@@ -89,7 +89,7 @@ export function SiteFooter({ navigation, settings, whatsappHref }: SiteFooterPro
             </ul>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-5 gap-y-7 xl:flex-1 xl:grid-cols-4 xl:gap-8 wide:flex-none wide:grid-cols-[repeat(4,210px)] wide:gap-10">
+          <div className="grid grid-cols-2 gap-x-5 gap-y-7 xl:flex-1 xl:grid-cols-[repeat(3,minmax(0,1fr))_auto] xl:gap-8 wide:flex-none wide:grid-cols-[repeat(4,210px)] wide:gap-10">
             {footer.columns.map((column) => (
               <nav key={column.title} aria-label={column.title} className="flex flex-col gap-3.5">
                 <h2 className="font-ui text-[15px] leading-6 font-semibold">

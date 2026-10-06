@@ -136,7 +136,7 @@ export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps
   return (
     <>
       <nav aria-label="Navigation principale" className="hidden xl:block">
-        <ul className="flex items-center gap-1 wide:gap-2.5">
+        <ul className="flex items-center gap-0.5 wide:gap-2.5">
           {items.map((item) => {
             const active =
               isActive(pathname, item.href) || (item.key === 'services' && pathname.startsWith('/services'));
@@ -207,7 +207,7 @@ export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps
               menu.openKey === SIGN_UP_KEY ? menu.setOpenKey(null) : openWithFocus(SIGN_UP_KEY)
             }
             onKeyDown={(event) => triggerKeyDown(event, SIGN_UP_KEY)}
-            className="flex cursor-pointer items-center gap-2 rounded-full border border-border-strong px-3.5 py-3 font-ui text-[14px] leading-5 font-semibold text-text-main transition-colors hover:bg-neutral-100"
+            className="flex cursor-pointer items-center gap-2 rounded-full border border-border-strong px-3 py-3 font-ui text-[14px] leading-5 font-semibold text-text-main transition-colors hover:bg-neutral-100 wide:px-3.5"
           >
             <User aria-hidden size={18} />
             S&apos;inscrire
@@ -219,7 +219,7 @@ export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps
             {...panelProps(SIGN_UP_KEY)}
           />
         </div>
-        <Link href={routes.devis} className={buttonVariants()}>
+        <Link href={routes.devis} className={cn(buttonVariants(), 'xl:px-5 wide:px-6')}>
           Devis gratuit
         </Link>
       </div>

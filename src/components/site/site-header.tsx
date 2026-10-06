@@ -40,11 +40,11 @@ export function SiteHeader({ navigation, whatsappHref, topBar }: SiteHeaderProps
       <header
         className={cn(
           'relative border-b border-border-default backdrop-blur-[24px] transition-[padding,background-color,box-shadow] duration-200 ease-standard',
-          'flex items-center justify-between px-4 py-3 xl:px-6 wide:px-10',
+          'flex items-center justify-between gap-3 px-4 py-3 xl:px-4 wide:px-10',
           scrolled ? 'bg-neutral-0/95 shadow-1 xl:py-[11.5px]' : 'bg-neutral-0/86 xl:py-[18px]',
         )}
       >
-        <Logo priority className="h-9 xl:h-10" />
+        <Logo priority className="h-9 wide:h-10" />
         <DesktopNav
           items={navigation.main}
           megaMenu={navigation.megaMenu}
