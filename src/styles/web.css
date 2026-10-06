@@ -176,3 +176,23 @@
     background-position: 100% 50%;
   }
 }
+
+/* Apparition au défilement (composant Reveal) : uniquement avec JavaScript et sans réduction des animations. */
+@media (prefers-reduced-motion: no-preference) {
+  .js .reveal {
+    transition:
+      opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .js .reveal:not([data-visible]) {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+/* Bandeau défilant : la liste est doublée, on la fait glisser de la moitié de sa largeur. */
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}

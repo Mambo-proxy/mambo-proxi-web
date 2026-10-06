@@ -24,7 +24,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="fr" className={`${inter.variable} ${poppins.variable}`}>
+    <html lang="fr" className={`${inter.variable} ${poppins.variable}`} suppressHydrationWarning>
+      <head>
+        {/* Classe `js` posée avant l'affichage : les états initiaux des animations n'existent qu'avec JavaScript. */}
+        <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
+      </head>
       <body>
         {children}
         <Toaster />

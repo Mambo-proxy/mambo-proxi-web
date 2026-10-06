@@ -17,13 +17,14 @@ export function Stars({ rating, size = 16, className }: StarsProps) {
     <span
       role="img"
       aria-label={`Note : ${formatRating(rating)} sur 5`}
-      className={cn('inline-flex gap-0.5', className)}
+      className={cn('inline-flex -space-x-px', className)}
     >
       {Array.from({ length: 5 }, (_, index) => (
         <Star
           key={index}
           aria-hidden
-          size={size}
+          // L'étoile lucide n'occupe que 83 % de son cadre : agrandie pour égaler l'icône 16 px de Figma.
+          size={Math.round(size * 1.2)}
           strokeWidth={0}
           className={index < filled ? 'fill-brand-primary' : 'fill-neutral-200'}
         />
