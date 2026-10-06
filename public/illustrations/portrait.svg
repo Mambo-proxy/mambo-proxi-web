@@ -1,0 +1,32 @@
+<svg width="640" height="480" viewBox="0 0 640 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Web &#226;&#128;&#148; Composants du site">
+<g id="Web/Illustration">
+<g id="Sc&#195;&#168;ne=portrait" clip-path="url(#clip0_43_2)">
+<rect width="640" height="480" fill="#FAF5ED"/>
+<g id="Art" clip-path="url(#clip1_43_2)">
+<path id="Vector" d="M640 0H0V480H640V0Z" fill="url(#paint0_linear_43_2)"/>
+<path id="Vector_2" opacity="0.35" d="M470 280C547.32 280 610 217.32 610 140C610 62.6801 547.32 0 470 0C392.68 0 330 62.6801 330 140C330 217.32 392.68 280 470 280Z" fill="white"/>
+<g id="Group">
+<path id="Vector_3" d="M257.6 457L265.4 600H309.6L320 496L330.4 600H374.6L382.4 457H257.6Z" fill="#2E2B28"/>
+<path id="Vector_4" d="M242 470V334.8C242 289.734 264.533 267.2 309.6 267.2H330.4C375.467 267.2 398 289.734 398 334.8V470H242Z" fill="#FF7A00"/>
+<path id="Vector_5" d="M338.2 241.2H301.8V277.6H338.2V241.2Z" fill="#6B3E26"/>
+<path id="Vector_6" d="M320 254.2C355.899 254.2 385 225.099 385 189.2C385 153.302 355.899 124.2 320 124.2C284.101 124.2 255 153.302 255 189.2C255 225.099 284.101 254.2 320 254.2Z" fill="#1C1A18"/>
+<path id="Vector_7" d="M320 259.4C347.283 259.4 369.4 237.283 369.4 210C369.4 182.717 347.283 160.6 320 160.6C292.717 160.6 270.6 182.717 270.6 210C270.6 237.283 292.717 259.4 320 259.4Z" fill="#6B3E26"/>
+</g>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<linearGradient id="paint0_linear_43_2" x1="0" y1="0" x2="460.8" y2="614.4" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FCE7D5"/>
+<stop offset="1" stop-color="#F8B272"/>
+</linearGradient>
+<clipPath id="clip0_43_2">
+<rect width="640" height="480" fill="white"/>
+</clipPath>
+<clipPath id="clip1_43_2">
+<rect width="640" height="480" fill="white"/>
+</clipPath>
+</defs>
+</svg>

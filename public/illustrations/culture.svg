@@ -1,0 +1,55 @@
+<svg width="640" height="480" viewBox="0 0 640 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Web &#226;&#128;&#148; Composants du site">
+<g id="Web/Illustration">
+<g id="Sc&#195;&#168;ne=culture" clip-path="url(#clip0_43_2)">
+<rect width="640" height="480" fill="#FAF5ED"/>
+<g id="Art" clip-path="url(#clip1_43_2)">
+<path id="Vector" d="M640 0H0V480H640V0Z" fill="url(#paint0_linear_43_2)"/>
+<path id="Vector_2" opacity="0.9" d="M500 180C538.66 180 570 148.66 570 110C570 71.3401 538.66 40 500 40C461.34 40 430 71.3401 430 110C430 148.66 461.34 180 500 180Z" fill="#FF7A00"/>
+<g id="Group">
+<path id="Vector_3" d="M90.0001 420C94.4001 368.667 92.9334 313.667 85.6001 255" stroke="#46423D" stroke-width="9.9" stroke-linecap="round"/>
+<g id="Vector_4">
+<path d="M85.6001 255C48.9334 247.667 19.6001 255 -2.3999 277C26.9334 255 56.2668 247.667 85.6001 255ZM85.6001 255C122.267 244.733 153.067 249.867 178 270.4C145.733 252.8 114.933 247.667 85.6001 255ZM85.6001 255C63.6001 225.667 37.9334 211 8.6001 211C37.9334 218.333 63.6001 233 85.6001 255ZM85.6001 255C107.6 222.733 134.733 208.067 167 211C134.733 216.867 107.6 231.533 85.6001 255Z" fill="#557E1B"/>
+<path d="M85.6001 255C122.267 244.733 153.067 249.867 178 270.4C145.733 252.8 114.933 247.667 85.6001 255C48.9334 247.667 19.6001 255 -2.3999 277C26.9334 255 56.2668 247.667 85.6001 255ZM85.6001 255C63.6001 225.667 37.9334 211 8.6001 211C37.9334 218.333 63.6001 233 85.6001 255ZM85.6001 255C107.6 222.733 134.733 208.067 167 211C134.733 216.867 107.6 231.533 85.6001 255Z" stroke="#557E1B" stroke-width="11" stroke-linejoin="round"/>
+</g>
+</g>
+<path id="Vector_5" d="M0 360C106.667 320 213.333 316.667 320 350C426.667 383.334 533.333 376.667 640 330V480H0V360Z" fill="#46423D"/>
+<g id="Group_2">
+<path id="Vector_6" d="M200 420L180 280H360L340 420H200Z" fill="#FF7A00"/>
+<path id="Vector_7" d="M180 280C240 240 300 240 360 280H180Z" fill="#F0550F"/>
+<path id="Vector_8" opacity="0.7" d="M200 300L220 330L200 360" stroke="white" stroke-width="4"/>
+<path id="Vector_9" opacity="0.7" d="M240 300L260 330L240 360" stroke="white" stroke-width="4"/>
+<path id="Vector_10" opacity="0.7" d="M280 300L300 330L280 360" stroke="white" stroke-width="4"/>
+<path id="Vector_11" opacity="0.7" d="M320 300L340 330L320 360" stroke="white" stroke-width="4"/>
+</g>
+<g id="Group_3">
+<path id="Vector_12" d="M460 354C478.778 354 494 329.823 494 300C494 270.177 478.778 246 460 246C441.222 246 426 270.177 426 300C426 329.823 441.222 354 460 354Z" fill="#F8B272"/>
+<path id="Vector_13" d="M448 300C451.866 300 455 295.523 455 290C455 284.477 451.866 280 448 280C444.134 280 441 284.477 441 290C441 295.523 444.134 300 448 300Z" fill="#2E2B28"/>
+<path id="Vector_14" d="M472 300C475.866 300 479 295.523 479 290C479 284.477 475.866 280 472 280C468.134 280 465 284.477 465 290C465 295.523 468.134 300 472 300Z" fill="#2E2B28"/>
+<g id="Vector_15">
+<path d="M450 325H470H450Z" fill="black"/>
+<path d="M450 325H470" stroke="#2E2B28" stroke-width="5"/>
+</g>
+<g id="Vector_16">
+<path d="M430 260L420 230L430 260ZM460 248V214V248ZM490 260L500 230L490 260Z" fill="black"/>
+<path d="M430 260L420 230M460 248V214M490 260L500 230" stroke="#FF7A00" stroke-width="6" stroke-linecap="round"/>
+</g>
+</g>
+<path id="Vector_17" d="M640 420H0V480H640V420Z" fill="#2E2B28"/>
+</g>
+</g>
+</g>
+</g>
+<defs>
+<linearGradient id="paint0_linear_43_2" x1="0" y1="0" x2="460.8" y2="614.4" gradientUnits="userSpaceOnUse">
+<stop stop-color="#3A2A20"/>
+<stop offset="1" stop-color="#1C1A18"/>
+</linearGradient>
+<clipPath id="clip0_43_2">
+<rect width="640" height="480" fill="white"/>
+</clipPath>
+<clipPath id="clip1_43_2">
+<rect width="640" height="480" fill="white"/>
+</clipPath>
+</defs>
+</svg>
