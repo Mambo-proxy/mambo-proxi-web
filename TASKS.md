@@ -19,12 +19,12 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 
 - [x] Types et client générés (`openapi-typescript`, `openapi-fetch`) + couche `src/lib/api` (fetch serveur avec tags, client navigateur)
 - [x] Mocks MSW (navigateur + Node) à partir des exemples du contrat et du catalogue ; drapeau `NEXT_PUBLIC_API_MOCKING` — gestionnaires dédiés du back-office et détails des rubriques/fiches à compléter avec chaque écran
-- [ ] Polices, styles web (`web/hero`, `web/section`, `web/lead`, `web/eyebrow`, `web/stat`), conteneur, grille, rythme vertical
-- [ ] Utilitaires : typographie française (insécables), formatage FR (nombres, dates, relatives), `AccentText` (`==…==`), WhatsApp (`wa.me`)
-- [ ] Composants `ui` : Button (Primary/Outline/Dark/WhatsApp/états), Chip, SegmentedTabs, Field/Input/Select/Textarea/Phone, Checkbox, Badge, Card, Accordion, Modal/Sheet, Toast (Sonner), Calendar, Dropzone, Pagination, Breadcrumb, Stars, Skeleton, Switch
-- [ ] Page interne `/dev/ui` (exclue de la production)
-- [ ] `<Visual>` (illustration ↔ photo, `next/image`, fond de secours)
-- [~] Infrastructure de tests : Vitest + Testing Library (fait), Playwright (E2E + `toHaveScreenshot` 390/768/1280/1440), axe-core, Lighthouse CI
+- [x] Polices, styles web (`web/hero`, `web/section`, `web/lead`, `web/eyebrow`, `web/stat`), conteneur, grille, rythme vertical
+- [x] Utilitaires : typographie française (insécables), formatage FR (nombres, dates, relatives), `AccentText` (`==…==`), WhatsApp (`wa.me`)
+- [x] Composants `ui` : Button (Primary/Outline/Dark/WhatsApp/états), Chip, SegmentedTabs, Field/Input/Select/Textarea/Phone, Checkbox, Badge, Card, Accordion, Modal/Sheet, Toast (Sonner), Calendar, Dropzone, Pagination, Breadcrumb, Stars, Skeleton, Switch
+- [x] Page interne `/dev/ui` (exclue de la production)
+- [x] `<Visual>` (illustration ↔ photo, `next/image`, fond de secours)
+- [~] Infrastructure de tests : Vitest + Testing Library, Playwright + axe-core aux 4 largeurs (faits) — reste : captures `toHaveScreenshot` par page (avec chaque page), Lighthouse CI
 
 ### 1.2 Gabarit global
 

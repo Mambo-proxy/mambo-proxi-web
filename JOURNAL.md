@@ -66,3 +66,25 @@
 ### Difficultés et solutions
 
 - **Installations groupées bloquées** : une commande `pnpm add` de plusieurs paquets restait muette indéfiniment alors que chaque paquet, seul, s'installe en 8 à 30 s. Un processus pnpm orphelin d'une tentative précédente tenait aussi le magasin. Solution : arrêter les processus orphelins, installer un paquet à la fois.
+
+### Fondations visuelles et composants (6 octobre 2026)
+
+- Styles web relevés dans les inventaires (mobile 390 / desktop 1440) : titre de page 32/38 → 52/58, titre de section 30/36 → 48/56, chapô 16/25 → 19/31, sur-titre 12 → 13 px +8 %, chiffres 36/40 → 56/60 ; tablette interpolée. Les pages dont la maquette diffère (accueil 36/42 → 58/64…) surchargent ces valeurs. Conteneur 1440 avec marges `clamp(20px, 4.5vw, 64px)` (contenu 1312 à 1440). Vérifié dans le navigateur : valeurs calculées identiques.
+- Palette Tailwind par défaut retirée (`palette-reset.css`) : seules les couleurs des tokens existent, plus le vert WhatsApp.
+- Utilitaires : `frenchTypography` (insécables sans changer les mots), formats FR (nombres, %, tailles de fichier, dates en `Africa/Douala`, dates relatives), `AccentText` (`==…==`), `whatsappUrl`, `toE164`, `cn` (tailwind-merge configuré avec les noms du thème).
+- Composants `ui` : Button / ButtonLink, Chip, SegmentedTabs, Field / Input / PhoneInput / Textarea / Select, Checkbox, Switch, Badge, Stars, Breadcrumb, Pagination, Accordion (`<details>` natif), Card, Skeleton, Spinner, Modal (`<dialog>` natif), Toaster (Sonner), Calendar (grille ARIA au clavier), Dropzone, Visual. Page `/dev/ui` (404 en production hors build sur mocks).
+- Tests : 32 tests Vitest ; Playwright + axe-core sur `/dev/ui` aux 4 largeurs (aucune erreur console, aucun débordement, aucune violation WCAG détectée, modale et calendrier au clavier). Job E2E ajouté à la CI.
+
+### Décisions
+
+- **Contraste des petits textes** : la couleur `text/subtle` (#7D776F) des maquettes donne 4,4:1 sur blanc, 4,1:1 sur `neutral/50` et 3,9:1 sur `neutral/100`, sous le seuil WCAG AA de 4,5:1 pour les textes de 12–14 px. Les aides de champ, l'aide de la zone de dépôt, les en-têtes du calendrier et le badge « gris clair » (Clôturée) utilisent `text/muted` (#5E5952). Écart de teinte à valider ; les placeholders gardent la couleur de la maquette.
+- **Libellés courts des onglets segmentés en mobile** (`shortLabel`), comme la maquette d'inscription ; les onglets ne débordent plus (la maquette Contact mobile dépassait de 32 px).
+- **Calendrier** : chevrons des deux côtés (la maquette mélange une flèche et un chevron) — à valider.
+- **Modale, notifications** : non maquettées, dessinées dans le langage des cartes (blanc, rayon 28, `elevation/4` ; panneau bas en mobile).
+- **Type de routes** : `pnpm typecheck` lance `next typegen` pour que la CI vérifie les liens typés sans build préalable.
+
+### Difficultés et solutions
+
+- **`max-w-none` valait 0** : les tokens définissent un espacement `none` = 0, que Tailwind 4 utilise pour `max-w-none`. Utiliser `max-w-full` (ou une valeur explicite) ; relevé par le test E2E (modale de largeur nulle en mobile).
+- **Espaces insécables invisibles** dans le code source : règle ESLint `no-irregular-whitespace` étendue aux chaînes ; elles s'écrivent en séquences d'échappement.
+- **Tests E2E en parallèle bloqués en local** (navigations sans réponse sous charge, alors que le serveur répond en 40 ms) : un seul navigateur en local (~1 min), deux en CI. Les interactions attendent l'hydratation (`toPass`).

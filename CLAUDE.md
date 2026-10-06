@@ -15,15 +15,16 @@ Les données viennent de l'API (`mambo-proxi-api`) décrite par `contracts/opena
 
 ## Commandes
 
-| Commande                                               | Rôle                                                                           |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| `pnpm install`                                         | Installer (pnpm 12, Node 24 — `.nvmrc`)                                        |
-| `pnpm dev`                                             | Serveur de développement (http://localhost:3000)                               |
-| `pnpm build` / `pnpm start`                            | Build et démarrage de production                                               |
-| `pnpm lint` · `pnpm typecheck` · `pnpm format:check`   | Qualité                                                                        |
-| `pnpm test` · `pnpm test:watch` · `pnpm test:coverage` | Tests unitaires et de composants (Vitest, MSW)                                 |
-| `pnpm contract:sync`                                   | Copier le contrat depuis l'API, régénérer types et exemples des mocks          |
-| `pnpm contract:generate`                               | Régénérer `src/lib/api/schema.d.ts` et `src/mocks/data/contract-examples.json` |
+| Commande                                               | Rôle                                                                                |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------- |
+| `pnpm install`                                         | Installer (pnpm 12, Node 24 — `.nvmrc`)                                             |
+| `pnpm dev`                                             | Serveur de développement (http://localhost:3000)                                    |
+| `pnpm build` / `pnpm start`                            | Build et démarrage de production                                                    |
+| `pnpm lint` · `pnpm typecheck` · `pnpm format:check`   | Qualité                                                                             |
+| `pnpm test` · `pnpm test:watch` · `pnpm test:coverage` | Tests unitaires et de composants (Vitest, MSW)                                      |
+| `pnpm test:e2e`                                        | Bout en bout + accessibilité (Playwright, axe) à 390/768/1280/1440, build sur mocks |
+| `pnpm contract:sync`                                   | Copier le contrat depuis l'API, régénérer types et exemples des mocks               |
+| `pnpm contract:generate`                               | Régénérer `src/lib/api/schema.d.ts` et `src/mocks/data/contract-examples.json`      |
 
 ## API et mocks
 
@@ -41,6 +42,9 @@ Les données viennent de l'API (`mambo-proxi-api`) décrite par `contracts/opena
 - Écrans et états non maquettés : conçus dans exactement le même langage visuel.
 
 ## Design system
+
+- Styles web : `text-web-hero`, `text-web-section`, `text-web-lead`, `text-web-eyebrow`, `text-web-stat`, conteneur `container-site`, rythme `section-y` (`src/styles/web.css`). Palette Tailwind par défaut désactivée. Composants de base dans `src/components/ui/` (aperçu : `/dev/ui`), classes assemblées avec `cn()`.
+- Petits textes (≤ 14 px) en `text-text-muted` et non `text-text-subtle` (#7D776F, contraste insuffisant) ; `text-text-subtle` reste possible pour les textes décoratifs ou de 18 px et plus.
 
 - **Tokens uniquement** (`src/styles/tokens.css`, `tailwind.theme.css`) : aucune couleur en dur, sauf le vert WhatsApp `#25D366` / survol `#1EBE5A`.
 - Texte orange = `#AD5300` (`text-text-brand`), **jamais** `#FF7A00` sur fond clair.
