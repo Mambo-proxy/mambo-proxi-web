@@ -8,3 +8,5 @@ src/lib/api/schema.d.ts
 src/styles/tokens.*
 src/styles/tailwind.theme.css
 src/styles/typography.css
+src/mocks/data/contract-examples.json
+src/mocks/data/catalogue-services.json

@@ -1,0 +1,3287 @@
+[
+  {
+    "operationId": "getSiteSettings",
+    "method": "GET",
+    "path": "/v1/site/settings",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "siteName": "MAMBO Proxi",
+        "tagline": "Vos services, au plus près de vous",
+        "signature": "Mambo, ce n'est pas qu'un service. C'est une expérience pensée pour vous.",
+        "contact": {
+          "phoneFrance": "+33600000000",
+          "phoneFranceDisplay": "+33 6 00 00 00 00",
+          "phoneCameroon": "+237600000000",
+          "phoneCameroonDisplay": "+237 6 00 00 00 00",
+          "email": "contact@mamboproxi.com",
+          "hoursLabel": "Lun – Sam · 8h – 20h"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "number": "+237600000000",
+          "message": "Bonjour Mambo Proxi, je souhaite des informations sur…"
+        },
+        "social": [
+          {
+            "network": "facebook",
+            "url": "https://www.facebook.com/mamboproxi"
+          },
+          {
+            "network": "instagram",
+            "url": "https://www.instagram.com/mamboproxi"
+          },
+          {
+            "network": "linkedin",
+            "url": "https://www.linkedin.com/company/mamboproxi"
+          },
+          {
+            "network": "tiktok",
+            "url": "https://www.tiktok.com/@mamboproxi"
+          }
+        ],
+        "agency": {
+          "name": "Agence MAMBO Proxi",
+          "addressLines": [
+            "Adresse de l'agence à compléter"
+          ],
+          "city": "Douala",
+          "country": "CM",
+          "latitude": 4.0511,
+          "longitude": 9.7679,
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=4.0511,9.7679",
+          "openingHours": [
+            {
+              "label": "Lundi – vendredi",
+              "hours": "8 h – 18 h"
+            },
+            {
+              "label": "Samedi",
+              "hours": "9 h – 13 h"
+            }
+          ],
+          "parcelReceptionNote": "Réception des colis et courriers aux heures d'ouverture."
+        },
+        "keyFigures": [
+          {
+            "key": "projects",
+            "value": 150,
+            "suffix": "+",
+            "label": "projets accompagnés"
+          },
+          {
+            "key": "partners",
+            "value": 40,
+            "suffix": "+",
+            "label": "partenaires engagés"
+          },
+          {
+            "key": "services",
+            "value": 19,
+            "label": "services réunis en 4 rubriques"
+          },
+          {
+            "key": "countries",
+            "value": 2,
+            "suffix": " pays",
+            "label": "couverts : France et Cameroun"
+          }
+        ],
+        "turnstileSiteKey": "1x00000000000000000000AA",
+        "analytics": {
+          "ga4MeasurementId": null,
+          "searchConsoleVerification": null
+        },
+        "seo": {
+          "defaultTitle": "MAMBO Proxi — Conciergerie de proximité France · Cameroun",
+          "defaultDescription": "Mobilité, chef privé, logement, courses, découvertes culturelles… Des prestataires de confiance pour vous simplifier la vie au Cameroun.",
+          "ogImageUrl": null
+        },
+        "features": {
+          "maintenanceMode": false,
+          "newsletterTracking": false
+        },
+        "updatedAt": "2026-10-05T08:00:00.000Z"
+      }
+    }
+  },
+  {
+    "operationId": "getNavigation",
+    "method": "GET",
+    "path": "/v1/site/navigation",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "main": [
+          {
+            "key": "accueil",
+            "label": "Accueil",
+            "href": "/",
+            "kind": "link"
+          },
+          {
+            "key": "services",
+            "label": "Nos services",
+            "href": "/services",
+            "kind": "mega"
+          },
+          {
+            "key": "partenaires",
+            "label": "Partenaires",
+            "href": "/partenaires",
+            "kind": "dropdown",
+            "children": [
+              {
+                "label": "Devenir partenaire",
+                "href": "/partenaires#devenir-partenaire",
+                "icon": "Handshake"
+              },
+              {
+                "label": "Nos partenaires",
+                "href": "/partenaires#nos-partenaires",
+                "icon": "Users"
+              },
+              {
+                "label": "Prestataires Expérience",
+                "href": "/partenaires?categorie=EXPERIENCE#nos-partenaires",
+                "icon": "Sparkles"
+              },
+              {
+                "label": "Immobilier",
+                "href": "/partenaires?categorie=IMMOBILIER#nos-partenaires",
+                "icon": "Building2"
+              },
+              {
+                "label": "Entreprises & prestataires",
+                "href": "/partenaires?categorie=ENTREPRISES#nos-partenaires",
+                "icon": "Briefcase"
+              }
+            ]
+          },
+          {
+            "key": "formation",
+            "label": "Formation",
+            "href": "/formation",
+            "kind": "dropdown",
+            "children": [
+              {
+                "label": "Nos formations",
+                "href": "/formation#catalogue",
+                "icon": "GraduationCap"
+              },
+              {
+                "label": "Formation des professionnels",
+                "href": "/formation?categorie=PROFESSIONNELS#catalogue",
+                "icon": "Briefcase"
+              },
+              {
+                "label": "Ateliers & sensibilisation",
+                "href": "/formation?categorie=ATELIERS#catalogue",
+                "icon": "Users"
+              },
+              {
+                "label": "Demande de formation",
+                "href": "/formation#demande",
+                "icon": "FileText"
+              }
+            ]
+          },
+          {
+            "key": "mission",
+            "label": "Mission",
+            "href": "/mission",
+            "kind": "dropdown",
+            "children": [
+              {
+                "label": "Notre mission",
+                "href": "/mission#notre-mission"
+              },
+              {
+                "label": "Notre vision",
+                "href": "/mission#notre-vision"
+              },
+              {
+                "label": "Nos engagements",
+                "href": "/mission#nos-engagements"
+              },
+              {
+                "label": "Notre méthode de coordination",
+                "href": "/mission#notre-methode"
+              }
+            ]
+          },
+          {
+            "key": "qui-sommes-nous",
+            "label": "Qui sommes-nous ?",
+            "href": "/qui-sommes-nous",
+            "kind": "dropdown",
+            "children": [
+              {
+                "label": "Présentation",
+                "href": "/qui-sommes-nous#presentation"
+              },
+              {
+                "label": "Notre équipe",
+                "href": "/qui-sommes-nous#notre-equipe"
+              },
+              {
+                "label": "Nos valeurs",
+                "href": "/qui-sommes-nous#nos-valeurs"
+              },
+              {
+                "label": "Pourquoi Mambo Proxi ?",
+                "href": "/qui-sommes-nous#pourquoi-mambo"
+              }
+            ]
+          },
+          {
+            "key": "recrutement",
+            "label": "Recrutement",
+            "href": "/recrutement",
+            "kind": "dropdown",
+            "children": [
+              {
+                "label": "Nos offres",
+                "href": "/recrutement#offres",
+                "icon": "Briefcase"
+              },
+              {
+                "label": "Candidature spontanée",
+                "href": "/recrutement?poste=spontanee#candidature",
+                "icon": "FileText"
+              },
+              {
+                "label": "Devenir prestataire / collaborateur",
+                "href": "/partenaires#devenir-partenaire",
+                "icon": "Handshake"
+              }
+            ]
+          },
+          {
+            "key": "contact",
+            "label": "Contact",
+            "href": "/contact",
+            "kind": "dropdown",
+            "children": [
+              {
+                "label": "Nous contacter",
+                "href": "/contact#formulaire",
+                "icon": "Mail"
+              },
+              {
+                "label": "Prendre rendez-vous",
+                "href": "/contact#rendez-vous",
+                "icon": "CalendarDays"
+              },
+              {
+                "label": "Demande d'information",
+                "href": "/contact?onglet=information#formulaire",
+                "icon": "Info"
+              }
+            ]
+          }
+        ],
+        "megaMenu": {
+          "categories": [
+            {
+              "slug": "experience",
+              "name": "Expérience",
+              "tagline": "Des moments sur mesure",
+              "icon": "Sparkles",
+              "tint": "orange-50",
+              "href": "/services/experience",
+              "services": [
+                {
+                  "slug": "location-voiture",
+                  "name": "Location de voiture",
+                  "href": "/services/experience/location-voiture"
+                },
+                {
+                  "slug": "photographe",
+                  "name": "Photographe",
+                  "href": "/services/experience/photographe"
+                },
+                {
+                  "slug": "chef-prive",
+                  "name": "Chef privé",
+                  "href": "/services/experience/chef-prive"
+                },
+                {
+                  "slug": "massage-bien-etre",
+                  "name": "Massage bien-être",
+                  "href": "/services/experience/massage-bien-etre"
+                },
+                {
+                  "slug": "services-evenementiels",
+                  "name": "Services événementiels",
+                  "href": "/services/experience/services-evenementiels"
+                }
+              ]
+            }
+          ],
+          "promo": {
+            "title": "Un besoin précis ?",
+            "text": "Décrivez-le en quelques lignes, nous revenons vers vous sous 24 h.",
+            "cta": {
+              "label": "Devis gratuit",
+              "href": "/devis"
+            },
+            "illustration": "accueil"
+          }
+        },
+        "signUp": [
+          {
+            "label": "Je suis un particulier",
+            "href": "/inscription",
+            "icon": "User"
+          },
+          {
+            "label": "Je suis un professionnel / partenaire",
+            "href": "/inscription?profil=professionnel",
+            "icon": "Briefcase"
+          }
+        ],
+        "footer": {
+          "about": "Votre conciergerie de proximité entre la France et le Cameroun. Des services pensés pour vous, des personnes de confiance pour les réaliser.",
+          "copyright": "© 2026 Mambo Proxi · France — Cameroun",
+          "newsletter": {
+            "eyebrow": "La lettre Mambo",
+            "title": "Restez au plus près de nos nouveautés",
+            "text": "Nouveaux services, sorties culturelles et conseils pour la France et le Cameroun. Désinscription en un clic."
+          },
+          "columns": [
+            {
+              "title": "Nos services",
+              "links": [
+                {
+                  "label": "Expérience",
+                  "href": "/services/experience"
+                },
+                {
+                  "label": "Immobilier",
+                  "href": "/services/immobilier"
+                },
+                {
+                  "label": "Services de proximité",
+                  "href": "/services/services-de-proximite"
+                },
+                {
+                  "label": "Culture & événementiel",
+                  "href": "/services/culture-evenementiel"
+                }
+              ]
+            }
+          ]
+        },
+        "legal": [
+          {
+            "label": "Mentions légales",
+            "href": "/mentions-legales"
+          },
+          {
+            "label": "CGU",
+            "href": "/cgu"
+          },
+          {
+            "label": "Politique de confidentialité",
+            "href": "/confidentialite"
+          },
+          {
+            "label": "Cookies",
+            "href": "/cookies"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operationId": "listRedirects",
+    "method": "GET",
+    "path": "/v1/site/redirects",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": [
+        {
+          "from": "/services/experience/chef-a-domicile",
+          "to": "/services/experience/chef-prive",
+          "permanent": true
+        }
+      ]
+    }
+  },
+  {
+    "operationId": "getPage",
+    "method": "GET",
+    "path": "/v1/pages/:key",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "accueil": {
+        "key": "accueil",
+        "title": "Accueil",
+        "isPreview": false,
+        "updatedAt": "2026-10-05T08:00:00.000Z",
+        "seo": {
+          "title": null,
+          "description": null,
+          "ogImageUrl": null,
+          "noindex": false
+        },
+        "sections": [
+          {
+            "id": "hero",
+            "type": "hero",
+            "enabled": true,
+            "variant": "home",
+            "tone": "muted",
+            "badge": {
+              "tag": "France  ·  Cameroun",
+              "text": "Conciergerie de proximité"
+            },
+            "title": "Mambo, ce n'est pas qu'un service. ==C'est une expérience pensée pour vous.==",
+            "lead": "Mobilité, chef privé, logement, courses, découvertes culturelles… Nous réunissons des prestataires de confiance pour vous simplifier la vie au Cameroun, que vous y viviez ou que vous prépariez votre venue.",
+            "primaryCta": {
+              "label": "Demander un devis gratuit",
+              "href": "/devis"
+            },
+            "secondaryCta": {
+              "label": "Créer mon compte",
+              "href": "/inscription"
+            },
+            "socialProof": "4,9/5 · plus de 150 projets accompagnés",
+            "visual": {
+              "illustration": "accueil",
+              "image": null,
+              "alt": ""
+            },
+            "visualSecondary": {
+              "illustration": "chef",
+              "image": null,
+              "alt": ""
+            },
+            "floatingCards": [
+              {
+                "icon": "Check",
+                "title": "Devis envoyé en 24 h",
+                "text": "Chef privé · samedi 20h"
+              },
+              {
+                "icon": "KeyRound",
+                "title": "Logement trouvé",
+                "text": "Bastos, Yaoundé",
+                "progress": 0.83,
+                "footnote": "Installation prévue le 12 nov."
+              }
+            ],
+            "sticker": "Pensé pour vous"
+          },
+          {
+            "id": "bandeau-services",
+            "type": "marquee",
+            "enabled": true,
+            "items": [
+              "Location de voiture",
+              "Chef privé",
+              "Massage bien-être",
+              "Photographe",
+              "Événementiel",
+              "Livraison de repas",
+              "Courses",
+              "Colis",
+              "Recherche de logement",
+              "Logement temporaire",
+              "Gestion locative",
+              "Découverte du Cameroun",
+              "Sorties culturelles"
+            ]
+          },
+          {
+            "id": "univers",
+            "type": "dynamic",
+            "enabled": true,
+            "source": "categories-bento",
+            "eyebrow": "Nos univers de services",
+            "title": "Tout ce dont vous avez besoin, réuni au même endroit.",
+            "lead": "19 services regroupés en 4 univers. Choisissez, nous coordonnons tout avec des prestataires sélectionnés et suivis.",
+            "link": {
+              "label": "Voir tous les services",
+              "href": "/services"
+            }
+          },
+          {
+            "id": "comment-ca-marche",
+            "type": "steps",
+            "enabled": true,
+            "tone": "muted",
+            "layout": "cards",
+            "eyebrow": "Comment ça marche",
+            "title": "Simple comme un message.",
+            "lead": "Trois étapes, un seul interlocuteur. Vous restez informé du début à la fin.",
+            "items": [
+              {
+                "number": "01",
+                "icon": "FileText",
+                "title": "Vous exprimez votre besoin",
+                "text": "Via le formulaire de devis, sur WhatsApp ou lors d'un rendez-vous, en France comme au Cameroun."
+              },
+              {
+                "number": "02",
+                "icon": "Mail",
+                "title": "Vous recevez un devis sur mesure",
+                "text": "Sous 24 h, une proposition claire et personnalisée, sans engagement de votre part."
+              },
+              {
+                "number": "03",
+                "icon": "Shield",
+                "title": "Nous nous occupons de tout",
+                "text": "Nos prestataires sélectionnés interviennent. Vous êtes tenu informé à chaque étape."
+              }
+            ],
+            "channelsLabel": "Au choix :",
+            "channels": [
+              {
+                "label": "Formulaire en ligne",
+                "kind": "form"
+              },
+              {
+                "label": "WhatsApp",
+                "kind": "whatsapp"
+              },
+              {
+                "label": "Rendez-vous",
+                "kind": "appointment"
+              }
+            ]
+          },
+          {
+            "id": "engagements",
+            "type": "featureList",
+            "enabled": true,
+            "eyebrow": "Nos engagements",
+            "title": "La proximité, c'est notre métier.",
+            "lead": "Une équipe présente des deux côtés, des prestataires choisis avec soin et une seule promesse : vous simplifier la vie.",
+            "visual": {
+              "illustration": "equipe",
+              "image": null,
+              "alt": ""
+            },
+            "items": [
+              {
+                "icon": "Users",
+                "title": "Une équipe à vos côtés",
+                "text": "Un interlocuteur unique qui vous accompagne pas à pas, en France comme au Cameroun."
+              },
+              {
+                "icon": "Shield",
+                "title": "Des solutions concrètes et durables",
+                "text": "Des prestataires vérifiés, suivis et évalués après chaque mission."
+              },
+              {
+                "icon": "Globe",
+                "title": "Un pont entre la France et le Cameroun",
+                "text": "Préparez votre venue depuis la France, nous agissons sur place."
+              }
+            ],
+            "figures": []
+          },
+          {
+            "id": "avis",
+            "type": "dynamic",
+            "enabled": true,
+            "tone": "muted",
+            "source": "reviews-highlight",
+            "eyebrow": "Avis clients",
+            "title": "Ils nous ont fait confiance, ils en parlent.",
+            "link": {
+              "label": "Lire tous les avis",
+              "href": "/avis-clients"
+            },
+            "limit": 3
+          },
+          {
+            "id": "partenaires",
+            "type": "dynamic",
+            "enabled": true,
+            "source": "partners-strip",
+            "title": "Ils travaillent à nos côtés",
+            "link": {
+              "label": "Vous êtes prestataire ? Devenez partenaire",
+              "href": "/partenaires#devenir-partenaire"
+            },
+            "limit": 6
+          },
+          {
+            "id": "cta",
+            "type": "ctaBand",
+            "enabled": true,
+            "title": "Un projet, une question ?\n==Parlons-en.==",
+            "text": "Devis gratuit et sans engagement, réponse sous 24 h. Ou écrivez-nous directement sur WhatsApp.",
+            "primaryCta": {
+              "label": "Demander un devis gratuit",
+              "href": "/devis"
+            },
+            "showWhatsapp": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operationId": "getSitemap",
+    "method": "GET",
+    "path": "/v1/sitemap",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": [
+        {
+          "path": "/",
+          "lastModified": "2026-10-20T08:00:00.000Z",
+          "changeFrequency": "weekly",
+          "priority": 1
+        },
+        {
+          "path": "/services/experience/chef-prive",
+          "lastModified": "2026-10-18T14:12:00.000Z",
+          "changeFrequency": "monthly",
+          "priority": 0.8
+        }
+      ]
+    }
+  },
+  {
+    "operationId": "getHealth",
+    "method": "GET",
+    "path": "/v1/health",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "status": "ok",
+        "version": "1.0.0",
+        "checks": {
+          "database": "up",
+          "redis": "up",
+          "storage": "up"
+        }
+      }
+    }
+  },
+  {
+    "operationId": "listCategories",
+    "method": "GET",
+    "path": "/v1/categories",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": [
+        {
+          "id": "cat_experience",
+          "slug": "experience",
+          "name": "Expérience",
+          "tagline": "Des moments sur mesure",
+          "description": "Se déplacer, se faire plaisir, immortaliser un moment : des prestataires triés sur le volet, réservés pour vous.",
+          "icon": "Sparkles",
+          "tint": "orange-50",
+          "iconColor": "orange-700",
+          "visual": {
+            "illustration": "chef",
+            "image": null,
+            "alt": ""
+          },
+          "sortOrder": 1,
+          "serviceCount": 5,
+          "href": "/services/experience"
+        },
+        {
+          "id": "cat_immobilier",
+          "slug": "immobilier",
+          "name": "Immobilier",
+          "tagline": "Se loger en toute sérénité",
+          "description": "Trouver, s'installer, louer en toute sérénité, ou confier votre bien à une équipe sur place.",
+          "icon": "Building2",
+          "tint": "neutral-100",
+          "iconColor": "neutral-800",
+          "visual": {
+            "illustration": "logement",
+            "image": null,
+            "alt": ""
+          },
+          "sortOrder": 2,
+          "serviceCount": 7,
+          "href": "/services/immobilier"
+        },
+        {
+          "id": "cat_proximite",
+          "slug": "services-de-proximite",
+          "name": "Services de proximité",
+          "tagline": "Votre quotidien simplifié",
+          "description": "Repas, courses, colis : on s'en charge, vous gagnez du temps.",
+          "icon": "ShoppingCart",
+          "tint": "vert-50",
+          "iconColor": "vert-700",
+          "visual": {
+            "illustration": "courses",
+            "image": null,
+            "alt": ""
+          },
+          "sortOrder": 3,
+          "serviceCount": 3,
+          "href": "/services/services-de-proximite"
+        },
+        {
+          "id": "cat_culture",
+          "slug": "culture-evenementiel",
+          "name": "Culture & événementiel",
+          "tagline": "Vivre le Cameroun",
+          "description": "Découvertes, sorties, événements et intégration locale : le pays vu de l'intérieur.",
+          "icon": "Compass",
+          "tint": "neutral-900",
+          "iconColor": "orange-400",
+          "visual": {
+            "illustration": "culture",
+            "image": null,
+            "alt": ""
+          },
+          "sortOrder": 4,
+          "serviceCount": 4,
+          "href": "/services/culture-evenementiel"
+        }
+      ]
+    }
+  },
+  {
+    "operationId": "getCategory",
+    "method": "GET",
+    "path": "/v1/categories/:slug",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "experience": {
+        "id": "cat_experience",
+        "slug": "experience",
+        "name": "Expérience",
+        "tagline": "Des moments sur mesure",
+        "description": "Se déplacer, se faire plaisir, immortaliser un moment : des prestataires triés sur le volet, réservés pour vous.",
+        "icon": "Sparkles",
+        "tint": "orange-50",
+        "iconColor": "orange-700",
+        "visual": {
+          "illustration": "chef",
+          "image": null,
+          "alt": ""
+        },
+        "sortOrder": 1,
+        "serviceCount": 5,
+        "href": "/services/experience",
+        "eyebrow": "Expérience",
+        "heroTitle": "Des moments sur mesure, ==pensés pour vous.==",
+        "heroLead": "Location de voiture, chef privé, massage, photographe, événementiel : nous réservons pour vous des prestataires de confiance, au Cameroun.",
+        "heroVisual": {
+          "illustration": "chef",
+          "image": null,
+          "alt": ""
+        },
+        "audiencesTitle": "Pour les particuliers, les familles et ceux qui reçoivent.",
+        "audiences": [
+          {
+            "icon": "User",
+            "title": "Particuliers",
+            "text": "Vous voulez vous faire plaisir ou simplifier un séjour, sans chercher pendant des heures."
+          },
+          {
+            "icon": "Users",
+            "title": "Familles en séjour",
+            "text": "Vous rentrez au pays en vacances : tout est prêt à votre arrivée."
+          },
+          {
+            "icon": "PartyPopper",
+            "title": "Organisateurs",
+            "text": "Anniversaire, mariage, réception : des prestataires fiables pour votre événement privé."
+          }
+        ],
+        "servicesTitle": "5 services pour vivre chaque moment pleinement.",
+        "services": [
+          {
+            "id": "svc_location_voiture",
+            "slug": "location-voiture",
+            "name": "Location de voiture",
+            "shortName": null,
+            "summary": "Véhicules récents, avec ou sans chauffeur, pour vos trajets et vos séjours.",
+            "icon": "Car",
+            "visual": {
+              "illustration": "voiture",
+              "image": null,
+              "alt": ""
+            },
+            "category": {
+              "slug": "experience",
+              "name": "Expérience"
+            },
+            "href": "/services/experience/location-voiture",
+            "featuredOnHome": true
+          },
+          {
+            "id": "svc_chef_prive",
+            "slug": "chef-prive",
+            "name": "Chef privé",
+            "shortName": null,
+            "summary": "Un chef à domicile pour vos dîners, réceptions et grandes occasions.",
+            "icon": "ChefHat",
+            "visual": {
+              "illustration": "chef",
+              "image": null,
+              "alt": ""
+            },
+            "category": {
+              "slug": "experience",
+              "name": "Expérience"
+            },
+            "href": "/services/experience/chef-prive",
+            "featuredOnHome": true
+          }
+        ],
+        "groups": [],
+        "highlight": null,
+        "processTitle": "Nous coordonnons tout, du premier message au suivi.",
+        "processSteps": [
+          {
+            "title": "Votre demande",
+            "text": "Formulaire, WhatsApp ou rendez-vous."
+          },
+          {
+            "title": "Devis sur mesure",
+            "text": "Une proposition claire sous 24 h."
+          },
+          {
+            "title": "Intervention",
+            "text": "Un prestataire sélectionné, un suivi constant."
+          },
+          {
+            "title": "Votre avis",
+            "text": "Un court questionnaire après chaque prestation."
+          }
+        ],
+        "testimonial": {
+          "id": "rev_jean_marc",
+          "authorName": "Jean-Marc T.",
+          "initials": "JT",
+          "city": "Yaoundé",
+          "rating": 5,
+          "text": "Le chef privé a régalé nos invités pour l'anniversaire de ma mère. Service impeccable, équipe aux petits soins du début à la fin.",
+          "service": {
+            "slug": "chef-prive",
+            "name": "Chef privé",
+            "categorySlug": "experience",
+            "categoryName": "Expérience"
+          },
+          "verified": true,
+          "featured": true,
+          "date": "2026-09-12T10:00:00.000Z",
+          "reply": null
+        },
+        "testimonialVisual": {
+          "illustration": "equipe",
+          "image": null,
+          "alt": ""
+        },
+        "quoteFields": [
+          {
+            "name": "eventDate",
+            "label": "Date souhaitée",
+            "type": "date",
+            "required": false,
+            "width": "half"
+          },
+          {
+            "name": "city",
+            "label": "Ville",
+            "type": "select",
+            "required": false,
+            "options": [
+              "Douala",
+              "Yaoundé",
+              "Kribi",
+              "Autre"
+            ],
+            "width": "half"
+          },
+          {
+            "name": "guests",
+            "label": "Nombre de personnes",
+            "type": "number",
+            "required": false,
+            "min": 1,
+            "max": 500,
+            "width": "half"
+          },
+          {
+            "name": "occasion",
+            "label": "Type d'occasion",
+            "type": "select",
+            "required": false,
+            "options": [
+              "Anniversaire",
+              "Mariage",
+              "Dîner entre amis",
+              "Séjour en famille",
+              "Événement d'entreprise",
+              "Autre"
+            ],
+            "width": "half"
+          }
+        ],
+        "otherCategories": [],
+        "cta": {
+          "title": "Un projet, une question ?\n==Parlons-en.==",
+          "text": "Devis gratuit et sans engagement, réponse sous 24 h. Ou écrivez-nous directement sur WhatsApp."
+        },
+        "seo": {
+          "title": "Expérience : chef privé, location de voiture, photographe au Cameroun",
+          "description": "Des prestataires de confiance réservés pour vous au Cameroun : location de voiture, chef privé, massage, photographe, événementiel.",
+          "ogImageUrl": null,
+          "noindex": false
+        }
+      }
+    }
+  },
+  {
+    "operationId": "listServices",
+    "method": "GET",
+    "path": "/v1/services",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "getService",
+    "method": "GET",
+    "path": "/v1/services/:slug",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "chefPrive": {
+        "id": "svc_chef_prive",
+        "slug": "chef-prive",
+        "name": "Chef privé",
+        "shortName": null,
+        "summary": "Un chef à domicile pour vos dîners, réceptions et grandes occasions.",
+        "icon": "ChefHat",
+        "visual": {
+          "illustration": "chef",
+          "image": null,
+          "alt": ""
+        },
+        "category": {
+          "slug": "experience",
+          "name": "Expérience"
+        },
+        "href": "/services/experience/chef-prive",
+        "featuredOnHome": true,
+        "tagline": "Un chef à domicile pour vos dîners, réceptions et grandes occasions. Vous profitez de vos invités, nous nous occupons du reste.",
+        "cities": [
+          "Douala",
+          "Yaoundé",
+          "Kribi"
+        ],
+        "audiences": [
+          "Aux particuliers qui reçoivent famille ou amis",
+          "Aux familles de la diaspora en séjour au pays",
+          "Aux organisateurs d'anniversaires et de fêtes privées",
+          "Aux entreprises pour un repas d'équipe ou un client"
+        ],
+        "steps": [
+          {
+            "title": "Échange sur votre projet",
+            "text": "Date, lieu, nombre d'invités, envies et contraintes alimentaires."
+          },
+          {
+            "title": "Proposition de menu et devis",
+            "text": "Le chef imagine un menu sur mesure ; vous recevez le devis sous 24 h."
+          },
+          {
+            "title": "Courses et préparation",
+            "text": "Produits frais achetés par le chef, préparation sur place."
+          },
+          {
+            "title": "Service et rangement",
+            "text": "Service à table, puis cuisine rangée et nettoyée."
+          },
+          {
+            "title": "Votre avis",
+            "text": "Un court questionnaire pour nous aider à progresser."
+          }
+        ],
+        "advantages": [
+          {
+            "icon": "Sparkles",
+            "title": "Un menu unique",
+            "text": "Pensé pour vos goûts et votre occasion."
+          },
+          {
+            "icon": "ShieldCheck",
+            "title": "Des chefs vérifiés",
+            "text": "Sélectionnés, suivis et évalués après chaque prestation."
+          },
+          {
+            "icon": "Clock",
+            "title": "Du temps pour vous",
+            "text": "Aucune course, aucune vaisselle : vous profitez."
+          },
+          {
+            "icon": "Users",
+            "title": "Un interlocuteur unique",
+            "text": "Joignable depuis la France comme au Cameroun."
+          }
+        ],
+        "faq": [
+          {
+            "question": "Combien coûte un chef privé ?",
+            "answer": "Chaque prestation est unique : le tarif dépend du menu, du nombre d'invités et du lieu. Il vous est communiqué sur devis, gratuitement."
+          },
+          {
+            "question": "Dans quelles villes intervenez-vous ?",
+            "answer": "À compléter par la cliente."
+          }
+        ],
+        "quoteBullets": [
+          "Gratuit et sans engagement",
+          "Menu et prestation sur mesure",
+          "Un seul interlocuteur du début à la fin"
+        ],
+        "gallery": [
+          {
+            "illustration": "chef",
+            "image": null,
+            "alt": ""
+          },
+          {
+            "illustration": "evenement",
+            "image": null,
+            "alt": ""
+          },
+          {
+            "illustration": "accueil",
+            "image": null,
+            "alt": ""
+          }
+        ],
+        "showWhatsapp": true,
+        "related": [
+          {
+            "id": "svc_location_voiture",
+            "slug": "location-voiture",
+            "name": "Location de voiture",
+            "shortName": null,
+            "summary": "Véhicules récents, avec ou sans chauffeur, pour vos trajets et vos séjours.",
+            "icon": "Car",
+            "visual": {
+              "illustration": "voiture",
+              "image": null,
+              "alt": ""
+            },
+            "category": {
+              "slug": "experience",
+              "name": "Expérience"
+            },
+            "href": "/services/experience/location-voiture",
+            "featuredOnHome": true
+          }
+        ],
+        "reviews": [],
+        "reviewSummary": null,
+        "seo": {
+          "title": "Chef privé à domicile à Douala, Yaoundé, Kribi",
+          "description": "Un chef à domicile pour vos dîners et réceptions au Cameroun. Menu sur mesure, devis gratuit sous 24 h.",
+          "ogImageUrl": null,
+          "noindex": false
+        },
+        "toComplete": false,
+        "updatedAt": "2026-10-05T08:00:00.000Z"
+      }
+    }
+  },
+  {
+    "operationId": "listReviews",
+    "method": "GET",
+    "path": "/v1/reviews",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "data": [
+          {
+            "id": "rev_aurelie",
+            "authorName": "Aurélie K.",
+            "initials": "AK",
+            "city": "Paris → Douala",
+            "rating": 5,
+            "text": "Arrivée à Douala sans stress : logement prêt, chauffeur à l'aéroport et même les courses faites. On s'est sentis attendus.",
+            "service": {
+              "slug": "logement-temporaire",
+              "name": "Logement temporaire",
+              "categorySlug": "immobilier",
+              "categoryName": "Immobilier"
+            },
+            "verified": true,
+            "featured": true,
+            "date": "2026-09-28T10:00:00.000Z",
+            "reply": null
+          },
+          {
+            "id": "rev_jean_marc",
+            "authorName": "Jean-Marc T.",
+            "initials": "JT",
+            "city": "Yaoundé",
+            "rating": 5,
+            "text": "Le chef privé a régalé nos invités pour l'anniversaire de ma mère. Service impeccable, équipe aux petits soins du début à la fin.",
+            "service": {
+              "slug": "chef-prive",
+              "name": "Chef privé",
+              "categorySlug": "experience",
+              "categoryName": "Expérience"
+            },
+            "verified": true,
+            "featured": true,
+            "date": "2026-09-12T10:00:00.000Z",
+            "reply": null
+          },
+          {
+            "id": "rev_sandrine",
+            "authorName": "Sandrine M.",
+            "initials": "SM",
+            "city": "Lyon",
+            "rating": 5,
+            "text": "Je vis en France et Mambo gère mon appartement à Bonapriso. Comptes rendus réguliers, locataires suivis : je suis enfin serein.",
+            "service": {
+              "slug": "gestion-locative",
+              "name": "Gestion locative",
+              "categorySlug": "immobilier",
+              "categoryName": "Immobilier"
+            },
+            "verified": true,
+            "featured": true,
+            "date": "2026-08-30T10:00:00.000Z",
+            "reply": null
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "pageSize": 12,
+          "total": 120,
+          "totalPages": 10
+        }
+      }
+    }
+  },
+  {
+    "operationId": "getReviewSummary",
+    "method": "GET",
+    "path": "/v1/reviews/summary",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "average": 4.9,
+        "total": 120,
+        "verifiedCount": 112,
+        "distribution": {
+          "1": 0,
+          "2": 1,
+          "3": 2,
+          "4": 13,
+          "5": 104
+        }
+      }
+    }
+  },
+  {
+    "operationId": "listPartners",
+    "method": "GET",
+    "path": "/v1/partners",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": [
+        {
+          "id": "prt_1",
+          "name": "Logo partenaire 1",
+          "category": "EXPERIENCE",
+          "categoryLabel": "Prestataires Expérience",
+          "logo": null,
+          "url": null
+        },
+        {
+          "id": "prt_2",
+          "name": "Logo partenaire 2",
+          "category": "IMMOBILIER",
+          "categoryLabel": "Immobilier",
+          "logo": null,
+          "url": null
+        },
+        {
+          "id": "prt_3",
+          "name": "Logo partenaire 3",
+          "category": "ENTREPRISES",
+          "categoryLabel": "Entreprises & prestataires",
+          "logo": null,
+          "url": null
+        }
+      ]
+    }
+  },
+  {
+    "operationId": "listTrainings",
+    "method": "GET",
+    "path": "/v1/trainings",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": [
+        {
+          "id": "trn_accueil",
+          "slug": "accueil-relation-client",
+          "title": "Accueil et relation client",
+          "category": "PROFESSIONNELS",
+          "categoryLabel": "Professionnels",
+          "audienceLabel": "Prestataires et entreprises",
+          "icon": "Users",
+          "duration": "1 jour",
+          "format": "Présentiel",
+          "location": "Douala",
+          "description": null
+        },
+        {
+          "id": "trn_hygiene",
+          "slug": "hygiene-securite-cuisine",
+          "title": "Hygiène et sécurité en cuisine",
+          "category": "PROFESSIONNELS",
+          "categoryLabel": "Professionnels",
+          "audienceLabel": "Prestataires et entreprises",
+          "icon": "Utensils",
+          "duration": "2 jours",
+          "format": "Présentiel",
+          "location": "Douala",
+          "description": null
+        },
+        {
+          "id": "trn_installation",
+          "slug": "preparer-installation-cameroun",
+          "title": "Bien préparer son installation au Cameroun",
+          "category": "ATELIERS",
+          "categoryLabel": "Ateliers",
+          "audienceLabel": "Particuliers et familles",
+          "icon": "Plane",
+          "duration": "2 heures",
+          "format": "En ligne",
+          "location": null,
+          "description": null
+        },
+        {
+          "id": "trn_proche",
+          "slug": "accompagner-proche-age",
+          "title": "Accompagner un proche âgé à domicile",
+          "category": "SENSIBILISATION",
+          "categoryLabel": "Sensibilisation",
+          "audienceLabel": "Familles et associations",
+          "icon": "HeartHandshake",
+          "duration": "3 heures",
+          "format": "Présentiel",
+          "location": "Douala",
+          "description": null
+        }
+      ]
+    }
+  },
+  {
+    "operationId": "listJobs",
+    "method": "GET",
+    "path": "/v1/jobs",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": [
+        {
+          "id": "job_coordinateur",
+          "slug": "coordinateur-rice-de-services",
+          "title": "Coordinateur·rice de services",
+          "city": "Douala",
+          "country": "CM",
+          "contractType": "CDI",
+          "summary": "Vous coordonnez les prestations de nos clients et le réseau de prestataires à Douala.",
+          "publishedAt": "2026-10-02T08:00:00.000Z",
+          "isNew": true
+        },
+        {
+          "id": "job_relation_diaspora",
+          "slug": "charge-e-relation-clients-diaspora",
+          "title": "Chargé·e de relation clients diaspora",
+          "city": "France · télétravail",
+          "country": "FR",
+          "contractType": "CDD 12 mois",
+          "summary": "Vous accompagnez nos clients de la diaspora depuis la France.",
+          "publishedAt": "2026-09-28T08:00:00.000Z",
+          "isNew": false
+        },
+        {
+          "id": "job_entretien",
+          "slug": "agent-e-entretien-logements",
+          "title": "Agent·e d’entretien des logements",
+          "city": "Yaoundé",
+          "country": "CM",
+          "contractType": "Temps partiel",
+          "summary": "Vous assurez l'entretien des logements gérés par l'agence.",
+          "publishedAt": "2026-09-21T08:00:00.000Z",
+          "isNew": false
+        },
+        {
+          "id": "job_chauffeur",
+          "slug": "chauffeur-euse-partenaire",
+          "title": "Chauffeur·euse partenaire",
+          "city": "Douala",
+          "country": "CM",
+          "contractType": "Freelance",
+          "summary": "Vous réalisez des transferts et mises à disposition pour nos clients.",
+          "publishedAt": "2026-09-14T08:00:00.000Z",
+          "isNew": false
+        }
+      ]
+    }
+  },
+  {
+    "operationId": "getJob",
+    "method": "GET",
+    "path": "/v1/jobs/:slug",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "id": "job_coordinateur",
+        "slug": "coordinateur-rice-de-services",
+        "title": "Coordinateur·rice de services",
+        "city": "Douala",
+        "country": "CM",
+        "contractType": "CDI",
+        "summary": "Vous coordonnez les prestations de nos clients et le réseau de prestataires à Douala.",
+        "publishedAt": "2026-10-02T08:00:00.000Z",
+        "isNew": true,
+        "startDate": "janvier 2027",
+        "workingTime": "temps plein",
+        "locationLabel": "Douala, Cameroun",
+        "description": "Au cœur de l’agence de Douala, vous coordonnez les demandes de nos clients, de la réception du besoin jusqu’au suivi de la prestation, avec notre réseau de prestataires.",
+        "missions": [
+          "Analyser les demandes et préparer les devis",
+          "Sélectionner et briefer les prestataires",
+          "Suivre chaque prestation et informer le client",
+          "Mettre à jour les dossiers dans l’outil de gestion"
+        ],
+        "profile": [
+          "Expérience en relation client ou coordination",
+          "Sens de l’organisation et du service",
+          "Aisance à l’écrit et à l’oral en français",
+          "Maîtrise des outils numériques courants"
+        ],
+        "benefits": [
+          "Une équipe bienveillante et engagée",
+          "Des formations régulières",
+          "Des missions utiles, au service des familles"
+        ],
+        "expiresAt": null
+      }
+    }
+  },
+  {
+    "operationId": "listEvents",
+    "method": "GET",
+    "path": "/v1/events",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "data": [
+          {
+            "id": "evt_saveurs",
+            "slug": "nuit-des-saveurs-camerounaises",
+            "title": "Nuit des saveurs camerounaises",
+            "startsAt": "2026-11-14T18:00:00.000Z",
+            "endsAt": null,
+            "city": "Douala",
+            "place": "Akwa",
+            "tag": "Gastronomie",
+            "visual": {
+              "illustration": "chef",
+              "image": null,
+              "alt": ""
+            },
+            "description": null,
+            "capacity": 40,
+            "remainingPlaces": 12,
+            "limited": true
+          },
+          {
+            "id": "evt_lobe",
+            "slug": "randonnee-cascades-lobe",
+            "title": "Randonnée et cascades de la Lobé",
+            "startsAt": "2026-11-22T07:00:00.000Z",
+            "endsAt": null,
+            "city": "Kribi",
+            "place": "journée",
+            "tag": "Nature",
+            "visual": {
+              "illustration": "culture",
+              "image": null,
+              "alt": ""
+            },
+            "description": null,
+            "capacity": 20,
+            "remainingPlaces": 8,
+            "limited": true
+          },
+          {
+            "id": "evt_artisans",
+            "slug": "visite-ateliers-artisans",
+            "title": "Visite des ateliers d’artisans",
+            "startsAt": "2026-12-06T08:00:00.000Z",
+            "endsAt": "2026-12-07T17:00:00.000Z",
+            "city": "Foumban",
+            "place": "week-end",
+            "tag": "Artisanat",
+            "visual": {
+              "illustration": "marche",
+              "image": null,
+              "alt": ""
+            },
+            "description": null,
+            "capacity": 15,
+            "remainingPlaces": 6,
+            "limited": true
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "pageSize": 3,
+          "total": 3,
+          "totalPages": 1
+        }
+      }
+    }
+  },
+  {
+    "operationId": "getAvailability",
+    "method": "GET",
+    "path": "/v1/appointments/availability",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "timezone": "Africa/Douala",
+        "timezoneLabel": "Heure de Douala (UTC+1)",
+        "days": [
+          {
+            "date": "2026-10-21",
+            "available": true,
+            "closedReason": null,
+            "slots": [
+              {
+                "startsAt": "2026-10-21T08:00:00.000Z",
+                "endsAt": "2026-10-21T09:30:00.000Z",
+                "formats": [
+                  "AGENCE",
+                  "TELEPHONE",
+                  "VISIO"
+                ]
+              },
+              {
+                "startsAt": "2026-10-21T13:00:00.000Z",
+                "endsAt": "2026-10-21T14:30:00.000Z",
+                "formats": [
+                  "TELEPHONE",
+                  "VISIO"
+                ]
+              }
+            ]
+          },
+          {
+            "date": "2026-10-25",
+            "available": false,
+            "closedReason": "Fermé le dimanche",
+            "slots": []
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operationId": "createQuoteRequest",
+    "method": "POST",
+    "path": "/v1/quote-requests",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "reference": "MP-2026-0142",
+        "message": "Merci, votre demande est bien envoyée ! Vous recevrez un e-mail de confirmation dans quelques instants."
+      }
+    }
+  },
+  {
+    "operationId": "createContactMessage",
+    "method": "POST",
+    "path": "/v1/contact-messages",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "reference": "MP-2026-0142",
+        "message": "Merci, votre demande est bien envoyée ! Vous recevrez un e-mail de confirmation dans quelques instants."
+      }
+    }
+  },
+  {
+    "operationId": "createAppointment",
+    "method": "POST",
+    "path": "/v1/appointments",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "reference": "MP-2026-0143",
+        "message": "Votre demande de rendez-vous est enregistrée. Nous la confirmons par e-mail très rapidement."
+      }
+    }
+  },
+  {
+    "operationId": "createRegistration",
+    "method": "POST",
+    "path": "/v1/registrations",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "reference": "MP-2026-0142",
+        "message": "Merci, votre demande est bien envoyée ! Vous recevrez un e-mail de confirmation dans quelques instants."
+      }
+    }
+  },
+  {
+    "operationId": "createTrainingRequest",
+    "method": "POST",
+    "path": "/v1/training-requests",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "reference": "MP-2026-0142",
+        "message": "Merci, votre demande est bien envoyée ! Vous recevrez un e-mail de confirmation dans quelques instants."
+      }
+    }
+  },
+  {
+    "operationId": "createPartnerRequest",
+    "method": "POST",
+    "path": "/v1/partner-requests",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "reference": "MP-2026-0142",
+        "message": "Merci, votre demande est bien envoyée ! Vous recevrez un e-mail de confirmation dans quelques instants."
+      }
+    }
+  },
+  {
+    "operationId": "createEventRegistration",
+    "method": "POST",
+    "path": "/v1/event-registrations",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "reference": "MP-2026-0142",
+        "message": "Merci, votre demande est bien envoyée ! Vous recevrez un e-mail de confirmation dans quelques instants."
+      }
+    }
+  },
+  {
+    "operationId": "createJobApplication",
+    "method": "POST",
+    "path": "/v1/job-applications",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "reference": "MP-2026-0142",
+        "message": "Merci, votre demande est bien envoyée ! Vous recevrez un e-mail de confirmation dans quelques instants."
+      }
+    }
+  },
+  {
+    "operationId": "subscribeNewsletter",
+    "method": "POST",
+    "path": "/v1/newsletter/subscriptions",
+    "status": 202,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "message": "Merci ! Confirmez votre inscription dans l'e-mail que nous venons de vous envoyer.",
+        "alreadySubscribed": false
+      }
+    }
+  },
+  {
+    "operationId": "confirmNewsletter",
+    "method": "POST",
+    "path": "/v1/newsletter/confirm",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "message": "Votre inscription à la newsletter est confirmée. À très vite !"
+      }
+    }
+  },
+  {
+    "operationId": "unsubscribeNewsletter",
+    "method": "POST",
+    "path": "/v1/newsletter/unsubscribe",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "message": "Vous êtes bien désinscrit·e. Vous ne recevrez plus notre newsletter."
+      }
+    }
+  },
+  {
+    "operationId": "getSurvey",
+    "method": "GET",
+    "path": "/v1/surveys/:token",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "reference": "MP-2026-0142",
+        "firstName": "Aurélie",
+        "service": {
+          "name": "Chef privé",
+          "categoryName": "Expérience",
+          "visual": {
+            "illustration": "chef",
+            "image": null,
+            "alt": ""
+          }
+        },
+        "serviceDate": "2026-11-14T18:00:00.000Z",
+        "expiresAt": "2026-12-16T09:00:00.000Z",
+        "questions": [
+          {
+            "id": "q1",
+            "order": 1,
+            "kind": "STARS",
+            "label": "Quelle note donnez-vous à la prestation ?",
+            "helpText": null,
+            "options": [
+              "Très décevant",
+              "Décevant",
+              "Correct",
+              "Très bien",
+              "Excellent"
+            ],
+            "required": true
+          },
+          {
+            "id": "q2",
+            "order": 2,
+            "kind": "CHOICE",
+            "label": "Le prestataire était-il ponctuel et professionnel ?",
+            "helpText": null,
+            "options": [
+              "Oui, tout à fait",
+              "Plutôt oui",
+              "Plutôt non",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "q3",
+            "order": 3,
+            "kind": "CHOICE",
+            "label": "L’équipe Mambo vous a-t-elle bien informé ?",
+            "helpText": null,
+            "options": [
+              "Oui, tout à fait",
+              "Plutôt oui",
+              "Plutôt non",
+              "Non"
+            ],
+            "required": false
+          },
+          {
+            "id": "q4",
+            "order": 4,
+            "kind": "NPS",
+            "label": "Recommanderiez-vous Mambo Proxi à un proche ?",
+            "helpText": null,
+            "options": [
+              "Peu probable",
+              "Très probable"
+            ],
+            "required": false
+          },
+          {
+            "id": "q5",
+            "order": 5,
+            "kind": "TEXT",
+            "label": "Un commentaire à partager ?",
+            "helpText": "Votre commentaire",
+            "options": [],
+            "required": false
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operationId": "submitSurvey",
+    "method": "POST",
+    "path": "/v1/surveys/:token/responses",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "message": "Merci pour votre retour !"
+      }
+    }
+  },
+  {
+    "operationId": "login",
+    "method": "POST",
+    "path": "/v1/auth/login",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "status": "AUTHENTICATED",
+        "user": {
+          "id": "clx8m2k4p0001mp9a7v3f2c1d",
+          "email": "mireille@mamboproxi.com",
+          "name": "Mireille Bell",
+          "firstName": "Mireille",
+          "initials": "MB",
+          "role": "ADMIN",
+          "lastLoginAt": "2026-10-19T07:58:00.000Z"
+        }
+      }
+    }
+  },
+  {
+    "operationId": "verifyOtp",
+    "method": "POST",
+    "path": "/v1/auth/verify-otp",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "resendOtp",
+    "method": "POST",
+    "path": "/v1/auth/resend-otp",
+    "status": 202,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "refreshSession",
+    "method": "POST",
+    "path": "/v1/auth/refresh",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "logout",
+    "method": "POST",
+    "path": "/v1/auth/logout",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "getMe",
+    "method": "GET",
+    "path": "/v1/auth/me",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "forgotPassword",
+    "method": "POST",
+    "path": "/v1/auth/forgot-password",
+    "status": 202,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "message": "Si un compte correspond à cette adresse, vous allez recevoir un lien de réinitialisation."
+      }
+    }
+  },
+  {
+    "operationId": "resetPassword",
+    "method": "POST",
+    "path": "/v1/auth/reset-password",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "acceptInvite",
+    "method": "POST",
+    "path": "/v1/auth/accept-invite",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetDashboard",
+    "method": "GET",
+    "path": "/v1/admin/dashboard",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "range": "30d",
+        "kpis": {
+          "newRequests": {
+            "value": 12,
+            "previous": 8,
+            "deltaPercent": 50,
+            "unit": null
+          },
+          "quotesInProgress": {
+            "value": 18,
+            "previous": null,
+            "deltaPercent": null,
+            "unit": null
+          },
+          "servicesCompleted": {
+            "value": 27,
+            "previous": 24,
+            "deltaPercent": 12,
+            "unit": null
+          },
+          "satisfaction": {
+            "value": 4.8,
+            "previous": 4.7,
+            "deltaPercent": 2.1,
+            "unit": "/5"
+          }
+        },
+        "requestsSeries": [
+          {
+            "label": "S30",
+            "start": "2026-07-20",
+            "count": 5
+          },
+          {
+            "label": "S31",
+            "start": "2026-07-27",
+            "count": 8
+          },
+          {
+            "label": "S32",
+            "start": "2026-08-03",
+            "count": 6
+          },
+          {
+            "label": "S33",
+            "start": "2026-08-10",
+            "count": 9
+          },
+          {
+            "label": "S34",
+            "start": "2026-08-17",
+            "count": 11
+          },
+          {
+            "label": "S35",
+            "start": "2026-08-24",
+            "count": 7
+          },
+          {
+            "label": "S36",
+            "start": "2026-08-31",
+            "count": 10
+          },
+          {
+            "label": "S37",
+            "start": "2026-09-07",
+            "count": 13
+          },
+          {
+            "label": "S38",
+            "start": "2026-09-14",
+            "count": 12
+          },
+          {
+            "label": "S39",
+            "start": "2026-09-21",
+            "count": 9
+          },
+          {
+            "label": "S40",
+            "start": "2026-09-28",
+            "count": 14
+          },
+          {
+            "label": "S41",
+            "start": "2026-10-05",
+            "count": 12
+          }
+        ],
+        "byCategory": [
+          {
+            "slug": "immobilier",
+            "name": "Immobilier",
+            "count": 21,
+            "percent": 39.6
+          },
+          {
+            "slug": "experience",
+            "name": "Expérience",
+            "count": 17,
+            "percent": 32.1
+          },
+          {
+            "slug": "services-de-proximite",
+            "name": "Services de proximité",
+            "count": 9,
+            "percent": 17
+          },
+          {
+            "slug": "culture-evenementiel",
+            "name": "Culture & événementiel",
+            "count": 6,
+            "percent": 11.3
+          }
+        ],
+        "latestRequests": [],
+        "todo": {
+          "reviewsToValidate": 4,
+          "unreadApplications": 2,
+          "appointmentsToConfirm": 3,
+          "partnershipRequests": 1,
+          "newRegistrations": 5
+        },
+        "surveys": {
+          "sent": 34,
+          "answered": 23,
+          "responseRate": 68
+        },
+        "newsletter": {
+          "subscribers": 1248,
+          "newThisPeriod": 56
+        },
+        "visits": {
+          "total": 4320,
+          "deltaPercent": null
+        },
+        "sidebarCounts": {
+          "requests": 12,
+          "appointments": 3,
+          "reviews": 4,
+          "applications": 2
+        }
+      }
+    }
+  },
+  {
+    "operationId": "adminSearch",
+    "method": "GET",
+    "path": "/v1/admin/search",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "groups": [
+          {
+            "kind": "requests",
+            "label": "Demandes",
+            "items": [
+              {
+                "id": "clx8n0a1b0009mp9a1c2d3e4f",
+                "title": "MP-2026-0142 · Aminata Diallo",
+                "subtitle": "Chef privé · Nouvelle",
+                "href": "/admin/demandes?id=clx8n0a1b0009mp9a1c2d3e4f"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operationId": "adminListNotifications",
+    "method": "GET",
+    "path": "/v1/admin/notifications",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminMarkNotificationsRead",
+    "method": "PATCH",
+    "path": "/v1/admin/notifications/read",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminListRequests",
+    "method": "GET",
+    "path": "/v1/admin/requests",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "data": [
+          {
+            "id": "req_0142",
+            "reference": "MP-2026-0142",
+            "type": "DEVIS",
+            "status": "NOUVELLE",
+            "contact": {
+              "id": "ctc_aurelie",
+              "fullName": "Aurélie Kamga",
+              "initials": "AK",
+              "email": "aurelie.k@example.com",
+              "phone": "+33612345678",
+              "country": "FR",
+              "city": "Paris",
+              "profile": "PARTICULIER"
+            },
+            "service": {
+              "id": "svc_chef_prive",
+              "name": "Chef privé",
+              "slug": "chef-prive"
+            },
+            "category": {
+              "slug": "experience",
+              "name": "Expérience"
+            },
+            "subject": "Chef privé",
+            "assignedTo": null,
+            "createdAt": "2026-10-05T08:12:00.000Z"
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "pageSize": 8,
+          "total": 58,
+          "totalPages": 8
+        },
+        "counts": {
+          "ALL": 58,
+          "NOUVELLE": 12,
+          "EN_COURS": 18,
+          "PRESTATION_REALISEE": 21,
+          "CLOTUREE": 7
+        }
+      }
+    }
+  },
+  {
+    "operationId": "adminExportRequests",
+    "method": "GET",
+    "path": "/v1/admin/requests/export.csv",
+    "status": 200,
+    "contentType": "text/csv",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetRequest",
+    "method": "GET",
+    "path": "/v1/admin/requests/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "id": "req_0142",
+        "reference": "MP-2026-0142",
+        "type": "DEVIS",
+        "status": "NOUVELLE",
+        "contact": {
+          "id": "ctc_aurelie",
+          "fullName": "Aurélie Kamga",
+          "initials": "AK",
+          "email": "aurelie.k@example.com",
+          "phone": "+33612345678",
+          "country": "FR",
+          "city": "Paris",
+          "profile": "PARTICULIER"
+        },
+        "service": {
+          "id": "svc_chef_prive",
+          "name": "Chef privé",
+          "slug": "chef-prive"
+        },
+        "category": {
+          "slug": "experience",
+          "name": "Expérience"
+        },
+        "subject": "Chef privé",
+        "assignedTo": null,
+        "createdAt": "2026-10-05T08:12:00.000Z",
+        "contactPreference": "WHATSAPP",
+        "message": "Dîner pour les 60 ans de ma mère, cuisine camerounaise revisitée, un invité végétarien.",
+        "fields": [
+          {
+            "key": "category",
+            "label": "Rubrique",
+            "value": "Expérience"
+          },
+          {
+            "key": "eventDate",
+            "label": "Date souhaitée",
+            "value": "Samedi 14 nov. 2026"
+          },
+          {
+            "key": "city",
+            "label": "Ville",
+            "value": "Douala"
+          },
+          {
+            "key": "guests",
+            "label": "Personnes",
+            "value": "12"
+          },
+          {
+            "key": "occasion",
+            "label": "Occasion",
+            "value": "Anniversaire"
+          }
+        ],
+        "payload": {
+          "eventDate": "2026-11-14",
+          "city": "Douala",
+          "guests": 12,
+          "occasion": "Anniversaire"
+        },
+        "notes": [],
+        "history": [
+          {
+            "id": "evt_1",
+            "kind": "RECEIVED",
+            "label": "Demande reçue via le formulaire",
+            "actor": null,
+            "data": null,
+            "createdAt": "2026-10-05T08:12:00.000Z"
+          },
+          {
+            "id": "evt_2",
+            "kind": "ACK_SENT",
+            "label": "Accusé de réception envoyé au client",
+            "actor": null,
+            "data": null,
+            "createdAt": "2026-10-05T08:12:05.000Z"
+          }
+        ],
+        "attachments": [],
+        "consentAt": "2026-10-05T08:12:00.000Z",
+        "survey": null,
+        "whatsappUrl": "https://wa.me/33612345678?text=Bonjour%20Aur%C3%A9lie%2C%20c%27est%20Mambo%20Proxi%20au%20sujet%20de%20votre%20demande%20MP-2026-0142.",
+        "completedAt": null,
+        "closedAt": null,
+        "updatedAt": "2026-10-05T08:12:05.000Z"
+      }
+    }
+  },
+  {
+    "operationId": "adminUpdateRequest",
+    "method": "PATCH",
+    "path": "/v1/admin/requests/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminAnonymizeRequest",
+    "method": "DELETE",
+    "path": "/v1/admin/requests/:id",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminAddRequestNote",
+    "method": "POST",
+    "path": "/v1/admin/requests/:id/notes",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminDuplicateRequest",
+    "method": "POST",
+    "path": "/v1/admin/requests/:id/duplicate",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetRequestAttachment",
+    "method": "GET",
+    "path": "/v1/admin/requests/:id/attachments/:attachmentId",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminListServices",
+    "method": "GET",
+    "path": "/v1/admin/services",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "data": [
+          {
+            "id": "svc_chef_prive",
+            "slug": "chef-prive",
+            "name": "Chef privé",
+            "category": {
+              "slug": "experience",
+              "name": "Expérience"
+            },
+            "status": "PUBLISHED",
+            "showInMenu": true,
+            "featuredOnHome": true,
+            "sortOrder": 3,
+            "visual": {
+              "illustration": "chef",
+              "image": null,
+              "alt": ""
+            },
+            "path": "/services/experience/chef-prive",
+            "requests30d": 9,
+            "completeness": 86,
+            "toComplete": false,
+            "isDemo": false,
+            "updatedAt": "2026-10-05T08:00:00.000Z"
+          },
+          {
+            "id": "svc_visites_douala",
+            "slug": "visites-guidees-douala",
+            "name": "Visites guidées de Douala",
+            "category": {
+              "slug": "culture-evenementiel",
+              "name": "Culture & événementiel"
+            },
+            "status": "DRAFT",
+            "showInMenu": false,
+            "featuredOnHome": false,
+            "sortOrder": 5,
+            "visual": {
+              "illustration": "culture",
+              "image": null,
+              "alt": ""
+            },
+            "path": "/services/culture-evenementiel/visites-guidees-douala",
+            "requests30d": 0,
+            "completeness": 43,
+            "toComplete": true,
+            "isDemo": true,
+            "updatedAt": "2026-10-04T16:20:00.000Z"
+          }
+        ],
+        "countsByCategory": {
+          "experience": 5,
+          "immobilier": 7,
+          "services-de-proximite": 3,
+          "culture-evenementiel": 5
+        }
+      }
+    }
+  },
+  {
+    "operationId": "adminCreateService",
+    "method": "POST",
+    "path": "/v1/admin/services",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminReorderServices",
+    "method": "PATCH",
+    "path": "/v1/admin/services/reorder",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetService",
+    "method": "GET",
+    "path": "/v1/admin/services/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminUpdateService",
+    "method": "PATCH",
+    "path": "/v1/admin/services/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminDeleteService",
+    "method": "DELETE",
+    "path": "/v1/admin/services/:id",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminPublishService",
+    "method": "POST",
+    "path": "/v1/admin/services/:id/publish",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminUnpublishService",
+    "method": "POST",
+    "path": "/v1/admin/services/:id/unpublish",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminDuplicateService",
+    "method": "POST",
+    "path": "/v1/admin/services/:id/duplicate",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetServicePreviewToken",
+    "method": "GET",
+    "path": "/v1/admin/services/:id/preview-token",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetServiceCompleteness",
+    "method": "GET",
+    "path": "/v1/admin/services/:id/completeness",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminListCategories",
+    "method": "GET",
+    "path": "/v1/admin/categories",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminCreateCategory",
+    "method": "POST",
+    "path": "/v1/admin/categories",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminReorderCategories",
+    "method": "PATCH",
+    "path": "/v1/admin/categories/reorder",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetCategory",
+    "method": "GET",
+    "path": "/v1/admin/categories/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminUpdateCategory",
+    "method": "PATCH",
+    "path": "/v1/admin/categories/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminDeleteCategory",
+    "method": "DELETE",
+    "path": "/v1/admin/categories/:id",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminListPages",
+    "method": "GET",
+    "path": "/v1/admin/pages",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetPage",
+    "method": "GET",
+    "path": "/v1/admin/pages/:key",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminSavePageDraft",
+    "method": "PUT",
+    "path": "/v1/admin/pages/:key",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminPublishPage",
+    "method": "POST",
+    "path": "/v1/admin/pages/:key/publish",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminDiscardPageDraft",
+    "method": "POST",
+    "path": "/v1/admin/pages/:key/discard",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetPagePreviewToken",
+    "method": "GET",
+    "path": "/v1/admin/pages/:key/preview-token",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminListReviews",
+    "method": "GET",
+    "path": "/v1/admin/reviews",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "data": [
+          {
+            "id": "rev_patrick",
+            "authorName": "Patrick E.",
+            "initials": "PE",
+            "city": "Marseille",
+            "rating": 5,
+            "text": "La journée découverte à Kribi était parfaite : guide passionné, repas local, tout était organisé. Mes enfants en parlent encore.",
+            "service": {
+              "slug": "decouverte-cameroun",
+              "name": "Découverte du Cameroun"
+            },
+            "requestReference": "MP-2026-0128",
+            "serviceDate": "2026-09-26T07:00:00.000Z",
+            "status": "A_VALIDER",
+            "verified": true,
+            "featured": false,
+            "publishConsent": true,
+            "answers": [
+              {
+                "question": "Quelle note donnez-vous à la prestation ?",
+                "answer": "5/5 — Excellent"
+              },
+              {
+                "question": "Le prestataire était-il ponctuel et professionnel ?",
+                "answer": "Oui, tout à fait"
+              }
+            ],
+            "reply": null,
+            "publishedAt": null,
+            "createdAt": "2026-10-03T19:40:00.000Z"
+          }
+        ],
+        "meta": {
+          "page": 1,
+          "pageSize": 20,
+          "total": 4,
+          "totalPages": 1
+        },
+        "counts": {
+          "A_VALIDER": 4,
+          "PUBLIE": 116,
+          "MASQUE": 3
+        }
+      }
+    }
+  },
+  {
+    "operationId": "adminCreateReview",
+    "method": "POST",
+    "path": "/v1/admin/reviews",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetReviewStats",
+    "method": "GET",
+    "path": "/v1/admin/reviews/stats",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminUpdateReview",
+    "method": "PATCH",
+    "path": "/v1/admin/reviews/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminDeleteReview",
+    "method": "DELETE",
+    "path": "/v1/admin/reviews/:id",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminReplyReview",
+    "method": "POST",
+    "path": "/v1/admin/reviews/:id/reply",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminListSurveyQuestions",
+    "method": "GET",
+    "path": "/v1/admin/survey-questions",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminReplaceSurveyQuestions",
+    "method": "PUT",
+    "path": "/v1/admin/survey-questions",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminListAppointments",
+    "method": "GET",
+    "path": "/v1/admin/appointments",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "data": [
+          {
+            "id": "apt_1",
+            "reference": "MP-2026-0139",
+            "contact": {
+              "id": "ctc_ruth",
+              "fullName": "Ruth Abena",
+              "initials": "RA",
+              "email": "ruth.a@example.com",
+              "phone": "+32470000000",
+              "country": "BE",
+              "city": "Bruxelles",
+              "profile": "PARTICULIER"
+            },
+            "reason": "IMMOBILIER",
+            "format": "VISIO",
+            "startsAt": "2026-10-06T08:00:00.000Z",
+            "endsAt": "2026-10-06T09:30:00.000Z",
+            "status": "CONFIRME",
+            "proposedStartsAt": null,
+            "location": null,
+            "videoLink": "https://meet.example.com/mambo-ruth",
+            "message": null,
+            "notes": null,
+            "reminderSentAt": null,
+            "createdAt": "2026-10-02T10:00:00.000Z"
+          }
+        ],
+        "pending": [
+          {
+            "id": "apt_2",
+            "reference": "MP-2026-0143",
+            "contact": {
+              "id": "ctc_aminata",
+              "fullName": "Aminata Diallo",
+              "initials": "AD",
+              "email": "aminata.diallo@example.com",
+              "phone": "+237600000000",
+              "country": "CM",
+              "city": "Douala",
+              "profile": "PARTICULIER"
+            },
+            "reason": "DEVIS",
+            "format": "AGENCE",
+            "startsAt": "2026-10-08T13:00:00.000Z",
+            "endsAt": "2026-10-08T14:30:00.000Z",
+            "status": "A_CONFIRMER",
+            "proposedStartsAt": null,
+            "location": null,
+            "videoLink": null,
+            "message": "Je souhaite parler d'un dîner pour 12 personnes en décembre.",
+            "notes": null,
+            "reminderSentAt": null,
+            "createdAt": "2026-10-05T07:30:00.000Z"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operationId": "adminCreateAppointment",
+    "method": "POST",
+    "path": "/v1/admin/appointments",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetAppointment",
+    "method": "GET",
+    "path": "/v1/admin/appointments/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminActOnAppointment",
+    "method": "PATCH",
+    "path": "/v1/admin/appointments/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "acceptAppointmentProposal",
+    "method": "POST",
+    "path": "/v1/appointments/:reference/accept-proposal",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "message": "Parfait ! Votre rendez-vous est confirmé. Vous allez recevoir une invitation par e-mail."
+      }
+    }
+  },
+  {
+    "operationId": "adminGetAvailability",
+    "method": "GET",
+    "path": "/v1/admin/availability",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "rules": [
+          {
+            "weekday": 1,
+            "startTime": "09:00",
+            "endTime": "17:00",
+            "slotMinutes": 90,
+            "formats": [
+              "AGENCE",
+              "TELEPHONE",
+              "VISIO"
+            ]
+          },
+          {
+            "weekday": 2,
+            "startTime": "09:00",
+            "endTime": "17:00",
+            "slotMinutes": 90,
+            "formats": [
+              "AGENCE",
+              "TELEPHONE",
+              "VISIO"
+            ]
+          },
+          {
+            "weekday": 3,
+            "startTime": "09:00",
+            "endTime": "17:00",
+            "slotMinutes": 90,
+            "formats": [
+              "AGENCE",
+              "TELEPHONE",
+              "VISIO"
+            ]
+          },
+          {
+            "weekday": 4,
+            "startTime": "09:00",
+            "endTime": "17:00",
+            "slotMinutes": 90,
+            "formats": [
+              "AGENCE",
+              "TELEPHONE",
+              "VISIO"
+            ]
+          },
+          {
+            "weekday": 5,
+            "startTime": "09:00",
+            "endTime": "17:00",
+            "slotMinutes": 90,
+            "formats": [
+              "AGENCE",
+              "TELEPHONE",
+              "VISIO"
+            ]
+          },
+          {
+            "weekday": 6,
+            "startTime": "09:00",
+            "endTime": "12:00",
+            "slotMinutes": 90,
+            "formats": [
+              "TELEPHONE",
+              "VISIO"
+            ]
+          }
+        ],
+        "exceptions": [
+          {
+            "date": "2026-12-25",
+            "closed": true,
+            "startTime": null,
+            "endTime": null,
+            "label": "Noël"
+          }
+        ],
+        "minNoticeHours": 24,
+        "maxAdvanceDays": 60,
+        "agencyAddress": null,
+        "defaultVideoLink": null
+      }
+    }
+  },
+  {
+    "operationId": "adminSaveAvailability",
+    "method": "PUT",
+    "path": "/v1/admin/availability",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminListJobs",
+    "method": "GET",
+    "path": "/v1/admin/jobs",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminCreateJob",
+    "method": "POST",
+    "path": "/v1/admin/jobs",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetJob",
+    "method": "GET",
+    "path": "/v1/admin/jobs/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminUpdateJob",
+    "method": "PATCH",
+    "path": "/v1/admin/jobs/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminDeleteJob",
+    "method": "DELETE",
+    "path": "/v1/admin/jobs/:id",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminListApplications",
+    "method": "GET",
+    "path": "/v1/admin/applications",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetApplication",
+    "method": "GET",
+    "path": "/v1/admin/applications/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminUpdateApplication",
+    "method": "PATCH",
+    "path": "/v1/admin/applications/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetApplicationCv",
+    "method": "GET",
+    "path": "/v1/admin/applications/:id/cv",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminListPartners",
+    "method": "GET",
+    "path": "/v1/admin/partners",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminCreatePartner",
+    "method": "POST",
+    "path": "/v1/admin/partners",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminReorderPartners",
+    "method": "PATCH",
+    "path": "/v1/admin/partners/reorder",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminUpdatePartner",
+    "method": "PATCH",
+    "path": "/v1/admin/partners/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminDeletePartner",
+    "method": "DELETE",
+    "path": "/v1/admin/partners/:id",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminListTrainings",
+    "method": "GET",
+    "path": "/v1/admin/trainings",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminCreateTraining",
+    "method": "POST",
+    "path": "/v1/admin/trainings",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminReorderTrainings",
+    "method": "PATCH",
+    "path": "/v1/admin/trainings/reorder",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminUpdateTraining",
+    "method": "PATCH",
+    "path": "/v1/admin/trainings/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminDeleteTraining",
+    "method": "DELETE",
+    "path": "/v1/admin/trainings/:id",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminListEvents",
+    "method": "GET",
+    "path": "/v1/admin/events",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminCreateEvent",
+    "method": "POST",
+    "path": "/v1/admin/events",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetEvent",
+    "method": "GET",
+    "path": "/v1/admin/events/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminUpdateEvent",
+    "method": "PATCH",
+    "path": "/v1/admin/events/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminDeleteEvent",
+    "method": "DELETE",
+    "path": "/v1/admin/events/:id",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminListContacts",
+    "method": "GET",
+    "path": "/v1/admin/contacts",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminExportContacts",
+    "method": "GET",
+    "path": "/v1/admin/contacts/export.csv",
+    "status": 200,
+    "contentType": "text/csv",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetContact",
+    "method": "GET",
+    "path": "/v1/admin/contacts/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminEraseContact",
+    "method": "DELETE",
+    "path": "/v1/admin/contacts/:id",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminExportContactData",
+    "method": "GET",
+    "path": "/v1/admin/contacts/:id/export",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminListSubscribers",
+    "method": "GET",
+    "path": "/v1/admin/subscribers",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminExportSubscribers",
+    "method": "GET",
+    "path": "/v1/admin/subscribers/export.csv",
+    "status": 200,
+    "contentType": "text/csv",
+    "examples": {}
+  },
+  {
+    "operationId": "adminDeleteSubscriber",
+    "method": "DELETE",
+    "path": "/v1/admin/subscribers/:id",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminListCampaigns",
+    "method": "GET",
+    "path": "/v1/admin/campaigns",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminCreateCampaign",
+    "method": "POST",
+    "path": "/v1/admin/campaigns",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminListCampaignSegments",
+    "method": "GET",
+    "path": "/v1/admin/campaigns/segments",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetCampaign",
+    "method": "GET",
+    "path": "/v1/admin/campaigns/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminUpdateCampaign",
+    "method": "PATCH",
+    "path": "/v1/admin/campaigns/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminDeleteCampaign",
+    "method": "DELETE",
+    "path": "/v1/admin/campaigns/:id",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminPreviewCampaign",
+    "method": "GET",
+    "path": "/v1/admin/campaigns/:id/preview",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminTestCampaign",
+    "method": "POST",
+    "path": "/v1/admin/campaigns/:id/test",
+    "status": 202,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminScheduleCampaign",
+    "method": "POST",
+    "path": "/v1/admin/campaigns/:id/schedule",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminCancelCampaign",
+    "method": "POST",
+    "path": "/v1/admin/campaigns/:id/cancel",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminSendCampaignNow",
+    "method": "POST",
+    "path": "/v1/admin/campaigns/:id/send-now",
+    "status": 202,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetSettings",
+    "method": "GET",
+    "path": "/v1/admin/settings/:group",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminSaveSettings",
+    "method": "PUT",
+    "path": "/v1/admin/settings/:group",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetSystemStatus",
+    "method": "GET",
+    "path": "/v1/admin/system-status",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminListEmailTemplates",
+    "method": "GET",
+    "path": "/v1/admin/email-templates",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetEmailTemplate",
+    "method": "GET",
+    "path": "/v1/admin/email-templates/:key",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminSaveEmailTemplate",
+    "method": "PUT",
+    "path": "/v1/admin/email-templates/:key",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminPreviewEmailTemplate",
+    "method": "POST",
+    "path": "/v1/admin/email-templates/:key/preview",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminTestEmailTemplate",
+    "method": "POST",
+    "path": "/v1/admin/email-templates/:key/test",
+    "status": 202,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminListUsers",
+    "method": "GET",
+    "path": "/v1/admin/users",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminInviteUser",
+    "method": "POST",
+    "path": "/v1/admin/users/invite",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminUpdateUser",
+    "method": "PATCH",
+    "path": "/v1/admin/users/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminDeleteUser",
+    "method": "DELETE",
+    "path": "/v1/admin/users/:id",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminResetUserPassword",
+    "method": "POST",
+    "path": "/v1/admin/users/:id/reset-password",
+    "status": 202,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminListMedia",
+    "method": "GET",
+    "path": "/v1/admin/media",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminUploadMedia",
+    "method": "POST",
+    "path": "/v1/admin/media",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminUpdateMedia",
+    "method": "PATCH",
+    "path": "/v1/admin/media/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminDeleteMedia",
+    "method": "DELETE",
+    "path": "/v1/admin/media/:id",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminListAuditLog",
+    "method": "GET",
+    "path": "/v1/admin/audit-log",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  }
+]
