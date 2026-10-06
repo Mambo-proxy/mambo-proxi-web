@@ -1,4 +1,6 @@
 import { http, HttpResponse } from 'msw';
+import { categoryDetails } from '../data/category-details';
+import { problem } from '../problem';
 import { categories, categorySummaries, normalize, services } from '../data/catalogue';
 
 export const catalogueHandlers = [
@@ -20,5 +22,19 @@ export const catalogueHandlers = [
           (!search || normalize(`${service.name} ${service.summary}`).includes(search)),
       ),
     );
+  }),
+
+  // Page rubrique : résumé + services + contenu de la page + 3 autres rubriques.
+  http.get('*/v1/categories/:slug', ({ params }) => {
+    const slug = String(params.slug);
+    const category = categories.find((item) => item.slug === slug);
+    const detail = categoryDetails[slug];
+    if (!category || !detail) return problem(404, "Cette rubrique n'existe pas.");
+    return HttpResponse.json({
+      ...category,
+      ...detail,
+      services: category.services ?? [],
+      otherCategories: categorySummaries.filter((item) => item.slug !== slug),
+    });
   }),
 ];

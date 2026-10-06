@@ -914,6 +914,11 @@
             "image": null,
             "alt": ""
           },
+          "thumbnail": {
+            "illustration": "accueil",
+            "image": null,
+            "alt": ""
+          },
           "sortOrder": 1,
           "serviceCount": 5,
           "href": "/services/experience",
@@ -941,6 +946,11 @@
           "tint": "neutral-100",
           "iconColor": "neutral-800",
           "visual": {
+            "illustration": "logement",
+            "image": null,
+            "alt": ""
+          },
+          "thumbnail": {
             "illustration": "logement",
             "image": null,
             "alt": ""
@@ -975,6 +985,11 @@
             "image": null,
             "alt": ""
           },
+          "thumbnail": {
+            "illustration": "courses",
+            "image": null,
+            "alt": ""
+          },
           "sortOrder": 3,
           "serviceCount": 3,
           "href": "/services/services-de-proximite",
@@ -1001,6 +1016,11 @@
           "iconColor": "orange-400",
           "visual": {
             "illustration": "marche",
+            "image": null,
+            "alt": ""
+          },
+          "thumbnail": {
+            "illustration": "culture",
             "image": null,
             "alt": ""
           },
@@ -1205,8 +1225,8 @@
         ],
         "otherCategories": [],
         "cta": {
-          "title": "Un projet, une question ?\n==Parlons-en.==",
-          "text": "Devis gratuit et sans engagement, réponse sous 24 h. Ou écrivez-nous directement sur WhatsApp."
+          "title": "Envie d’un moment\nsur mesure ?",
+          "text": "Dites-nous ce que vous imaginez : nous vous proposons un devis gratuit sous 24 h."
         },
         "seo": {
           "title": "Expérience : chef privé, location de voiture, photographe au Cameroun",

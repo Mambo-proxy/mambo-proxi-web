@@ -2469,6 +2469,8 @@ export interface components {
              */
             iconColor?: string;
             visual: components["schemas"]["Visual"];
+            /** @description Vignette des cartes « Nos autres rubriques » (pages rubrique) ; null = visuel principal. */
+            thumbnail?: components["schemas"]["Visual"] | null;
             sortOrder: number;
             serviceCount: number;
             /** @example /services/experience */
@@ -2497,8 +2499,11 @@ export interface components {
             eyebrow?: string | null;
             title: components["schemas"]["AccentText"];
             text?: string | null;
-            steps?: components["schemas"]["StepItem"][];
+            /** @description Étapes illustrées (réception de colis). */
+            steps?: components["schemas"]["IconTextItem"][];
             note?: string | null;
+            /** @description Lien complémentaire (ex. « Voir tout l'agenda »). */
+            link?: components["schemas"]["Link"] | null;
         };
         CategoryDetail: components["schemas"]["CategorySummary"] & {
             eyebrow?: string | null;
