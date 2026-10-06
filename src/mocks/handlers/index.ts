@@ -3,6 +3,7 @@ import { problem } from '../problem';
 import { catalogueHandlers } from './catalogue';
 import { contractHandlers } from './contract';
 import { formHandlers } from './forms';
+import { newsletterHandlers } from './newsletter';
 
 /**
  * Ordre de priorité : gestionnaires dédiés (filtres, pagination, validation), puis exemples du contrat,
@@ -11,6 +12,7 @@ import { formHandlers } from './forms';
 export const handlers = [
   ...catalogueHandlers,
   ...formHandlers,
+  ...newsletterHandlers,
   ...contractHandlers,
   http.all('*/v1/*', ({ request }) =>
     problem(501, `Route non simulée : ${request.method} ${new URL(request.url).pathname}.`),
