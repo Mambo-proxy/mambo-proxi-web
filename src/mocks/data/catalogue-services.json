@@ -2,58 +2,215 @@
   "_note": "Catalogue validé (cahier des charges v1.2, §5) : 4 rubriques, 19 services. Textes repris des maquettes. À utiliser pour le seed de la base et les mocks du frontend. Les icônes sont des noms lucide-react.",
   "rubriques": [
     {
-      "slug": "experience", "nom": "Expérience", "accroche": "Des moments sur mesure", "ordre": 1,
-      "illustration": "chef", "teinteCarte": "orange-50", "couleurIcone": "orange-700", "icone": "Sparkles",
+      "slug": "experience",
+      "nom": "Expérience",
+      "accroche": "Des moments sur mesure",
+      "ordre": 1,
+      "illustration": "chef",
+      "teinteCarte": "orange-50",
+      "couleurIcone": "orange-700",
+      "icone": "Sparkles",
       "titreHero": "Des moments sur mesure, pensés pour vous.",
       "description": "Se déplacer, se faire plaisir, immortaliser un moment : des prestataires triés sur le volet, réservés pour vous.",
       "services": [
-        {"slug": "location-voiture", "nom": "Location de voiture", "icone": "Car", "illustration": "voiture", "resume": "Véhicules récents, avec ou sans chauffeur, pour vos trajets et vos séjours."},
-        {"slug": "photographe", "nom": "Photographe", "icone": "Camera", "illustration": "photo", "resume": "Portraits, événements, reportages : vos moments immortalisés."},
-        {"slug": "chef-prive", "nom": "Chef privé", "icone": "ChefHat", "illustration": "chef", "resume": "Un chef à domicile pour vos dîners, réceptions et grandes occasions."},
-        {"slug": "massage-bien-etre", "nom": "Massage bien-être", "icone": "Flower2", "illustration": "massage", "resume": "Des praticiens qualifiés, chez vous ou sur votre lieu de séjour."},
-        {"slug": "services-evenementiels", "nom": "Services événementiels", "icone": "PartyPopper", "illustration": "evenement", "resume": "Décoration, traiteur, animation : des prestataires pour vos événements privés."}
+        {
+          "slug": "location-voiture",
+          "nom": "Location de voiture",
+          "icone": "Car",
+          "illustration": "voiture",
+          "resume": "Véhicules récents, avec ou sans chauffeur, pour vos trajets et vos séjours."
+        },
+        {
+          "slug": "photographe",
+          "nom": "Photographe",
+          "icone": "Camera",
+          "illustration": "photo",
+          "resume": "Portraits, événements, reportages : vos moments immortalisés."
+        },
+        {
+          "slug": "chef-prive",
+          "nom": "Chef privé",
+          "icone": "ChefHat",
+          "illustration": "chef",
+          "resume": "Un chef à domicile pour vos dîners, réceptions et grandes occasions."
+        },
+        {
+          "slug": "massage-bien-etre",
+          "nom": "Massage bien-être",
+          "icone": "Flower2",
+          "illustration": "massage",
+          "resume": "Des praticiens qualifiés, chez vous ou sur votre lieu de séjour."
+        },
+        {
+          "slug": "services-evenementiels",
+          "nom": "Services événementiels",
+          "icone": "PartyPopper",
+          "illustration": "evenement",
+          "resume": "Décoration, traiteur, animation : des prestataires pour vos événements privés."
+        }
       ]
     },
     {
-      "slug": "immobilier", "nom": "Immobilier", "accroche": "Se loger en toute sérénité", "ordre": 2,
-      "illustration": "logement", "teinteCarte": "neutral-100", "couleurIcone": "neutral-800", "icone": "Building2",
+      "slug": "immobilier",
+      "nom": "Immobilier",
+      "accroche": "Se loger en toute sérénité",
+      "ordre": 2,
+      "illustration": "logement",
+      "teinteCarte": "neutral-100",
+      "couleurIcone": "neutral-800",
+      "icone": "Building2",
       "titreHero": "Se loger au Cameroun, en toute sérénité.",
       "description": "Trouver, louer, s'installer, ou confier votre bien à une équipe présente sur place.",
       "groupes": [
-        {"titre": "Vous cherchez un logement", "services": ["recherche-logement", "location-sous-location-colocation", "logement-adapte-meuble", "logement-temporaire", "accompagnement-installation"]},
-        {"titre": "Vous êtes propriétaire", "services": ["gestion-locative", "entretien-logements"]}
+        {
+          "titre": "Vous cherchez un logement",
+          "services": [
+            "recherche-logement",
+            "location-sous-location-colocation",
+            "logement-adapte-meuble",
+            "logement-temporaire",
+            "accompagnement-installation"
+          ]
+        },
+        {
+          "titre": "Vous êtes propriétaire",
+          "services": [
+            "gestion-locative",
+            "entretien-logements"
+          ]
+        }
       ],
       "services": [
-        {"slug": "recherche-logement", "nom": "Recherche de logement", "icone": "Search", "illustration": "logement", "resume": "Nous trouvons le bien qui correspond à vos critères et à votre budget."},
-        {"slug": "location-sous-location-colocation", "nom": "Location, sous-location et colocation", "icone": "KeyRound", "illustration": "logement", "resume": "Des solutions souples, avec des contrats clairs et un suivi."},
-        {"slug": "logement-adapte-meuble", "nom": "Logement thérapeutique / adapté et appartement meublé", "nomCourt": "Logement adapté et appartement meublé", "icone": "HousePlus", "illustration": "logement", "resume": "Logements thérapeutiques ou adaptés, et meublés prêts à vivre."},
-        {"slug": "gestion-locative", "nom": "Gestion locative", "icone": "Building", "illustration": "equipe", "resume": "Nous gérons votre bien au Cameroun, même depuis la France."},
-        {"slug": "entretien-logements", "nom": "Entretien des logements", "icone": "Wrench", "illustration": "logement", "resume": "Ménage, petites réparations et contrôles réguliers."},
-        {"slug": "accompagnement-installation", "nom": "Accompagnement à l'installation", "icone": "House", "illustration": "accueil", "resume": "Démarches, abonnements, ameublement : on vous aide à vous installer."},
-        {"slug": "logement-temporaire", "nom": "Solutions de logement temporaire", "icone": "Clock", "illustration": "logement", "resume": "Un logement pour quelques jours ou quelques mois, prêt à votre arrivée."}
+        {
+          "slug": "recherche-logement",
+          "nom": "Recherche de logement",
+          "icone": "Search",
+          "illustration": "logement",
+          "resume": "Nous trouvons le bien qui correspond à vos critères et à votre budget."
+        },
+        {
+          "slug": "location-sous-location-colocation",
+          "nom": "Location, sous-location et colocation",
+          "icone": "Key",
+          "illustration": "logement",
+          "resume": "Des solutions souples, avec des contrats clairs et un suivi."
+        },
+        {
+          "slug": "logement-adapte-meuble",
+          "nom": "Logement thérapeutique / adapté et appartement meublé",
+          "nomCourt": "Logement adapté et appartement meublé",
+          "icone": "HouseHeart",
+          "illustration": "logement",
+          "resume": "Logements thérapeutiques ou adaptés, et meublés prêts à vivre."
+        },
+        {
+          "slug": "gestion-locative",
+          "nom": "Gestion locative",
+          "icone": "Building",
+          "illustration": "equipe",
+          "resume": "Nous gérons votre bien au Cameroun, même depuis la France."
+        },
+        {
+          "slug": "entretien-logements",
+          "nom": "Entretien des logements",
+          "icone": "Wrench",
+          "illustration": "logement",
+          "resume": "Ménage, petites réparations et contrôles réguliers."
+        },
+        {
+          "slug": "accompagnement-installation",
+          "nom": "Accompagnement à l'installation",
+          "icone": "House",
+          "illustration": "accueil",
+          "resume": "Démarches, abonnements, ameublement : on vous aide à vous installer."
+        },
+        {
+          "slug": "logement-temporaire",
+          "nom": "Solutions de logement temporaire",
+          "icone": "Clock",
+          "illustration": "logement",
+          "resume": "Un logement pour quelques jours ou quelques mois, prêt à votre arrivée."
+        }
       ]
     },
     {
-      "slug": "services-de-proximite", "nom": "Services de proximité", "accroche": "Votre quotidien simplifié", "ordre": 3,
-      "illustration": "courses", "teinteCarte": "vert-50", "couleurIcone": "vert-700", "icone": "ShoppingCart",
+      "slug": "services-de-proximite",
+      "nom": "Services de proximité",
+      "accroche": "Votre quotidien simplifié",
+      "ordre": 3,
+      "illustration": "courses",
+      "teinteCarte": "vert-50",
+      "couleurIcone": "vert-700",
+      "icone": "ShoppingCart",
       "titreHero": "Votre quotidien simplifié, chez vous.",
       "description": "Repas, courses, colis : nous nous en chargeons pour vous et pour vos proches.",
       "services": [
-        {"slug": "portage-livraison-repas", "nom": "Portage et livraison de repas à domicile", "nomCourt": "Portage et livraison de repas", "icone": "Utensils", "illustration": "livraison", "resume": "Des repas livrés au domicile de la personne accompagnée."},
-        {"slug": "livraison-courses-commandes", "nom": "Livraison de courses et de commandes à domicile", "nomCourt": "Livraison de courses et de commandes", "icone": "ShoppingCart", "illustration": "courses", "resume": "Vos courses et achats effectués, puis livrés au bénéficiaire."},
-        {"slug": "reception-colis-courrier", "nom": "Réception de colis et de courrier à l'agence", "nomCourt": "Réception de colis et de courrier", "icone": "Package", "illustration": "colis", "resume": "L'agence reçoit vos envois, prévient le destinataire et organise le retrait ou la livraison."}
+        {
+          "slug": "portage-livraison-repas",
+          "nom": "Portage et livraison de repas à domicile",
+          "nomCourt": "Portage et livraison de repas",
+          "icone": "Utensils",
+          "illustration": "livraison",
+          "resume": "Des repas livrés au domicile de la personne accompagnée."
+        },
+        {
+          "slug": "livraison-courses-commandes",
+          "nom": "Livraison de courses et de commandes à domicile",
+          "nomCourt": "Livraison de courses et de commandes",
+          "icone": "ShoppingCart",
+          "illustration": "courses",
+          "resume": "Vos courses et achats effectués, puis livrés au bénéficiaire."
+        },
+        {
+          "slug": "reception-colis-courrier",
+          "nom": "Réception de colis et de courrier à l'agence",
+          "nomCourt": "Réception de colis et de courrier",
+          "icone": "Package",
+          "illustration": "colis",
+          "resume": "L'agence reçoit vos envois, prévient le destinataire et organise le retrait ou la livraison."
+        }
       ]
     },
     {
-      "slug": "culture-evenementiel", "nom": "Culture & événementiel", "accroche": "Vivre le Cameroun", "ordre": 4,
-      "illustration": "culture", "teinteCarte": "neutral-900", "couleurIcone": "orange-400", "icone": "Compass",
+      "slug": "culture-evenementiel",
+      "nom": "Culture & événementiel",
+      "accroche": "Vivre le Cameroun",
+      "ordre": 4,
+      "illustration": "culture",
+      "teinteCarte": "neutral-900",
+      "couleurIcone": "orange-400",
+      "icone": "Compass",
       "titreHero": "Vivre le Cameroun, de l'intérieur.",
       "description": "Découvertes, sorties, événements et intégration locale : le pays vu de l'intérieur.",
       "services": [
-        {"slug": "decouverte-cameroun", "nom": "Découverte du Cameroun", "icone": "Compass", "illustration": "culture", "resume": "Circuits et visites pour découvrir le pays autrement."},
-        {"slug": "activites-culturelles-loisirs-sorties", "nom": "Activités culturelles, loisirs et sorties", "icone": "Sparkles", "illustration": "marche", "resume": "Concerts, expositions, sorties : l'agenda culturel à portée de main."},
-        {"slug": "organisation-activites-evenements", "nom": "Organisation d'activités et d'événements", "icone": "CalendarCheck", "illustration": "evenement", "resume": "Des sorties et des événements conçus et organisés par Mambo."},
-        {"slug": "decouverte-integration-locale", "nom": "Découverte et intégration locale", "icone": "Globe", "illustration": "accueil", "resume": "Repères, rencontres et conseils pour vous sentir chez vous."}
+        {
+          "slug": "decouverte-cameroun",
+          "nom": "Découverte du Cameroun",
+          "icone": "Compass",
+          "illustration": "culture",
+          "resume": "Circuits et visites pour découvrir le pays autrement."
+        },
+        {
+          "slug": "activites-culturelles-loisirs-sorties",
+          "nom": "Activités culturelles, loisirs et sorties",
+          "icone": "Sparkles",
+          "illustration": "marche",
+          "resume": "Concerts, expositions, sorties : l'agenda culturel à portée de main."
+        },
+        {
+          "slug": "organisation-activites-evenements",
+          "nom": "Organisation d'activités et d'événements",
+          "icone": "CalendarCheck",
+          "illustration": "evenement",
+          "resume": "Des sorties et des événements conçus et organisés par Mambo."
+        },
+        {
+          "slug": "decouverte-integration-locale",
+          "nom": "Découverte et intégration locale",
+          "icone": "Globe",
+          "illustration": "accueil",
+          "resume": "Repères, rencontres et conseils pour vous sentir chez vous."
+        }
       ]
     }
   ],
@@ -61,28 +218,88 @@
     "_note": "Contenu complet de la fiche « Chef privé » (maquette fiche-service-chef-prive). Les 18 autres fiches suivent la même structure ; leur contenu détaillé sera fourni par la cliente (cahier §11) — en attendant, générer un contenu court et neutre par service, marqué `aCompleter: true` dans le seed, sans inventer de prix.",
     "slug": "chef-prive",
     "accroche": "Un chef à domicile pour vos dîners, réceptions et grandes occasions. Vous profitez de vos invités, nous nous occupons du reste.",
-    "villes": ["Douala", "Yaoundé", "Kribi"],
-    "publics": ["Aux particuliers qui reçoivent famille ou amis", "Aux familles de la diaspora en séjour au pays", "Aux organisateurs d'anniversaires et de fêtes privées", "Aux entreprises pour un repas d'équipe ou un client"],
+    "villes": [
+      "Douala",
+      "Yaoundé",
+      "Kribi"
+    ],
+    "publics": [
+      "Aux particuliers qui reçoivent famille ou amis",
+      "Aux familles de la diaspora en séjour au pays",
+      "Aux organisateurs d'anniversaires et de fêtes privées",
+      "Aux entreprises pour un repas d'équipe ou un client"
+    ],
     "etapes": [
-      {"titre": "Échange sur votre projet", "texte": "Date, lieu, nombre d'invités, envies et contraintes alimentaires."},
-      {"titre": "Proposition de menu et devis", "texte": "Le chef imagine un menu sur mesure ; vous recevez le devis sous 24 h."},
-      {"titre": "Courses et préparation", "texte": "Produits frais achetés par le chef, préparation sur place."},
-      {"titre": "Service et rangement", "texte": "Service à table, puis cuisine rangée et nettoyée."},
-      {"titre": "Votre avis", "texte": "Un court questionnaire pour nous aider à progresser."}
+      {
+        "titre": "Échange sur votre projet",
+        "texte": "Date, lieu, nombre d'invités, envies et contraintes alimentaires."
+      },
+      {
+        "titre": "Proposition de menu et devis",
+        "texte": "Le chef imagine un menu sur mesure ; vous recevez le devis sous 24 h."
+      },
+      {
+        "titre": "Courses et préparation",
+        "texte": "Produits frais achetés par le chef, préparation sur place."
+      },
+      {
+        "titre": "Service et rangement",
+        "texte": "Service à table, puis cuisine rangée et nettoyée."
+      },
+      {
+        "titre": "Votre avis",
+        "texte": "Un court questionnaire pour nous aider à progresser."
+      }
     ],
     "avantages": [
-      {"icone": "Sparkles", "titre": "Un menu unique", "texte": "Pensé pour vos goûts et votre occasion."},
-      {"icone": "ShieldCheck", "titre": "Des chefs vérifiés", "texte": "Sélectionnés, suivis et évalués après chaque prestation."},
-      {"icone": "Clock", "titre": "Du temps pour vous", "texte": "Aucune course, aucune vaisselle : vous profitez."},
-      {"icone": "Users", "titre": "Un interlocuteur unique", "texte": "Joignable depuis la France comme au Cameroun."}
+      {
+        "icone": "Sparkles",
+        "titre": "Un menu unique",
+        "texte": "Pensé pour vos goûts et votre occasion."
+      },
+      {
+        "icone": "ShieldCheck",
+        "titre": "Des chefs vérifiés",
+        "texte": "Sélectionnés, suivis et évalués après chaque prestation."
+      },
+      {
+        "icone": "Clock",
+        "titre": "Du temps pour vous",
+        "texte": "Aucune course, aucune vaisselle : vous profitez."
+      },
+      {
+        "icone": "Users",
+        "titre": "Un interlocuteur unique",
+        "texte": "Joignable depuis la France comme au Cameroun."
+      }
     ],
     "faq": [
-      {"q": "Combien coûte un chef privé ?", "r": "Chaque prestation est unique : le tarif dépend du menu, du nombre d'invités et du lieu. Il vous est communiqué sur devis, gratuitement."},
-      {"q": "Dans quelles villes intervenez-vous ?", "r": "À compléter par la cliente."},
-      {"q": "Puis-je réserver depuis la France ?", "r": "À compléter par la cliente."},
-      {"q": "Combien de temps à l'avance réserver ?", "r": "À compléter par la cliente."}
+      {
+        "q": "Combien coûte un chef privé ?",
+        "r": "Chaque prestation est unique : le tarif dépend du menu, du nombre d'invités et du lieu. Il vous est communiqué sur devis, gratuitement."
+      },
+      {
+        "q": "Dans quelles villes intervenez-vous ?",
+        "r": "À compléter par la cliente."
+      },
+      {
+        "q": "Puis-je réserver depuis la France ?",
+        "r": "À compléter par la cliente."
+      },
+      {
+        "q": "Combien de temps à l'avance réserver ?",
+        "r": "À compléter par la cliente."
+      }
     ],
-    "carteDevis": ["Gratuit et sans engagement", "Menu et prestation sur mesure", "Un seul interlocuteur du début à la fin"],
-    "servicesLies": ["location-voiture", "photographe", "massage-bien-etre"]
+    "carteDevis": [
+      "Gratuit et sans engagement",
+      "Menu et prestation sur mesure",
+      "Un seul interlocuteur du début à la fin"
+    ],
+    "servicesLies": [
+      "location-voiture",
+      "photographe",
+      "massage-bien-etre"
+    ]
   }
 }
