@@ -5,12 +5,21 @@ import { test as base, expect, type Page } from '@playwright/test';
 export const test = base.extend<{ pageErrors: string[] }>({
   pageErrors: async ({ page }, provide) => {
     const errors: string[] = [];
-    page.on('console', (message) => message.type() === 'error' && errors.push(message.text()));
-    page.on('pageerror', (error) => errors.push(String(error)));
+    // Les échecs de chargement sont relevés par l'écouteur de réponses (plus précis que le message console).
     page.on(
-      'response',
-      (response) => response.status() >= 400 && errors.push(`${response.status()} ${response.url()}`),
+      'console',
+      (message) =>
+        message.type() === 'error' &&
+        !message.text().startsWith('Failed to load resource') &&
+        errors.push(message.text()),
     );
+    page.on('pageerror', (error) => errors.push(String(error)));
+    page.on('response', (response) => {
+      if (response.status() < 400) return;
+      // Préchargements Next.js de pages pas encore intégrées : ignorés (ils disparaissent avec les pages).
+      if (response.request().headers()['next-router-prefetch']) return;
+      errors.push(`${response.status()} ${response.url()}`);
+    });
     await provide(errors);
   },
 });
