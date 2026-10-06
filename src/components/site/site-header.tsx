@@ -2,7 +2,7 @@
 
 import { Menu } from 'lucide-react';
 import Link from 'next/link';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Logo } from '@/components/brand/logo';
 import { buttonVariants } from '@/components/ui/button';
 import type { Navigation } from '@/lib/api/schema';
@@ -27,9 +27,26 @@ type SiteHeaderProps = {
 export function SiteHeader({ navigation, whatsappHref, topBar }: SiteHeaderProps) {
   const { scrolled, goingDown } = useScroll(80);
   const [menuOpen, setMenuOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // Hauteur visible de l'en-tête (`--site-header-h`) : position des barres collantes et marge des ancres.
+  useEffect(() => {
+    const update = () => {
+      const bottom = wrapperRef.current?.getBoundingClientRect().bottom ?? 0;
+      document.documentElement.style.setProperty('--site-header-h', `${Math.max(0, Math.round(bottom))}px`);
+    };
+    update();
+    const afterTransition = setTimeout(update, 220);
+    window.addEventListener('resize', update);
+    return () => {
+      clearTimeout(afterTransition);
+      window.removeEventListener('resize', update);
+    };
+  }, [scrolled, goingDown, menuOpen]);
 
   return (
     <div
+      ref={wrapperRef}
       className={cn(
         'sticky top-0 z-40 transition-transform duration-200 ease-standard',
         scrolled && 'xl:-translate-y-9',
