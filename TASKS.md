@@ -28,15 +28,16 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 
 ### 1.2 Gabarit global
 
-- [ ] Barre supérieure (repli au défilement)
-- [ ] En-tête desktop (onglets, point actif, S'inscrire, Devis gratuit, compactage 84 → 72)
-- [ ] Méga-menu « Nos services » (survol avec intention, clic/clavier, voile, flèches, Échap)
-- [ ] Sous-menus Partenaires, Formation, Mission, Qui sommes-nous, Recrutement, Contact, S'inscrire (non maquettés)
-- [ ] En-tête mobile + menu mobile plein écran (accordéons, blocage du défilement)
-- [ ] Pied de page + formulaire newsletter (états succès / déjà inscrit / erreur)
-- [ ] Bouton WhatsApp flottant (apparition, pulsation, étiquette, décalage cookies)
-- [ ] Bandeau cookies + modale « Personnaliser » + chargement GA4 après consentement
-- [ ] Bandeau CTA (variantes par page), fil d'Ariane, transitions de page
+- [x] Barre supérieure (repli au défilement)
+- [x] En-tête desktop (onglets, point actif, S'inscrire, Devis gratuit, compactage 84 → 72)
+- [x] Méga-menu « Nos services » (survol avec intention, clic/clavier, voile, flèches, Échap)
+- [x] Sous-menus Partenaires, Formation, Mission, Qui sommes-nous, Recrutement, Contact, S'inscrire (non maquettés)
+- [x] En-tête mobile + menu mobile plein écran (accordéons, blocage du défilement)
+- [x] Pied de page + formulaire newsletter (états succès / déjà inscrit / erreur)
+- [x] Bouton WhatsApp flottant (apparition, pulsation, étiquette, décalage cookies)
+- [x] Bandeau cookies + modale « Personnaliser » + chargement GA4 après consentement
+- [~] Bandeau CTA (variantes par page), fil d'Ariane, transitions de page — bandeau et fil d'Ariane faits ; reste : transitions de page (View Transitions)
+- [ ] Protection Turnstile (widget invisible) sur tous les formulaires publics, newsletter comprise (jeton vide pour l'instant)
 
 ### 1.3 Pages publiques (desktop 1440, tablette, mobile 390)
 

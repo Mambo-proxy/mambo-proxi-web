@@ -88,3 +88,26 @@
 - **`max-w-none` valait 0** : les tokens définissent un espacement `none` = 0, que Tailwind 4 utilise pour `max-w-none`. Utiliser `max-w-full` (ou une valeur explicite) ; relevé par le test E2E (modale de largeur nulle en mobile).
 - **Espaces insécables invisibles** dans le code source : règle ESLint `no-irregular-whitespace` étendue aux chaînes ; elles s'écrivent en séquences d'échappement.
 - **Tests E2E en parallèle bloqués en local** (navigations sans réponse sous charge, alors que le serveur répond en 40 ms) : un seul navigateur en local (~1 min), deux en CI. Les interactions attendent l'hydratation (`toPass`).
+
+### Gabarit global (6 octobre 2026)
+
+- Layout `(site)` : lien d'évitement, barre supérieure + en-tête collants, pied de page, bouton WhatsApp flottant, bandeau cookies ; données `GET /v1/site/settings` et `GET /v1/site/navigation` (cache par étiquettes, une requête par rendu).
+- Barre supérieure (repli après 80 px), en-tête desktop 85 → 72 px avec ombre, onglets avec point actif, méga-menu (survol avec délai d'intention 120 ms / fermeture 200 ms, clavier, voile 35 %, colonnes en cascade), sous-menus des autres onglets et de « S'inscrire », en-tête mobile (masqué en descendant), menu mobile plein écran (`<dialog>`, glissement depuis la droite, accordéons animés, fermeture au changement de page), pied de page et newsletter (états succès / déjà inscrit / erreur), WhatsApp flottant (apparition après 400 px ou 4 s, anneau pulsant, étiquette au survol, décalé au-dessus du bandeau cookies), bandeau cookies + modale « Personnaliser » (choix mémorisé 6 mois dans le cookie `mp_consent`, GA4 chargé seulement après accord), bandeau CTA (dégradé qui ondule, filigrane).
+- Vérifié au navigateur contre les captures : en-tête 85 px (69 en mobile), logo 144 × 40 (130 × 36), méga-menu et pied de page superposables aux maquettes ; aucun débordement à 390 / 768 / 1280 / 1440. Tests E2E : méga-menu au clavier, menu mobile, cookies (aucune requête Google sans accord), newsletter, WhatsApp, axe.
+- Contrat (dépôt API) : exemple `Navigation` complété d'après les maquettes (4 rubriques et 19 services du méga-menu avec les noms courts, texte de l'encart promo, colonnes du pied de page), ordre des réseaux de la maquette (Instagram, Facebook, LinkedIn, TikTok).
+
+### Décisions
+
+- **Onglets à sous-menu** : l'onglet reste un lien vers sa page (`Entrée` y mène) ; `↓` ou `Espace` ouvrent le panneau. La spécification (docs/04) prévoit aussi `Entrée` pour ouvrir : conserver le lien vers la page a été préféré (pas de lien « voir toute la page » dans les panneaux maquettés).
+- **Icône Immobilier** : la maquette montre `icon/building` (immeuble unique) ; le catalogue indique `Building2`. Contrat aligné sur la maquette (`Building`) ; à reporter dans les données d'amorçage de l'API.
+- **Pastille Culture** : icône orange sur fond sombre (maquettes méga-menu et menu mobile).
+- **Point de rupture `wide` (1440 px)** : mesures exactes des maquettes à partir de 1440 ; entre 1280 et 1439, marges de l'en-tête et colonnes du pied de page resserrées (sinon débordement de 35 à 78 px).
+- **Newsletter sans case de consentement** (maquette) : le clic sur « S'abonner » vaut consentement (`consent: true`), confirmé par le double opt-in. À valider avec la cliente ; ajouter une mention sous le formulaire si nécessaire.
+- **Animations en CSS** (transitions, `@starting-style`, `grid-template-rows`) plutôt que Motion pour le gabarit : même rendu, sans JavaScript supplémentaire. Motion reste prévu pour les animations de contenu.
+- **Barre supérieure** : icône `Smartphone` (la capture montre un téléphone portable, l'inventaire indiquait `phone`).
+
+### Difficultés et solutions
+
+- **Préchargements des pages pas encore intégrées** : Next.js précharge `/devis`, `/inscription`… qui répondent 404 et sont relancés en boucle (l'état « réseau au repos » n'est jamais atteint). Les tests attendent le DOM et ignorent ces seuls préchargements ; disparaît avec les pages.
+- **Double espace de la maquette** (« France␣␣+33… ») supprimé par Prettier dans le JSX : écrit dans une chaîne littérale.
+- **Règle `react-hooks/refs`** (compilateur React) : les déclencheurs et panneaux du menu sont retrouvés par `id` au lieu de références lues pendant le rendu.
