@@ -1,0 +1,10 @@
+.next
+node_modules
+pnpm-lock.yaml
+public
+qa
+contracts
+src/lib/api/schema.d.ts
+src/styles/tokens.*
+src/styles/tailwind.theme.css
+src/styles/typography.css

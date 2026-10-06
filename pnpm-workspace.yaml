@@ -1,0 +1,3 @@
+allowBuilds:
+  # Le binaire natif Windows est fourni par @unrs/resolver-binding-* ; le script ne sert que de repli.
+  unrs-resolver: false

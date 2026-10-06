@@ -1,0 +1,94 @@
+/* Classes typographiques Mambo Proxi — généré */
+.mp-text-display {
+  font-family: var(--mp-font-family-brand);
+  font-weight: 700;
+  font-size: var(--mp-font-size-display);
+  line-height: var(--mp-line-height-display);
+  letter-spacing: -0.02em;
+}
+.mp-text-h1 {
+  font-family: var(--mp-font-family-brand);
+  font-weight: 700;
+  font-size: var(--mp-font-size-heading-h1);
+  line-height: var(--mp-line-height-heading-h1);
+  letter-spacing: -0.015em;
+}
+.mp-text-h2 {
+  font-family: var(--mp-font-family-brand);
+  font-weight: 600;
+  font-size: var(--mp-font-size-heading-h2);
+  line-height: var(--mp-line-height-heading-h2);
+  letter-spacing: -0.01em;
+}
+.mp-text-h3 {
+  font-family: var(--mp-font-family-brand);
+  font-weight: 600;
+  font-size: var(--mp-font-size-heading-h3);
+  line-height: var(--mp-line-height-heading-h3);
+  letter-spacing: normal;
+}
+.mp-text-h4 {
+  font-family: var(--mp-font-family-brand);
+  font-weight: 600;
+  font-size: var(--mp-font-size-heading-h4);
+  line-height: var(--mp-line-height-heading-h4);
+  letter-spacing: normal;
+}
+.mp-text-overline {
+  font-family: var(--mp-font-family-brand);
+  font-weight: 500;
+  font-size: var(--mp-font-size-overline);
+  line-height: var(--mp-line-height-overline);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.mp-text-body-lg {
+  font-family: var(--mp-font-family-ui);
+  font-weight: 400;
+  font-size: var(--mp-font-size-body-lg);
+  line-height: var(--mp-line-height-body-lg);
+  letter-spacing: normal;
+}
+.mp-text-body-md {
+  font-family: var(--mp-font-family-ui);
+  font-weight: 400;
+  font-size: var(--mp-font-size-body-md);
+  line-height: var(--mp-line-height-body-md);
+  letter-spacing: normal;
+}
+.mp-text-body-sm {
+  font-family: var(--mp-font-family-ui);
+  font-weight: 400;
+  font-size: var(--mp-font-size-body-sm);
+  line-height: var(--mp-line-height-body-sm);
+  letter-spacing: normal;
+}
+.mp-text-label-md {
+  font-family: var(--mp-font-family-ui);
+  font-weight: 600;
+  font-size: var(--mp-font-size-label-md);
+  line-height: var(--mp-line-height-label-md);
+  letter-spacing: normal;
+}
+.mp-text-label-sm {
+  font-family: var(--mp-font-family-ui);
+  font-weight: 500;
+  font-size: var(--mp-font-size-label-sm);
+  line-height: var(--mp-line-height-label-sm);
+  letter-spacing: 0.005em;
+}
+.mp-text-caption {
+  font-family: var(--mp-font-family-ui);
+  font-weight: 400;
+  font-size: var(--mp-font-size-caption);
+  line-height: var(--mp-line-height-caption);
+  letter-spacing: 0.01em;
+}
+.mp-text-price {
+  font-family: var(--mp-font-family-ui);
+  font-weight: 600;
+  font-size: var(--mp-font-size-price);
+  line-height: var(--mp-line-height-price);
+  letter-spacing: normal;
+  font-variant-numeric: tabular-nums;
+}
