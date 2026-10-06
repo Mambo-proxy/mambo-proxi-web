@@ -13,6 +13,8 @@ type PageHeroProps = {
   section: HeroSection;
   breadcrumb: BreadcrumbItem[];
   whatsappHref: string | null;
+  /** Hauteur du visuel desktop (Nos services : 420, rubriques : 440). */
+  visualClassName?: string;
 };
 
 /**
@@ -20,7 +22,7 @@ type PageHeroProps = {
  * titre `web/hero` (52/58 → 32/38) dont la fin est en orange, chapô 19/31, boutons Devis + WhatsApp ;
  * illustration 560 × 420 rayon 32 à droite (350 × 240 sous le texte en mobile).
  */
-export function PageHero({ section, breadcrumb, whatsappHref }: PageHeroProps) {
+export function PageHero({ section, breadcrumb, whatsappHref, visualClassName }: PageHeroProps) {
   return (
     <section className="bg-neutral-50">
       <div className="container-site grid items-center gap-6 pt-5 pb-10 md:pb-14 xl:grid-cols-[1fr_560px] xl:gap-16 xl:pt-12 xl:pb-20">
@@ -71,7 +73,7 @@ export function PageHero({ section, breadcrumb, whatsappHref }: PageHeroProps) {
             visual={section.visual}
             priority
             sizes="(min-width: 1280px) 560px, 100vw"
-            className="h-60 rounded-xl md:h-[360px] xl:h-[420px] xl:rounded-[32px]"
+            className={cn('h-60 rounded-xl md:h-[360px] xl:h-[420px] xl:rounded-[32px]', visualClassName)}
           />
         )}
       </div>
