@@ -112,3 +112,26 @@
 - **Double espace de la maquette** (« France␣␣+33… ») supprimé par Prettier dans le JSX : écrit dans une chaîne littérale.
 - **Build de CI sans API** : les pages lisent l'API au rendu statique ; en Phase 1 le build de CI utilise les mocks (`NEXT_PUBLIC_API_MOCKING=enabled`). À l'intégration, le build de production devra joindre l'API (ou les pages passeront en rendu à la demande).
 - **Règle `react-hooks/refs`** (compilateur React) : les déclencheurs et panneaux du menu sont retrouvés par `id` au lieu de références lues pendant le rendu.
+
+### Accueil (6 octobre 2026)
+
+- Page `/` pilotée par `GET /v1/pages/accueil` : chaque section est rendue selon son type et sa source (héros, bandeau défilant, « Nos univers » en bento, étapes, engagements + chiffres clés, avis, partenaires, bandeau CTA), dans l'ordre du back-office. Données complémentaires : rubriques, avis mis en avant, note moyenne, partenaires, chiffres des Paramètres.
+- Fidélité vérifiée par comparaison côte à côte avec les captures (`qa/fidelite/accueil-1440.png`, `-390.png`) : en desktop, chaque section a la hauteur de la maquette à 4 px près (page 6 580 px pour 6 575) ; en mobile, page 7 173 px pour 7 094 (écart dû à trois retours à la ligne, voir ci-dessous). 768 et 1280 : rendu cohérent, sans débordement.
+- Animations : apparition au défilement (fondu + 16 px, une fois, cascade 70 ms), chiffres qui défilent, bandeau défilant en boucle (pause au survol), flèches des cartes qui pivotent ; tout est désactivé avec `prefers-reduced-motion`. Le contenu reste dans le HTML rendu côté serveur.
+- Tests : E2E accueil (ordre des sections, textes mobiles, liens des cartes, chiffres, carrousel au clavier) + axe aux 4 largeurs ; 50 tests E2E au total.
+- Contrat (dépôt API) : champs facultatifs de textes mobiles (`titleMobile`, `leadMobile`, `textMobile`, `itemsMobile`, `labelMobile`), cartes « Nos univers » des rubriques (`homeCard`), visuels des rubriques Proximité (`livraison`) et Culture (`marche`), icône bouclier coché, texte mobile du bandeau CTA.
+
+### Décisions
+
+- **Textes propres au mobile** : la maquette mobile raccourcit de nombreux textes. Plutôt que d'afficher partout la version desktop, le contrat accueille des versions mobiles facultatives, éditables dans le back-office (vides = texte principal ; chapô mobile vide = masqué).
+- **Avis en mobile** : la maquette montre des citations raccourcies ; un avis client ne se réécrit pas. Le texte complet est affiché, limité à 4 lignes.
+- **Carrousel des avis** : points de pagination décoratifs (6 px, trop petits pour une cible tactile de 24 px exigée par WCAG 2.2) ; la liste défile au doigt, à la molette et aux flèches du clavier.
+- **« Logo partenaire »** (en attendant les logos) : texte `text/muted` au lieu de `neutral/400` (contraste 2,4:1).
+- **Carte Expériences** : la maquette laisse la description en sombre sur l'illustration (illisible) ; elle est rendue en blanc comme le titre.
+- **Écarts restants en mobile** : trois textes que Figma garde sur une ligne passent à la ligne dans le navigateur (« La proximité, c'est notre métier. », « Un pont entre la France et le Cameroun », « services, 4 rubriques ») ; 3e icône des engagements en mobile (`sparkles` sur la maquette, `globe` comme en desktop).
+- **Étoiles** : l'étoile lucide n'occupe que 83 % de son cadre ; agrandie de 20 % pour égaler l'icône Figma.
+
+### Difficultés et solutions
+
+- **Images chargées à la demande** absentes des captures pleine page (filigrane du bandeau CTA) : le symbole décoratif est chargé immédiatement.
+- **Tests E2E dépendants de l'hydratation** sur une machine chargée : interactions répétées jusqu'au succès (`toPass`) et délais plus longs pour le premier envoi simulé (le module des mocks est chargé à la demande dans le navigateur).
