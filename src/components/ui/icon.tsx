@@ -1,0 +1,88 @@
+import {
+  Briefcase,
+  Building,
+  Building2,
+  CalendarCheck,
+  CalendarDays,
+  Camera,
+  Car,
+  Check,
+  ChefHat,
+  Circle,
+  Clock,
+  Compass,
+  FileText,
+  Flower2,
+  Globe,
+  GraduationCap,
+  Handshake,
+  HeartHandshake,
+  House,
+  HousePlus,
+  Info,
+  KeyRound,
+  Mail,
+  Package,
+  PartyPopper,
+  Plane,
+  Search,
+  Shield,
+  ShieldCheck,
+  ShoppingCart,
+  Sparkles,
+  User,
+  Users,
+  Utensils,
+  Wrench,
+  type LucideIcon,
+  type LucideProps,
+} from 'lucide-react';
+
+/**
+ * Icônes désignées par leur nom dans les données de l'API (`IconName`, nom lucide en PascalCase).
+ * Liste fermée : seules les icônes utilisées sont incluses dans le bundle.
+ */
+const ICONS: Record<string, LucideIcon> = {
+  Briefcase,
+  Building,
+  Building2,
+  CalendarCheck,
+  CalendarDays,
+  Camera,
+  Car,
+  Check,
+  ChefHat,
+  Clock,
+  Compass,
+  FileText,
+  Flower2,
+  Globe,
+  GraduationCap,
+  Handshake,
+  HeartHandshake,
+  House,
+  HousePlus,
+  Info,
+  KeyRound,
+  Mail,
+  Package,
+  PartyPopper,
+  Plane,
+  Search,
+  Shield,
+  ShieldCheck,
+  ShoppingCart,
+  Sparkles,
+  User,
+  Users,
+  Utensils,
+  Wrench,
+};
+
+export const iconNames = Object.keys(ICONS);
+
+/** Icône décorative à partir de son nom ; un cercle neutre si le nom est inconnu. */
+export function Icon({ name, ...props }: LucideProps & { name: string }) {
+  const Component = ICONS[name] ?? Circle;
+  return <Component aria-hidden {...props} />;
+}

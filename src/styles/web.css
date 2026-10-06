@@ -13,6 +13,8 @@
   --text-caption--line-height: var(--mp-line-height-caption);
   --ease-standard: var(--mp-easing-standard);
   --ease-emphasized: var(--mp-easing-emphasized);
+  /* Largeur des maquettes desktop : mesures exactes à partir de 1440 px, resserrées entre 1280 et 1439. */
+  --breakpoint-wide: 90rem;
 }
 
 /* Conteneur : 1312 px de contenu à 1440 (marges 64), marges 20 px en mobile, centré au-delà. */
@@ -142,5 +144,35 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* Anneau du bouton WhatsApp flottant : deux pulsations toutes les 6 s. */
+@keyframes wa-pulse {
+  0%,
+  14% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  12%,
+  26% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+  27%,
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+/* Bandeau CTA : dégradé qui ondule très lentement. */
+@keyframes cta-wave {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
   }
 }
