@@ -2171,6 +2171,8 @@ export interface components {
             href: string;
             /** @default false */
             external: boolean;
+            /** @description Libellé raccourci en mobile ; vide = libellé principal. */
+            labelMobile?: string | null;
         };
         Seo: {
             title?: string | null;
@@ -2243,6 +2245,8 @@ export interface components {
             decimals: number;
             /** @example projets accompagnés */
             label: string;
+            /** @description Libellé raccourci en mobile ; vide = libellé principal. */
+            labelMobile?: string | null;
         };
         SiteSettings: {
             /** @example MAMBO Proxi */
@@ -2479,6 +2483,8 @@ export interface components {
                 /** @example Des moments sur mesure */
                 title?: string;
                 text?: string;
+                /** @description Texte raccourci en mobile ; null = texte principal. */
+                textMobile?: string | null;
                 chips?: string[];
             };
             /** @description Présent avec `include=services`. */
@@ -3207,6 +3213,7 @@ export interface components {
             homeCard?: {
                 title?: string;
                 text?: string;
+                textMobile?: string | null;
                 chips?: string[];
             };
             icon?: components["schemas"]["IconName"];
@@ -3788,6 +3795,10 @@ export interface components {
             eyebrow?: string | null;
             title?: components["schemas"]["AccentText"] | null;
             lead?: string | null;
+            /** @description Titre raccourci en mobile (< 768 px) ; null = titre principal. */
+            titleMobile?: components["schemas"]["AccentText"] | null;
+            /** @description Chapô raccourci en mobile ; null = chapô principal, chaîne vide = chapô masqué en mobile. */
+            leadMobile?: string | null;
         };
         /** @description Élément générique d'une liste de cartes. */
         SectionItem: {
@@ -3796,6 +3807,8 @@ export interface components {
             number?: string | null;
             title: string;
             text?: string | null;
+            /** @description Texte raccourci en mobile ; null = texte principal. */
+            textMobile?: string | null;
             visual?: components["schemas"]["Visual"] | null;
             tone?: components["schemas"]["SectionTone"];
             chips?: string[];
@@ -3847,6 +3860,8 @@ export interface components {
             /** @constant */
             type: "marquee";
             items: string[];
+            /** @description Liste réduite affichée en mobile ; vide = même liste. */
+            itemsMobile?: string[];
         } & {
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -3997,6 +4012,8 @@ export interface components {
             /** @constant */
             type: "ctaBand";
             text?: string | null;
+            /** @description Texte raccourci en mobile ; null = texte principal. */
+            textMobile?: string | null;
             primaryCta?: components["schemas"]["Link"] | null;
             /** @default true */
             showWhatsapp: boolean;

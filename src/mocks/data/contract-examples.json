@@ -79,13 +79,15 @@
           {
             "key": "services",
             "value": 19,
-            "label": "services réunis en 4 rubriques"
+            "label": "services réunis en 4 rubriques",
+            "labelMobile": "services, 4 rubriques"
           },
           {
             "key": "countries",
             "value": 2,
             "suffix": " pays",
-            "label": "couverts : France et Cameroun"
+            "label": "couverts : France et Cameroun",
+            "labelMobile": "France et Cameroun"
           }
         ],
         "turnstileSiteKey": "1x00000000000000000000AA",
@@ -593,6 +595,7 @@
             },
             "title": "Mambo, ce n'est pas qu'un service. ==C'est une expérience pensée pour vous.==",
             "lead": "Mobilité, chef privé, logement, courses, découvertes culturelles… Nous réunissons des prestataires de confiance pour vous simplifier la vie au Cameroun, que vous y viviez ou que vous prépariez votre venue.",
+            "leadMobile": "Mobilité, chef privé, logement, courses, découvertes… Des prestataires de confiance pour vous simplifier la vie au Cameroun.",
             "primaryCta": {
               "label": "Demander un devis gratuit",
               "href": "/devis"
@@ -646,6 +649,13 @@
               "Gestion locative",
               "Découverte du Cameroun",
               "Sorties culturelles"
+            ],
+            "itemsMobile": [
+              "Chef privé",
+              "Logement",
+              "Massage bien-être",
+              "Courses",
+              "Découverte du Cameroun"
             ]
           },
           {
@@ -656,6 +666,7 @@
             "eyebrow": "Nos univers de services",
             "title": "Tout ce dont vous avez besoin, réuni au même endroit.",
             "lead": "19 services regroupés en 4 univers. Choisissez, nous coordonnons tout avec des prestataires sélectionnés et suivis.",
+            "leadMobile": "19 services regroupés en 4 univers.",
             "link": {
               "label": "Voir tous les services",
               "href": "/services"
@@ -670,24 +681,28 @@
             "eyebrow": "Comment ça marche",
             "title": "Simple comme un message.",
             "lead": "Trois étapes, un seul interlocuteur. Vous restez informé du début à la fin.",
+            "leadMobile": "Trois étapes, un seul interlocuteur.",
             "items": [
               {
                 "number": "01",
                 "icon": "FileText",
                 "title": "Vous exprimez votre besoin",
-                "text": "Via le formulaire de devis, sur WhatsApp ou lors d'un rendez-vous, en France comme au Cameroun."
+                "text": "Via le formulaire de devis, sur WhatsApp ou lors d'un rendez-vous, en France comme au Cameroun.",
+                "textMobile": "Formulaire, WhatsApp ou rendez-vous."
               },
               {
                 "number": "02",
                 "icon": "Mail",
                 "title": "Vous recevez un devis sur mesure",
-                "text": "Sous 24 h, une proposition claire et personnalisée, sans engagement de votre part."
+                "text": "Sous 24 h, une proposition claire et personnalisée, sans engagement de votre part.",
+                "textMobile": "Sous 24 h, sans engagement."
               },
               {
                 "number": "03",
-                "icon": "Shield",
+                "icon": "ShieldCheck",
                 "title": "Nous nous occupons de tout",
-                "text": "Nos prestataires sélectionnés interviennent. Vous êtes tenu informé à chaque étape."
+                "text": "Nos prestataires sélectionnés interviennent. Vous êtes tenu informé à chaque étape.",
+                "textMobile": "Vous êtes informé à chaque étape."
               }
             ],
             "channelsLabel": "Au choix :",
@@ -713,6 +728,7 @@
             "eyebrow": "Nos engagements",
             "title": "La proximité, c'est notre métier.",
             "lead": "Une équipe présente des deux côtés, des prestataires choisis avec soin et une seule promesse : vous simplifier la vie.",
+            "leadMobile": "",
             "visual": {
               "illustration": "equipe",
               "image": null,
@@ -725,7 +741,7 @@
                 "text": "Un interlocuteur unique qui vous accompagne pas à pas, en France comme au Cameroun."
               },
               {
-                "icon": "Shield",
+                "icon": "ShieldCheck",
                 "title": "Des solutions concrètes et durables",
                 "text": "Des prestataires vérifiés, suivis et évalués après chaque mission."
               },
@@ -745,6 +761,7 @@
             "source": "reviews-highlight",
             "eyebrow": "Avis clients",
             "title": "Ils nous ont fait confiance, ils en parlent.",
+            "titleMobile": "Ils en parlent.",
             "link": {
               "label": "Lire tous les avis",
               "href": "/avis-clients"
@@ -759,6 +776,7 @@
             "title": "Ils travaillent à nos côtés",
             "link": {
               "label": "Vous êtes prestataire ? Devenez partenaire",
+              "labelMobile": "Devenez partenaire",
               "href": "/partenaires#devenir-partenaire"
             },
             "limit": 6
@@ -769,6 +787,7 @@
             "enabled": true,
             "title": "Un projet, une question ?\n==Parlons-en.==",
             "text": "Devis gratuit et sans engagement, réponse sous 24 h. Ou écrivez-nous directement sur WhatsApp.",
+            "textMobile": "Devis gratuit, réponse sous 24 h.",
             "primaryCta": {
               "label": "Demander un devis gratuit",
               "href": "/devis"
@@ -844,7 +863,19 @@
           },
           "sortOrder": 1,
           "serviceCount": 5,
-          "href": "/services/experience"
+          "href": "/services/experience",
+          "homeCard": {
+            "title": "Des moments sur mesure",
+            "text": "Se déplacer, se faire plaisir, immortaliser un moment : des prestataires triés sur le volet, réservés pour vous.",
+            "textMobile": "Voiture, chef privé, massage, photographe, événementiel.",
+            "chips": [
+              "Location de voiture",
+              "Chef privé",
+              "Massage bien-être",
+              "Photographe",
+              "Prestataires événementiels"
+            ]
+          }
         },
         {
           "id": "cat_immobilier",
@@ -862,7 +893,18 @@
           },
           "sortOrder": 2,
           "serviceCount": 7,
-          "href": "/services/immobilier"
+          "href": "/services/immobilier",
+          "homeCard": {
+            "title": "Immobilier",
+            "text": "Trouver, s'installer, louer en toute sérénité, ou confier votre bien à une équipe sur place.",
+            "textMobile": "Trouver, louer, s'installer ou confier votre bien.",
+            "chips": [
+              "Recherche de logement",
+              "Location & colocation",
+              "Logement temporaire",
+              "Gestion locative"
+            ]
+          }
         },
         {
           "id": "cat_proximite",
@@ -874,13 +916,23 @@
           "tint": "vert-50",
           "iconColor": "vert-700",
           "visual": {
-            "illustration": "courses",
+            "illustration": "livraison",
             "image": null,
             "alt": ""
           },
           "sortOrder": 3,
           "serviceCount": 3,
-          "href": "/services/services-de-proximite"
+          "href": "/services/services-de-proximite",
+          "homeCard": {
+            "title": "Votre quotidien simplifié",
+            "text": "Repas, courses, colis : on s'en charge, vous gagnez du temps.",
+            "textMobile": "Repas, courses et colis livrés pour vous.",
+            "chips": [
+              "Livraison de repas",
+              "Courses",
+              "Colis"
+            ]
+          }
         },
         {
           "id": "cat_culture",
@@ -892,13 +944,24 @@
           "tint": "neutral-900",
           "iconColor": "orange-400",
           "visual": {
-            "illustration": "culture",
+            "illustration": "marche",
             "image": null,
             "alt": ""
           },
           "sortOrder": 4,
           "serviceCount": 4,
-          "href": "/services/culture-evenementiel"
+          "href": "/services/culture-evenementiel",
+          "homeCard": {
+            "title": "Vivre le Cameroun",
+            "text": "Découvertes, sorties, événements et intégration locale : le pays vu de l'intérieur.",
+            "textMobile": "Découvertes, sorties, événements, intégration locale.",
+            "chips": [
+              "Découverte du Cameroun",
+              "Sorties & loisirs",
+              "Événements Mambo",
+              "Intégration locale"
+            ]
+          }
         }
       ]
     }
