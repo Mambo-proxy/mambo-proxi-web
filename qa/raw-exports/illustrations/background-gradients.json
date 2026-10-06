@@ -1,0 +1,212 @@
+{
+  "accueil": {
+    "fill": "linear-gradient",
+    "coords": "x1=\"0\" y1=\"0\" x2=\"460.8\" y2=\"614.4\" gradientUnits=\"userSpaceOnUse\"",
+    "stops": [
+      {
+        "offset": 0.0,
+        "color": "#FCE7D5"
+      },
+      {
+        "offset": 1.0,
+        "color": "#F8CFAA"
+      }
+    ]
+  },
+  "chef": {
+    "fill": "linear-gradient",
+    "coords": "x1=\"0\" y1=\"0\" x2=\"460.8\" y2=\"614.4\" gradientUnits=\"userSpaceOnUse\"",
+    "stops": [
+      {
+        "offset": 0.0,
+        "color": "#FCE7D5"
+      },
+      {
+        "offset": 1.0,
+        "color": "#F8B272"
+      }
+    ]
+  },
+  "colis": {
+    "fill": "linear-gradient",
+    "coords": "x1=\"0\" y1=\"0\" x2=\"460.8\" y2=\"614.4\" gradientUnits=\"userSpaceOnUse\"",
+    "stops": [
+      {
+        "offset": 0.0,
+        "color": "#F1EFEC"
+      },
+      {
+        "offset": 1.0,
+        "color": "#FCE7D5"
+      }
+    ]
+  },
+  "courses": {
+    "fill": "linear-gradient",
+    "coords": "x1=\"0\" y1=\"0\" x2=\"460.8\" y2=\"614.4\" gradientUnits=\"userSpaceOnUse\"",
+    "stops": [
+      {
+        "offset": 0.0,
+        "color": "#FDF4EC"
+      },
+      {
+        "offset": 1.0,
+        "color": "#EAF5DB"
+      }
+    ]
+  },
+  "culture": {
+    "fill": "linear-gradient",
+    "coords": "x1=\"0\" y1=\"0\" x2=\"460.8\" y2=\"614.4\" gradientUnits=\"userSpaceOnUse\"",
+    "stops": [
+      {
+        "offset": 0.0,
+        "color": "#3A2A20"
+      },
+      {
+        "offset": 1.0,
+        "color": "#1C1A18"
+      }
+    ]
+  },
+  "equipe": {
+    "fill": "linear-gradient",
+    "coords": "x1=\"0\" y1=\"0\" x2=\"460.8\" y2=\"614.4\" gradientUnits=\"userSpaceOnUse\"",
+    "stops": [
+      {
+        "offset": 0.0,
+        "color": "#EAF5DB"
+      },
+      {
+        "offset": 1.0,
+        "color": "#FDF4EC"
+      }
+    ]
+  },
+  "evenement": {
+    "fill": "linear-gradient",
+    "coords": "x1=\"0\" y1=\"0\" x2=\"460.8\" y2=\"614.4\" gradientUnits=\"userSpaceOnUse\"",
+    "stops": [
+      {
+        "offset": 0.0,
+        "color": "#FCE7D5"
+      },
+      {
+        "offset": 1.0,
+        "color": "#F8CFAA"
+      }
+    ]
+  },
+  "formation": {
+    "fill": "linear-gradient",
+    "coords": "x1=\"0\" y1=\"0\" x2=\"460.8\" y2=\"614.4\" gradientUnits=\"userSpaceOnUse\"",
+    "stops": [
+      {
+        "offset": 0.0,
+        "color": "#FDF4EC"
+      },
+      {
+        "offset": 1.0,
+        "color": "#EAF5DB"
+      }
+    ]
+  },
+  "livraison": {
+    "fill": "linear-gradient",
+    "coords": "x1=\"0\" y1=\"0\" x2=\"460.8\" y2=\"614.4\" gradientUnits=\"userSpaceOnUse\"",
+    "stops": [
+      {
+        "offset": 0.0,
+        "color": "#EAF5DB"
+      },
+      {
+        "offset": 1.0,
+        "color": "#D5EAB8"
+      }
+    ]
+  },
+  "logement": {
+    "fill": "linear-gradient",
+    "coords": "x1=\"0\" y1=\"0\" x2=\"460.8\" y2=\"614.4\" gradientUnits=\"userSpaceOnUse\"",
+    "stops": [
+      {
+        "offset": 0.0,
+        "color": "#F1EFEC"
+      },
+      {
+        "offset": 1.0,
+        "color": "#FDF4EC"
+      }
+    ]
+  },
+  "marche": {
+    "fill": "linear-gradient",
+    "coords": "x1=\"0\" y1=\"0\" x2=\"460.8\" y2=\"614.4\" gradientUnits=\"userSpaceOnUse\"",
+    "stops": [
+      {
+        "offset": 0.0,
+        "color": "#EAF5DB"
+      },
+      {
+        "offset": 1.0,
+        "color": "#FCE7D5"
+      }
+    ]
+  },
+  "massage": {
+    "fill": "linear-gradient",
+    "coords": "x1=\"0\" y1=\"0\" x2=\"460.8\" y2=\"614.4\" gradientUnits=\"userSpaceOnUse\"",
+    "stops": [
+      {
+        "offset": 0.0,
+        "color": "#FDF4EC"
+      },
+      {
+        "offset": 1.0,
+        "color": "#F6FAEF"
+      }
+    ]
+  },
+  "photo": {
+    "fill": "linear-gradient",
+    "coords": "x1=\"0\" y1=\"0\" x2=\"460.8\" y2=\"614.4\" gradientUnits=\"userSpaceOnUse\"",
+    "stops": [
+      {
+        "offset": 0.0,
+        "color": "#EAF5DB"
+      },
+      {
+        "offset": 1.0,
+        "color": "#D5EAB8"
+      }
+    ]
+  },
+  "portrait": {
+    "fill": "linear-gradient",
+    "coords": "x1=\"0\" y1=\"0\" x2=\"460.8\" y2=\"614.4\" gradientUnits=\"userSpaceOnUse\"",
+    "stops": [
+      {
+        "offset": 0.0,
+        "color": "#FCE7D5"
+      },
+      {
+        "offset": 1.0,
+        "color": "#F8B272"
+      }
+    ]
+  },
+  "voiture": {
+    "fill": "linear-gradient",
+    "coords": "x1=\"0\" y1=\"0\" x2=\"460.8\" y2=\"614.4\" gradientUnits=\"userSpaceOnUse\"",
+    "stops": [
+      {
+        "offset": 0.0,
+        "color": "#FDF4EC"
+      },
+      {
+        "offset": 1.0,
+        "color": "#FCE7D5"
+      }
+    ]
+  }
+}

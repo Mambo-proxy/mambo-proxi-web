@@ -1,0 +1,17 @@
+{
+  "accueil": "#FCE7D5",
+  "chef": "#FCE7D5",
+  "colis": "#F1EFEC",
+  "courses": "#FDF4EC",
+  "culture": "#3A2A20",
+  "equipe": "#EAF5DB",
+  "evenement": "#FCE7D5",
+  "formation": "#FDF4EC",
+  "livraison": "#EAF5DB",
+  "logement": "#F1EFEC",
+  "marche": "#EAF5DB",
+  "massage": "#FDF4EC",
+  "photo": "#EAF5DB",
+  "portrait": "#FCE7D5",
+  "voiture": "#FDF4EC"
+}
