@@ -50,7 +50,8 @@ test.describe('gabarit des pages publiques', () => {
     const gtag: string[] = [];
     page.on('request', (request) => request.url().includes('googletagmanager') && gtag.push(request.url()));
     const banner = page.getByRole('region', { name: 'Nous respectons votre vie privée' });
-    await expect(banner).toBeVisible();
+    // Le bandeau s'affiche une fois la page interactive (le choix est lu dans le navigateur).
+    await expect(banner).toBeVisible({ timeout: 15_000 });
     await expect(async () => {
       await banner.getByRole('button', { name: 'Refuser' }).click();
       await expect(banner).toBeHidden({ timeout: 1000 });
@@ -74,13 +75,17 @@ test.describe('gabarit des pages publiques', () => {
     await expect(email).toHaveAttribute('aria-invalid', 'true');
     await email.fill('deja@exemple.fr');
     await form.getByRole('button', { name: "S'abonner" }).click();
-    await expect(page.getByRole('status')).toContainText('déjà inscrit');
+    // Premier envoi : le module des mocks est chargé à la demande dans le navigateur.
+    await expect(page.getByRole('status')).toContainText('déjà inscrit', { timeout: 15_000 });
   });
 
   test('bouton WhatsApp flottant après défilement', async ({ page }) => {
     const button = page.getByRole('link', { name: 'Écrire sur WhatsApp (nouvel onglet)' }).last();
-    await page.mouse.wheel(0, 600);
-    await expect(button).toBeVisible();
+    // Apparition après 400 px de défilement (une fois la page interactive) ou au plus tard après 4 s.
+    await expect(async () => {
+      await page.mouse.wheel(0, 600);
+      await expect(button).toBeVisible({ timeout: 1500 });
+    }).toPass({ timeout: 10_000 });
     await expect(button).toHaveAttribute('href', /^https:\/\/wa\.me\/237600000000\?text=/);
   });
 });
