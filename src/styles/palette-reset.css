@@ -1,0 +1,4 @@
+/* Palette par défaut de Tailwind retirée : seules les couleurs des tokens sont disponibles. */
+@theme {
+  --color-*: initial;
+}

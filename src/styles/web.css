@@ -1,0 +1,134 @@
+/*
+ * Styles web du site (docs/02 §3-§5), en complément des tokens fournis (non modifiés).
+ * Valeurs relevées dans les maquettes (qa/inventory) : mobile = cadre 390, desktop = cadre 1440.
+ * Points de rupture : mobile < 768 (md), tablette 768-1279, desktop ≥ 1280 (xl).
+ */
+
+@theme inline {
+  /* Seule couleur hors tokens autorisée : WhatsApp. */
+  --color-whatsapp: #25d366;
+  --color-whatsapp-hover: #1ebe5a;
+  --shadow-whatsapp: 0 10px 28px -4px rgb(18 102 51 / 0.35);
+  --text-caption: var(--mp-font-size-caption);
+  --text-caption--line-height: var(--mp-line-height-caption);
+  --ease-standard: var(--mp-easing-standard);
+  --ease-emphasized: var(--mp-easing-emphasized);
+}
+
+/* Conteneur : 1312 px de contenu à 1440 (marges 64), marges 20 px en mobile, centré au-delà. */
+@utility container-site {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  padding-inline: clamp(20px, 4.5vw, 64px);
+}
+
+/* Rythme vertical des sections : 56 px en mobile, 96 px en desktop. */
+@utility section-y {
+  padding-block: 56px;
+  @variant md {
+    padding-block: 72px;
+  }
+  @variant xl {
+    padding-block: 96px;
+  }
+}
+
+/* web/hero — titre de page. Valeur courante des maquettes : 52/58 (desktop), 32/38 (mobile). */
+@utility text-web-hero {
+  font-family: var(--mp-font-family-brand);
+  font-weight: 600;
+  font-size: 32px;
+  line-height: 38px;
+  letter-spacing: -0.02em;
+  @variant md {
+    font-size: 44px;
+    line-height: 50px;
+  }
+  @variant xl {
+    font-size: 52px;
+    line-height: 58px;
+  }
+}
+
+/* web/section — titres de section : 48/56 -2 % (desktop), 30/36 -1,5 % (mobile). */
+@utility text-web-section {
+  font-family: var(--mp-font-family-brand);
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 36px;
+  letter-spacing: -0.015em;
+  @variant md {
+    font-size: 40px;
+    line-height: 48px;
+    letter-spacing: -0.02em;
+  }
+  @variant xl {
+    font-size: 48px;
+    line-height: 56px;
+  }
+}
+
+/* web/lead — chapô : 19/31 (desktop), 16/25 (mobile). */
+@utility text-web-lead {
+  font-family: var(--mp-font-family-ui);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 25px;
+  @variant md {
+    font-size: 18px;
+    line-height: 29px;
+  }
+  @variant xl {
+    font-size: 19px;
+    line-height: 31px;
+  }
+}
+
+/* web/eyebrow — sur-titre en capitales : 13/16 +8 % (desktop), 12/16 (mobile), texte orange. */
+@utility text-web-eyebrow {
+  font-family: var(--mp-font-family-ui);
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mp-color-text-brand);
+  @variant xl {
+    font-size: 13px;
+  }
+}
+
+/* web/stat — chiffres clés : 56/60 -2 % (desktop), 36/40 (mobile). */
+@utility text-web-stat {
+  font-family: var(--mp-font-family-brand);
+  font-weight: 600;
+  font-size: 36px;
+  line-height: 40px;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  @variant xl {
+    font-size: 56px;
+    line-height: 60px;
+  }
+}
+
+@utility bg-gradient-energie {
+  background-image: var(--mp-gradient-energie);
+}
+
+/* Ruban 4 px du pied de page et des e-mails. */
+@utility bg-gradient-lien {
+  background-image: var(--mp-gradient-lien);
+}
+
+/* Anneau de focus clavier : 2 px sombre + décalage 2 px (orange sur fond sombre via `focus-ring-inverse`). */
+@utility focus-ring {
+  outline: 2px solid var(--mp-color-neutral-900);
+  outline-offset: 2px;
+}
+
+@utility focus-ring-inverse {
+  outline: 2px solid var(--mp-color-brand-primary);
+  outline-offset: 2px;
+}
