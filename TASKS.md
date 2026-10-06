@@ -42,7 +42,7 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 ### 1.3 Pages publiques (desktop 1440, tablette, mobile 390)
 
 - [x] Accueil `/` — comparaisons dans `qa/fidelite/accueil-*.png` ; captures de régression `toHaveScreenshot` à ajouter avec l'infrastructure de tests
-- [ ] Nos services `/services`
+- [x] Nos services `/services` — comparaisons dans `qa/fidelite/nos-services-*.png`
 - [ ] Rubrique Expérience `/services/experience`
 - [ ] Rubrique Immobilier `/services/immobilier`
 - [ ] Rubrique Services de proximité `/services/services-de-proximite`

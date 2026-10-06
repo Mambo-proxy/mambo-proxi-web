@@ -135,3 +135,17 @@
 
 - **Images chargées à la demande** absentes des captures pleine page (filigrane du bandeau CTA) : le symbole décoratif est chargé immédiatement.
 - **Tests E2E dépendants de l'hydratation** sur une machine chargée : interactions répétées jusqu'au succès (`toPass`) et délais plus longs pour le premier envoi simulé (le module des mocks est chargé à la demande dans le navigateur).
+
+### Nos services (6 octobre 2026)
+
+- Page `/services` : héros de page générique (`PageHero`, réutilisable par les rubriques), barre des rubriques collante sous l'en-tête avec suivi de la section visible et défilement fluide, 4 rubriques en fonds alternés (présentation + grille de cartes en desktop, lignes cliquables en mobile), bandeau CTA propre à la page. Données : `GET /v1/pages/services` et `GET /v1/categories?include=services`.
+- L'en-tête publie sa hauteur visible dans `--site-header-h` (barres collantes, marge des ancres).
+- Fidélité : 5 947 px pour 5 926 à 1440, 6 747 pour 6 742 à 390 (`qa/fidelite/nos-services-*.png`) ; aucun débordement à 768 et 1280. Tests E2E : contenu, 19 liens de fiche, barre collante et rubrique active, axe.
+- Contrat (dépôt API) : exemple de page `services`, numéros 01–04 et descriptions des rubriques de la maquette, icône `Key` de la carte « Logement trouvé » de l'accueil.
+
+### Décisions
+
+- **Icônes de services corrigées d'après la maquette** dans le catalogue simulé : Location / colocation → `Key`, Logement adapté → `HouseHeart`, Gestion locative → `Building` (le catalogue du dossier de pilotage indique `KeyRound`, `HousePlus`, `Building`/`Building2`) : à reporter dans les données d'amorçage de l'API.
+- **Massage bien-être** : la maquette montre une fleur de lotus absente de lucide ; `Flower2` conservé.
+- **Numéros décoratifs « 01 »–« 04 »** (orange très pâle de la maquette, contraste 1,4:1) : rendus par pseudo-élément CSS. Texte purement décoratif, exempté par WCAG 1.4.3 ; l'outil d'audit ne peut pas le savoir.
+- **Noms courts des services** sur les cartes (« Portage et livraison de repas »…), comme dans le méga-menu.
