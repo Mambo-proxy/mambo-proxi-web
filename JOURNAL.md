@@ -149,3 +149,18 @@
 - **Massage bien-être** : la maquette montre une fleur de lotus absente de lucide ; `Flower2` conservé.
 - **Numéros décoratifs « 01 »–« 04 »** (orange très pâle de la maquette, contraste 1,4:1) : rendus par pseudo-élément CSS. Texte purement décoratif, exempté par WCAG 1.4.3 ; l'outil d'audit ne peut pas le savoir.
 - **Noms courts des services** sur les cartes (« Portage et livraison de repas »…), comme dans le méga-menu.
+
+### Pages rubrique (6 octobre 2026)
+
+- Gabarit `/services/[rubrique]` (4 pages générées à la compilation) : héros, « Pour qui ? », services (groupes titrés pour Immobilier), bloc spécifique (réception de colis pour Proximité, agenda pour Culture), « Comment ça se passe », témoignage, « Nos autres rubriques », bandeau CTA propre à la rubrique. Liens « Devis » vers `/devis?service=…`, bouton du héros vers `/devis?rubrique=…`, message WhatsApp pré-rempli avec la rubrique. Rubrique inconnue : 404.
+- Agenda : 3 prochains événements, « Voir tout l’agenda » affiche les suivants ; « Je participe » ouvre la modale d'inscription (non maquettée : nom, e-mail, téléphone, nombre de places, consentement → `POST /v1/event-registrations`), premier formulaire sur react-hook-form + zod (règles et messages communs dans `src/lib/forms`).
+- Fidélité : en desktop, chaque section à 8 px près des maquettes (5 498 / 5 487, 6 002 / 5 999, 5 734 / 5 725, 6 144 / 6 129) ; mobile ajusté section par section (`qa/fidelite/rubrique-*.png`). Tests E2E : 4 rubriques (contenu, axe, débordement), groupes, 404, agenda, inscription (validation et confirmation).
+- Contrat (dépôt API) : étapes illustrées et lien du bloc spécifique, vignette des rubriques (`thumbnail`), bandeau CTA d'Expérience.
+
+### Décisions
+
+- **Contenu des 4 rubriques dans les mocks** (`src/mocks/data/category-details.ts`, relevé des inventaires) plutôt que 4 exemples complets dans le contrat ; sert de référence pour l'amorçage de l'API.
+- **Illustrations de services alignées sur les maquettes** dans le catalogue simulé : Livraison de courses → `livraison`, Activités culturelles → `culture`, Découverte et intégration locale → `culture` (catalogue de pilotage : `courses`, `marche`, `accueil`) — à reporter dans l'amorçage.
+- **Teinte des pastilles** de « Pour qui ? » et des cartes services selon la rubrique (orange pâle, gris clair, vert pâle, sombre + icône orange), comme sur les maquettes.
+- **« Places limitées »** en `text/muted` (maquette `text/subtle`, contraste insuffisant).
+- **Agenda simulé** : 5 événements (les 3 de la maquette + 2) pour que « Voir tout l’agenda » ait un effet.

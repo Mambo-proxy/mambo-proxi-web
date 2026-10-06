@@ -43,10 +43,10 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 
 - [x] Accueil `/` — comparaisons dans `qa/fidelite/accueil-*.png` ; captures de régression `toHaveScreenshot` à ajouter avec l'infrastructure de tests
 - [x] Nos services `/services` — comparaisons dans `qa/fidelite/nos-services-*.png`
-- [ ] Rubrique Expérience `/services/experience`
-- [ ] Rubrique Immobilier `/services/immobilier`
-- [ ] Rubrique Services de proximité `/services/services-de-proximite`
-- [ ] Rubrique Culture & événementiel `/services/culture-evenementiel` (+ agenda, modale d'inscription)
+- [x] Rubrique Expérience `/services/experience` — `qa/fidelite/rubrique-*.png`
+- [x] Rubrique Immobilier `/services/immobilier`
+- [x] Rubrique Services de proximité `/services/services-de-proximite`
+- [x] Rubrique Culture & événementiel `/services/culture-evenementiel` (+ agenda, modale d'inscription)
 - [ ] Fiche service `/services/[rubrique]/[service]` (19 fiches, barre d'action mobile)
 - [ ] Devis gratuit `/devis` (3 étapes, champs dynamiques, brouillon, récapitulatif)
 - [ ] Confirmation `/devis/confirmation`
