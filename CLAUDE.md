@@ -15,16 +15,22 @@ Les données viennent de l'API (`mambo-proxi-api`) décrite par `contracts/opena
 
 ## Commandes
 
-| Commande                                             | Rôle                                                                  |
-| ---------------------------------------------------- | --------------------------------------------------------------------- |
-| `pnpm install`                                       | Installer (pnpm 12, Node 24 — `.nvmrc`)                               |
-| `pnpm dev`                                           | Serveur de développement (http://localhost:3000)                      |
-| `pnpm build` / `pnpm start`                          | Build et démarrage de production                                      |
-| `pnpm lint` · `pnpm typecheck` · `pnpm format:check` | Qualité                                                               |
-| `pnpm contract:sync`                                 | Copier le contrat depuis l'API et régénérer `src/lib/api/schema.d.ts` |
-| `pnpm contract:types`                                | Régénérer seulement les types                                         |
+| Commande                                               | Rôle                                                                           |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| `pnpm install`                                         | Installer (pnpm 12, Node 24 — `.nvmrc`)                                        |
+| `pnpm dev`                                             | Serveur de développement (http://localhost:3000)                               |
+| `pnpm build` / `pnpm start`                            | Build et démarrage de production                                               |
+| `pnpm lint` · `pnpm typecheck` · `pnpm format:check`   | Qualité                                                                        |
+| `pnpm test` · `pnpm test:watch` · `pnpm test:coverage` | Tests unitaires et de composants (Vitest, MSW)                                 |
+| `pnpm contract:sync`                                   | Copier le contrat depuis l'API, régénérer types et exemples des mocks          |
+| `pnpm contract:generate`                               | Régénérer `src/lib/api/schema.d.ts` et `src/mocks/data/contract-examples.json` |
 
-(Tests unitaires, E2E, régression visuelle et mocks MSW sont ajoutés en phase 1.)
+## API et mocks
+
+- Lecture côté serveur : `api` + `cached([cacheTags…])` + `unwrap` / `unwrapOrNull` (`src/lib/api/server.ts`, `result.ts`, `tags.ts`). Les étiquettes sont celles envoyées par l'API à `/api/revalidate`.
+- Composants client : `browserApi` (`src/lib/api/browser.ts`), cookies de session inclus, jeton CSRF ajouté aux mutations. Erreurs : `ApiError` (`fieldErrors`, `errorMessage`).
+- `NEXT_PUBLIC_API_MOCKING=enabled` : toutes les requêtes sont résolues par les gestionnaires MSW de `src/mocks/handlers/` (gestionnaires dédiés, puis exemples du contrat, puis 501 « Route non simulée »). Tests : `src/mocks/node.ts` (`onUnhandledFrame: 'error'`).
+- `erreur@exemple.fr` dans un formulaire simulé déclenche une erreur 500, pour vérifier l'affichage des erreurs.
 
 ## Règles de fidélité (non négociables)
 

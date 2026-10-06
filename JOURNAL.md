@@ -46,3 +46,23 @@
 - Mobile : contenus retirés volontairement (ex. Partenaires 6 logos au lieu de 8, Avis 4 cartes au lieu de 6, rail de la méthode retiré sur Mission), débordements à corriger dans le même langage visuel (onglets Contact, ligne d'offre Recrutement, fil d'Ariane Offre).
 - Erreurs ponctuelles des maquettes : calendrier de novembre 2026 sans le 30, flèches de navigation de mois dissymétriques, flèche « Voir toutes les offres » du mauvais côté — corrigées à l'intégration et listées dans le rapport final.
 - Case newsletter de l'inscription cochée sur la maquette : décochée par défaut (RGPD).
+
+## Phase 1 — Frontend sur mocks (6 octobre 2026)
+
+### Fait
+
+- Dépôts poussés sur GitHub.
+- Couche API `src/lib/api` : client serveur (`api`, `cached` avec étiquettes de revalidation, `createAdminServerClient` qui transmet les cookies), client navigateur (`browserApi`, jeton CSRF « double-submit »), `ApiError` (RFC 9457, erreurs par champ), étiquettes de cache.
+- Mocks : `scripts/contract-examples.mjs` extrait les exemples du contrat (63 opérations sur 151 simulables telles quelles, dont toutes les routes publiques sauf `GET /v1/services`) ; gestionnaires dédiés pour le catalogue (19 services de `catalogue-services.json`, filtres rubrique / mis en avant / recherche sans accents) et les 7 formulaires publics (référence `MP-AAAA-NNNN`) ; toute autre route répond 501 « Route non simulée ».
+- Vitest 5 (projets `node` et `jsdom`), Testing Library, 11 tests. CI : contrôle des fichiers générés (types + exemples) et tests.
+- Vérifié dans Next.js : build avec `NEXT_PUBLIC_API_MOCKING=enabled`, page serveur lisant les paramètres et les rubriques via les mocks.
+
+### Décisions
+
+- **Mocks branchés sur le transport du client** plutôt que par interception globale : avec le drapeau, `openapi-fetch` utilise un `fetch` qui résout la requête avec `getResponse(handlers, request)` de MSW, identique côté serveur (Server Components) et navigateur. Évite les conflits entre l'interception de MSW et le `fetch` modifié par Next.js, et pas de service worker à installer. Le code des mocks est chargé par import dynamique derrière une constante de compilation. Les tests utilisent `setupServer` (MSW Node) avec les mêmes gestionnaires.
+- **MSW 3.0.2** (sorti le 3 octobre 2026) : l'option `onUnhandledRequest` est devenue `onUnhandledFrame` ; l'ancienne est ignorée sans erreur, d'où la vérification par `tsc`.
+- **Vitest 5.0.3** et Vite 8 (dépendance de Vitest).
+
+### Difficultés et solutions
+
+- **Installations groupées bloquées** : une commande `pnpm add` de plusieurs paquets restait muette indéfiniment alors que chaque paquet, seul, s'installe en 8 à 30 s. Un processus pnpm orphelin d'une tentative précédente tenait aussi le magasin. Solution : arrêter les processus orphelins, installer un paquet à la fois.
