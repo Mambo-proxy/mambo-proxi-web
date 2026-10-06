@@ -110,4 +110,5 @@
 
 - **Préchargements des pages pas encore intégrées** : Next.js précharge `/devis`, `/inscription`… qui répondent 404 et sont relancés en boucle (l'état « réseau au repos » n'est jamais atteint). Les tests attendent le DOM et ignorent ces seuls préchargements ; disparaît avec les pages.
 - **Double espace de la maquette** (« France␣␣+33… ») supprimé par Prettier dans le JSX : écrit dans une chaîne littérale.
+- **Build de CI sans API** : les pages lisent l'API au rendu statique ; en Phase 1 le build de CI utilise les mocks (`NEXT_PUBLIC_API_MOCKING=enabled`). À l'intégration, le build de production devra joindre l'API (ou les pages passeront en rendu à la demande).
 - **Règle `react-hooks/refs`** (compilateur React) : les déclencheurs et panneaux du menu sont retrouvés par `id` au lieu de références lues pendant le rendu.

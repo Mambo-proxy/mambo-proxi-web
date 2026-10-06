@@ -29,7 +29,10 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm format:check
       - run: pnpm test
+      # Phase 1 : le site est construit sur les mocks (pas d'API joignable pendant le build).
       - run: pnpm build
+        env:
+          NEXT_PUBLIC_API_MOCKING: enabled
 
   e2e:
     name: Bout en bout (Playwright, axe)
