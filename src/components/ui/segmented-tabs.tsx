@@ -3,7 +3,12 @@
 import { useRef, type KeyboardEvent, type ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
-export type SegmentedOption<T extends string> = { value: T; label: ReactNode };
+export type SegmentedOption<T extends string> = {
+  value: T;
+  label: ReactNode;
+  /** Libellé raccourci affiché en mobile (< 768 px), ex. « Particulier » (Inscription mobile `70:10933`). */
+  shortLabel?: ReactNode;
+};
 
 type SegmentedTabsProps<T extends string> = {
   options: SegmentedOption<T>[];
@@ -57,7 +62,7 @@ export function SegmentedTabs<T extends string>({
       role="radiogroup"
       aria-label={label}
       className={cn(
-        'inline-flex gap-1 rounded-full bg-neutral-100 p-1',
+        'inline-flex max-w-full gap-1 rounded-full bg-neutral-100 p-1',
         fullWidth && 'flex w-full',
         className,
       )}
@@ -77,13 +82,20 @@ export function SegmentedTabs<T extends string>({
             onClick={() => onChange(option.value)}
             onKeyDown={(event) => onKeyDown(event, index)}
             className={cn(
-              'cursor-pointer rounded-full px-4 py-[9px] font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] whitespace-nowrap',
+              'min-w-0 cursor-pointer truncate rounded-full px-4 py-[9px] font-ui text-[14px] leading-5 font-semibold tracking-[0.005em]',
               'transition-[background-color,box-shadow,color] duration-150 ease-standard',
               fullWidth && 'flex-1',
               active ? 'bg-neutral-0 text-text-main shadow-1' : 'text-text-muted hover:text-text-main',
             )}
           >
-            {option.label}
+            {option.shortLabel ? (
+              <>
+                <span className="md:hidden">{option.shortLabel}</span>
+                <span className="hidden md:inline">{option.label}</span>
+              </>
+            ) : (
+              option.label
+            )}
           </button>
         );
       })}

@@ -1,4 +1,4 @@
-import { ChevronDown, CircleAlert, type LucideIcon } from 'lucide-react';
+import { ChevronDown, CircleAlert, Phone, type LucideIcon } from 'lucide-react';
 import { useId, type ComponentProps, type ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
@@ -47,7 +47,7 @@ export function Field({ label, required, help, error, className, children }: Fie
         'aria-describedby': describedBy,
       })}
       {help && !error && (
-        <p id={helpId} className="text-caption text-text-subtle">
+        <p id={helpId} className="text-caption text-text-muted">
           {help}
         </p>
       )}
@@ -124,5 +124,15 @@ export function Select({ className, children, ...props }: ComponentProps<'select
         className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-icon-default"
       />
     </div>
+  );
+}
+
+/** Téléphone (Contact `69:7834`) : saisie simple avec icône, indicatif tapé par l'utilisateur. */
+export function PhoneInput({
+  placeholder = '+237 6 00 00 00 00',
+  ...props
+}: Omit<InputProps, 'icon' | 'type'>) {
+  return (
+    <Input type="tel" inputMode="tel" autoComplete="tel" icon={Phone} placeholder={placeholder} {...props} />
   );
 }

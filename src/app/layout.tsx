@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, Poppins } from 'next/font/google';
+import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 
 const inter = Inter({
@@ -24,7 +25,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="fr" className={`${inter.variable} ${poppins.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Toaster />
+      </body>
     </html>
   );
 }

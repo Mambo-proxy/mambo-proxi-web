@@ -15,7 +15,8 @@ export const badgeVariants = cva(
         green: 'bg-vert-50 text-vert-700 [--dot:var(--mp-color-vert-500)]',
         dark: 'bg-neutral-100 text-neutral-800 [--dot:var(--mp-color-neutral-800)]',
         gray: 'bg-neutral-100 text-text-muted [--dot:var(--mp-color-neutral-400)]',
-        light: 'bg-neutral-100 text-text-subtle [--dot:var(--mp-color-neutral-300)]',
+        // Maquette : texte #7D776F (contraste 3,9:1) ; #5E5952 pour atteindre 4,5:1 (WCAG AA).
+        light: 'bg-neutral-100 text-text-muted [--dot:var(--mp-color-neutral-300)]',
         red: 'bg-feedback-error-subtle text-feedback-error [--dot:var(--mp-color-feedback-error)]',
       },
     },

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseAccentText } from '@/components/ui/accent-text';
 import { cn } from './cn';
+import { toE164 } from './phone';
 import { whatsappUrl } from './whatsapp';
 
 describe('cn', () => {
@@ -39,5 +40,15 @@ describe('whatsappUrl', () => {
       'https://wa.me/237699000000?text=Bonjour%20Mambo%20Proxi%2C%20Service%20%3A%20Chef%20priv%C3%A9',
     );
     expect(whatsappUrl('+33612345678')).toBe('https://wa.me/33612345678');
+  });
+});
+
+describe('toE164', () => {
+  it('normalise les numéros saisis', () => {
+    expect(toE164('+237 6 99 00 00 00')).toBe('+237699000000');
+    expect(toE164('06 12 34 56 78')).toBe('+33612345678');
+    expect(toE164('0033 (6) 12-34-56-78')).toBe('+33612345678');
+    expect(toE164('12345')).toBeNull();
+    expect(toE164('')).toBeNull();
   });
 });
