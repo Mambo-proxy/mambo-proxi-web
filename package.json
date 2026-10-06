@@ -17,26 +17,42 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "contract:sync": "node scripts/contract-sync.mjs",
-    "contract:types": "openapi-typescript contracts/openapi.yaml --output src/lib/api/schema.d.ts --root-types --root-types-no-schema-prefix"
+    "contract:types": "openapi-typescript contracts/openapi.yaml --output src/lib/api/schema.d.ts --root-types --root-types-no-schema-prefix",
+    "contract:examples": "node scripts/contract-examples.mjs",
+    "contract:generate": "pnpm contract:types && pnpm contract:examples",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "next": "16.3.8",
     "openapi-fetch": "0.17.0",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "server-only": "0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.3",
+    "@testing-library/dom": "10.4.2",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.7",
     "@types/node": "24.19.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "@vitest/coverage-v8": "5.0.3",
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "9.39.5",
     "eslint-config-next": "16.3.8",
+    "jsdom": "30.1.2",
+    "msw": "3.0.2",
     "openapi-typescript": "7.13.0",
     "prettier": "3.9.9",
     "prettier-plugin-tailwindcss": "0.8.1",
     "tailwindcss": "4.3.3",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "5.0.3",
+    "yaml": "2.9.1"
   }
 }
