@@ -21,11 +21,12 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Types générés à jour avec le contrat
+      - name: Types et exemples générés à jour avec le contrat
         run: |
-          pnpm contract:types
-          git diff --exit-code -- src/lib/api/schema.d.ts
+          pnpm contract:generate
+          git diff --exit-code -- src/lib/api/schema.d.ts src/mocks/data/contract-examples.json
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm format:check
+      - run: pnpm test
       - run: pnpm build
