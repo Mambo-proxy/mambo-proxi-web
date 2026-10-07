@@ -26,6 +26,9 @@ type DetailFields = Pick<
   | 'seo'
 >;
 
+/** Villes proposées dans les champs « Ville » du devis. */
+const CITIES = ['Douala', 'Yaoundé', 'Kribi', 'Autre'];
+
 const PROCESS_STEPS: DetailFields['processSteps'] = [
   { title: 'Votre demande', text: 'Formulaire, WhatsApp ou rendez-vous.' },
   { title: 'Devis sur mesure', text: 'Une proposition claire sous 24 h.' },
@@ -89,7 +92,34 @@ export const categoryDetails: Record<string, DetailFields> = {
       date: '2026-09-12T10:00:00.000Z',
     }),
     testimonialVisual: visual('equipe'),
-    quoteFields: [],
+    quoteFields: [
+      { name: 'eventDate', label: 'Date souhaitée', type: 'date', required: false, width: 'half' },
+      { name: 'city', label: 'Ville', type: 'city', required: false, options: CITIES, width: 'half' },
+      {
+        name: 'guests',
+        label: 'Nombre de personnes',
+        type: 'number',
+        required: false,
+        min: 1,
+        max: 500,
+        width: 'half',
+      },
+      {
+        name: 'occasion',
+        label: 'Type d’occasion',
+        type: 'select',
+        required: false,
+        options: [
+          'Anniversaire',
+          'Mariage',
+          'Dîner entre amis',
+          'Séjour en famille',
+          'Événement d’entreprise',
+          'Autre',
+        ],
+        width: 'half',
+      },
+    ],
     cta: {
       title: 'Envie d’un moment\nsur mesure ?',
       text: 'Dites-nous ce que vous imaginez : nous vous proposons un devis gratuit sous 24 h.',
@@ -159,7 +189,35 @@ export const categoryDetails: Record<string, DetailFields> = {
       date: '2026-08-30T10:00:00.000Z',
     }),
     testimonialVisual: visual('equipe'),
-    quoteFields: [],
+    quoteFields: [
+      {
+        name: 'propertyType',
+        label: 'Type de bien',
+        type: 'select',
+        required: false,
+        options: ['Chambre', 'Studio', 'Appartement', 'Maison', 'Local professionnel', 'Autre'],
+        width: 'half',
+      },
+      { name: 'city', label: 'Ville', type: 'city', required: false, options: CITIES, width: 'half' },
+      {
+        name: 'budget',
+        label: 'Budget indicatif',
+        type: 'text',
+        required: false,
+        placeholder: 'Ex. 250 000 FCFA par mois',
+        helpText: 'Facultatif : il nous aide à cibler les recherches.',
+        width: 'half',
+      },
+      { name: 'arrivalDate', label: 'Date d’arrivée', type: 'date', required: false, width: 'half' },
+      {
+        name: 'duration',
+        label: 'Durée',
+        type: 'select',
+        required: false,
+        options: ['Moins d’un mois', '1 à 6 mois', '6 à 12 mois', 'Plus d’un an', 'Je ne sais pas encore'],
+        width: 'half',
+      },
+    ],
     cta: {
       title: 'Un logement à trouver\nou à confier ?',
       text: 'Expliquez-nous votre projet immobilier : devis gratuit et réponse sous 24 h.',
@@ -241,7 +299,25 @@ export const categoryDetails: Record<string, DetailFields> = {
       date: '2026-09-20T10:00:00.000Z',
     }),
     testimonialVisual: visual('equipe'),
-    quoteFields: [],
+    quoteFields: [
+      { name: 'city', label: 'Ville', type: 'city', required: false, options: CITIES, width: 'half' },
+      {
+        name: 'frequency',
+        label: 'Fréquence',
+        type: 'select',
+        required: false,
+        options: ['Une seule fois', 'Chaque semaine', 'Plusieurs fois par semaine', 'Chaque mois'],
+        width: 'half',
+      },
+      {
+        name: 'address',
+        label: 'Adresse ou quartier',
+        type: 'text',
+        required: false,
+        placeholder: 'Ex. Bonapriso, Douala',
+        width: 'full',
+      },
+    ],
     cta: {
       title: 'Besoin d’un coup de main\nau quotidien ?',
       text: 'Repas, courses ou colis : décrivez votre besoin, nous vous répondons sous 24 h.',
@@ -307,7 +383,18 @@ export const categoryDetails: Record<string, DetailFields> = {
       date: '2026-09-05T10:00:00.000Z',
     }),
     testimonialVisual: visual('equipe'),
-    quoteFields: [],
+    quoteFields: [
+      { name: 'eventDate', label: 'Date souhaitée', type: 'date', required: false, width: 'half' },
+      {
+        name: 'participants',
+        label: 'Nombre de participants',
+        type: 'number',
+        required: false,
+        min: 1,
+        max: 200,
+        width: 'half',
+      },
+    ],
     cta: {
       title: 'Envie de sortir,\nde découvrir ?',
       text: 'Rejoignez une sortie Mambo ou demandez une activité sur mesure.',
