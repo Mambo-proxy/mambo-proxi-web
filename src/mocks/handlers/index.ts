@@ -6,6 +6,7 @@ import { contractHandlers } from './contract';
 import { eventHandlers } from './events';
 import { formHandlers } from './forms';
 import { newsletterHandlers } from './newsletter';
+import { pageHandlers } from './pages';
 import { partnerHandlers } from './partners';
 
 /**
@@ -19,6 +20,7 @@ export const handlers = [
   ...newsletterHandlers,
   ...partnerHandlers,
   ...eventHandlers,
+  ...pageHandlers,
   ...contractHandlers,
   http.all('*/v1/*', ({ request }) =>
     problem(501, `Route non simulée : ${request.method} ${new URL(request.url).pathname}.`),
