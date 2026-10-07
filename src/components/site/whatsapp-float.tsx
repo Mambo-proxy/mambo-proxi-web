@@ -33,6 +33,7 @@ export function WhatsappFloat({ href }: { href: string }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Écrire sur WhatsApp (nouvel onglet)"
+      data-whatsapp-float
       className={cn(
         'group/wa fixed right-4 bottom-4 z-40 flex items-center xl:right-7 xl:bottom-7',
         'transition-[translate,scale,opacity] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]',

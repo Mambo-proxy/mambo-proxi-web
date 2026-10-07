@@ -25,6 +25,12 @@
   padding-inline: clamp(20px, 4.5vw, 64px);
 }
 
+/* Fond pleine largeur pour un bloc placé dans le conteneur (annule puis rétablit ses marges latérales). */
+@utility bleed-x {
+  margin-inline: calc(-1 * clamp(20px, 4.5vw, 64px));
+  padding-inline: clamp(20px, 4.5vw, 64px);
+}
+
 /* Rythme vertical des sections : 56 px en mobile, 96 px en desktop. */
 @utility section-y {
   padding-block: 56px;
@@ -194,5 +200,15 @@
 @keyframes marquee {
   to {
     transform: translateX(-50%);
+  }
+}
+
+/* Fiche service en mobile : la barre d'action fixe remplace le bouton WhatsApp flottant et ne recouvre pas le pied de page. */
+@media (width < 48rem) {
+  body:has([data-action-bar]) {
+    padding-bottom: 85px;
+  }
+  body:has([data-action-bar]) [data-whatsapp-float] {
+    display: none;
   }
 }
