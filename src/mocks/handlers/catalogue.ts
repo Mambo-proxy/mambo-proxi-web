@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import { categoryDetails } from '../data/category-details';
+import { serviceDetails } from '../data/service-details';
 import { problem } from '../problem';
 import { categories, categorySummaries, normalize, services } from '../data/catalogue';
 
@@ -22,6 +23,11 @@ export const catalogueHandlers = [
           (!search || normalize(`${service.name} ${service.summary}`).includes(search)),
       ),
     );
+  }),
+
+  http.get('*/v1/services/:slug', ({ params }) => {
+    const detail = serviceDetails[String(params.slug)];
+    return detail ? HttpResponse.json(detail) : problem(404, "Ce service n'existe pas.");
   }),
 
   // Page rubrique : résumé + services + contenu de la page + 3 autres rubriques.
