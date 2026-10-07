@@ -7,6 +7,7 @@ import { Visual } from '@/components/ui/visual';
 import type { HeroSection } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
+import { AnchorChips } from './content/anchor-chips';
 import { ResponsiveText } from './responsive-text';
 
 type PageHeroProps = {
@@ -42,7 +43,8 @@ export function PageHero({ section, breadcrumb, whatsappHref, visualClassName }:
               />
             </p>
           )}
-          <div className="flex flex-col gap-2.5 md:flex-row md:gap-3">
+          {section.anchors && section.anchors.length > 0 && <AnchorChips links={section.anchors} />}
+          <div className="flex flex-col gap-2.5 empty:hidden md:flex-row md:gap-3">
             {section.primaryCta && (
               <Link href={section.primaryCta.href as Route} className={cn(buttonVariants(), 'max-md:w-full')}>
                 {section.primaryCta.label}

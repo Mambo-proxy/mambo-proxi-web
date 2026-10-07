@@ -13,6 +13,8 @@ type SectionHeadingProps = {
   align?: 'left' | 'center';
   /** Niveau du titre (h2 pour une section, h1 pour un héros). */
   as?: 'h1' | 'h2';
+  /** Sur fond sombre : sur-titre `orange/400`, titre blanc, chapô `neutral/300`. */
+  inverse?: boolean;
   className?: string;
   leadClassName?: string;
 };
@@ -29,14 +31,20 @@ export function SectionHeading({
   leadMobile,
   align = 'left',
   as: Heading = 'h2',
+  inverse = false,
   className,
   leadClassName,
 }: SectionHeadingProps) {
   return (
     <div className={cn('flex flex-col gap-4', align === 'center' && 'items-center text-center', className)}>
-      {eyebrow && <p className="text-web-eyebrow">{frenchTypography(eyebrow)}</p>}
+      {eyebrow && (
+        // Chaînes brutes : `cn` confondrait les utilitaires `text-web-*` avec des couleurs de texte.
+        <p className={inverse ? 'text-web-eyebrow text-orange-400!' : 'text-web-eyebrow'}>
+          {frenchTypography(eyebrow)}
+        </p>
+      )}
       {title && (
-        <Heading className="text-web-section text-text-main">
+        <Heading className={`text-web-section ${inverse ? 'text-neutral-0' : 'text-text-main'}`}>
           <ResponsiveText
             desktop={<AccentText text={title} />}
             mobile={titleMobile ? <AccentText text={titleMobile} /> : null}
@@ -46,7 +54,8 @@ export function SectionHeading({
       {lead && (
         <p
           className={cn(
-            'font-ui text-[16px] leading-6 text-text-muted md:text-[18px] md:leading-7',
+            'font-ui text-[16px] leading-6 md:text-[18px] md:leading-7',
+            inverse ? 'text-neutral-300' : 'text-text-muted',
             leadMobile === '' && 'max-md:hidden',
             leadClassName,
           )}
