@@ -216,3 +216,16 @@
 - **Sujets** du formulaire : liste proposée (devis, question sur un service, immobilier, partenariat, recrutement, presse, autre) ; téléphone facultatif comme sur la maquette.
 - **Pastille WhatsApp** : vert WhatsApp à 10 % d'opacité (la maquette utilise `#e9fbf0`, hors tokens).
 
+### Inscription (7 octobre 2026)
+
+- `/inscription` : panneau illustré collant en desktop (accueil pour un particulier, équipe pour un professionnel ; voile sombre, logo blanc, citation), absent en mobile ; sélecteur « Je suis un particulier » / « Je suis un professionnel / partenaire » (libellés courts en mobile) qui met à jour `?profil=professionnel` ; formulaire → `POST /v1/registrations` (fiche contact, pas de mot de passe au lot 1), confirmation en place.
+- Professionnel : nom de la structure et activité principale obligatoires, rubriques d'intervention ; particulier : services qui intéressent (puces à choix multiple).
+- Fidélité : 2 007 px pour 2 055 (desktop) et 3 142 / 3 312 pour 3 123 / 3 295 (mobile) ; l'écart desktop vient des puces, réparties sur deux lignes dans la maquette, où deux d'entre elles sont cochées. Tests E2E : deux profils (axe, débordement, newsletter décochée), validation et envoi, bascule de profil.
+
+### Décisions
+
+- **Newsletter décochée par défaut** : la maquette la montre cochée pour illustrer l'état ; le consentement doit être explicite (RGPD).
+- **Pays et ville vides** par défaut (la maquette montre « France » et « Paris » comme valeurs saisies).
+- **Activités principales** : liste proposée (restauration, transport, photo, bien-être, événementiel, immobilier, entretien, livraison, tourisme, autre), à valider par la cliente.
+- **Citation du panneau** : guillemet orange clair (`orange/300`), comme sur la maquette.
+
