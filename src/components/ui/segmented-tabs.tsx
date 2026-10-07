@@ -17,6 +17,8 @@ type SegmentedTabsProps<T extends string> = {
   /** Nom accessible du groupe (ex. « Profil »). */
   label: string;
   fullWidth?: boolean;
+  /** `lg` : 52 px de haut (Inscription `70:10703` : p 5, onglet py 11). */
+  size?: 'md' | 'lg';
   className?: string;
 };
 
@@ -31,6 +33,7 @@ export function SegmentedTabs<T extends string>({
   onChange,
   label,
   fullWidth = false,
+  size = 'md',
   className,
 }: SegmentedTabsProps<T>) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -63,6 +66,7 @@ export function SegmentedTabs<T extends string>({
       aria-label={label}
       className={cn(
         'inline-flex max-w-full gap-1 rounded-full bg-neutral-100 p-1',
+        size === 'lg' && 'p-[5px]',
         fullWidth && 'flex w-full',
         className,
       )}
@@ -85,6 +89,7 @@ export function SegmentedTabs<T extends string>({
               'min-w-0 cursor-pointer truncate rounded-full px-4 py-[9px] font-ui text-[14px] leading-5 font-semibold tracking-[0.005em]',
               'transition-[background-color,box-shadow,color] duration-150 ease-standard',
               fullWidth && 'flex-1',
+              size === 'lg' && 'py-[11px]',
               active ? 'bg-neutral-0 text-text-main shadow-1' : 'text-text-muted hover:text-text-main',
             )}
           >
