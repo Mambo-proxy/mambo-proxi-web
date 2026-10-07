@@ -229,3 +229,14 @@
 - **Activités principales** : liste proposée (restauration, transport, photo, bien-être, événementiel, immobilier, entretien, livraison, tourisme, autre), à valider par la cliente.
 - **Citation du panneau** : guillemet orange clair (`orange/300`), comme sur la maquette.
 
+### Qui sommes-nous et Mission (7 octobre 2026)
+
+- Pages éditoriales rendues depuis `GET /v1/pages/{key}` par un moteur commun (`PageSections`) : chaque section publiée est affichée selon son type, dans l'ordre du back-office. Nouveaux rendus : héros avec puces d'ancrage (la puce active suit la section visible), texte + média (présentation en deux colonnes ou citation signée de la fondatrice), équipe, grilles de cartes (valeurs sur fond sombre, engagements numérotés, énoncés mission/vision), engagements + chiffres clés, méthode en rail (numéros dans les titres en mobile), bandeau de citation.
+- Contenu des deux pages relevé dans les maquettes (`src/mocks/data/pages.ts`), servi par un gestionnaire dédié ; il sert de référence pour l'amorçage de l'API.
+- Fidélité desktop : chaque section à la hauteur de la maquette (Qui sommes-nous 588 · 440 · 792 · 856 · 534 · 812 · 528, Mission 568 · 624 · 755 · 661 · 448 · 498) ; mobile à moins de 45 px par section (`qa/fidelite/qui-sommes-nous-*.png`, `mission-*.png`). Tests E2E : titres, ancres, bandeau final, axe, défilement par puce.
+
+### Décisions
+
+- **Portraits de l'équipe** : la maquette fait varier la couleur des vêtements sur une même illustration ; les 4 cartes affichent l'illustration « portrait » en attendant les photos de l'équipe (noms « Prénom Nom » à fournir).
+- **Numéros décoratifs** (« 01 »… en `orange/200` et `orange/300`) rendus par pseudo-élément, comme sur Nos services : texte décoratif à faible contraste voulu par la maquette.
+

@@ -52,8 +52,8 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [x] Confirmation `/devis/confirmation` — `qa/fidelite/devis-confirmation-*.png`
 - [x] Contact `/contact` (2 formulaires, prise de rendez-vous + étape coordonnées, carte) — `qa/fidelite/contact-*.png`
 - [x] Inscription `/inscription` (particulier / professionnel) — `qa/fidelite/inscription-*.png`
-- [ ] Qui sommes-nous `/qui-sommes-nous`
-- [ ] Mission `/mission`
+- [x] Qui sommes-nous `/qui-sommes-nous` — `qa/fidelite/qui-sommes-nous-*.png`
+- [x] Mission `/mission` — `qa/fidelite/mission-*.png`
 - [ ] Partenaires `/partenaires` (filtres, formulaire)
 - [ ] Formation `/formation` (catalogue filtrable, formulaire)
 - [ ] Recrutement `/recrutement` (recherche, filtres, candidature avec CV)
