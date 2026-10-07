@@ -34,6 +34,11 @@ export function formatTime(date: DateInput, timeZone = DEFAULT_TIME_ZONE): strin
     : format(zoned, "H'\u00A0h\u00A0'mm", { locale: fr });
 }
 
+/** « 09:00 » (créneaux de rendez-vous, maquette Contact). */
+export function formatClock(date: DateInput, timeZone = DEFAULT_TIME_ZONE): string {
+  return format(inZone(date, timeZone), 'HH:mm', { locale: fr });
+}
+
 /** « 6 octobre 2026 à 14 h 30 ». */
 export function formatDateTime(date: DateInput, timeZone = DEFAULT_TIME_ZONE): string {
   return `${formatDate(date, timeZone)} à ${formatTime(date, timeZone)}`;

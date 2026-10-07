@@ -35,6 +35,7 @@ async function readEmail(request: Request): Promise<string | null> {
 const FORM_ENDPOINTS = [
   '/v1/quote-requests',
   '/v1/contact-messages',
+  '/v1/appointments',
   '/v1/registrations',
   '/v1/training-requests',
   '/v1/partner-requests',

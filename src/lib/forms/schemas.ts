@@ -28,6 +28,22 @@ export const fieldRules = {
       }
       return phone;
     }),
+  /** Téléphone facultatif (Contact) : vide → `null`, sinon converti en E.164. */
+  optionalPhone: z
+    .string()
+    .trim()
+    .transform((value, context) => {
+      if (!value) return null;
+      const phone = toE164(value);
+      if (!phone) {
+        context.addIssue({
+          code: 'custom',
+          message: 'Merci d’indiquer un numéro avec l’indicatif du pays (ex. +237…).',
+        });
+        return z.NEVER;
+      }
+      return phone;
+    }),
   consent: z.literal(true, {
     error: 'Merci d’accepter le traitement de vos données pour envoyer votre demande.',
   }),

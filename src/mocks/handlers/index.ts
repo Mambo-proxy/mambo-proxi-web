@@ -1,5 +1,6 @@
 import { http } from 'msw';
 import { problem } from '../problem';
+import { appointmentHandlers } from './appointments';
 import { catalogueHandlers } from './catalogue';
 import { contractHandlers } from './contract';
 import { eventHandlers } from './events';
@@ -13,6 +14,7 @@ import { partnerHandlers } from './partners';
  */
 export const handlers = [
   ...catalogueHandlers,
+  ...appointmentHandlers,
   ...formHandlers,
   ...newsletterHandlers,
   ...partnerHandlers,
