@@ -164,3 +164,20 @@
 - **Teinte des pastilles** de « Pour qui ? » et des cartes services selon la rubrique (orange pâle, gris clair, vert pâle, sombre + icône orange), comme sur les maquettes.
 - **« Places limitées »** en `text/muted` (maquette `text/subtle`, contraste insuffisant).
 - **Agenda simulé** : 5 événements (les 3 de la maquette + 2) pour que « Voir tout l’agenda » ait un effet.
+
+### Fiche service (7 octobre 2026)
+
+- Gabarit `/services/[rubrique]/[service]` (19 pages générées à la compilation) d'après la maquette « Chef privé » : héros (étiquettes rubrique et villes, titre 64/68, accroche, boutons, galerie de 3 visuels), colonne principale (« À qui s’adresse ce service ? », étapes en frise verticale, avantages, FAQ dont la première question est ouverte) et colonne latérale collante (carte devis « Tarif communiqué sur devis » + encart rendez-vous), avis du service, services liés, bandeau CTA propre au service. Aucun prix affiché.
+- Mobile : la carte devis s'insère après « À qui… », chaque bloc devient une section, les avantages passent sur fond `neutral/50` ; barre d'action fixe « Devis gratuit » + « WhatsApp » qui remplace le bouton WhatsApp flottant (le pied de page garde une marge pour ne pas être recouvert). Tablette : boutons du héros, pas de barre.
+- Tous les boutons Devis mènent à `/devis?service=<slug>` ; le message WhatsApp mentionne le service. Un service demandé sous une autre rubrique que la sienne répond 404.
+- Fidélité : 5 294 px pour 5 287 à 1440 (héros, avis et services liés au pixel, contenu à 2 px) ; mobile comparé section par section (`qa/fidelite/fiche-service-*.png`) ; aucun débordement à 768 et 1280. Tests E2E : 4 fiches (une par rubrique : contenu, axe, débordement), devis pré-rempli, FAQ, avis, services liés, barre d'action mobile, 404.
+- Contrat (dépôt API) : exemple « Chef privé » complet (galerie chef / marché / chef, 4 questions, 2 avis, 3 services liés, titres des sections, bandeau « Prêt à recevoir vos invités ? »).
+
+### Décisions
+
+- **Fiches sans maquette** : seules les données de « Chef privé » viennent de la maquette. Les 18 autres fiches simulées ont un contenu provisoire cohérent par rubrique (publics, étapes, avantages, FAQ), marqué `toComplete` ; la cliente le remplacera dans le back-office.
+- **Réponses de la FAQ « Chef privé »** : seule la première est visible sur la maquette ; les trois autres sont rédigées (villes desservies, réservation depuis la France, délai conseillé) et sont à valider par la cliente.
+- **Carte devis** : largeur 338 px comme sur la maquette (l'encart rendez-vous dessous fait 400 px).
+- **Vignettes des services liés** : la maquette montre des illustrations provisoires sans rapport avec les services ; chaque carte affiche le visuel de son service.
+- **Accordéon** : variante espacée (question py 32, 29 en mobile) relevée sur la page, l'espacement de la planche des composants (py 20) restant celui par défaut.
+- **Données structurées** (`Service`, `FAQPage`, `BreadcrumbList`) : elles demandent l'adresse publique du site, pas encore définie ; elles seront ajoutées avec le chantier SEO (1.5).

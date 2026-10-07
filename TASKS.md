@@ -47,7 +47,7 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [x] Rubrique Immobilier `/services/immobilier`
 - [x] Rubrique Services de proximité `/services/services-de-proximite`
 - [x] Rubrique Culture & événementiel `/services/culture-evenementiel` (+ agenda, modale d'inscription)
-- [ ] Fiche service `/services/[rubrique]/[service]` (19 fiches, barre d'action mobile)
+- [x] Fiche service `/services/[rubrique]/[service]` (19 fiches, barre d'action mobile) — `qa/fidelite/fiche-service-*.png` ; JSON-LD `Service`/`FAQPage`/`BreadcrumbList` reporté au chantier SEO (1.5)
 - [ ] Devis gratuit `/devis` (3 étapes, champs dynamiques, brouillon, récapitulatif)
 - [ ] Confirmation `/devis/confirmation`
 - [ ] Contact `/contact` (2 formulaires, prise de rendez-vous + étape coordonnées, carte)
