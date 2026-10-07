@@ -50,7 +50,7 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [x] Fiche service `/services/[rubrique]/[service]` (19 fiches, barre d'action mobile) — `qa/fidelite/fiche-service-*.png` ; JSON-LD `Service`/`FAQPage`/`BreadcrumbList` reporté au chantier SEO (1.5)
 - [x] Devis gratuit `/devis` (3 étapes, champs dynamiques, brouillon, récapitulatif) — `qa/fidelite/devis-*.png`
 - [x] Confirmation `/devis/confirmation` — `qa/fidelite/devis-confirmation-*.png`
-- [ ] Contact `/contact` (2 formulaires, prise de rendez-vous + étape coordonnées, carte)
+- [x] Contact `/contact` (2 formulaires, prise de rendez-vous + étape coordonnées, carte) — `qa/fidelite/contact-*.png`
 - [ ] Inscription `/inscription` (particulier / professionnel)
 - [ ] Qui sommes-nous `/qui-sommes-nous`
 - [ ] Mission `/mission`

@@ -199,3 +199,20 @@
 - **Liste « Choisir »** : texte gris `text/muted` (la maquette utilise `text/subtle`, contraste insuffisant pour une valeur affichée).
 - **Vignette du récapitulatif** : visuel du service choisi (la maquette montre l'illustration « accueil »).
 
+### Contact (7 octobre 2026)
+
+- `/contact` : héros et 4 moyens de contact cliquables (`tel:`, `wa.me`, `mailto:`), carte « Écrivez-nous » à onglets « Nous contacter » / « Demande d’information » (`?onglet=information`, ajoute le service concerné) → `POST /v1/contact-messages`, confirmation et référence en place.
+- « Prendre rendez-vous » (ancre `#rendez-vous`) : motif, format, calendrier des disponibilités du mois (`GET /v1/appointments/availability`, filtré par format ; jours passés, dimanches, jours complets et délai de 24 h désactivés), créneaux du jour en heure de Douala ; puis, dans le même encart, coordonnées (nom, e-mail, téléphone, message facultatif, consentement) → `POST /v1/appointments` (« À confirmer »), confirmation en place.
+- « Notre agence » : plan stylisé reprenant la maquette (SVG, sans service tiers ni cookie) et carte adresse alimentée par les Paramètres (adresse, horaires, réception des colis, lien « Itinéraire »).
+- Mocks : disponibilités générées (lundi–samedi, 5 créneaux dont le dernier sans agence, un jour sur neuf complet), envoi des rendez-vous.
+- Fidélité : 3 320 px pour 3 349 en desktop et 4 891 pour 4 912 en mobile ; l'écart vient de la ligne de créneaux, affichée par la maquette avec un jour déjà choisi (`qa/fidelite/contact-*.png`). Tests E2E : page, validation et envoi du message, onglet information, rendez-vous complet.
+
+### Décisions
+
+- **Aucune sélection par défaut** pour le motif, le format, le jour et le créneau (la maquette montre « Immobilier », « Visio », le 12 et 14:00 pour illustrer l'état sélectionné) ; « Demander ce rendez-vous » indique ce qui manque.
+- **Étape coordonnées du rendez-vous** (non maquettée) : le contrat exige nom, e-mail et téléphone ; l'encart rappelle le créneau choisi avec un lien « Modifier ».
+- **Onglets en mobile** : libellé court « Information » (la maquette déborde de la carte).
+- **Plan** : image stylisée en attendant l'adresse définitive (docs/03 le permet) ; une carte interactive (Leaflet + OpenStreetMap) pourra la remplacer quand les coordonnées seront validées.
+- **Sujets** du formulaire : liste proposée (devis, question sur un service, immobilier, partenariat, recrutement, presse, autre) ; téléphone facultatif comme sur la maquette.
+- **Pastille WhatsApp** : vert WhatsApp à 10 % d'opacité (la maquette utilise `#e9fbf0`, hors tokens).
+
