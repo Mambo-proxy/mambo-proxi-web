@@ -181,3 +181,21 @@
 - **Vignettes des services liés** : la maquette montre des illustrations provisoires sans rapport avec les services ; chaque carte affiche le visuel de son service.
 - **Accordéon** : variante espacée (question py 32, 29 en mobile) relevée sur la page, l'espacement de la planche des composants (py 20) restant celui par défaut.
 - **Données structurées** (`Service`, `FAQPage`, `BreadcrumbList`) : elles demandent l'adresse publique du site, pas encore définie ; elles seront ajoutées avec le chantier SEO (1.5).
+
+### Devis gratuit et confirmation (7 octobre 2026)
+
+- `/devis` : en-tête, indicateur de progression (Service → Votre besoin → Coordonnées), 3 cartes d'étape et récapitulatif collant (service choisi avec ✕ pour changer, 3 garanties, carte « Une question avant de remplir ? » + WhatsApp). Pré-sélection par `?service=` (étape 2 active) ou `?rubrique=`.
+- Étape 2 : champs propres à la rubrique lus dans `quoteFields` (`GET /v1/categories/{slug}`, administrables) — Expérience : date, ville, nombre de personnes, occasion ; Immobilier : type de bien, ville, budget indicatif, date d'arrivée, durée ; Proximité : ville, fréquence, adresse ; Culture : date, nombre de participants — puis description obligatoire.
+- Validation zod étape par étape (« Continuer » vérifie les étapes 1 et 2 et place le focus sur l'étape 3), brouillon en `sessionStorage` (consentement jamais mémorisé), envoi `POST /v1/quote-requests`, erreurs en toast avec conservation des saisies, redirection vers `/devis/confirmation?ref=…`.
+- Confirmation : pastille de succès animée (rebond + coche tracée, désactivés si le mouvement est réduit), référence, « Suivre sur WhatsApp » avec la référence dans le message, « Retour à l’accueil ». Sans référence valide : retour à `/devis`. Page non indexée.
+- Fidélité : devis 2 948 px pour 2 945 (desktop) et 4 784 pour 4 781 (mobile), cartes d'étape à 8 px près ; confirmation 1 632 pour 1 631,5, section mobile à 1 px. Tests E2E : pré-sélection, parcours complet jusqu'à la confirmation, brouillon, redirection, axe.
+
+### Décisions
+
+- **Toutes les étapes restent ouvertes**, comme sur la maquette (l'étape faite garde ses choix modifiables, l'étape à venir est déjà remplissable) ; l'état de chaque carte (faite, active, à venir) suit la progression. Choisir un service passe à l'étape 2.
+- **Date** : champ date natif (calendrier du système, accessible et adapté au mobile) ; la maquette affiche « Samedi 14 novembre 2026 », le navigateur affiche la date au format local.
+- **Rubrique et service obligatoires** à l'étape 1 (le contrat accepte un service vide ; la maquette demande « une rubrique puis un service »).
+- **Pays de résidence** : liste de 20 pays (France et Cameroun en tête) ; à compléter si besoin.
+- **Liste « Choisir »** : texte gris `text/muted` (la maquette utilise `text/subtle`, contraste insuffisant pour une valeur affichée).
+- **Vignette du récapitulatif** : visuel du service choisi (la maquette montre l'illustration « accueil »).
+
