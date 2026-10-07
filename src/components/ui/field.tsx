@@ -108,12 +108,31 @@ export function Textarea({ className, rows = 4, ...props }: ComponentProps<'text
   );
 }
 
-/** Liste déroulante native (accessible et adaptée au mobile), chevron 18 px à droite. */
-export function Select({ className, children, ...props }: ComponentProps<'select'>) {
+/** Liste déroulante native (accessible et adaptée au mobile), chevron 18 px à droite, icône facultative à gauche. */
+export function Select({
+  icon: Icon,
+  className,
+  children,
+  ...props
+}: ComponentProps<'select'> & { icon?: LucideIcon }) {
   return (
     <div className="relative">
+      {Icon && (
+        <Icon
+          aria-hidden
+          size={18}
+          className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-icon-default"
+        />
+      )}
       <select
-        className={cn(controlBase, 'cursor-pointer appearance-none py-3.5 pr-11 pl-4', className)}
+        className={cn(
+          controlBase,
+          'cursor-pointer appearance-none py-3.5 pr-11',
+          Icon ? 'pl-[44px]' : 'pl-4',
+          // Option « Choisir » (valeur vide) en gris, comme un texte indicatif (muted : contraste AA).
+          'has-[option[value=""]:checked]:text-text-muted [&_option]:text-text-main',
+          className,
+        )}
         {...props}
       >
         {children}
@@ -127,12 +146,16 @@ export function Select({ className, children, ...props }: ComponentProps<'select
   );
 }
 
-/** Téléphone (Contact `69:7834`) : saisie simple avec icône, indicatif tapé par l'utilisateur. */
+/**
+ * Téléphone (Contact `69:7834`) : saisie simple avec icône, indicatif tapé par l'utilisateur.
+ * Icône `Phone` par défaut, `Smartphone` sur le devis (« Téléphone / WhatsApp »).
+ */
 export function PhoneInput({
   placeholder = '+237 6 00 00 00 00',
+  icon = Phone,
   ...props
-}: Omit<InputProps, 'icon' | 'type'>) {
+}: Omit<InputProps, 'type'>) {
   return (
-    <Input type="tel" inputMode="tel" autoComplete="tel" icon={Phone} placeholder={placeholder} {...props} />
+    <Input type="tel" inputMode="tel" autoComplete="tel" icon={icon} placeholder={placeholder} {...props} />
   );
 }
