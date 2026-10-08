@@ -240,3 +240,18 @@
 - **Portraits de l'équipe** : la maquette fait varier la couleur des vêtements sur une même illustration ; les 4 cartes affichent l'illustration « portrait » en attendant les photos de l'équipe (noms « Prénom Nom » à fournir).
 - **Numéros décoratifs** (« 01 »… en `orange/200` et `orange/300`) rendus par pseudo-élément, comme sur Nos services : texte décoratif à faible contraste voulu par la maquette.
 
+### Partenaires et Formation (8 octobre 2026)
+
+- Les deux pages passent par le moteur des pages éditoriales, avec des sections dynamiques propres : grille de partenaires filtrable (`?categorie=`, 6 logos en mobile) et formulaire « Devenir partenaire » (`POST /v1/partner-requests`) ; catalogue des formations filtrable (`?categorie=`) et formulaire « Demande de formation » (`POST /v1/training-requests`).
+- Nouveaux rendus de cartes : cartes illustrées avec sous-titre (types de partenariat), avantages sur fond clair, offres avec lien (Formation). Section formulaire commune (colonne d'informations + carte), avec l'encadré « Et ensuite ? » ou une illustration.
+- Liens croisés sans rechargement : « Je candidate » présélectionne le type de partenariat, « Voir les formations » applique le filtre, « Demander cette formation » présélectionne la formation ; sans JavaScript, ces liens restent de simples ancres ou adresses avec paramètre.
+- Contrat (dépôt API) : `subtitle` facultatif sur les éléments de section.
+- Fidélité desktop : Partenaires 568 · 632 · 812 · 570 · 990 (maquette 568 · 632 · 806 · 570 · 982), Formation 568 · 476 · 990 · 946, identique à la maquette. Tests E2E : pages, filtres, présélections, validation et envoi.
+
+### Décisions
+
+- **Logos des partenaires** : en attendant les logos, la tuile affiche le nom en `text/muted` (la maquette utilise `neutral/400`, contraste insuffisant).
+- **« Pays et ville »** (Partenaires) : liste au format « Pays · Ville » de la maquette (Cameroun et France, avec « Autre ville »), envoyée en code pays + ville comme l'exige le contrat.
+- **Formation hors catalogue** : option « Autre formation » qui ouvre un champ « Formation recherchée » (le contrat prévoit `autre` + `otherTraining`).
+- **Titre « Une formation pour votre équipe ? »** : le point d'interrogation ne passe plus seul à la ligne (espace insécable), comme le demandait l'inventaire.
+
