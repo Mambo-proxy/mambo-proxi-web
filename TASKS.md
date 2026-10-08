@@ -68,10 +68,10 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 
 ### 1.4 Back-office `/admin`
 
-- [ ] Connexion + vérification du code (OTP) + mot de passe oublié / réinitialisation / acceptation d'invitation
-- [ ] Gabarit : barre latérale (compteurs), barre supérieure, recherche ⌘K, notifications, responsive (icônes, navigation basse mobile), 404
-- [ ] Tableau de bord (desktop + mobile)
-- [ ] Demandes (liste, filtres, panneau de détail, statuts, notes, export)
+- [x] Connexion + vérification du code (OTP) + mot de passe oublié / réinitialisation / acceptation d'invitation
+- [~] Gabarit : barre latérale (compteurs), barre supérieure, recherche ⌘K, notifications, responsive (icônes, navigation basse mobile), 404 — reste la 404 du back-office
+- [x] Tableau de bord (desktop + mobile)
+- [x] Demandes (liste, filtres, panneau de détail, statuts, notes, export)
 - [ ] Services (liste, réordonnancement, menu) + gestion des rubriques
 - [ ] Ajouter / modifier un service (7 sections, sauvegarde auto, aperçu, complétude, publication)
 - [ ] Pages & textes (sections, éditeurs par type, Tiptap pour les pages légales, aperçu, publication)

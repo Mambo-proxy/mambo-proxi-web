@@ -316,3 +316,19 @@
 - **Note obligatoire** : seule la question marquée obligatoire dans le back-office l'est (la note en étoiles dans l'exemple du contrat).
 - **Page de maintenance** à `/maintenance`, prête pour le mode maintenance du chantier 1.5 (redirection par le middleware).
 - **Pages système** : non maquettées, construites sur la carte de « Merci » (pastille, titre, texte, actions).
+
+### Back-office : connexion, gabarit, tableau de bord, demandes (8 octobre 2026)
+
+- Connexion (`/admin/connexion`) : e-mail et mot de passe, « Rester connecté », code à 6 chiffres envoyé par e-mail (renvoi, « Faire confiance à cet appareil pendant 30 jours »), mot de passe oublié, nouveau mot de passe et acceptation d'invitation. Session vérifiée côté serveur (`GET /v1/auth/me`) ; sans session, retour à la connexion.
+- Gabarit : barre latérale avec compteurs (`GET /v1/admin/sidebar-counts`, ajouté au contrat), repliée en icônes entre 768 et 1 279 px, navigation basse en mobile, recherche ⌘K, notifications. La colonne de la barre latérale porte fond et bordure sur toute la hauteur de la page ; la barre reste collée à l'écran.
+- Tableau de bord (desktop et mobile) et Demandes : onglets de statut avec compteurs, filtres (type, rubrique, pays, période) et recherche conservés dans l'adresse, pagination, export CSV, panneau de détail (`?id=`) à droite à partir de 1 280 px et superposé en dessous : actions rapides, informations, statut en 4 étapes, notes internes, historique, « Préparer le devis » et menu (assigner, dupliquer, copier la référence, anonymiser).
+- Mocks : session simulée (cookies décrits par `x-mock-set-cookie`, appliqués au document), toutes les routes `/v1/admin/*` refusées sans session (401) ; données de la maquette Demandes. TanStack Query pour les données du back-office.
+- Fidélité desktop : tableau de bord et demandes conformes à la maquette (captures à 1440 et 390). Tests E2E (`e2e/admin.spec.ts`, 28 tests sur les 4 largeurs) : connexion, protection, mot de passe incorrect, tableau de bord, liste, filtres, détail (statut, note, fermeture), détail ouvert depuis l'adresse ; axe sans violation.
+
+### Décisions
+
+- **Formulaires d'authentification en `method="post"`** : envoyés avant le chargement du script, ils ne mettent pas le mot de passe dans l'adresse.
+- **Couleur des avatars** déduite du nom du contact (la même partout) plutôt que celle, arbitraire, de la maquette.
+- **« À faire aujourd'hui » en mobile** : rendez-vous avant candidatures, comme la maquette mobile (ordre inverse en desktop).
+- **Rôle affiché** « Administrateur·rice » (la maquette indique « Administratrice »), le libellé ne dépendant pas de la personne.
+- **Développement local** : les mocks exigent `NEXT_PUBLIC_API_MOCKING=enabled` (dans `.env.local`, sinon le serveur appelle l'API réelle).
