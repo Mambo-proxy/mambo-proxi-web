@@ -290,4 +290,3 @@
 ### Décisions
 
 - **Consentement de « Me prévenir »** : comme la newsletter du pied de page, pas de case (la maquette n'en montre pas) ; l'envoi vaut demande et l'e-mail de confirmation (double opt-in) recueille le consentement. À valider avec la cliente (point déjà signalé pour la newsletter).
-
