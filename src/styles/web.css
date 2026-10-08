@@ -230,3 +230,32 @@
     stroke-dashoffset: 0;
   }
 }
+
+/* Page 404 : la voiture marque une pause dans la scène, sort du cadre à droite puis revient par la gauche. */
+@keyframes car-drive {
+  0%,
+  45% {
+    transform: translateX(0);
+  }
+  70% {
+    transform: translateX(560px);
+  }
+  70.01% {
+    transform: translateX(-560px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes car-bump {
+  to {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes road-dash {
+  to {
+    stroke-dashoffset: -70;
+  }
+}
