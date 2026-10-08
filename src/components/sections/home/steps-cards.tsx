@@ -55,12 +55,12 @@ export function StepsCards({
                 <span className="flex size-12 items-center justify-center rounded-[14px] bg-orange-50 text-text-brand md:size-[52px] md:rounded-2xl">
                   {item.icon && <Icon name={item.icon} className="size-[22px] md:size-6" />}
                 </span>
+                {/* Numéro décoratif à faible contraste voulu par la maquette : rendu en CSS, hors du texte de la page. */}
                 <span
                   aria-hidden
-                  className="hidden font-brand text-[56px] leading-[56px] font-semibold tracking-[-0.02em] text-orange-200 md:block"
-                >
-                  {item.number}
-                </span>
+                  data-number={item.number ?? undefined}
+                  className="hidden font-brand text-[56px] leading-[56px] font-semibold tracking-[-0.02em] text-orange-200 before:content-[attr(data-number)] md:block"
+                />
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-1 md:gap-5">
                 <h3 className="font-ui text-[16px] leading-6 font-semibold text-text-main md:font-brand md:text-[22px] md:leading-[30px]">
@@ -78,10 +78,9 @@ export function StepsCards({
               </div>
               <span
                 aria-hidden
-                className="font-brand text-[28px] leading-8 font-semibold text-orange-200 md:hidden"
-              >
-                {item.number}
-              </span>
+                data-number={item.number ?? undefined}
+                className="font-brand text-[28px] leading-8 font-semibold text-orange-200 before:content-[attr(data-number)] md:hidden"
+              />
             </Reveal>
           ))}
         </ol>
