@@ -304,7 +304,7 @@ export function CardGrid({ section }: { section: CardGridSection }) {
           lead={section.lead}
           leadMobile={section.leadMobile}
           inverse={inverse}
-          className="xl:max-w-[760px]"
+          className="xl:max-w-[820px]"
         />
       )}
       <ul
