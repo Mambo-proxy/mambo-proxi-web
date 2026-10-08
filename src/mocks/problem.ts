@@ -3,9 +3,13 @@ import type { Problem } from '@/lib/api/schema';
 
 const TITLES: Record<number, string> = {
   400: 'Requête invalide',
+  401: 'Non authentifié',
+  403: 'Accès refusé',
   404: 'Introuvable',
   409: 'Conflit',
+  410: 'Lien expiré',
   422: 'Données invalides',
+  423: 'Compte verrouillé',
   429: 'Trop de requêtes',
   500: 'Erreur interne',
   501: 'Non simulé',

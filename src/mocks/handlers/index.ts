@@ -1,6 +1,9 @@
 import { http } from 'msw';
 import { problem } from '../problem';
+import { adminCoreHandlers } from './admin-core';
+import { adminRequestHandlers } from './admin-requests';
 import { appointmentHandlers } from './appointments';
+import { authHandlers } from './auth';
 import { catalogueHandlers } from './catalogue';
 import { contractHandlers } from './contract';
 import { eventHandlers } from './events';
@@ -21,6 +24,9 @@ import { partnerHandlers } from './partners';
 export const handlers = [
   ...catalogueHandlers,
   ...siteHandlers,
+  ...authHandlers,
+  ...adminCoreHandlers,
+  ...adminRequestHandlers,
   ...appointmentHandlers,
   ...formHandlers,
   ...newsletterHandlers,

@@ -16,8 +16,13 @@ describe('résolution des requêtes simulées (transport NEXT_PUBLIC_API_MOCKING
   });
 
   it('signale explicitement une route non simulée (501, Problem Details)', async () => {
-    const response = await resolveMockRequest(new Request(`${API}/v1/admin/notifications`));
+    const response = await resolveMockRequest(new Request(`${API}/v1/route-inconnue`));
     expect(response.status).toBe(501);
     expect(response.headers.get('Content-Type')).toContain('application/problem+json');
+  });
+
+  it('refuse les routes du back-office sans session (401)', async () => {
+    const response = await resolveMockRequest(new Request(`${API}/v1/admin/notifications`));
+    expect(response.status).toBe(401);
   });
 });
