@@ -2419,6 +2419,21 @@
     "examples": {}
   },
   {
+    "operationId": "adminGetSidebarCounts",
+    "method": "GET",
+    "path": "/v1/admin/sidebar-counts",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "requests": 12,
+        "appointments": 3,
+        "reviews": 4,
+        "applications": 2
+      }
+    }
+  },
+  {
     "operationId": "adminListRequests",
     "method": "GET",
     "path": "/v1/admin/requests",

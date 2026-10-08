@@ -780,6 +780,26 @@ export interface paths {
         patch: operations["adminMarkNotificationsRead"];
         trace?: never;
     };
+    "/v1/admin/sidebar-counts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Compteurs de la barre latérale
+         * @description Demandes nouvelles, rendez-vous à confirmer, avis à valider, candidatures non lues. Affichés sur tous les écrans du back-office.
+         */
+        get: operations["adminGetSidebarCounts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/admin/requests": {
         parameters: {
             query?: never;
@@ -5963,6 +5983,35 @@ export interface operations {
         };
         responses: {
             204: components["responses"]["NoContent"];
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    adminGetSidebarCounts: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Compteurs. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "requests": 12,
+                     *       "appointments": 3,
+                     *       "reviews": 4,
+                     *       "applications": 2
+                     *     }
+                     */
+                    "application/json": components["schemas"]["SidebarCounts"];
+                };
+            };
             401: components["responses"]["Unauthorized"];
         };
     };
