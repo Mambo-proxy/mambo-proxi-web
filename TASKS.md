@@ -59,7 +59,7 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [x] Recrutement `/recrutement` (recherche, filtres, candidature avec CV) — `qa/fidelite/recrutement-*.png`
 - [x] Offre d'emploi `/recrutement/[slug]` — `qa/fidelite/offre-emploi-*.png`
 - [x] Avis clients `/avis-clients` (synthèse, filtres, masonry, pagination) — `qa/fidelite/avis-clients-*.png`
-- [ ] Suivi Mambo `/suivi-mambo`
+- [x] Suivi Mambo `/suivi-mambo` — `qa/fidelite/suivi-mambo-*.png`
 - [ ] Pages légales `/mentions-legales`, `/confidentialite`, `/cookies`, `/cgu`
 - [ ] Questionnaire `/questionnaire/[token]` (+ états jeton invalide / expiré / déjà rempli)
 - [ ] Merci `/questionnaire/merci`

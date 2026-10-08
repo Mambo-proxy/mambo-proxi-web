@@ -281,3 +281,13 @@
 - **Date des avis** en `text/muted` (maquette `text/subtle`, contraste insuffisant).
 - **Nombre d'avis par page** : 6 (maquette) ; la maquette annonce 120 avis et 12 pages, incohérence à arbitrer avec la cliente.
 
+### Suivi Mambo (8 octobre 2026)
+
+- `/suivi-mambo` (page statique, espace client hors lot 1) : badge « Bientôt disponible », « Me prévenir » → `POST /v1/newsletter/subscriptions` avec la source et l'étiquette `suivi-mambo` (double opt-in, déjà inscrit géré), aperçu illustratif « Mes demandes » (décoratif, masqué aux lecteurs d'écran), 4 fonctionnalités à venir, bandeau CTA.
+- Fidélité desktop : 511 · 514 · 498, identique à la maquette (`qa/fidelite/suivi-mambo-*.png`). Tests E2E : page, adresse invalide puis inscription.
+- En-têtes des grilles de cartes portés à 820 px (largeur de la maquette) ; les autres pages éditoriales gardent leurs hauteurs.
+
+### Décisions
+
+- **Consentement de « Me prévenir »** : comme la newsletter du pied de page, pas de case (la maquette n'en montre pas) ; l'envoi vaut demande et l'e-mail de confirmation (double opt-in) recueille le consentement. À valider avec la cliente (point déjà signalé pour la newsletter).
+
