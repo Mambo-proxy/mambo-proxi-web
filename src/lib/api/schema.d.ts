@@ -3811,6 +3811,8 @@ export interface components {
             /** @example 01 */
             number?: string | null;
             title: string;
+            /** @description Sous-titre mis en avant (ex. métiers concernés d'un type de partenariat). */
+            subtitle?: string | null;
             text?: string | null;
             /** @description Texte raccourci en mobile ; null = texte principal. */
             textMobile?: string | null;
