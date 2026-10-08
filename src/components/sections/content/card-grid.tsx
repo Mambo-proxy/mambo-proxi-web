@@ -73,6 +73,33 @@ function FeatureCard({ item }: { item: SectionItem }) {
 }
 
 /**
+ * Atout horizontal (Recrutement `67:6848`) : carte `neutral/50` rayon 22, p 24 (18 en mobile), pastille 44 `orange/50`
+ * à gauche, titre Inter SemiBold 17/24 et texte 14/21 à droite.
+ */
+function HorizontalCard({ item }: { item: SectionItem }) {
+  return (
+    <div className="flex h-full gap-4 rounded-[22px] bg-neutral-50 p-[18px] xl:p-6">
+      {item.icon && (
+        <span
+          aria-hidden
+          className="flex size-11 shrink-0 items-center justify-center rounded-[13px] bg-orange-50"
+        >
+          <Icon name={item.icon} size={20} className="text-text-brand" />
+        </span>
+      )}
+      <span className="flex flex-col gap-1">
+        <h3 className="font-ui text-[17px] leading-6 font-semibold text-text-main">
+          {frenchTypography(item.title)}
+        </h3>
+        {item.text && (
+          <p className="font-ui text-[14px] leading-[21px] text-text-muted">{frenchTypography(item.text)}</p>
+        )}
+      </span>
+    </div>
+  );
+}
+
+/**
  * Carte illustrée (Partenaires `65:5893`) : bordée, rayon 24 ; illustration pleine largeur 200 (150 en mobile),
  * corps p 28 (20) : titre Poppins 20/28, sous-titre orange 14/20, texte 15/23, lien « Je candidate → ».
  */
@@ -257,11 +284,18 @@ export function CardGrid({ section }: { section: CardGridSection }) {
         ? StatementCard
         : section.layout === 'illustrated'
           ? IllustratedCard
-          : inverse
-            ? ValueCard
-            : FeatureCard;
+          : section.layout === 'horizontal'
+            ? HorizontalCard
+            : inverse
+              ? ValueCard
+              : FeatureCard;
   return (
-    <SectionShell section={section} innerClassName="flex flex-col gap-7 xl:gap-12">
+    <SectionShell
+      section={section}
+      // Rangée d'atouts sans en-tête (Recrutement) : marges réduites, 80 en desktop et 48 en mobile.
+      className={section.layout === 'horizontal' && !section.title ? 'py-12 xl:py-20' : undefined}
+      innerClassName="flex flex-col gap-7 xl:gap-12"
+    >
       {(section.eyebrow || section.title) && (
         <SectionHeading
           eyebrow={section.eyebrow}

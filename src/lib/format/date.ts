@@ -63,3 +63,23 @@ export function formatRelative(
   if (days < 7) return `il y a ${days}\u00A0jours`;
   return formatDate(target, timeZone);
 }
+
+/**
+ * Ancienneté d'une publication (liste des offres) : « aujourd’hui », « il y a 3 jours », « il y a 1 semaine »,
+ * « il y a 3 semaines », puis « le 2 octobre 2026 » au-delà d'un mois.
+ */
+export function formatPublishedAgo(
+  date: DateInput,
+  now: DateInput = Date.now(),
+  timeZone = DEFAULT_TIME_ZONE,
+): string {
+  const days = differenceInCalendarDays(inZone(now, timeZone), inZone(date, timeZone));
+  if (days <= 0) return 'aujourd’hui';
+  if (days === 1) return 'hier';
+  if (days < 7) return `il y a ${days}\u00A0jours`;
+  if (days < 31) {
+    const weeks = Math.floor(days / 7);
+    return `il y a ${weeks}\u00A0semaine${weeks > 1 ? 's' : ''}`;
+  }
+  return `le ${formatDate(date, timeZone)}`;
+}

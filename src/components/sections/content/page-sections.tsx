@@ -5,6 +5,7 @@ import type { BreadcrumbItem } from '@/components/ui/breadcrumb';
 import type { KeyFigure, Page, PageSection } from '@/lib/api/schema';
 import { PageHero } from '../page-hero';
 import { CardGrid } from './card-grid';
+import { DarkBand } from './dark-band';
 import { FeatureCards } from './feature-cards';
 import { MethodRail } from './method-rail';
 import { QuoteBand } from './quote-band';
@@ -62,6 +63,7 @@ export function PageSections({
       case 'quote':
         return <QuoteBand key={section.id} section={section} />;
       case 'ctaBand':
+        if (section.tone === 'dark') return <DarkBand key={section.id} section={section} />;
         return (
           <CtaBand
             key={section.id}

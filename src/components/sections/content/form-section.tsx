@@ -11,11 +11,14 @@ import { SectionShell } from './section-shell';
 export function FormSection({
   section,
   aside,
+  titleClassName,
   children,
 }: {
   section: DynamicSection;
   /** Contenu complémentaire sous le chapô, masqué en mobile (Formation : illustration 420 × 280). */
   aside?: ReactNode;
+  /** Taille de titre propre à la maquette (Recrutement : 40/48, 26/32 en mobile). */
+  titleClassName?: string;
   children: ReactNode;
 }) {
   const steps = section.items ?? [];
@@ -31,6 +34,7 @@ export function FormSection({
           titleMobile={section.titleMobile}
           lead={section.lead}
           leadMobile={section.leadMobile}
+          titleClassName={titleClassName}
           leadClassName="md:text-[16px] md:leading-[26px]"
         />
         {aside && <div className="hidden xl:block">{aside}</div>}

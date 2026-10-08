@@ -16,6 +16,8 @@ type SectionHeadingProps = {
   /** Sur fond sombre : sur-titre `orange/400`, titre blanc, chapô `neutral/300`. */
   inverse?: boolean;
   className?: string;
+  /** Taille de titre propre à une maquette (classes `!` : elles priment sur `text-web-section`). */
+  titleClassName?: string;
   leadClassName?: string;
 };
 
@@ -33,6 +35,7 @@ export function SectionHeading({
   as: Heading = 'h2',
   inverse = false,
   className,
+  titleClassName,
   leadClassName,
 }: SectionHeadingProps) {
   return (
@@ -44,7 +47,9 @@ export function SectionHeading({
         </p>
       )}
       {title && (
-        <Heading className={`text-web-section ${inverse ? 'text-neutral-0' : 'text-text-main'}`}>
+        <Heading
+          className={`text-web-section ${inverse ? 'text-neutral-0' : 'text-text-main'} ${titleClassName ?? ''}`}
+        >
           <ResponsiveText
             desktop={<AccentText text={title} />}
             mobile={titleMobile ? <AccentText text={titleMobile} /> : null}
