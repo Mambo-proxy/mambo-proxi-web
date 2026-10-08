@@ -9,6 +9,7 @@ import { DarkBand } from './dark-band';
 import { FeatureCards } from './feature-cards';
 import { MethodRail } from './method-rail';
 import { QuoteBand } from './quote-band';
+import { StepsPanel } from './steps-panel';
 import { TeamGrid } from './team-grid';
 import { TextMedia } from './text-media';
 
@@ -59,6 +60,7 @@ export function PageSections({
       case 'featureList':
         return <FeatureCards key={section.id} section={section} keyFigures={keyFigures} />;
       case 'steps':
+        if (section.layout === 'timeline') return <StepsPanel key={section.id} section={section} />;
         return <MethodRail key={section.id} section={section} />;
       case 'quote':
         return <QuoteBand key={section.id} section={section} />;
