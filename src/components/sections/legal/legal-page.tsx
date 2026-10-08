@@ -89,7 +89,7 @@ export async function LegalPage({ pageKey }: { pageKey: LegalKey }) {
               })}
             </ul>
           </nav>
-          <article className="flex flex-col gap-9">
+          <article className="flex min-w-0 flex-col gap-9">
             {content?.articles.map((article, index) => (
               <section key={article.title} className="flex flex-col gap-3">
                 <h2 className="font-brand text-[24px] leading-8 font-semibold text-text-main">
