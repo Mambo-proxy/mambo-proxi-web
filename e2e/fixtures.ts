@@ -28,6 +28,11 @@ export { expect };
 
 /** Aucune violation WCAG 2.2 A/AA détectable automatiquement. */
 export async function expectAccessible(page: Page) {
+  // Contenu dans son état final : sans cela, un élément en plein fondu d'apparition fausse le calcul des contrastes.
+  await page.addStyleTag({
+    content:
+      '*, *::before, *::after { transition: none !important; animation: none !important; } .reveal { opacity: 1 !important; transform: none !important; }',
+  });
   const { violations } = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .analyze();
