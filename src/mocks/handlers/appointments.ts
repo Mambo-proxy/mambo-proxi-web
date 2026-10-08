@@ -62,4 +62,15 @@ export const appointmentHandlers = [
     const body: Availability = { timezone: 'Africa/Douala', timezoneLabel: 'Heure de Douala (UTC+1)', days };
     return HttpResponse.json(body);
   }),
+
+  // Acceptation du créneau proposé par l'agence : `expire` → 410, `pris` → 409 (créneau plus disponible).
+  http.post('*/v1/appointments/:reference/accept-proposal', async ({ request }) => {
+    const { token } = ((await request.json().catch(() => null)) ?? {}) as { token?: string };
+    if (!token || token === 'expire')
+      return problem(410, 'Cette proposition a expiré. Choisissez un nouveau créneau.');
+    if (token === 'pris') return problem(409, 'Ce créneau vient d’être réservé. Choisissez-en un autre.');
+    return HttpResponse.json({
+      message: 'Parfait ! Votre rendez-vous est confirmé. Vous allez recevoir une invitation par e-mail.',
+    });
+  }),
 ];

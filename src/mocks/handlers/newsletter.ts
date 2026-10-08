@@ -26,4 +26,23 @@ export const newsletterHandlers = [
       { status: 202 },
     );
   }),
+
+  // Liens des e-mails : `expire` et `invalide` simulent un lien périmé ou inconnu.
+  http.post('*/v1/newsletter/confirm', async ({ request }) => {
+    const { token } = ((await request.json().catch(() => null)) ?? {}) as { token?: string };
+    if (!token || token === 'expire' || token === 'invalide')
+      return problem(
+        410,
+        'Ce lien de confirmation a expiré. Inscrivez-vous à nouveau depuis le pied de page.',
+      );
+    return HttpResponse.json({ message: 'Votre inscription à la newsletter est confirmée. À très vite !' });
+  }),
+
+  http.post('*/v1/newsletter/unsubscribe', async ({ request }) => {
+    const { token } = ((await request.json().catch(() => null)) ?? {}) as { token?: string };
+    if (!token || token === 'invalide') return problem(410, 'Ce lien de désinscription n’est pas valide.');
+    return HttpResponse.json({
+      message: 'Vous êtes bien désinscrit·e. Vous ne recevrez plus notre newsletter.',
+    });
+  }),
 ];

@@ -9,6 +9,7 @@ import { jobHandlers } from './jobs';
 import { newsletterHandlers } from './newsletter';
 import { pageHandlers } from './pages';
 import { reviewHandlers } from './reviews';
+import { surveyHandlers } from './surveys';
 import { trainingHandlers } from './trainings';
 import { partnerHandlers } from './partners';
 
@@ -27,6 +28,7 @@ export const handlers = [
   ...trainingHandlers,
   ...jobHandlers,
   ...reviewHandlers,
+  ...surveyHandlers,
   ...contractHandlers,
   http.all('*/v1/*', ({ request }) =>
     problem(501, `Route non simulée : ${request.method} ${new URL(request.url).pathname}.`),

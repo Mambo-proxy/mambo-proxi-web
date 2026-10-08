@@ -26,6 +26,11 @@ export function formatWeekdayDate(date: DateInput, timeZone = DEFAULT_TIME_ZONE)
   return format(inZone(date, timeZone), 'EEEE d MMMM', { locale: fr });
 }
 
+/** « samedi 14 novembre 2026 ». */
+export function formatLongDate(date: DateInput, timeZone = DEFAULT_TIME_ZONE): string {
+  return format(inZone(date, timeZone), 'EEEE d MMMM yyyy', { locale: fr });
+}
+
 /** « 14 h 30 ». */
 export function formatTime(date: DateInput, timeZone = DEFAULT_TIME_ZONE): string {
   const zoned = inZone(date, timeZone);
