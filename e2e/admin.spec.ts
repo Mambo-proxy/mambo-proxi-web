@@ -1,24 +1,5 @@
-import type { Page } from '@playwright/test';
+import { login } from './admin-helpers';
 import { expect, expectAccessible, expectNoHorizontalScroll, test } from './fixtures';
-
-/** Connexion simulée : mot de passe quelconque, puis le code `123456` (gestionnaires de `src/mocks/handlers/auth.ts`). */
-async function login(page: Page) {
-  await page.goto('/admin/connexion', { waitUntil: 'domcontentloaded' });
-  const form = page.getByRole('form', { name: 'Connexion au back-office' });
-  const code = page.getByRole('group', { name: 'Code de vérification à 6 chiffres' });
-  // Saisie répétée tant que la page n'est pas hydratée (le formulaire est alors réinitialisé).
-  await expect(async () => {
-    if (await code.isVisible()) return;
-    await form.getByLabel('Adresse e-mail').fill('mireille@mamboproxi.com');
-    await form.getByRole('textbox', { name: 'Mot de passe' }).fill('motdepasse-solide');
-    await form.getByRole('button', { name: 'Se connecter' }).click();
-    await expect(code).toBeVisible({ timeout: 3000 });
-  }).toPass({ timeout: 30_000 });
-  await code.getByLabel('Chiffre 1 sur 6').pressSequentially('123456');
-  const submit = page.getByRole('button', { name: 'Valider le code' });
-  if (await submit.isEnabled()) await submit.click().catch(() => undefined);
-  await expect(page).toHaveURL(/\/admin$/, { timeout: 15_000 });
-}
 
 test.describe('back-office : connexion', () => {
   test('page de connexion accessible, sans en-tête du site', async ({ page, pageErrors }) => {
@@ -107,5 +88,15 @@ test.describe('back-office : demandes', () => {
     await page.goto('/admin/demandes?id=req_0142', { waitUntil: 'domcontentloaded' });
     const panel = page.getByRole('region', { name: 'Demande MP-2026-0142' });
     await expect(panel.getByRole('heading', { name: 'Chef privé' })).toBeVisible();
+  });
+});
+
+test.describe('back-office : gabarit', () => {
+  test('adresse inconnue : 404 dans la coque du back-office', async ({ page }) => {
+    await login(page);
+    await page.goto('/admin/adresse-inconnue', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Page introuvable');
+    await expect(page.getByRole('link', { name: 'Retour au tableau de bord' })).toBeVisible();
+    await expectAccessible(page);
   });
 });

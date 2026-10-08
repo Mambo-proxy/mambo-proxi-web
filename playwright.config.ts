@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const PORT = 3100;
+// Port modifiable (`E2E_PORT`) pour lancer plusieurs copies du dépôt en parallèle sans partager le serveur.
+const PORT = Number(process.env.E2E_PORT ?? 3100);
 
 /**
  * Tests de bout en bout et de fidélité visuelle, sur le build de production branché sur les mocks.
@@ -30,7 +31,9 @@ export default defineConfig({
     { name: 'desktop-1440', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
   ],
   webServer: {
-    command: `pnpm build && pnpm start --port ${PORT}`,
+    // Connexions gardées ouvertes 60 s : avec la valeur par défaut (5 s), Chrome réutilise parfois une connexion que
+    // le serveur vient de fermer et attend 10 s avant de réessayer (tests instables sous Windows).
+    command: `pnpm build && pnpm start --port ${PORT} --keepAliveTimeout 60000`,
     url: `http://localhost:${PORT}/dev/ui`,
     reuseExistingServer: !process.env.CI,
     timeout: 300_000,
