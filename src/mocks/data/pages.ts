@@ -610,10 +610,131 @@ const recrutement: Page = {
   ],
 };
 
+const avisClients: Page = {
+  key: 'avis-clients',
+  title: 'Avis clients',
+  updatedAt: UPDATED_AT,
+  isPreview: false,
+  seo: {
+    title: 'Avis clients MAMBO Proxi : ce que nos clients disent de nous',
+    description:
+      'Chaque avis est recueilli après une prestation réalisée, puis validé par l’agence avant publication.',
+    ogImageUrl: null,
+    noindex: false,
+  },
+  sections: [
+    {
+      id: 'hero',
+      type: 'hero',
+      enabled: true,
+      variant: 'page',
+      eyebrow: 'Avis clients',
+      title: 'Ce que ==nos clients== disent de nous.',
+      lead: 'Chaque avis est recueilli après une prestation réalisée, puis validé par l’agence avant publication.',
+      showWhatsapp: false,
+    },
+    { id: 'avis', type: 'dynamic', enabled: true, tone: 'light', source: 'reviews-list', limit: 6 },
+    {
+      id: 'votre-avis',
+      type: 'steps',
+      enabled: true,
+      tone: 'muted',
+      layout: 'timeline',
+      eyebrow: 'Votre avis compte',
+      title: 'Après chaque prestation, un court questionnaire',
+      lead: 'Vous recevez automatiquement un e-mail avec un lien : 5 questions maximum, 2 minutes. Avec votre accord, votre avis peut être publié sur le site.',
+      items: [
+        { icon: 'CalendarCheck', title: 'Prestation réalisée' },
+        { icon: 'Mail', title: 'E-mail avec le questionnaire' },
+        { icon: 'Star', title: 'Vous notez et commentez' },
+        { icon: 'Check', title: 'Avis publié après validation' },
+      ],
+    },
+    {
+      id: 'cta',
+      type: 'ctaBand',
+      enabled: true,
+      title: 'À votre tour de vivre\nl’expérience Mambo.',
+      text: 'Demandez votre devis gratuit : réponse sous 24 h.',
+      primaryCta: { label: 'Demander un devis gratuit', href: '/devis', external: false },
+      showWhatsapp: true,
+    },
+  ],
+};
+
+const suiviMambo: Page = {
+  key: 'suivi-mambo',
+  title: 'Suivi Mambo',
+  updatedAt: UPDATED_AT,
+  isPreview: false,
+  seo: {
+    title: 'Suivi Mambo : votre espace client, bientôt en ligne',
+    description:
+      'Suivre vos demandes, retrouver vos devis et échanger avec votre conseiller depuis un seul espace : soyez prévenu de son ouverture.',
+    ogImageUrl: null,
+    noindex: false,
+  },
+  sections: [
+    {
+      id: 'hero',
+      type: 'hero',
+      enabled: true,
+      variant: 'page',
+      badge: { tag: null, text: 'Bientôt disponible' },
+      title: '==Suivi Mambo== : votre espace client, bientôt en ligne.',
+      lead: 'Suivre vos demandes, retrouver vos devis et échanger avec votre conseiller depuis un seul espace. En attendant, notre équipe vous tient informé par e-mail et WhatsApp.',
+      showWhatsapp: false,
+    },
+    {
+      id: 'fonctionnalites',
+      type: 'cardGrid',
+      enabled: true,
+      tone: 'light',
+      layout: 'cards',
+      columns: 4,
+      eyebrow: 'Ce qui arrive',
+      title: 'Tout votre suivi au même endroit',
+      items: [
+        {
+          icon: 'FileText',
+          title: 'Vos demandes et devis',
+          text: 'Statut en temps réel, de la demande à la prestation.',
+        },
+        {
+          icon: 'MessageSquare',
+          title: 'Messages',
+          text: 'Échangez avec votre conseiller, sans perdre le fil.',
+        },
+        {
+          icon: 'Package',
+          title: 'Colis et courriers',
+          text: 'Soyez prévenu à chaque réception à l’agence.',
+        },
+        {
+          icon: 'Wallet',
+          title: 'Paiement en ligne',
+          text: 'Carte bancaire et Mobile Money, dans une prochaine étape.',
+        },
+      ],
+    },
+    {
+      id: 'cta',
+      type: 'ctaBand',
+      enabled: true,
+      title: 'Une demande\nen attendant ?',
+      text: 'Notre équipe vous répond sous 24 h, par e-mail ou WhatsApp.',
+      primaryCta: { label: 'Demander un devis gratuit', href: '/devis', external: false },
+      showWhatsapp: true,
+    },
+  ],
+};
+
 export const pages: Partial<Record<Page['key'], Page>> = {
   'qui-sommes-nous': quiSommesNous,
   mission,
   partenaires,
   formation,
   recrutement,
+  'avis-clients': avisClients,
+  'suivi-mambo': suiviMambo,
 };
