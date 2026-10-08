@@ -9,6 +9,7 @@ import type {
 } from '@/lib/api/schema';
 import { appointmentsToConfirm } from '../data/admin-appointments';
 import { adminRequests } from '../data/admin-requests';
+import { reviewsToValidate } from '../data/admin-reviews';
 import { problem } from '../problem';
 import { requireSession } from '../session';
 
@@ -16,7 +17,10 @@ const HOUR = 60 * 60 * 1000;
 
 /** Compteurs « à faire » qui ne dépendent pas des demandes (avis, candidatures, RDV, partenariats, inscrits). */
 export const pendingCounts = {
-  reviewsToValidate: 4,
+  /** Avis au statut « À valider » (`data/admin-reviews.ts`). */
+  get reviewsToValidate() {
+    return reviewsToValidate();
+  },
   unreadApplications: 2,
   /** Rendez-vous « À confirmer » : calculé sur les rendez-vous simulés (`data/admin-appointments.ts`). */
   get appointmentsToConfirm() {
