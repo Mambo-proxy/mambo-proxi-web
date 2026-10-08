@@ -50,3 +50,7 @@ export function AdminPage({ title, breadcrumb, actions, hideMobileTitle, flush, 
 /** Bouton d'action de la barre supérieure (`85:10374`) : orange, rayon 10, padding 10/14, icône 16, Inter SemiBold 14. */
 export const topbarActionClass =
   'inline-flex items-center gap-2 rounded-[10px] bg-brand-primary px-3.5 py-2.5 font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-on-primary transition-colors hover:bg-brand-primary-hover [&_svg]:size-4';
+
+/** Bouton secondaire de la barre supérieure et des éditeurs (« Exporter », « Aperçu », « Enregistrer ») : fond blanc, bordure `border/strong`. */
+export const topbarSecondaryClass =
+  'inline-flex items-center justify-center gap-2 rounded-[10px] border border-border-strong bg-neutral-0 px-3.5 py-2.5 font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main transition-colors hover:bg-neutral-50 disabled:opacity-60 [&_svg]:size-4';

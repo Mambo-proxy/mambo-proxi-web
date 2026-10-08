@@ -2,6 +2,18 @@ import { http } from 'msw';
 import { problem } from '../problem';
 import { adminCoreHandlers } from './admin-core';
 import { adminRequestHandlers } from './admin-requests';
+import { adminServiceHandlers } from './admin-services';
+import { adminPageHandlers } from './admin-pages';
+import { adminReviewHandlers } from './admin-reviews';
+import { adminAppointmentHandlers } from './admin-appointments';
+import { adminJobHandlers } from './admin-jobs';
+import { adminPartnerHandlers } from './admin-partners';
+import { adminTrainingHandlers } from './admin-trainings';
+import { adminEventHandlers } from './admin-events';
+import { adminContactHandlers } from './admin-contacts';
+import { adminNewsletterHandlers } from './admin-newsletter';
+import { adminSettingsHandlers } from './admin-settings';
+import { adminMediaHandlers } from './admin-media';
 import { appointmentHandlers } from './appointments';
 import { authHandlers } from './auth';
 import { catalogueHandlers } from './catalogue';
@@ -27,6 +39,18 @@ export const handlers = [
   ...authHandlers,
   ...adminCoreHandlers,
   ...adminRequestHandlers,
+  ...adminServiceHandlers,
+  ...adminPageHandlers,
+  ...adminReviewHandlers,
+  ...adminAppointmentHandlers,
+  ...adminJobHandlers,
+  ...adminPartnerHandlers,
+  ...adminTrainingHandlers,
+  ...adminEventHandlers,
+  ...adminContactHandlers,
+  ...adminNewsletterHandlers,
+  ...adminSettingsHandlers,
+  ...adminMediaHandlers,
   ...appointmentHandlers,
   ...formHandlers,
   ...newsletterHandlers,

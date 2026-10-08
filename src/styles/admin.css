@@ -1,0 +1,62 @@
+/* Back-office : contenu de l'éditeur de texte riche (même mise en forme que les pages légales du site). */
+.rich-text-editor > * + * {
+  margin-top: 0.75rem;
+}
+
+.rich-text-editor h2 {
+  font-family: var(--font-brand);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 28px;
+}
+
+.rich-text-editor h3,
+.rich-text-editor h4 {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.rich-text-editor ul,
+.rich-text-editor ol {
+  padding-left: 1.25rem;
+}
+
+.rich-text-editor ul {
+  list-style: disc;
+}
+
+.rich-text-editor ol {
+  list-style: decimal;
+}
+
+.rich-text-editor li + li {
+  margin-top: 0.25rem;
+}
+
+.rich-text-editor a {
+  color: var(--mp-color-text-brand);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.rich-text-editor blockquote {
+  border-left: 3px solid var(--mp-color-border-strong);
+  color: var(--mp-color-text-muted);
+  padding-left: 1rem;
+}
+
+.rich-text-editor strong {
+  font-weight: 600;
+}
+
+/* Texte d'invite tant que l'éditeur est vide. */
+.rich-text-editor[data-placeholder] > p.is-editor-empty:first-child::before,
+.rich-text-editor[data-placeholder]:has(> p:only-child:empty)::before {
+  color: var(--mp-color-text-muted);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}

@@ -4,6 +4,7 @@
 @import '../styles/tailwind.theme.css';
 @import '../styles/typography.css';
 @import '../styles/web.css';
+@import '../styles/admin.css';
 
 /* Polices chargées par next/font (voir src/app/layout.tsx) */
 :root {
