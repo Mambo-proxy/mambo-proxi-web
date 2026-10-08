@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { publicCsp, securityHeaders } from './src/lib/security/headers';
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
@@ -6,6 +7,16 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   images: {
     formats: ['image/avif', 'image/webp'],
+  },
+  async headers() {
+    return [
+      { source: '/:path*', headers: securityHeaders },
+      // Le back-office reçoit sa propre CSP (avec nonce) depuis le proxy.
+      {
+        source: '/((?!admin(?:/|$)).*)',
+        headers: [{ key: 'Content-Security-Policy', value: publicCsp() }],
+      },
+    ];
   },
   async redirects() {
     return [
