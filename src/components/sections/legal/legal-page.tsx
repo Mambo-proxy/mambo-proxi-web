@@ -55,7 +55,7 @@ export async function LegalPage({ pageKey }: { pageKey: LegalKey }) {
         <div className="container-site grid items-start gap-6 pt-6 pb-14 xl:grid-cols-[300px_minmax(0,1fr)] xl:gap-20 xl:pt-16 xl:pb-28">
           <nav
             aria-label="Pages légales"
-            className="xl:sticky xl:top-[calc(var(--site-header-h,121px)+24px)]"
+            className="min-w-0 xl:sticky xl:top-[calc(var(--site-header-h,121px)+24px)]"
           >
             <ul className="flex [scrollbar-width:none] gap-1 overflow-x-auto rounded-[20px] bg-neutral-50 p-1.5 xl:flex-col xl:p-3 [&::-webkit-scrollbar]:hidden">
               {LEGAL_PAGES.map((item) => {
