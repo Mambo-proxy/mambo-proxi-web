@@ -269,3 +269,15 @@
 - **Partage de l'offre** : l'adresse est lue dans le navigateur tant que l'adresse publique du site n'est pas définie.
 - **Liste en mobile** : la ligne de métadonnées passe sur plusieurs lignes (la maquette déborde de la carte).
 
+### Avis clients (8 octobre 2026)
+
+- `/avis-clients` : héros avec carte « Note globale » (moyenne, étoiles, nombre d'avis, répartition des notes) depuis `GET /v1/reviews/summary` ; avis de `GET /v1/reviews` filtrés par rubrique (liens `?categorie=`), triés (« Plus récents » / « Mieux notés », `?tri=notes`) et paginés (`?page=`, 6 avis par page comme la maquette), en maçonnerie 3 colonnes remplie ligne par ligne (une colonne sous 1 280 px, 4 avis en mobile) ; bloc « Votre avis compte » (texte + 4 étapes) ; bandeau CTA.
+- Mocks : les 6 avis de la maquette et 66 avis provisoires pour remplir la pagination (`1 2 3 … 12`) ; l'accueil lit désormais ses 3 avis mis en avant dans ce jeu.
+- Fidélité desktop : héros 404, collecte 576, CTA 498 au pixel ; liste 940 pour 878 (`qa/fidelite/avis-clients-*.png`). Tests E2E : page, filtre, tri et pagination qui conservent les paramètres.
+
+### Décisions
+
+- **« Avis vérifié après prestation »** affiché sur chaque avis vérifié (la maquette ne le montre que sur le premier) : d'où la liste un peu plus haute que la maquette.
+- **Date des avis** en `text/muted` (maquette `text/subtle`, contraste insuffisant).
+- **Nombre d'avis par page** : 6 (maquette) ; la maquette annonce 120 avis et 12 pages, incohérence à arbitrer avec la cliente.
+
