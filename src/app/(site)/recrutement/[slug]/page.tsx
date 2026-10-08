@@ -11,6 +11,9 @@ import { cacheTags } from '@/lib/api/tags';
 import { formatDate } from '@/lib/format/date';
 import { frenchTypography } from '@/lib/format/typography';
 import { routes } from '@/lib/routes';
+import { seoMetadata } from '@/lib/seo/metadata';
+import { JsonLd } from '@/components/seo/json-ld';
+import { jobPostingJsonLd } from '@/lib/seo/json-ld';
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -32,11 +35,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const job = await getJob(slug);
   if (!job) return {};
-  return {
+  return seoMetadata({
     title: `${job.title} · ${job.city}`,
     description: job.summary,
-    alternates: { canonical: `/recrutement/${job.slug}` },
-  };
+    path: `/recrutement/${job.slug}`,
+  });
 }
 
 /** Bloc de contenu de l'offre : titre Poppins 26/32 (22 en mobile). */
@@ -89,6 +92,7 @@ export default async function JobPage({ params }: Params) {
 
   return (
     <>
+      <JsonLd data={jobPostingJsonLd(job)} />
       <section className="bg-neutral-50">
         <div className="container-site flex flex-col gap-[18px] pt-5 pb-8 xl:pt-12 xl:pb-14">
           <Breadcrumb

@@ -3,13 +3,14 @@ import { RegistrationLayout } from '@/components/forms/registration-layout';
 import { unwrap } from '@/lib/api/result';
 import { api, cached } from '@/lib/api/server';
 import { cacheTags } from '@/lib/api/tags';
+import { seoMetadata } from '@/lib/seo/metadata';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = seoMetadata({
   title: 'S’inscrire',
   description:
     'Créez votre compte Mambo : enregistrez vos informations une fois, ou rejoignez notre réseau de partenaires au Cameroun.',
-  alternates: { canonical: '/inscription' },
-};
+  path: '/inscription',
+});
 
 type SearchParams = { searchParams: Promise<{ profil?: string }> };
 

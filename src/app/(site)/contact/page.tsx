@@ -15,13 +15,14 @@ import { frenchTypography } from '@/lib/format/typography';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
+import { seoMetadata } from '@/lib/seo/metadata';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = seoMetadata({
   title: 'Contact',
   description:
     'Par téléphone, WhatsApp, e-mail ou lors d’un rendez-vous à l’agence de Douala : choisissez ce qui vous convient, nous vous répondons rapidement.',
-  alternates: { canonical: '/contact' },
-};
+  path: '/contact',
+});
 
 type SearchParams = { searchParams: Promise<{ onglet?: string }> };
 

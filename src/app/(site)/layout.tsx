@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { CookieBanner } from '@/components/site/cookie-banner';
 import { SiteFooter } from '@/components/site/site-footer';
@@ -6,6 +7,13 @@ import { TopBar } from '@/components/site/top-bar';
 import { WhatsappFloat } from '@/components/site/whatsapp-float';
 import { getNavigation, getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
+
+/** Balise de vérification Google Search Console, saisie dans les Paramètres du back-office. */
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  const google = settings.analytics?.searchConsoleVerification;
+  return google ? { verification: { google } } : {};
+}
 
 /** Gabarit des pages publiques : barre supérieure, en-tête, pied de page, WhatsApp flottant, bandeau cookies. */
 export default async function SiteLayout({ children }: { children: ReactNode }) {

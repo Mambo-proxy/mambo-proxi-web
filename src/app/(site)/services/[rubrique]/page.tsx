@@ -16,6 +16,9 @@ import { cacheTags } from '@/lib/api/tags';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
+import { seoMetadata } from '@/lib/seo/metadata';
+import { JsonLd } from '@/components/seo/json-ld';
+import { categoryJsonLd } from '@/lib/seo/json-ld';
 
 type Params = { params: Promise<{ rubrique: string }> };
 
@@ -40,11 +43,12 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { rubrique } = await params;
   const category = await getCategory(rubrique);
   if (!category) return {};
-  return {
-    title: category.seo.title ?? category.name,
-    description: category.seo.description ?? category.description,
-    alternates: { canonical: category.href },
-  };
+  return seoMetadata({
+    title: category.name,
+    description: category.description,
+    path: category.href,
+    seo: category.seo,
+  });
 }
 
 /** Page rubrique (Expérience `60:1491`, Immobilier `61:2156`, Proximité `61:3356`, Culture `61:5620`). */
@@ -84,6 +88,7 @@ export default async function RubriquePage({ params }: Params) {
 
   return (
     <>
+      <JsonLd data={categoryJsonLd(category)} />
       <PageHero
         section={hero}
         whatsappHref={whatsappHref}

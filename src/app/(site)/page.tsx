@@ -14,6 +14,9 @@ import { api, cached } from '@/lib/api/server';
 import { cacheTags } from '@/lib/api/tags';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
+import { seoMetadata } from '@/lib/seo/metadata';
+import { JsonLd } from '@/components/seo/json-ld';
+import { organizationJsonLd, websiteJsonLd } from '@/lib/seo/json-ld';
 
 async function getHomeData() {
   const [page, settings, categories, reviews, summary, partners] = await Promise.all([
@@ -39,11 +42,13 @@ async function getHomeData() {
 
 export async function generateMetadata(): Promise<Metadata> {
   const { page, settings } = await getHomeData();
-  return {
-    title: { absolute: page?.seo.title ?? settings.seo?.defaultTitle ?? settings.siteName },
-    description: page?.seo.description ?? settings.seo?.defaultDescription,
-    alternates: { canonical: '/' },
-  };
+  return seoMetadata({
+    title: settings.seo?.defaultTitle ?? settings.siteName,
+    description: settings.seo?.defaultDescription,
+    path: '/',
+    seo: page?.seo,
+    absoluteTitle: true,
+  });
 }
 
 /** Accueil (Figma `47:151`, mobile `53:530`) : sections de la page `accueil`, dans l'ordre défini dans le back-office. */
@@ -98,5 +103,10 @@ export default async function HomePage() {
     }
   }
 
-  return <>{data.page.sections.map(render)}</>;
+  return (
+    <>
+      <JsonLd data={[organizationJsonLd(settings, data.summary), websiteJsonLd(settings)]} />
+      {data.page.sections.map(render)}
+    </>
+  );
 }

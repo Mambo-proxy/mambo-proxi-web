@@ -9,6 +9,7 @@ import { jobHandlers } from './jobs';
 import { newsletterHandlers } from './newsletter';
 import { pageHandlers } from './pages';
 import { reviewHandlers } from './reviews';
+import { siteHandlers } from './site';
 import { surveyHandlers } from './surveys';
 import { trainingHandlers } from './trainings';
 import { partnerHandlers } from './partners';
@@ -19,6 +20,7 @@ import { partnerHandlers } from './partners';
  */
 export const handlers = [
   ...catalogueHandlers,
+  ...siteHandlers,
   ...appointmentHandlers,
   ...formHandlers,
   ...newsletterHandlers,

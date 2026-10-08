@@ -10,6 +10,8 @@ import { getPage, pageMetadata } from '@/lib/pages';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
+import { JsonLd } from '@/components/seo/json-ld';
+import { organizationJsonLd } from '@/lib/seo/json-ld';
 
 export function generateMetadata(): Promise<Metadata> {
   return pageMetadata('avis-clients', '/avis-clients');
@@ -44,30 +46,35 @@ export default async function ReviewsPage({ searchParams }: SearchParams) {
   const breadcrumb = [{ label: 'Accueil', href: routes.home }, { label: 'Avis clients' }];
 
   return (
-    <PageSections
-      page={page}
-      breadcrumb={breadcrumb}
-      whatsappHref={
-        settings.whatsapp.enabled ? whatsappUrl(settings.whatsapp.number, settings.whatsapp.message) : null
-      }
-      keyFigures={settings.keyFigures ?? []}
-      renderSection={(section) => {
-        if (section.type === 'hero')
-          return <ReviewsHero key={section.id} section={section} summary={summary} breadcrumb={breadcrumb} />;
-        if (section.type === 'dynamic' && section.source === 'reviews-list')
-          return (
-            <ReviewsList
-              key={section.id}
-              reviews={reviews.data}
-              categories={categories.map((item) => ({ slug: item.slug, name: item.name }))}
-              category={category}
-              sort={sort}
-              page={reviews.meta.page}
-              totalPages={reviews.meta.totalPages}
-            />
-          );
-        return undefined;
-      }}
-    />
+    <>
+      <JsonLd data={organizationJsonLd(settings, summary)} />
+      <PageSections
+        page={page}
+        breadcrumb={breadcrumb}
+        whatsappHref={
+          settings.whatsapp.enabled ? whatsappUrl(settings.whatsapp.number, settings.whatsapp.message) : null
+        }
+        keyFigures={settings.keyFigures ?? []}
+        renderSection={(section) => {
+          if (section.type === 'hero')
+            return (
+              <ReviewsHero key={section.id} section={section} summary={summary} breadcrumb={breadcrumb} />
+            );
+          if (section.type === 'dynamic' && section.source === 'reviews-list')
+            return (
+              <ReviewsList
+                key={section.id}
+                reviews={reviews.data}
+                categories={categories.map((item) => ({ slug: item.slug, name: item.name }))}
+                category={category}
+                sort={sort}
+                page={reviews.meta.page}
+                totalPages={reviews.meta.totalPages}
+              />
+            );
+          return undefined;
+        }}
+      />
+    </>
   );
 }

@@ -8,13 +8,14 @@ import { cacheTags } from '@/lib/api/tags';
 import { frenchTypography } from '@/lib/format/typography';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
+import { seoMetadata } from '@/lib/seo/metadata';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = seoMetadata({
   title: 'Devis gratuit',
   description:
     'Votre devis gratuit en 3 minutes : sans engagement, réponse personnalisée sous 24 h, par e-mail ou WhatsApp.',
-  alternates: { canonical: '/devis' },
-};
+  path: '/devis',
+});
 
 type SearchParams = { searchParams: Promise<{ service?: string; rubrique?: string }> };
 

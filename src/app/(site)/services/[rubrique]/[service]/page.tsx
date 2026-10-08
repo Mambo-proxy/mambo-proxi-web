@@ -13,6 +13,9 @@ import { cacheTags } from '@/lib/api/tags';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
+import { seoMetadata } from '@/lib/seo/metadata';
+import { JsonLd } from '@/components/seo/json-ld';
+import { faqJsonLd, serviceJsonLd } from '@/lib/seo/json-ld';
 
 type Params = { params: Promise<{ rubrique: string; service: string }> };
 
@@ -36,12 +39,12 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { rubrique, service: slug } = await params;
   const service = await getService(rubrique, slug);
   if (!service) return {};
-  return {
-    title: service.seo.title ?? service.name,
-    description: service.seo.description ?? service.summary,
-    alternates: { canonical: service.href },
-    robots: service.seo.noindex ? { index: false } : undefined,
-  };
+  return seoMetadata({
+    title: service.name,
+    description: service.summary,
+    path: service.href,
+    seo: service.seo,
+  });
 }
 
 /** Fiche service (Chef privé desktop `62:4161`, mobile `62:4733`) : gabarit commun aux 19 services. */
@@ -59,6 +62,7 @@ export default async function ServicePage({ params }: Params) {
 
   return (
     <>
+      <JsonLd data={[serviceJsonLd(service), faqJsonLd(service.faq)]} />
       <ServiceHero
         service={service}
         quoteHref={quoteHref}

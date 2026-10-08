@@ -11,6 +11,7 @@ import { cacheTags } from '@/lib/api/tags';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
+import { seoMetadata } from '@/lib/seo/metadata';
 
 async function getServicesData() {
   const [page, settings, categories] = await Promise.all([
@@ -33,11 +34,7 @@ async function getServicesData() {
 
 export async function generateMetadata(): Promise<Metadata> {
   const { page } = await getServicesData();
-  return {
-    title: page?.seo.title ?? 'Nos services',
-    description: page?.seo.description ?? undefined,
-    alternates: { canonical: '/services' },
-  };
+  return seoMetadata({ title: 'Nos services', path: '/services', seo: page?.seo });
 }
 
 /** « Nos services » (Figma `58:828`, mobile `58:1543`) : héros, rubriques avec leurs services, bandeau CTA. */

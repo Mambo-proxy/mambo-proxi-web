@@ -2,14 +2,17 @@ import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import type { Route } from 'next';
 import { Fragment } from 'react';
+import { JsonLd } from '@/components/seo/json-ld';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
+import { breadcrumbJsonLd } from '@/lib/seo/json-ld';
 
 export type BreadcrumbItem = { label: string; href?: Route };
 
 /**
  * Fil d'Ariane (Devis `70:8185`) : liens Inter Regular 13/16 +1 % `text/muted`,
  * page courante Inter SemiBold `text/main`, chevron 14 px. Le dernier élément est la page courante.
+ * Accompagné des données structurées `BreadcrumbList`.
  */
 export function Breadcrumb({ items, className }: { items: BreadcrumbItem[]; className?: string }) {
   return (
@@ -37,6 +40,7 @@ export function Breadcrumb({ items, className }: { items: BreadcrumbItem[]; clas
           );
         })}
       </ol>
+      <JsonLd data={breadcrumbJsonLd(items)} />
     </nav>
   );
 }

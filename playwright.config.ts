@@ -34,6 +34,10 @@ export default defineConfig({
     url: `http://localhost:${PORT}/dev/ui`,
     reuseExistingServer: !process.env.CI,
     timeout: 300_000,
-    env: { NEXT_PUBLIC_API_MOCKING: 'enabled', NEXT_TELEMETRY_DISABLED: '1' },
+    env: {
+      NEXT_PUBLIC_API_MOCKING: 'enabled',
+      NEXT_PUBLIC_SITE_URL: `http://localhost:${PORT}`,
+      NEXT_TELEMETRY_DISABLED: '1',
+    },
   },
 });
