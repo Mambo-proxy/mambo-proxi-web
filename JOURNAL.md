@@ -255,3 +255,17 @@
 - **Formation hors catalogue** : option « Autre formation » qui ouvre un champ « Formation recherchée » (le contrat prévoit `autre` + `otherTraining`).
 - **Titre « Une formation pour votre équipe ? »** : le point d'interrogation ne passe plus seul à la ligne (espace insécable), comme le demandait l'inventaire.
 
+### Recrutement et offre d'emploi (8 octobre 2026)
+
+- `/recrutement` : atouts (cartes horizontales), offres (nombre de postes ouverts en titre, recherche, filtres lieu et contrat, ancienneté « Publiée il y a… »), bandeau sombre « Devenir prestataire » (variante sombre de la section CTA, vers le formulaire Partenaires), candidature avec CV par glisser-déposer → `POST /v1/job-applications` en `multipart/form-data`. « Candidature spontanée » est le choix par défaut ; `?poste=` présélectionne une offre.
+- `/recrutement/[slug]` (générées à la compilation) : étiquettes, intitulé, lieu, contrat, prise de poste, date de publication ; Le poste, Vos missions, Votre profil, Ce que nous offrons ; carte « Intéressé·e ? » (Postuler → candidature présélectionnée, partage WhatsApp, LinkedIn, e-mail) et « Voir toutes les offres ».
+- Fidélité desktop : Recrutement 568 · 278 · 972 · 348 · 1048 (identique à la maquette), offre 2 208 px pour 2 206 (`qa/fidelite/recrutement-*.png`, `offre-emploi-*.png`). Tests E2E : pages, compteur, recherche, filtres, présélection et envoi avec CV.
+- Tests : l'audit d'accessibilité neutralise désormais les animations d'apparition (un contraste mesuré en plein fondu faisait échouer un test de façon aléatoire).
+
+### Décisions
+
+- **Filtres de contrat** : CDI, CDD, Freelance… selon les offres publiées (la maquette ne montre que CDI et Freelance ; une offre en CDD fait apparaître « CDD »).
+- **Ville** facultative dans la candidature, comme sur la maquette (le contrat la déclare obligatoire : une valeur vide est envoyée ; à aligner côté API).
+- **Partage de l'offre** : l'adresse est lue dans le navigateur tant que l'adresse publique du site n'est pas définie.
+- **Liste en mobile** : la ligne de métadonnées passe sur plusieurs lignes (la maquette déborde de la carte).
+
