@@ -61,10 +61,10 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [x] Avis clients `/avis-clients` (synthèse, filtres, masonry, pagination) — `qa/fidelite/avis-clients-*.png`
 - [x] Suivi Mambo `/suivi-mambo` — `qa/fidelite/suivi-mambo-*.png`
 - [x] Pages légales `/mentions-legales`, `/confidentialite`, `/cookies`, `/cgu` — `qa/fidelite/pages-legales-*.png`
-- [ ] Questionnaire `/questionnaire/[token]` (+ états jeton invalide / expiré / déjà rempli)
-- [ ] Merci `/questionnaire/merci`
-- [ ] 404, erreur 500, maintenance
-- [ ] Pages newsletter `/newsletter/confirmation`, `/newsletter/desinscription`, acceptation de créneau RDV
+- [x] Questionnaire `/questionnaire/[token]` (+ états jeton invalide / expiré / déjà rempli) — `qa/fidelite/questionnaire-*.png`
+- [x] Merci `/questionnaire/merci`
+- [x] 404, erreur 500, maintenance — `qa/fidelite/page-404-*.png`
+- [x] Pages newsletter `/newsletter/confirmation`, `/newsletter/desinscription`, acceptation de créneau RDV (`/rendez-vous/confirmer`)
 
 ### 1.4 Back-office `/admin`
 

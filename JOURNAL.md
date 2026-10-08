@@ -301,3 +301,18 @@
 
 - **4ᵉ entrée « Conditions générales »** dans le sommaire : le pied de page pointe vers `/cgu`, absent de la maquette qui ne montre que 3 pages.
 - **Liens dans le texte** : « politique de confidentialité » et l'adresse e-mail sont des liens (soulignés, orange `text/brand`).
+
+### Questionnaire, pages d'erreur et pages système (8 octobre 2026)
+
+- `/questionnaire/[token]` : page autonome (barre logo seule, non indexée) ouverte depuis l'e-mail après la prestation ; rappel de la prestation (visuel, service, date, référence), progression en 5 segments qui avance avec les réponses, questions administrables (`GET /v1/surveys/{token}` : étoiles avec libellé de la note, choix en puces, échelle 0–10, texte libre), consentement à la publication, envoi `POST /v1/surveys/{token}/responses` puis `/questionnaire/merci`. Lien inconnu (404), expiré ou déjà utilisé (410) : état dédié avec le message de l'API.
+- 404 avec le gabarit du site (adresses inconnues comme `notFound()` des pages) : scène « voiture » recomposée en SVG pour l'animer (la voiture roule, sort du cadre et revient ; marquage qui défile ; immobile si le mouvement est réduit). Erreur 500 (« Réessayer ») et maintenance (page autonome qui s'affiche même sans API) sur le même gabarit ; erreur globale minimale en dernier recours.
+- Pages des liens d'e-mail, au gabarit de « Merci » : confirmation de la newsletter (exécutée à l'ouverture), désinscription et acceptation d'un créneau proposé (sur clic : un logiciel qui suit les liens d'un e-mail ne doit pas désinscrire ni confirmer à la place de la personne).
+- Fidélité : questionnaire 1 421 px pour 1 411, 404 1 598 pour 1 597 (`qa/fidelite/questionnaire-*.png`, `page-404-*.png`). Tests E2E : questionnaire (accessibilité, note obligatoire, progression, envoi, 3 états de lien), 404, maintenance, liens d'e-mail.
+- Suite complète avant ce lot : 262 tests réussis (audit sans animations). Les grands numéros décoratifs des étapes de l'accueil passent en pseudo-élément, comme sur les autres pages.
+
+### Décisions
+
+- **Progression** : elle reflète le nombre de questions répondues (la maquette montre 2 segments sur 5 alors que 4 réponses sont données).
+- **Note obligatoire** : seule la question marquée obligatoire dans le back-office l'est (la note en étoiles dans l'exemple du contrat).
+- **Page de maintenance** à `/maintenance`, prête pour le mode maintenance du chantier 1.5 (redirection par le middleware).
+- **Pages système** : non maquettées, construites sur la carte de « Merci » (pastille, titre, texte, actions).
