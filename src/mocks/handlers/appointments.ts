@@ -1,28 +1,16 @@
-import { addDays, differenceInCalendarDays, format, parseISO } from 'date-fns';
+import { differenceInCalendarDays, parseISO } from 'date-fns';
 import { http, HttpResponse } from 'msw';
-import type { AppointmentFormat, Availability } from '@/lib/api/schema';
+import type { AppointmentFormat, AppointmentInput } from '@/lib/api/schema';
+import { adminAppointments, availabilityState, computeAvailability } from '../data/admin-appointments';
 import { problem } from '../problem';
+import { MOCK_FAILURE_EMAIL } from './forms';
 
-/** Créneaux simulés, heure de Douala (UTC+1) : heure, minute, formats proposés. */
-const SLOTS: ReadonlyArray<{ hour: number; minute: number; formats: AppointmentFormat[] }> = [
-  { hour: 9, minute: 0, formats: ['AGENCE', 'TELEPHONE', 'VISIO'] },
-  { hour: 10, minute: 30, formats: ['AGENCE', 'TELEPHONE', 'VISIO'] },
-  { hour: 14, minute: 0, formats: ['AGENCE', 'TELEPHONE', 'VISIO'] },
-  { hour: 15, minute: 30, formats: ['AGENCE', 'TELEPHONE', 'VISIO'] },
-  { hour: 17, minute: 0, formats: ['TELEPHONE', 'VISIO'] },
-];
-
-/** Délai minimal avant un rendez-vous (contrat : 24 h). */
-const MIN_NOTICE_MS = 24 * 60 * 60 * 1000;
-
-/** Instant UTC d'une heure de Douala (UTC+1, sans changement d'heure). */
-function doualaInstant(day: string, hour: number, minute: number): Date {
-  return new Date(`${day}T${String(hour - 1).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00.000Z`);
-}
+let sequence = 200;
 
 /**
- * `GET /v1/appointments/availability` : du lundi au samedi, 5 créneaux (le dernier sans rendez-vous à l'agence),
- * dimanches fermés, délai de 24 h ; un jour sur neuf est complet pour montrer l'état « sans créneau ».
+ * Rendez-vous du site, branchés sur les données du back-office (`src/mocks/data/admin-appointments.ts`) :
+ * les créneaux proposés suivent les disponibilités réglées dans « Créneaux disponibles » (règles, fermetures,
+ * délai de prévenance, horizon) et les rendez-vous déjà pris ; une demande envoyée arrive « À confirmer ».
  */
 export const appointmentHandlers = [
   http.get('*/v1/appointments/availability', ({ request }) => {
@@ -31,36 +19,50 @@ export const appointmentHandlers = [
     const to = query.get('to');
     const formatFilter = query.get('format') as AppointmentFormat | null;
     if (!from || !to) return problem(422, 'Les dates de début et de fin sont obligatoires.');
-    const start = parseISO(from);
-    const span = differenceInCalendarDays(parseISO(to), start);
+    const span = differenceInCalendarDays(parseISO(to), parseISO(from));
     if (span < 0 || span > 62) return problem(422, 'La période demandée doit faire 62 jours au plus.');
+    return HttpResponse.json(
+      computeAvailability(availabilityState.config, adminAppointments, from, to, { format: formatFilter }),
+    );
+  }),
 
-    const now = Date.now();
-    const days: Availability['days'] = Array.from({ length: span + 1 }, (_, index) => {
-      const date = addDays(start, index);
-      const key = format(date, 'yyyy-MM-dd');
-      if (date.getDay() === 0)
-        return { date: key, available: false, closedReason: 'Fermé le dimanche', slots: [] };
-      const slots = SLOTS.filter((slot) => !formatFilter || slot.formats.includes(formatFilter))
-        .map((slot) => {
-          const startsAt = doualaInstant(key, slot.hour, slot.minute);
-          return {
-            startsAt: startsAt.toISOString(),
-            endsAt: new Date(startsAt.getTime() + 60 * 60 * 1000).toISOString(),
-            formats: slot.formats,
-          };
-        })
-        .filter((slot) => new Date(slot.startsAt).getTime() - now >= MIN_NOTICE_MS);
-      const full = date.getDate() % 9 === 0;
-      return {
-        date: key,
-        available: !full && slots.length > 0,
-        closedReason: full ? 'Complet' : null,
-        slots: full ? [] : slots,
-      };
+  // Demande de rendez-vous du site : ajoutée à la file « À confirmer » du back-office, puis réponse du
+  // gestionnaire générique des formulaires (référence, erreur simulée).
+  http.post('*/v1/appointments', async ({ request }) => {
+    const body = (await request
+      .clone()
+      .json()
+      .catch(() => null)) as Partial<AppointmentInput> | null;
+    if (!body?.startsAt || !body.contact?.fullName || body.contact.email === MOCK_FAILURE_EMAIL) return;
+    sequence += 1;
+    const startsAt = new Date(body.startsAt);
+    if (Number.isNaN(startsAt.getTime())) return;
+    const minutes = availabilityState.config.rules.find((rule) => rule.slotMinutes)?.slotMinutes ?? 60;
+    adminAppointments.push({
+      id: `apt_web_${sequence}`,
+      reference: `MP-2026-0${sequence}`,
+      contact: {
+        id: `ctc_web_${sequence}`,
+        fullName: body.contact.fullName,
+        email: body.contact.email ?? '',
+        phone: body.contact.phone ?? null,
+        country: body.contact.country ?? null,
+        city: body.contact.city ?? null,
+        profile: 'PARTICULIER',
+      },
+      reason: body.reason ?? 'AUTRE',
+      format: body.format ?? 'TELEPHONE',
+      startsAt: startsAt.toISOString(),
+      endsAt: new Date(startsAt.getTime() + minutes * 60_000).toISOString(),
+      status: 'A_CONFIRMER',
+      proposedStartsAt: null,
+      location: null,
+      videoLink: null,
+      message: body.message ?? null,
+      notes: null,
+      reminderSentAt: null,
+      createdAt: new Date().toISOString(),
     });
-    const body: Availability = { timezone: 'Africa/Douala', timezoneLabel: 'Heure de Douala (UTC+1)', days };
-    return HttpResponse.json(body);
   }),
 
   // Acceptation du créneau proposé par l'agence : `expire` → 410, `pris` → 409 (créneau plus disponible).

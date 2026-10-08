@@ -7,6 +7,7 @@ import type {
   RequestStatus,
   SidebarCounts,
 } from '@/lib/api/schema';
+import { appointmentsToConfirm } from '../data/admin-appointments';
 import { adminRequests } from '../data/admin-requests';
 import { problem } from '../problem';
 import { requireSession } from '../session';
@@ -17,7 +18,10 @@ const HOUR = 60 * 60 * 1000;
 export const pendingCounts = {
   reviewsToValidate: 4,
   unreadApplications: 2,
-  appointmentsToConfirm: 3,
+  /** Rendez-vous « À confirmer » : calculé sur les rendez-vous simulés (`data/admin-appointments.ts`). */
+  get appointmentsToConfirm() {
+    return appointmentsToConfirm();
+  },
   partnershipRequests: 1,
   newRegistrations: 5,
 };
