@@ -81,7 +81,10 @@ export function TimeGrid({
   const columns = { gridTemplateColumns: `56px repeat(${days.length}, minmax(0, 1fr))` };
   const day = variant === 'day';
   return (
-    <AdminCard className="overflow-hidden">
+    <AdminCard
+      aria-label={day ? 'Calendrier du jour' : 'Calendrier de la semaine'}
+      className="overflow-hidden"
+    >
       <div style={columns} className="grid border-b border-border-default">
         <span aria-hidden className="h-11" />
         {days.map((key) => (
@@ -218,7 +221,7 @@ export function MonthGrid({
   const weekdays = [...new Set(days.map(weekdayShort))];
   const columns = { gridTemplateColumns: `repeat(${weekdays.length}, minmax(0, 1fr))` };
   return (
-    <AdminCard className="overflow-hidden">
+    <AdminCard aria-label="Calendrier du mois" className="overflow-hidden">
       <div style={columns} className="grid border-b border-border-default">
         {weekdays.map((name, index) => (
           <p

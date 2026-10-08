@@ -86,7 +86,9 @@ function AvailabilityFormView({ initial }: { initial: AvailabilityConfig }) {
       setErrors({});
       client.setQueryData(['availability-config'], result);
       void client.invalidateQueries({ queryKey: ['availability'] });
-      toast.success('Disponibilités enregistrées\u00A0: le formulaire du site propose les nouveaux créneaux.');
+      toast.success(
+        'Disponibilités enregistrées\u00A0: le formulaire du site propose les nouveaux créneaux.',
+      );
     },
     onError: (error) => {
       if (error instanceof ApiError && error.status === 422 && Object.keys(error.fieldErrors).length) {
@@ -411,14 +413,14 @@ function AvailabilityFormView({ initial }: { initial: AvailabilityConfig }) {
           subtitle="Jours fériés, congés, journées aux horaires réduits."
         >
           {form.exceptions.length > 0 && (
-            <ul className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3">
               {form.exceptions.map((exception, index) => {
                 const dateKey = exceptionKey(exception.key, 'date');
                 const startKey = exceptionKey(exception.key, 'start');
                 const endKey = exceptionKey(exception.key, 'end');
                 const label = `Fermeture ${index + 1}`;
                 return (
-                  <li
+                  <div
                     key={exception.key}
                     role="group"
                     aria-label={label}
@@ -510,10 +512,10 @@ function AvailabilityFormView({ initial }: { initial: AvailabilityConfig }) {
                     </div>
                     <ErrorText id={startKey} message={errors[startKey]} />
                     <ErrorText id={endKey} message={errors[endKey]} />
-                  </li>
+                  </div>
                 );
               })}
-            </ul>
+            </div>
           )}
           <AddItemButton
             onClick={() =>

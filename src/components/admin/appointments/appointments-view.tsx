@@ -145,7 +145,12 @@ export function AppointmentsView() {
   ]);
 
   const title = viewTitle(view, date, view === 'mois' ? range.days : shownDays);
-  const inRange = view === 'jour' ? date === today : range.days.includes(today);
+  const inRange =
+    view === 'jour'
+      ? date === today
+      : view === 'mois'
+        ? date.slice(0, 7) === today.slice(0, 7)
+        : range.days.includes(today);
   const open = (appointment: Appointment) => update({ id: appointment.id });
   const closePanel = useCallback(() => update({ id: null }), [update]);
 

@@ -406,7 +406,9 @@ export function NewAppointmentDialog({
       open={open}
       onClose={onClose}
       title="Ajouter un rendez-vous"
-      description={'Rendez-vous pris par téléphone, WhatsApp ou à l’agence\u00A0: il est enregistré comme confirmé.'}
+      description={
+        'Rendez-vous pris par téléphone, WhatsApp ou à l’agence\u00A0: il est enregistré comme confirmé.'
+      }
       maxWidth={640}
     >
       {open && (
