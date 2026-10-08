@@ -290,3 +290,14 @@
 ### Décisions
 
 - **Consentement de « Me prévenir »** : comme la newsletter du pied de page, pas de case (la maquette n'en montre pas) ; l'envoi vaut demande et l'e-mail de confirmation (double opt-in) recueille le consentement. À valider avec la cliente (point déjà signalé pour la newsletter).
+
+### Pages légales (8 octobre 2026)
+
+- Gabarit commun pour `/mentions-legales`, `/confidentialite`, `/cookies` et `/cgu` (pages statiques) : en-tête (titre, « Dernière mise à jour »), sommaire collant à gauche (onglets horizontaux défilants en mobile, libellés courts), article en sections numérotées dont le contenu riche vient de l'API (`richText`, HTML assaini côté serveur). La page Cookies propose « Modifier mes choix de cookies », qui rouvre les préférences du bandeau.
+- Contenu simulé : texte de la maquette pour les mentions légales ; modèles marqués « à compléter » pour les trois autres pages (texte juridique fourni par la cliente).
+- Fidélité : en-tête 218 px (54 en mobile : 154), identique à la maquette ; corps conforme (`qa/fidelite/pages-legales-*.png`). Tests E2E : 4 pages (titre, sommaire et page courante, axe, débordement), réouverture des préférences cookies.
+
+### Décisions
+
+- **4ᵉ entrée « Conditions générales »** dans le sommaire : le pied de page pointe vers `/cgu`, absent de la maquette qui ne montre que 3 pages.
+- **Liens dans le texte** : « politique de confidentialité » et l'adresse e-mail sont des liens (soulignés, orange `text/brand`).

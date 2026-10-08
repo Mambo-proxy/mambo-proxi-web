@@ -60,7 +60,7 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [x] Offre d'emploi `/recrutement/[slug]` — `qa/fidelite/offre-emploi-*.png`
 - [x] Avis clients `/avis-clients` (synthèse, filtres, masonry, pagination) — `qa/fidelite/avis-clients-*.png`
 - [x] Suivi Mambo `/suivi-mambo` — `qa/fidelite/suivi-mambo-*.png`
-- [ ] Pages légales `/mentions-legales`, `/confidentialite`, `/cookies`, `/cgu`
+- [x] Pages légales `/mentions-legales`, `/confidentialite`, `/cookies`, `/cgu` — `qa/fidelite/pages-legales-*.png`
 - [ ] Questionnaire `/questionnaire/[token]` (+ états jeton invalide / expiré / déjà rempli)
 - [ ] Merci `/questionnaire/merci`
 - [ ] 404, erreur 500, maintenance
