@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, type ClipboardEvent, type KeyboardEvent } from 'react';
+import { useEffect, useRef, type ClipboardEvent, type KeyboardEvent } from 'react';
 import { cn } from '@/lib/cn';
 
 const LENGTH = 6;
@@ -26,10 +26,18 @@ export function OtpInput({
   describedBy?: string;
 }) {
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
+  // Dernière valeur saisie : des frappes rapides (ou le remplissage automatique du code) peuvent arriver avant le
+  // rendu suivant ; partir de `value` ferait perdre un chiffre.
+  const latest = useRef(value);
+  useEffect(() => {
+    latest.current = value;
+  }, [value]);
   const digits = Array.from({ length: LENGTH }, (_, index) => value[index] ?? '');
+  const currentDigits = () => Array.from({ length: LENGTH }, (_, index) => latest.current[index] ?? '');
 
   function update(next: string) {
     const code = next.replace(/\D/g, '').slice(0, LENGTH);
+    latest.current = code;
     onChange(code);
     if (code.length === LENGTH) onComplete(code);
     return code;
@@ -42,7 +50,7 @@ export function OtpInput({
   function onInput(index: number, raw: string) {
     const digit = raw.replace(/\D/g, '').slice(-1);
     if (!digit) return;
-    const next = digits.slice();
+    const next = currentDigits();
     next[index] = digit;
     update(next.join(''));
     focus(index + 1);
@@ -51,13 +59,14 @@ export function OtpInput({
   function onKeyDown(index: number, event: KeyboardEvent<HTMLInputElement>) {
     if (event.key === 'Backspace') {
       event.preventDefault();
-      const next = digits.slice();
+      const next = currentDigits();
       if (next[index]) next[index] = '';
       else if (index > 0) {
         next[index - 1] = '';
         focus(index - 1);
       }
-      onChange(next.join('').slice(0, LENGTH));
+      latest.current = next.join('').slice(0, LENGTH);
+      onChange(latest.current);
     } else if (event.key === 'ArrowLeft') focus(index - 1);
     else if (event.key === 'ArrowRight') focus(index + 1);
   }
