@@ -62,7 +62,7 @@ export function ConsentBadge({ consent }: { consent: boolean }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-ui text-[12px] leading-4 font-semibold',
+        'inline-flex items-center gap-1.5 self-start rounded-full px-2.5 py-1 font-ui text-[12px] leading-4 font-semibold sm:self-auto',
         consent ? 'bg-vert-50 text-vert-700' : 'bg-neutral-100 text-text-muted',
       )}
     >

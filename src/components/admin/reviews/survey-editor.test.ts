@@ -39,7 +39,7 @@ describe('questionnaire de satisfaction', () => {
 
   it('refuse plus de 5 questions actives', () => {
     const { general } = validateDraft(Array.from({ length: 6 }, () => question()));
-    expect(general).toMatch(/5 questions actives au maximum : désactivez-en 1/);
+    expect(general).toMatch(/5 questions actives au maximum\s: désactivez-en 1/);
   });
 
   it('choix par défaut selon le type', () => {

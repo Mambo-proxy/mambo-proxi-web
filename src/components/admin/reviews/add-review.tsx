@@ -38,11 +38,12 @@ const EMPTY: Form = {
 };
 
 /** Services du catalogue (filtre « Tous les services » et ajout manuel), groupés par rubrique. */
-export function useServiceOptions() {
+export function useServiceOptions(enabled = true) {
   return useQuery({
     queryKey: ['catalogue-services'],
     queryFn: () => data(browserApi.GET('/v1/services')),
     staleTime: 5 * 60_000,
+    enabled,
   });
 }
 
@@ -108,8 +109,9 @@ function RatingInput({
  */
 export function AddReviewButton() {
   const refresh = useRefreshReviews();
-  const services = useServiceOptions();
   const [open, setOpen] = useState(false);
+  // Chargés à l'ouverture seulement : sinon la liste du filtre serait déjà remplie à l'hydratation de la page.
+  const services = useServiceOptions(open);
   const [form, setForm] = useState<Form>(EMPTY);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -120,7 +122,9 @@ export function AddReviewButton() {
     mutationFn: (body: ReviewInput) => data(browserApi.POST('/v1/admin/reviews', { body })),
     onSuccess: (review) => {
       toast.success(
-        review.status === 'PUBLIE' ? 'Avis ajouté et publié sur le site.' : 'Avis ajouté : il est à valider.',
+        review.status === 'PUBLIE'
+          ? 'Avis ajouté et publié sur le site.'
+          : 'Avis ajouté\u00A0: il est à valider.',
       );
       refresh();
       setOpen(false);
@@ -134,7 +138,7 @@ export function AddReviewButton() {
 
   function submit() {
     const next: Record<string, string> = {};
-    if (!form.authorName.trim()) next.authorName = 'Indiquez le nom affiché (ex. « Aurélie K. »).';
+    if (!form.authorName.trim()) next.authorName = 'Indiquez le nom affiché (ex. «\u00A0Aurélie K.\u00A0»).';
     if (!form.rating) next.rating = 'Choisissez une note de 1 à 5 étoiles.';
     if (form.text.trim().length < 10) next.text = 'L’avis doit compter au moins 10 caractères.';
     setErrors(next);
@@ -162,7 +166,9 @@ export function AddReviewButton() {
         open={open}
         onClose={() => setOpen(false)}
         title="Ajouter un avis"
-        description="Témoignage recueilli hors questionnaire (téléphone, e-mail…) : il sera marqué « non vérifié »."
+        description={
+          'Témoignage recueilli hors questionnaire (téléphone, e-mail…)\u00A0: il sera marqué «\u00A0non vérifié\u00A0».'
+        }
         maxWidth={620}
         footer={
           <>
@@ -189,7 +195,7 @@ export function AddReviewButton() {
               label="Nom affiché"
               required
               error={errors.authorName}
-              help="Prénom et initiale : « Aurélie K. »"
+              help={'Prénom et initiale\u00A0: «\u00A0Aurélie K.\u00A0»'}
             >
               {(control) => (
                 <Input

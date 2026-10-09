@@ -18,7 +18,7 @@ function KpiCard({
   legend?: string;
 }) {
   return (
-    <AdminCard className="flex flex-col gap-1.5 p-3.5 md:gap-3 md:p-5">
+    <AdminCard className="flex flex-col gap-1.5 p-3.5 md:min-h-[156px] md:gap-3 md:p-5">
       <div className="flex items-center justify-between gap-3">
         <p className="font-ui text-[12px] leading-4 text-text-muted md:text-[13px] md:leading-5 md:font-medium">
           {label}

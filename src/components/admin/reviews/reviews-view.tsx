@@ -79,7 +79,7 @@ function SurveyCard({ questions }: { questions: AdminSurveyQuestion[] | undefine
           {active.map((question, index) => (
             <li
               key={question.id}
-              className="flex items-center gap-2.5 border-b border-border-default py-2 font-ui text-[13px] leading-5 text-text-main"
+              className="flex items-center gap-2.5 border-b border-border-default py-[14px] font-ui text-[13px] leading-5 text-text-main"
             >
               <span
                 aria-hidden
@@ -154,7 +154,7 @@ export function ReviewsView() {
           label="Service"
           value={filters.service}
           onChange={(event) => update({ service: event.target.value })}
-          className="w-full sm:w-auto"
+          className="w-full sm:w-[170px]"
         >
           <option value="">Tous les services</option>
           {categories.map((category) => (

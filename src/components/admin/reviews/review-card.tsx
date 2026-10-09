@@ -29,7 +29,7 @@ type Change = { status?: ReviewStatus; featured?: boolean };
 const SUCCESS: Record<ReviewStatus, string> = {
   A_VALIDER: 'Avis remis à valider.',
   PUBLIE: 'Avis publié sur le site.',
-  MASQUE: 'Avis masqué : il reste consultable dans l’onglet « Masqués ».',
+  MASQUE: 'Avis masqué\u00A0: il reste consultable dans l’onglet «\u00A0Masqués\u00A0».',
 };
 
 /**
@@ -50,7 +50,9 @@ export function ReviewCard({ review, onRemoved }: { review: AdminReview; onRemov
       if (body.featured !== undefined)
         toast.success(updated.featured ? 'Avis mis en avant sur l’accueil.' : 'Avis retiré de l’accueil.');
       else if (body.status === 'MASQUE' && !review.publishConsent && confirm !== 'hide')
-        toast.success('Avis classé en suivi interne : il reste consultable dans l’onglet « Masqués ».');
+        toast.success(
+          'Avis classé en suivi interne\u00A0: il reste consultable dans l’onglet «\u00A0Masqués\u00A0».',
+        );
       else toast.success(SUCCESS[updated.status]);
       if (body.status && body.status !== review.status) onRemoved();
       refresh();
@@ -230,8 +232,8 @@ export function ReviewCard({ review, onRemoved }: { review: AdminReview; onRemov
         title="Masquer cet avis ?"
         description={
           review.status === 'PUBLIE'
-            ? `L’avis de ${review.authorName} sera retiré du site. Il reste consultable dans l’onglet « Masqués ».`
-            : `L’avis de ${review.authorName} ne sera pas publié sur le site. Il reste consultable dans l’onglet « Masqués ».`
+            ? `L’avis de ${review.authorName} sera retiré du site. Il reste consultable dans l’onglet «\u00A0Masqués\u00A0».`
+            : `L’avis de ${review.authorName} ne sera pas publié sur le site. Il reste consultable dans l’onglet «\u00A0Masqués\u00A0».`
         }
         confirmLabel="Masquer l’avis"
         destructive

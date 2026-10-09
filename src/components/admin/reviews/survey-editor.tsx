@@ -88,7 +88,7 @@ export function validateDraft(questions: DraftQuestion[]): {
     fields,
     general:
       active > MAX_ACTIVE
-        ? `Le questionnaire compte ${MAX_ACTIVE} questions actives au maximum : désactivez-en ${active - MAX_ACTIVE}.`
+        ? `Le questionnaire compte ${MAX_ACTIVE} questions actives au maximum\u00A0: désactivez-en ${active - MAX_ACTIVE}.`
         : undefined,
   };
 }
@@ -258,7 +258,10 @@ function QuestionItem({
       <div
         id={panelId}
         hidden={!expanded}
-        className="flex flex-col gap-4 border-t border-border-default bg-neutral-50 p-3.5 md:p-4"
+        className={cn(
+          'flex-col gap-4 border-t border-border-default bg-neutral-50 p-3.5 md:p-4',
+          expanded ? 'flex' : 'hidden',
+        )}
       >
         <Field label="Intitulé de la question" required error={labelError}>
           {(control) => (
@@ -404,8 +407,8 @@ function SurveyForm({ initial }: { initial: AdminSurveyQuestion[] }) {
           <SideCard title="Envoi">
             <ul className="flex list-disc flex-col gap-2 pl-4 font-ui text-[13px] leading-5 text-text-muted">
               <li>
-                Envoyé automatiquement 24{'\u00A0'}h après le passage d’une demande au statut « Prestation
-                réalisée ».
+                Envoyé automatiquement 24{'\u00A0'}h après le passage d’une demande au statut «{'\u00A0'}
+                Prestation réalisée{'\u00A0'}».
               </li>
               <li>
                 {MAX_ACTIVE} questions posées au maximum ({activeCount} actuellement), {MAX_QUESTIONS}{' '}
@@ -467,7 +470,7 @@ function SurveyForm({ initial }: { initial: AdminSurveyQuestion[] }) {
           setToDelete(null);
         }}
         title="Supprimer cette question ?"
-        description={`« ${toDelete?.label.trim() || 'Nouvelle question'} » sera retirée du questionnaire à l’enregistrement. Les réponses déjà reçues restent consultables.`}
+        description={`«\u00A0${toDelete?.label.trim() || 'Nouvelle question'}\u00A0» sera retirée du questionnaire à l’enregistrement. Les réponses déjà reçues restent consultables.`}
         confirmLabel="Supprimer la question"
         destructive
       />

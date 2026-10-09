@@ -71,7 +71,8 @@ export function ReplyDialog({
   return (
     <>
       <Modal
-        open={open && !confirmRemove}
+        // La confirmation s'ouvre par-dessus (fermer la modale déclencherait `onClose`).
+        open={open}
         onClose={onClose}
         title={`Répondre à ${review.authorName}`}
         description={
@@ -103,7 +104,9 @@ export function ReplyDialog({
           className="flex flex-col gap-4"
         >
           <blockquote className="rounded-md bg-neutral-50 p-3.5 font-ui text-[14px] leading-5 text-text-main">
-            « {review.text} »
+            «{'\u00A0'}
+            {review.text}
+            {'\u00A0'}»
           </blockquote>
           <Field label="Réponse publique" required error={error} help={charCountHelp(text, MAX)}>
             {(control) => (

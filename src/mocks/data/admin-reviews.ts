@@ -99,6 +99,7 @@ const TO_VALIDATE: Seed[] = [
     initials: 'AK',
     city: 'Paris',
     service: 'logement-temporaire',
+    serviceName: 'Logement temporaire',
     rating: 5,
     // Apostrophes droites, comme sur la maquette.
     text: "Arrivée à Douala sans stress : logement prêt, chauffeur à l'aéroport et même les courses faites. On s'est sentis attendus.",
