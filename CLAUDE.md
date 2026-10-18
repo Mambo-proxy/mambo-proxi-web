@@ -50,8 +50,15 @@ Les données viennent de l'API (`mambo-proxi-api`) décrite par `contracts/opena
 - Texte orange = `#AD5300` (`text-text-brand`), **jamais** `#FF7A00` sur fond clair.
 - **Violet au strict minimum** : uniquement le logo, les guillemets des témoignages et le petit cœur du badge « Pensé pour vous ». Nulle part ailleurs (pas de focus violet).
 - **Logos** : `public/brand/*.svg` exportés de Figma, utilisés tels quels (jamais modifiés, recolorés ni recomposés).
-- **Illustrations** à la place des photos : `public/illustrations/<scène>.svg`, affichées via `<Visual>` qui acceptera plus tard une photo du back-office sans changer la mise en page.
+- **Photos** : depuis la refonte des maquettes (octobre 2026), les emplacements visuels montrent des photos. Elles sont exportées de Figma dans `public/photos/` et servies par l'API comme `Visual.image` (médias du back-office) ; `<Visual>` affiche l'illustration `public/illustrations/<scène>.svg` tant qu'aucune image n'est fournie.
 - Icônes : `lucide-react`. Polices : Poppins (titres) et Inter (texte) via `next/font`.
+
+## Langues (français / anglais)
+
+- Site bilingue avec next-intl : français sans préfixe (adresses historiques), anglais sous `/en` avec des adresses traduites (`src/i18n/routing.ts`). Le back-office reste en français.
+- Liens du site : toujours `SiteLink` (`@/i18n/site-link`) avec l'adresse interne française (`/qui-sommes-nous`), convertie dans la langue de la page ; `useSiteRouter` / `useSitePathname` pour la navigation programmée et l'onglet actif.
+- Textes de l'interface dans `messages/fr.json` et `messages/en.json` (mêmes clés) ; contenus éditoriaux fournis par l'API dans la langue demandée (`?lang=en`, ajouté par le client serveur). Dans les mocks, l'exemple anglais d'un exemple du contrat porte le même nom suffixé `En` (`default` → `en`).
+- Les traductions anglaises sont rédigées pour le site (aucune maquette anglaise) : ton et longueurs proches du français.
 
 ## Règles produit
 
@@ -67,3 +74,13 @@ Les données viennent de l'API (`mambo-proxi-api`) décrite par `contracts/opena
 
 - `TASKS.md` : liste des tâches du projet (site + back-office), tenue à jour.
 - `JOURNAL.md` : à chaque étape, ce qui a été fait, décisions, difficultés et solutions.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
