@@ -23,12 +23,26 @@ describe('client API serveur (sur les mocks)', () => {
     expect(unknown).toBeNull();
   });
 
-  it('expose les 4 rubriques et les 19 services du catalogue', async () => {
+  it('expose les 5 rubriques et les 24 services du catalogue, dont 4 formules', async () => {
     const categories = await unwrap(
       api.GET('/v1/categories', { params: { query: { include: 'services' } } }),
     );
-    expect(categories).toHaveLength(4);
-    expect(categories.flatMap((category) => category.services ?? [])).toHaveLength(19);
+    expect(categories).toHaveLength(5);
+    const services = categories.flatMap((category) => category.services ?? []);
+    expect(services).toHaveLength(24);
+    expect(services.filter((service) => service.kind === 'formula').map((service) => service.slug)).toEqual([
+      'maison-essentiel',
+      'maison-auto',
+      'maison-linge',
+      'maison-auto-linge',
+    ]);
+  });
+
+  it('renvoie le catalogue et les zones en anglais avec ?lang=en', async () => {
+    const categories = await unwrap(api.GET('/v1/categories', { params: { query: { lang: 'en' } } }));
+    expect(categories[0]?.name).toBe('Home services');
+    const zones = await unwrap(api.GET('/v1/zones', { params: { query: { lang: 'en' } } }));
+    expect(zones.zones.map((zone) => zone.name)).toContain('Zone 3 — Extended');
   });
 
   it('filtre les services par rubrique et par recherche sans accents', async () => {

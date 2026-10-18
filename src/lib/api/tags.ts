@@ -14,6 +14,7 @@ export const cacheTags = {
   trainings: 'trainings',
   jobs: 'jobs',
   events: 'events',
+  zones: 'zones',
   page: (key: string) => `page:${key}`,
   category: (slug: string) => `category:${slug}`,
   service: (slug: string) => `service:${slug}`,

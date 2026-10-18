@@ -9,31 +9,36 @@ type Seed = {
   /** Libellé du badge de service tel qu'il apparaît sur la maquette. */
   label?: string;
   text: string;
+  /** Citation courte de l'accueil en mobile (maquette `54:683`). */
+  excerpt?: string;
   rating?: number;
 };
 
-/** Les 6 avis de la maquette Avis clients (`68:7361`), du plus récent au plus ancien. */
+/** Les avis des maquettes (Avis clients `68:7361`, accueil `52:389`), du plus récent au plus ancien. */
 const MAQUETTE: Seed[] = [
   {
     author: 'Aurélie K.',
-    city: 'Paris → Douala',
+    city: 'Bonapriso, Douala',
     service: 'logement-temporaire',
     label: 'Logement temporaire',
     text: "Arrivée à Douala sans stress : logement prêt, chauffeur à l'aéroport et même les courses faites. On s'est sentis attendus.",
+    excerpt:
+      "Arrivée à Douala sans stress : logement prêt, chauffeur à l'aéroport et même les courses faites.",
   },
   {
     author: 'Jean-Marc T.',
     city: 'Yaoundé',
     service: 'chef-prive',
     label: 'Chef privé',
-    text: "Le chef privé a régalé nos invités pour l'anniversaire de ma mère. Service impeccable du début à la fin.",
+    text: "Le chef privé a régalé nos invités pour l'anniversaire de ma mère. Service impeccable, équipe aux petits soins du début à la fin.",
+    excerpt: 'Le chef privé a régalé nos invités. Service impeccable du début à la fin.',
   },
   {
     author: 'Sandrine M.',
-    city: 'Lyon',
+    city: 'Kotto',
     service: 'gestion-locative',
     label: 'Gestion locative',
-    text: 'Je vis en France et Mambo gère mon appartement à Bonapriso. Comptes rendus réguliers, locataires suivis : je suis enfin serein.',
+    text: 'Mambo gère mon appartement à Bonapriso. Comptes rendus réguliers, locataires suivis : je suis enfin serein.',
   },
   {
     author: 'Clarisse N.',
@@ -52,8 +57,8 @@ const MAQUETTE: Seed[] = [
   {
     author: 'Hervé D.',
     city: 'Douala',
-    service: 'reception-colis-courrier',
-    label: 'Réception de colis',
+    service: 'collecte-livraison-colis-courrier',
+    label: 'Livraison de colis',
     text: 'Colis reçu à l’agence, on m’a appelé le jour même et livré le lendemain. Très pro.',
   },
 ];
@@ -102,6 +107,7 @@ function review(seed: Seed, index: number, date: number): Review {
     city: seed.city,
     rating: seed.rating ?? 5,
     text: seed.text,
+    excerpt: seed.excerpt ?? null,
     service: {
       slug: service.slug,
       name: seed.label ?? service.shortName ?? service.name,

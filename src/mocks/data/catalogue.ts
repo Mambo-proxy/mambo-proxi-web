@@ -1,42 +1,63 @@
 import type { CategorySummary, ServiceSummary } from '@/lib/api/schema';
+import { catalogueSeed } from './catalogue-services';
 import operations from './contract-examples.json';
-import catalogue from './catalogue-services.json';
 
 /**
- * Catalogue simulé : 4 rubriques et 19 services du cahier des charges (§5), au format du contrat.
- * Les résumés de rubriques viennent de l'exemple `Categories` du contrat, les services de
- * `catalogue-services.json` (copie de `content/` du dossier de pilotage).
+ * Catalogue simulé des nouvelles maquettes : 5 rubriques et 24 services, en français et en anglais (`?lang=en`).
+ * Les résumés de rubriques viennent des exemples `Categories` / `CategoriesEn` du contrat, les services de
+ * `catalogue-services.ts`.
  */
+export type Lang = 'fr' | 'en';
+
+const categoryExamples = operations.find((operation) => operation.operationId === 'listCategories')
+  ?.examples as Record<'default' | 'en', CategorySummary[]>;
+
+/** Langue d'une requête simulée (`?lang=en`), le français sinon. */
+export function langOf(request: Request): Lang {
+  return new URL(request.url).searchParams.get('lang') === 'en' ? 'en' : 'fr';
+}
+
 /** Résumés des rubriques, sans leurs services (réponse par défaut de `GET /v1/categories`). */
-export const categorySummaries = operations.find((operation) => operation.operationId === 'listCategories')
-  ?.examples.default as CategorySummary[];
+export function getCategorySummaries(lang: Lang = 'fr'): CategorySummary[] {
+  return lang === 'en' ? categoryExamples.en : categoryExamples.default;
+}
 
-/** Services marqués « mis en avant sur l'accueil » dans les exemples du contrat. */
-const FEATURED_ON_HOME = new Set(['location-voiture', 'chef-prive']);
+export function getServices(lang: Lang = 'fr'): ServiceSummary[] {
+  const summaries = getCategorySummaries(lang);
+  return Object.entries(catalogueSeed).flatMap(([categorySlug, seeds]) => {
+    const category = summaries.find((item) => item.slug === categorySlug);
+    return seeds.map((seed) => ({
+      id: `svc_${seed.slug.replaceAll('-', '_')}`,
+      slug: seed.slug,
+      name: seed.name[lang],
+      shortName: seed.shortName?.[lang] ?? null,
+      summary: seed.summary[lang],
+      icon: seed.icon,
+      visual: {
+        illustration: seed.illustration,
+        image: seed.photo ? { id: `photo-${seed.slug}`, ...seed.photo, variants: [] } : null,
+        alt: '',
+      },
+      category: { slug: categorySlug, name: category?.name ?? categorySlug },
+      href: `/services/${categorySlug}/${seed.slug}`,
+      featuredOnHome: seed.featuredOnHome ?? false,
+      kind: seed.kind ?? 'service',
+    }));
+  });
+}
 
-export const services: ServiceSummary[] = catalogue.rubriques.flatMap((category) =>
-  category.services.map((service) => ({
-    id: `svc_${service.slug.replaceAll('-', '_')}`,
-    slug: service.slug,
-    name: service.nom,
-    shortName: 'nomCourt' in service ? (service.nomCourt ?? null) : null,
-    summary: service.resume,
-    icon: service.icone,
-    visual: {
-      illustration: service.illustration as ServiceSummary['visual']['illustration'],
-      image: null,
-      alt: '',
-    },
-    category: { slug: category.slug, name: category.nom },
-    href: `/services/${category.slug}/${service.slug}`,
-    featuredOnHome: FEATURED_ON_HOME.has(service.slug),
-  })),
-);
+export function getCategories(lang: Lang = 'fr'): CategorySummary[] {
+  const services = getServices(lang);
+  return getCategorySummaries(lang).map((category) => ({
+    ...category,
+    services: services.filter((service) => service.category.slug === category.slug),
+  }));
+}
 
-export const categories: CategorySummary[] = categorySummaries.map((category) => ({
-  ...category,
-  services: services.filter((service) => service.category.slug === category.slug),
-}));
+/** Données françaises (gestionnaires et tests qui n'ont pas besoin de la langue). */
+export const categorySummaries = getCategorySummaries('fr');
+export const services = getServices('fr');
+export const categories = getCategories('fr');
 
 /** Recherche insensible à la casse et aux accents. */
 export function normalize(value: string): string {

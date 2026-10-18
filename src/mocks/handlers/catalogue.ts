@@ -2,12 +2,13 @@ import { http, HttpResponse } from 'msw';
 import { categoryDetails } from '../data/category-details';
 import { serviceDetails } from '../data/service-details';
 import { problem } from '../problem';
-import { categories, categorySummaries, normalize, services } from '../data/catalogue';
+import { getCategories, getCategorySummaries, getServices, langOf, normalize } from '../data/catalogue';
 
 export const catalogueHandlers = [
   http.get('*/v1/categories', ({ request }) => {
     const include = new URL(request.url).searchParams.get('include');
-    return HttpResponse.json(include === 'services' ? categories : categorySummaries);
+    const lang = langOf(request);
+    return HttpResponse.json(include === 'services' ? getCategories(lang) : getCategorySummaries(lang));
   }),
 
   http.get('*/v1/services', ({ request }) => {
@@ -16,7 +17,7 @@ export const catalogueHandlers = [
     const featured = query.get('featured');
     const search = query.get('q') ? normalize(query.get('q') ?? '') : null;
     return HttpResponse.json(
-      services.filter(
+      getServices(langOf(request)).filter(
         (service) =>
           (!category || service.category.slug === category) &&
           (featured === null || service.featuredOnHome === (featured === 'true')) &&
@@ -31,16 +32,17 @@ export const catalogueHandlers = [
   }),
 
   // Page rubrique : résumé + services + contenu de la page + 3 autres rubriques.
-  http.get('*/v1/categories/:slug', ({ params }) => {
+  http.get('*/v1/categories/:slug', ({ params, request }) => {
     const slug = String(params.slug);
-    const category = categories.find((item) => item.slug === slug);
+    const lang = langOf(request);
+    const category = getCategories(lang).find((item) => item.slug === slug);
     const detail = categoryDetails[slug];
     if (!category || !detail) return problem(404, "Cette rubrique n'existe pas.");
     return HttpResponse.json({
       ...category,
       ...detail,
       services: category.services ?? [],
-      otherCategories: categorySummaries.filter((item) => item.slug !== slug),
+      otherCategories: getCategorySummaries(lang).filter((item) => item.slug !== slug),
     });
   }),
 ];
