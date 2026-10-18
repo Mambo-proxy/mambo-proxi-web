@@ -1,0 +1,27 @@
+/*
+ * Carte des zones d'intervention (Figma `290:31639`) : couleurs propres à la carte stylisée de Douala, absentes des
+ * variables du design system (tokens.css, généré). Déclarées ici pour que les composants n'aient aucune couleur en dur.
+ */
+:root {
+  --mp-color-map-land: #f3efe8;
+  --mp-color-map-water: #cfe3ea;
+  --mp-color-map-bank: #e7e1d6;
+  --mp-color-map-water-label: #5e8a99;
+  --mp-color-map-zone-1: #3f8f2e;
+  --mp-color-map-zone-2: #e86f00;
+  --mp-color-map-zone-3: #2b2622;
+  --mp-color-map-zone-special: #9a938c;
+  --mp-color-map-result: #fff1e5;
+}
+
+@theme inline {
+  --color-map-land: var(--mp-color-map-land);
+  --color-map-water: var(--mp-color-map-water);
+  --color-map-bank: var(--mp-color-map-bank);
+  --color-map-water-label: var(--mp-color-map-water-label);
+  --color-map-zone-1: var(--mp-color-map-zone-1);
+  --color-map-zone-2: var(--mp-color-map-zone-2);
+  --color-map-zone-3: var(--mp-color-map-zone-3);
+  --color-map-zone-special: var(--mp-color-map-zone-special);
+  --color-map-result: var(--mp-color-map-result);
+}

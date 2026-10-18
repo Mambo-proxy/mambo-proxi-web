@@ -2,6 +2,7 @@
 @import '../styles/palette-reset.css';
 @import '../styles/tokens.css';
 @import '../styles/tailwind.theme.css';
+@import '../styles/map-tokens.css';
 @import '../styles/typography.css';
 @import '../styles/web.css';
 @import '../styles/admin.css';
