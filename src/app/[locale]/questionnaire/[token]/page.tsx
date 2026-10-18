@@ -1,6 +1,6 @@
 import { CircleAlert } from 'lucide-react';
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { SurveyForm } from '@/components/forms/survey-form';
 import { buttonVariants } from '@/components/ui/button';
 import { Visual } from '@/components/ui/visual';

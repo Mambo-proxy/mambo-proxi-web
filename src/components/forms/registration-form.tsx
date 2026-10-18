@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, Check, CircleCheck, Mail, Smartphone } from 'lucide-react';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';

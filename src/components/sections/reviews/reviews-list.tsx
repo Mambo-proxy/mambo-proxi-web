@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react';
 import type { Route } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { chipVariants } from '@/components/ui/chip';
 import { Pagination } from '@/components/ui/pagination';
 import type { Review } from '@/lib/api/schema';

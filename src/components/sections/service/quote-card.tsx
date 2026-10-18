@@ -1,6 +1,6 @@
 import { ArrowRight, CalendarCheck, Check, Smartphone } from 'lucide-react';
 import type { Route } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';

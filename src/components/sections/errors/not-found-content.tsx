@@ -1,5 +1,5 @@
 import type { Route } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { buttonVariants } from '@/components/ui/button';
 import { routes } from '@/lib/routes';
 import { ErrorPanel } from './error-panel';

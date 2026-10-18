@@ -1,7 +1,7 @@
 'use client';
 
 import type { Route } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { browserApi } from '@/lib/api/browser';

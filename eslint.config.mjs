@@ -22,5 +22,6 @@ export default defineConfig([
     'src/lib/api/schema.d.ts',
     'qa/**',
     'public/**',
+    '.claude/**',
   ]),
 ]);

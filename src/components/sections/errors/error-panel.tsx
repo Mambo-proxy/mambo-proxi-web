@@ -1,6 +1,6 @@
 import { ArrowRight } from 'lucide-react';
 import type { Route } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import type { ReactNode } from 'react';
 import { frenchTypography } from '@/lib/format/typography';
 import { routes } from '@/lib/routes';

@@ -1,9 +1,7 @@
 'use client';
 
 import { ChevronRight, Minus, Plus, X } from 'lucide-react';
-import type { Route } from 'next';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { SiteLink as Link, useSitePathname } from '@/i18n/site-link';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Logo } from '@/components/brand/logo';
 import { buttonVariants } from '@/components/ui/button';
@@ -28,7 +26,7 @@ type MobileMenuProps = {
  */
 export function MobileMenu({ open, onClose, items, megaMenu, whatsappHref }: MobileMenuProps) {
   const ref = useRef<HTMLDialogElement>(null);
-  const pathname = usePathname();
+  const pathname = useSitePathname();
   const [expanded, setExpanded] = useState<string | null>(() =>
     pathname.startsWith('/services') ? 'services' : null,
   );
@@ -89,7 +87,7 @@ export function MobileMenu({ open, onClose, items, megaMenu, whatsappHref }: Mob
               >
                 {item.kind === 'link' ? (
                   <Link
-                    href={item.href as Route}
+                    href={item.href}
                     aria-current={isActive(pathname, item.href) ? 'page' : undefined}
                     className="block py-[13px] font-brand text-[19px] leading-7 font-semibold"
                   >
@@ -213,7 +211,7 @@ function AccordionItem({
 function SubmenuRow({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <Link
-      href={href as Route}
+      href={href}
       className="flex min-h-[54px] items-center gap-3 rounded-lg bg-neutral-50 px-3 py-[9px] text-text-main"
     >
       {children}

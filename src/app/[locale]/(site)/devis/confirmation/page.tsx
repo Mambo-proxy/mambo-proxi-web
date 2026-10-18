@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react';
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { redirect } from 'next/navigation';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/cn';

@@ -2,8 +2,6 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Check, Lock, Mail, Smartphone, User } from 'lucide-react';
-import type { Route } from 'next';
-import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -31,6 +29,7 @@ import {
 } from './quote-schema';
 import { QuoteProgress, StepCard, type StepState } from './quote-steps';
 import { QuoteSummary } from './quote-summary';
+import { useSiteRouter } from '@/i18n/site-link';
 
 export type QuoteCategory = CategorySummary & { services: ServiceSummary[] };
 
@@ -64,7 +63,7 @@ export function QuoteForm({
   initialService,
   whatsapp,
 }: QuoteFormProps) {
-  const router = useRouter();
+  const router = useSiteRouter();
   const antiSpam = useAntiSpam();
   const [step, setStep] = useState<Step>(initialService ? 2 : 1);
   const heading1 = useRef<HTMLHeadingElement>(null);
@@ -193,7 +192,7 @@ export function QuoteForm({
       } catch {
         // Rien à nettoyer.
       }
-      router.push(`/devis/confirmation?ref=${encodeURIComponent(accepted.reference)}` as Route);
+      router.push(`/devis/confirmation?ref=${encodeURIComponent(accepted.reference)}`);
     } catch (caught) {
       if (caught instanceof ApiError) {
         for (const [path, message] of Object.entries(caught.fieldErrors)) {

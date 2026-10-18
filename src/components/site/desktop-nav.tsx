@@ -1,9 +1,7 @@
 'use client';
 
 import { ArrowRight, ChevronDown, User } from 'lucide-react';
-import type { Route } from 'next';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { SiteLink as Link, useSitePathname } from '@/i18n/site-link';
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { buttonVariants } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
@@ -79,7 +77,7 @@ type DesktopNavProps = {
  * `Échap` ferme et rend le focus à l'onglet ; `Entrée` suit le lien de l'onglet.
  */
 export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps) {
-  const pathname = usePathname();
+  const pathname = useSitePathname();
   const menu = useMenuState();
   const baseId = useId();
   const panelId = (key: string) => `${baseId}-${key}`;
@@ -150,7 +148,7 @@ export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps
                 onMouseLeave={hasPanel ? menu.hoverClose : undefined}
               >
                 <Link
-                  href={item.href as Route}
+                  href={item.href}
                   id={triggerId(item.key)}
                   aria-current={pathname === item.href ? 'page' : undefined}
                   aria-expanded={hasPanel ? open : undefined}
@@ -284,7 +282,7 @@ function Dropdown({
         {links.map((link) => (
           <li key={link.href}>
             <Link
-              href={link.href as Route}
+              href={link.href}
               tabIndex={open ? undefined : -1}
               className="flex items-center gap-3 rounded-md px-3 py-2.5 font-ui text-[14px] leading-5 font-medium text-text-main transition-colors hover:bg-neutral-50 focus-visible:bg-neutral-50"
             >
@@ -360,7 +358,7 @@ function MegaPanel({
                 ))}
               </ul>
               <Link
-                href={category.href as Route}
+                href={category.href}
                 tabIndex={open ? undefined : -1}
                 className="group/more inline-flex items-center gap-1.5 self-start rounded-xs font-ui text-[14px] leading-5 font-semibold text-text-brand"
               >
@@ -387,7 +385,7 @@ function MegaPanel({
             {frenchTypography(menu.promo.text)}
           </p>
           <Link
-            href={menu.promo.cta.href as Route}
+            href={menu.promo.cta.href}
             tabIndex={open ? undefined : -1}
             className={cn(buttonVariants({ fullWidth: true }), 'focus-visible:focus-ring-inverse')}
           >
@@ -402,7 +400,7 @@ function MegaPanel({
 function PanelLink({ href, open, children }: { href: string; open: boolean; children: ReactNode }) {
   return (
     <Link
-      href={href as Route}
+      href={href}
       tabIndex={open ? undefined : -1}
       className="block rounded-xs font-ui text-[14px] leading-5 text-text-main transition-colors hover:text-text-brand"
     >

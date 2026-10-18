@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react';
 import type { Metadata, Route } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { buttonVariants } from '@/components/ui/button';
 import { frenchTypography } from '@/lib/format/typography';
 import { routes } from '@/lib/routes';

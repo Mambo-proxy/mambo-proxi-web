@@ -1,6 +1,6 @@
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import type { Route } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { Icon } from '@/components/ui/icon';
 import { Reveal } from '@/components/ui/reveal';
 import { Visual } from '@/components/ui/visual';

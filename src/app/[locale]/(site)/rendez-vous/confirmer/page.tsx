@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { TokenAction } from '@/components/sections/system/token-action';
 import { buttonVariants } from '@/components/ui/button';
 import { routes } from '@/lib/routes';

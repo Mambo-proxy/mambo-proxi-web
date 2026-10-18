@@ -1,5 +1,5 @@
 import type { Route } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { AccentText } from '@/components/ui/accent-text';
 import { Breadcrumb, type BreadcrumbItem } from '@/components/ui/breadcrumb';
 import { buttonVariants } from '@/components/ui/button';

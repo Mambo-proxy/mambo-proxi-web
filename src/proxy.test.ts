@@ -53,7 +53,7 @@ describe('proxy — maintenance', () => {
     maintenance(false);
     const response = await proxy(request('/services'));
     expect(response.status).toBe(200);
-    expect(response.headers.get('x-middleware-rewrite')).toBeNull();
+    expect(response.headers.get('x-middleware-rewrite')).toBe('http://localhost:3000/fr/services');
   });
 
   it('affiche la page de maintenance (503) quand elle est activée dans les Paramètres', async () => {
@@ -62,6 +62,13 @@ describe('proxy — maintenance', () => {
     expect(response.status).toBe(503);
     expect(response.headers.get('x-middleware-rewrite')).toContain('/maintenance');
     expect(response.headers.get('retry-after')).toBe('3600');
+  });
+
+  it('page de maintenance dans la langue de l’adresse', async () => {
+    maintenance(true);
+    const response = await proxy(request('/en/about-us'));
+    expect(response.status).toBe(503);
+    expect(response.headers.get('x-middleware-rewrite')).toBe('http://localhost:3000/en/maintenance');
   });
 
   it('les membres de l’équipe connectés voient toujours le site', async () => {
@@ -81,5 +88,30 @@ describe('proxy — maintenance', () => {
     server.use(http.get('*/v1/site/settings', () => HttpResponse.error()));
     const response = await proxy(request('/'));
     expect(response.status).toBe(200);
+  });
+});
+
+describe('proxy — langues', () => {
+  beforeEach(() => maintenance(false));
+
+  it('français sans préfixe', async () => {
+    const response = await proxy(request('/qui-sommes-nous'));
+    expect(response.headers.get('x-middleware-rewrite')).toBe('http://localhost:3000/fr/qui-sommes-nous');
+  });
+
+  it('anglais sous /en, avec les adresses traduites', async () => {
+    const response = await proxy(request('/en/about-us'));
+    expect(response.headers.get('x-middleware-rewrite')).toBe('http://localhost:3000/en/qui-sommes-nous');
+  });
+
+  it('le préfixe /fr est retiré', async () => {
+    const response = await proxy(request('/fr/contact'));
+    expect(response.status).toBe(307);
+    expect(new URL(response.headers.get('location') ?? '').pathname).toBe('/contact');
+  });
+
+  it('pages internes hors langue', async () => {
+    const response = await proxy(request('/dev/ui'));
+    expect(response.headers.get('x-middleware-rewrite')).toBeNull();
   });
 });

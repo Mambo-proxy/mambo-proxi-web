@@ -1,6 +1,6 @@
 import { ChevronRight, FileText } from 'lucide-react';
 import type { Metadata, Route } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { notFound } from 'next/navigation';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import type { HeroSection, PageKey, RichTextSection } from '@/lib/api/schema';

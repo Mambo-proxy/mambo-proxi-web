@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import type { Route } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import type { DynamicSection, Partner } from '@/lib/api/schema';
 import { frenchTypography } from '@/lib/format/typography';
 import { ResponsiveText } from '../responsive-text';

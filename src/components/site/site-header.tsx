@@ -1,7 +1,7 @@
 'use client';
 
 import { Menu } from 'lucide-react';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Logo } from '@/components/brand/logo';
 import { buttonVariants } from '@/components/ui/button';

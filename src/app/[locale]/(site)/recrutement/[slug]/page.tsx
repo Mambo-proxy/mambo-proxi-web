@@ -1,6 +1,6 @@
 import { ArrowLeft, Briefcase, Calendar, Check, Clock, MapPin } from 'lucide-react';
 import type { Metadata, Route } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { notFound } from 'next/navigation';
 import { ShareButtons } from '@/components/sections/jobs/share-buttons';
 import { Breadcrumb } from '@/components/ui/breadcrumb';

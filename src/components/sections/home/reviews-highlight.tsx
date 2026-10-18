@@ -1,6 +1,6 @@
 import { ArrowRight, Quote } from 'lucide-react';
 import type { Route } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { Reveal } from '@/components/ui/reveal';
 import { Stars } from '@/components/ui/stars';
 import type { DynamicSection, Review, ReviewSummary } from '@/lib/api/schema';

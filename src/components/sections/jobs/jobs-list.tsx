@@ -2,7 +2,7 @@
 
 import { Briefcase, Clock, MapPin, Search } from 'lucide-react';
 import type { Route } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { useState } from 'react';
 import { buttonVariants } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';

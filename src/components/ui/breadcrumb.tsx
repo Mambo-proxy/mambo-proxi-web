@@ -1,13 +1,12 @@
 import { ChevronRight } from 'lucide-react';
-import Link from 'next/link';
-import type { Route } from 'next';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { Fragment } from 'react';
 import { JsonLd } from '@/components/seo/json-ld';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
 import { breadcrumbJsonLd } from '@/lib/seo/json-ld';
 
-export type BreadcrumbItem = { label: string; href?: Route };
+export type BreadcrumbItem = { label: string; href?: string };
 
 /**
  * Fil d'Ariane (Devis `70:8185`) : liens Inter Regular 13/16 +1 % `text/muted`,

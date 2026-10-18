@@ -1,4 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import createIntlMiddleware from 'next-intl/middleware';
+import { routing } from '@/i18n/routing';
 import { getApiBaseUrl } from '@/lib/api/config';
 import { transport } from '@/lib/api/transport';
 import { adminCsp } from '@/lib/security/headers';
@@ -14,6 +16,9 @@ export const ADMIN_PUBLIC_PATHS = [
   '/admin/nouveau-mot-de-passe',
   '/admin/invitation',
 ];
+
+/** Langue de l'adresse (préfixe `/en`), adresses traduites et 404 de la langue demandée. */
+const intl = createIntlMiddleware(routing);
 
 /** Durée de mémorisation de l'état « maintenance » des Paramètres, pour ne pas interroger l'API à chaque page. */
 const MAINTENANCE_TTL_MS = 30_000;
@@ -76,21 +81,34 @@ async function admin(request: NextRequest): Promise<NextResponse> {
   return response;
 }
 
+/** Langue d'une adresse publique : `/en` ou `/en/…` pour l'anglais, sinon le français (sans préfixe). */
+function localeOf(pathname: string): string {
+  const prefix = routing.locales.find(
+    (locale) => locale !== routing.defaultLocale && (pathname === `/${locale}` || pathname.startsWith(`/${locale}/`)),
+  );
+  return prefix ?? routing.defaultLocale;
+}
+
 /**
- * Proxy (anciennement « middleware ») : protège `/admin` et affiche la page de maintenance à la place du site public
- * (statut 503) quand elle est activée. Les membres de l'équipe connectés continuent de voir le site.
+ * Proxy (anciennement « middleware ») : protège `/admin`, oriente le site public vers sa langue et affiche la page de
+ * maintenance de cette langue (statut 503) quand elle est activée. Les membres de l'équipe connectés continuent de
+ * voir le site.
  */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (pathname === '/admin' || pathname.startsWith('/admin/')) return admin(request);
+  if (pathname === '/dev' || pathname.startsWith('/dev/')) return NextResponse.next();
 
-  if (pathname !== '/maintenance' && !hasSession(request) && (await isMaintenance())) {
-    const response = NextResponse.rewrite(new URL('/maintenance', request.url), { status: 503 });
+  const locale = localeOf(pathname);
+  const maintenancePath = `/${locale}/maintenance`;
+  const isMaintenancePage = pathname === '/maintenance' || pathname === `/${locale}/maintenance`;
+  if (!isMaintenancePage && !hasSession(request) && (await isMaintenance())) {
+    const response = NextResponse.rewrite(new URL(maintenancePath, request.url), { status: 503 });
     response.headers.set('Retry-After', '3600');
     response.headers.set('Cache-Control', 'no-store');
     return response;
   }
-  return NextResponse.next();
+  return intl(request);
 }
 
 export const config = {

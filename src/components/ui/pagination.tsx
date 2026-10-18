@@ -1,5 +1,4 @@
-import Link from 'next/link';
-import type { Route } from 'next';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { cn } from '@/lib/cn';
 
 export type PageItem = number | 'ellipsis';
@@ -26,7 +25,7 @@ type PaginationProps = {
   page: number;
   totalPages: number;
   /** URL d'une page (ex. `?page=2` en conservant les filtres). */
-  hrefFor: (page: number) => Route;
+  hrefFor: (page: number) => string;
   className?: string;
 };
 

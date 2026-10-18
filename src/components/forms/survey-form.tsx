@@ -1,8 +1,6 @@
 'use client';
 
 import { Check, Star } from 'lucide-react';
-import type { Route } from 'next';
-import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -13,6 +11,7 @@ import { errorMessage, toApiError } from '@/lib/api/errors';
 import type { SurveyQuestion } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
+import { useSiteRouter } from '@/i18n/site-link';
 
 type Value = number | string | null;
 
@@ -170,7 +169,7 @@ function NpsQuestion({
  * `POST /v1/surveys/{token}/responses` puis page de remerciement.
  */
 export function SurveyForm({ token, questions }: { token: string; questions: SurveyQuestion[] }) {
-  const router = useRouter();
+  const router = useSiteRouter();
   const sorted = [...questions].sort((a, b) => a.order - b.order);
   const [values, setValues] = useState<Record<string, Value>>({});
   const [publish, setPublish] = useState(false);
@@ -204,7 +203,7 @@ export function SurveyForm({ token, questions }: { token: string; questions: Sur
         },
       });
       if (!response.ok || !data) throw toApiError(error, response);
-      router.push('/questionnaire/merci' as Route);
+      router.push('/questionnaire/merci');
     } catch (caught) {
       setSending(false);
       toast.error(errorMessage(caught));

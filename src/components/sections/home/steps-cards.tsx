@@ -1,6 +1,6 @@
 import { CalendarCheck, FileText } from 'lucide-react';
 import type { Route } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { WhatsappIcon } from '@/components/brand/social-icons';
 import { Icon } from '@/components/ui/icon';
 import { Reveal } from '@/components/ui/reveal';

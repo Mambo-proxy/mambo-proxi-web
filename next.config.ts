@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   poweredByHeader: false,
   typedRoutes: true,
+  // Configuration des langues de next-intl (équivalent de son plugin, qui dépend d'un binaire natif superflu ici).
+  turbopack: {
+    resolveAlias: { 'next-intl/config': './src/i18n/request.ts' },
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
   },

@@ -1,3 +1,6 @@
 allowBuilds:
   # Le binaire natif Windows est fourni par @unrs/resolver-binding-* ; le script ne sert que de repli.
   unrs-resolver: false
+  # Dépendances facultatives de next-intl (plugin et extraction des messages), inutilisées : l'alias est déclaré dans next.config.ts.
+  '@parcel/watcher': false
+  '@swc/core': false

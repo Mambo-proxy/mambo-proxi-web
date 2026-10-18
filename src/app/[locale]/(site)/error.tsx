@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { useEffect } from 'react';
 import { ErrorPanel } from '@/components/sections/errors/error-panel';
 import { Button, buttonVariants } from '@/components/ui/button';

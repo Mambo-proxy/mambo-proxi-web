@@ -1,5 +1,5 @@
 import type { Route } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { AccentText } from '@/components/ui/accent-text';
 import { buttonVariants } from '@/components/ui/button';
 import type { CtaBandSection } from '@/lib/api/schema';

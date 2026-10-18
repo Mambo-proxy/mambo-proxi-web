@@ -1,6 +1,8 @@
 import 'server-only';
 import createClient from 'openapi-fetch';
 import { cookies } from 'next/headers';
+import { getLocale } from 'next-intl/server';
+import { defaultLocale } from '@/i18n/routing';
 import { getApiBaseUrl } from './config';
 import type { paths } from './schema';
 import { transport } from './transport';
@@ -10,6 +12,31 @@ const FALLBACK_REVALIDATE_SECONDS = 3600;
 
 /** Client des routes publiques, utilisé par les Server Components. */
 export const api = createClient<paths>({ baseUrl: getApiBaseUrl(), fetch: (request) => transport(request) });
+
+/** Langue de la requête en cours ; hors d'un rendu de page (tests, tâches), le français. */
+async function currentLocale(): Promise<string> {
+  try {
+    return await getLocale();
+  } catch {
+    return defaultLocale;
+  }
+}
+
+/**
+ * Contenus dans la langue de la page : `?lang=en` ajouté aux lectures du site anglais (le français, langue par défaut,
+ * garde des adresses sans paramètre). Le paramètre fait partie de l'adresse, donc de la clé du cache.
+ */
+api.use({
+  async onRequest({ request }) {
+    if (request.method !== 'GET') return undefined;
+    const locale = await currentLocale();
+    if (locale === defaultLocale) return undefined;
+    const url = new URL(request.url);
+    if (url.searchParams.has('lang')) return undefined;
+    url.searchParams.set('lang', locale);
+    return new Request(url, request);
+  },
+});
 
 /**
  * Options de requête mises en cache par Next.js et invalidées par étiquettes.

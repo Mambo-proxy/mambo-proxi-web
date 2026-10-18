@@ -1,6 +1,5 @@
 import { cva, type VariantProps } from 'class-variance-authority';
-import Link from 'next/link';
-import type { Route } from 'next';
+import { SiteLink as Link } from '@/i18n/site-link';
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 import { Spinner } from './spinner';
@@ -76,11 +75,10 @@ export function Button({
   );
 }
 
-type ExternalHref = `https://${string}` | `mailto:${string}` | `tel:${string}`;
 
 type ButtonLinkProps = Omit<ComponentProps<'a'>, 'href'> &
   ButtonStyleProps & {
-    href: Route | ExternalHref;
+    href: string;
     children: ReactNode;
   };
 
@@ -98,5 +96,5 @@ export function ButtonLink({ className, variant, size, shape, fullWidth, href, .
       />
     );
   }
-  return <Link href={href as Route} className={classes} {...props} />;
+  return <Link href={href} className={classes} {...props} />;
 }

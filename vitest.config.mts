@@ -16,6 +16,8 @@ export default defineConfig({
   test: {
     setupFiles: ['./src/test/setup.ts'],
     clearMocks: true,
+    // next-intl importe `next/server` sans extension : il est transformé par Vite pour que l'import se résolve.
+    server: { deps: { inline: ['next-intl'] } },
     projects: [
       {
         extends: true,

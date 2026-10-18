@@ -1,6 +1,6 @@
 import { CalendarCheck, Mail, Smartphone } from 'lucide-react';
 import type { Route } from 'next';
-import Link from 'next/link';
+import { SiteLink as Link } from '@/i18n/site-link';
 import { Logo } from '@/components/brand/logo';
 import { SOCIAL_ICONS, SOCIAL_LABELS } from '@/components/brand/social-icons';
 import type { Navigation, SiteSettings } from '@/lib/api/schema';
