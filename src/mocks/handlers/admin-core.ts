@@ -8,6 +8,7 @@ import type {
   SidebarCounts,
 } from '@/lib/api/schema';
 import { appointmentsToConfirm } from '../data/admin-appointments';
+import { unreadApplications } from '../data/admin-jobs';
 import { adminRequests } from '../data/admin-requests';
 import { reviewsToValidate } from '../data/admin-reviews';
 import { problem } from '../problem';
@@ -21,7 +22,10 @@ export const pendingCounts = {
   get reviewsToValidate() {
     return reviewsToValidate();
   },
-  unreadApplications: 2,
+  /** Candidatures « Nouveau » (non lues) : calculé sur les candidatures simulées (`data/admin-jobs.ts`). */
+  get unreadApplications() {
+    return unreadApplications();
+  },
   /** Rendez-vous « À confirmer » : calculé sur les rendez-vous simulés (`data/admin-appointments.ts`). */
   get appointmentsToConfirm() {
     return appointmentsToConfirm();
