@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowRight, ChevronDown, User } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { SiteLink as Link, useSitePathname } from '@/i18n/site-link';
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { buttonVariants } from '@/components/ui/button';
@@ -71,12 +72,13 @@ type DesktopNavProps = {
 };
 
 /**
- * Navigation desktop (≥ 1280 px) : 8 onglets (Figma `45:24`), méga-menu « Nos services » (`72:10000`),
+ * Navigation desktop (≥ 1280 px) : 9 onglets espacés de 6 px à 1440 (Figma `45:69`), méga-menu « Nos services » (`72:10000`),
  * sous-menus des autres onglets et de « S'inscrire » (non maquettés, même langage).
  * Clavier : `↓` ou `Espace` ouvre le panneau et place le focus sur le premier lien, flèches dans le panneau,
  * `Échap` ferme et rend le focus à l'onglet ; `Entrée` suit le lien de l'onglet.
  */
 export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps) {
+  const t = useTranslations('site.header');
   const pathname = useSitePathname();
   const menu = useMenuState();
   const baseId = useId();
@@ -133,8 +135,8 @@ export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps
 
   return (
     <>
-      <nav aria-label="Navigation principale" className="hidden xl:block">
-        <ul className="flex items-center gap-0.5 wide:gap-2.5">
+      <nav aria-label={t('mainNav')} className="hidden xl:block">
+        <ul className="flex items-center gap-0.5 wide:gap-1.5">
           {items.map((item) => {
             const active =
               isActive(pathname, item.href) || (item.key === 'services' && pathname.startsWith('/services'));
@@ -155,7 +157,7 @@ export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps
                   aria-controls={hasPanel ? panelId(item.key) : undefined}
                   onKeyDown={hasPanel ? (event) => triggerKeyDown(event, item.key) : undefined}
                   className={cn(
-                    'group/tab flex flex-col items-center gap-1 rounded-sm px-1 py-2 font-ui text-[14px] leading-5 tracking-[0.005em]',
+                    'group/tab flex flex-col items-center gap-1 rounded-sm px-0.5 py-2 font-ui text-[14px] leading-5 tracking-[0.005em] wide:px-1',
                     active || open
                       ? 'font-semibold text-text-main'
                       : 'font-medium text-neutral-700 hover:text-text-main',
@@ -208,7 +210,7 @@ export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps
             className="flex cursor-pointer items-center gap-2 rounded-full border border-border-strong px-3 py-3 font-ui text-[14px] leading-5 font-semibold text-text-main transition-colors hover:bg-neutral-100 wide:px-3.5"
           >
             <User aria-hidden size={18} />
-            S&apos;inscrire
+            {t('signUp')}
           </button>
           <Dropdown
             open={menu.openKey === SIGN_UP_KEY}
@@ -218,7 +220,7 @@ export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps
           />
         </div>
         <Link href={routes.devis} className={cn(buttonVariants(), 'xl:px-5 wide:px-6')}>
-          Devis gratuit
+          {t('freeQuote')}
         </Link>
       </div>
 
@@ -301,8 +303,9 @@ function Dropdown({
 }
 
 /**
- * Méga-menu « Nos services » : panneau blanc (marges 40 à 1440 → 1360 px), rayon 28, p 32, gap 32, `elevation/4` ;
- * 4 colonnes (gap 28) + encart promo sombre 280 px. Colonnes en cascade (60 ms).
+ * Méga-menu « Nos services » (`72:10112`) : panneau blanc (marges 40 à 1440 → 1360 px), rayon 28, p 32, gap 32,
+ * `elevation/4` ; une colonne par rubrique (5, gap 28 ; titre, filet, services et lien espacés de 12) + encart
+ * promo sombre 280 px avec photo. Colonnes en cascade (60 ms).
  */
 function MegaPanel({
   open,
@@ -310,6 +313,7 @@ function MegaPanel({
   compact,
   ...panel
 }: PanelProps & { open: boolean; menu: MegaMenu; compact: boolean }) {
+  const t = useTranslations('site.header');
   return (
     <div
       {...panel}
@@ -325,30 +329,29 @@ function MegaPanel({
           panelClasses(open),
         )}
       >
-        <div className="grid flex-1 grid-cols-4 gap-7">
+        <div className="flex flex-1 gap-7">
           {menu.categories.map((category, index) => (
             <div
               key={category.slug}
               style={{ transitionDelay: open ? `${index * 60}ms` : '0ms' }}
               className={cn(
-                'flex flex-col gap-3.5 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
+                'flex min-w-0 flex-1 flex-col gap-3 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
                 open ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0',
               )}
             >
-              <div className="flex flex-col gap-4 border-b border-border-default pb-4">
-                <div className="flex items-center gap-2.5">
-                  <CategoryBadge icon={category.icon} tint={category.tint} />
-                  <div className="flex flex-col">
-                    <p className="font-ui text-[15px] leading-6 font-semibold text-text-main">
-                      {frenchTypography(category.name)}
-                    </p>
-                    <p className="font-ui text-[12px] leading-4 tracking-[0.01em] text-text-muted">
-                      {frenchTypography(category.tagline)}
-                    </p>
-                  </div>
+              <div className="flex items-start gap-2.5">
+                <CategoryBadge icon={category.icon} tint={category.tint} />
+                <div className="flex min-w-0 flex-1 flex-col">
+                  <p className="font-ui text-[15px] leading-6 font-semibold text-text-main">
+                    {frenchTypography(category.name)}
+                  </p>
+                  <p className="font-ui text-[12px] leading-4 tracking-[0.01em] text-text-muted">
+                    {frenchTypography(category.tagline)}
+                  </p>
                 </div>
               </div>
-              <ul className="flex flex-col gap-3">
+              <div aria-hidden className="h-px bg-border-default" />
+              <ul className="contents">
                 {category.services.map((service) => (
                   <li key={service.slug}>
                     <PanelLink href={service.href} open={open}>
@@ -360,9 +363,9 @@ function MegaPanel({
               <Link
                 href={category.href}
                 tabIndex={open ? undefined : -1}
-                className="group/more inline-flex items-center gap-1.5 self-start rounded-xs font-ui text-[14px] leading-5 font-semibold text-text-brand"
+                className="group/more inline-flex items-center gap-1.5 self-start rounded-xs font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-brand"
               >
-                Toute la rubrique
+                {t('wholeCategory')}
                 <ArrowRight
                   aria-hidden
                   size={16}
@@ -373,11 +376,7 @@ function MegaPanel({
           ))}
         </div>
         <aside className="flex w-[280px] shrink-0 flex-col gap-3.5 self-start rounded-[22px] bg-neutral-900 p-6">
-          <Visual
-            visual={{ illustration: menu.promo.illustration, image: null, alt: '' }}
-            sizes="232px"
-            className="h-[130px] w-full rounded-lg"
-          />
+          <Visual visual={menu.promo.visual} sizes="232px" className="h-[130px] w-full rounded-lg" />
           <p className="font-ui text-[16px] leading-6 font-semibold text-neutral-0">
             {frenchTypography(menu.promo.title)}
           </p>

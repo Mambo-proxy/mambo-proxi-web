@@ -49,12 +49,16 @@ export default async function ContactPage({ searchParams }: SearchParams) {
   ]);
   const { contact } = settings;
   const methods: ContactMethod[] = [
-    {
-      icon: Smartphone,
-      label: 'France',
-      value: contact.phoneFranceDisplay ?? contact.phoneFrance,
-      href: `tel:${contact.phoneFrance}`,
-    },
+    ...(contact.phoneFrance
+      ? [
+          {
+            icon: Smartphone,
+            label: 'France',
+            value: contact.phoneFranceDisplay ?? contact.phoneFrance,
+            href: `tel:${contact.phoneFrance}`,
+          },
+        ]
+      : []),
     {
       icon: Smartphone,
       label: 'Cameroun',

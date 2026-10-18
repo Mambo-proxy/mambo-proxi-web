@@ -1,5 +1,66 @@
 {
   "metadata": {
     "description": "Home cleaning, laundry, meals, parcels, private chef, massage, photographer: trusted professionals at your home, in Douala and the surrounding area."
+  },
+  "site": {
+    "skipToContent": "Skip to content",
+    "newTab": "{label} (opens in a new tab)",
+    "homeLink": "MAMBO Proxi — home",
+    "language": {
+      "label": "Language",
+      "fr": "Français",
+      "en": "English",
+      "short": { "fr": "FR", "en": "EN" },
+      "choose": "Choose the language"
+    },
+    "topBar": {
+      "whatsapp": "WhatsApp",
+      "phone": "Phone"
+    },
+    "header": {
+      "mainNav": "Main navigation",
+      "freeQuote": "Free quote",
+      "signUp": "Sign up",
+      "openMenu": "Open the menu",
+      "closeMenu": "Close the menu",
+      "menu": "Menu",
+      "wholeCategory": "See the whole category",
+      "servicesCount": "{count, plural, one {# service} other {# services}}",
+      "whatsapp": "Message us on WhatsApp"
+    },
+    "footer": {
+      "contactTitle": "Contact us",
+      "whatsapp": "WhatsApp",
+      "cameroon": "Cameroon",
+      "appointment": "Book an appointment"
+    },
+    "newsletter": {
+      "form": "Subscribe to the Mambo letter",
+      "name": "Your name",
+      "email": "Your email address",
+      "phone": "Phone (WhatsApp)",
+      "submit": "Subscribe",
+      "alreadySubscribed": "You are already subscribed to the Mambo letter: thank you for your loyalty!",
+      "invalidEmail": "Please enter a valid email address.",
+      "invalidPhone": "Please enter a number with the country code (e.g. +237…)."
+    },
+    "whatsappFloat": {
+      "label": "Message us on WhatsApp"
+    },
+    "cookies": {
+      "title": "We respect your privacy",
+      "text": "We use cookies to measure our audience and improve the website. You can accept, refuse or customise your choices.",
+      "refuse": "Refuse",
+      "customize": "Customise",
+      "accept": "Accept",
+      "modalTitle": "Customise cookies",
+      "modalText": "Choose which cookies you accept. You can change these choices at any time from the Cookies page.",
+      "refuseAll": "Refuse all",
+      "save": "Save my choices",
+      "necessary": "Necessary cookies",
+      "necessaryText": "Essential for the website to work (remembering your choices, form security). Always active.",
+      "analytics": "Audience measurement (Google Analytics)",
+      "analyticsText": "Anonymised visit statistics to improve the website. Disabled until you accept it."
+    }
   }
 }

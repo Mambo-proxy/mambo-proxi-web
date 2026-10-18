@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronRight, Minus, Plus, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { SiteLink as Link, useSitePathname } from '@/i18n/site-link';
 import { useEffect, useId, useRef, useState } from 'react';
 import { Logo } from '@/components/brand/logo';
@@ -10,6 +11,7 @@ import { cn } from '@/lib/cn';
 import { routes } from '@/lib/routes';
 import { frenchTypography } from '@/lib/format/typography';
 import { CategoryBadge } from './category-badge';
+import { LanguageSwitch } from './language-switch';
 import { isActive, type MegaMenu, type NavItem } from './nav-types';
 
 type MobileMenuProps = {
@@ -22,9 +24,11 @@ type MobileMenuProps = {
 
 /**
  * Menu mobile plein écran (Figma `72:10211`) : `<dialog>` modal (page inerte, focus piégé, `Échap`),
- * glissement depuis la droite (300 ms), accordéons +/−, fermeture au changement de page.
+ * glissement depuis la droite (300 ms), accordéons +/−, fermeture au changement de page ; en bas, la langue
+ * (FR — Français / EN — English), S'inscrire, Devis gratuit et WhatsApp.
  */
 export function MobileMenu({ open, onClose, items, megaMenu, whatsappHref }: MobileMenuProps) {
+  const t = useTranslations('site.header');
   const ref = useRef<HTMLDialogElement>(null);
   const pathname = useSitePathname();
   const [expanded, setExpanded] = useState<string | null>(() =>
@@ -50,7 +54,7 @@ export function MobileMenu({ open, onClose, items, megaMenu, whatsappHref }: Mob
   return (
     <dialog
       ref={ref}
-      aria-label="Menu"
+      aria-label={t('menu')}
       onCancel={(event) => {
         event.preventDefault();
         onClose();
@@ -67,14 +71,14 @@ export function MobileMenu({ open, onClose, items, megaMenu, whatsappHref }: Mob
           <button
             type="button"
             onClick={onClose}
-            aria-label="Fermer le menu"
+            aria-label={t('closeMenu')}
             className="flex size-11 cursor-pointer items-center justify-center rounded-full bg-neutral-100 text-text-main"
           >
             <X aria-hidden size={22} />
           </button>
         </div>
 
-        <nav aria-label="Navigation principale" className="flex-1 overflow-y-auto px-5 py-2">
+        <nav aria-label={t('mainNav')} className="flex-1 overflow-y-auto px-5 py-2">
           <ul>
             {items.map((item, index) => (
               <li
@@ -107,15 +111,16 @@ export function MobileMenu({ open, onClose, items, megaMenu, whatsappHref }: Mob
         </nav>
 
         <div className="flex flex-col gap-2.5 border-t border-border-default px-5 pt-4 pb-7">
+          <LanguageSwitch variant="pill" />
           <div className="flex gap-2.5">
             <Link
               href={routes.inscription}
               className={cn(buttonVariants({ variant: 'outline' }), 'flex-1 px-4 py-[13px]')}
             >
-              S&apos;inscrire
+              {t('signUp')}
             </Link>
             <Link href={routes.devis} className={cn(buttonVariants(), 'flex-1')}>
-              Devis gratuit
+              {t('freeQuote')}
             </Link>
           </div>
           {whatsappHref && (
@@ -125,7 +130,7 @@ export function MobileMenu({ open, onClose, items, megaMenu, whatsappHref }: Mob
               rel="noopener noreferrer"
               className={buttonVariants({ variant: 'whatsapp', fullWidth: true })}
             >
-              Écrire sur WhatsApp
+              {t('whatsapp')}
             </a>
           )}
         </div>
@@ -145,6 +150,7 @@ function AccordionItem({
   expanded: boolean;
   onToggle: () => void;
 }) {
+  const t = useTranslations('site.header');
   const id = useId();
   return (
     <>
@@ -182,7 +188,7 @@ function AccordionItem({
                         {frenchTypography(category.name)}
                       </span>
                       <span className="font-ui text-[12px] leading-4 text-text-muted">
-                        {category.services.length} services
+                        {category.countLabel ?? t('servicesCount', { count: category.services.length })}
                       </span>
                     </span>
                   </SubmenuRow>

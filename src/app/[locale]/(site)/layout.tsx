@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { CookieBanner } from '@/components/site/cookie-banner';
 import { SiteFooter } from '@/components/site/site-footer';
@@ -17,7 +18,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /** Gabarit des pages publiques : barre supérieure, en-tête, pied de page, WhatsApp flottant, bandeau cookies. */
 export default async function SiteLayout({ children }: { children: ReactNode }) {
-  const [settings, navigation] = await Promise.all([getSiteSettings(), getNavigation()]);
+  const [settings, navigation, t] = await Promise.all([
+    getSiteSettings(),
+    getNavigation(),
+    getTranslations('site'),
+  ]);
   const whatsappHref = settings.whatsapp.enabled
     ? whatsappUrl(settings.whatsapp.number, settings.whatsapp.message)
     : null;
@@ -28,12 +33,12 @@ export default async function SiteLayout({ children }: { children: ReactNode }) 
         href="#contenu"
         className="sr-only z-50 rounded-md bg-neutral-900 px-4 py-3 font-ui text-[14px] font-semibold text-neutral-0 focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
       >
-        Aller au contenu
+        {t('skipToContent')}
       </a>
       <SiteHeader
         navigation={navigation}
         whatsappHref={whatsappHref}
-        topBar={<TopBar settings={settings} />}
+        topBar={<TopBar settings={settings} whatsappHref={whatsappHref} />}
       />
       <main id="contenu" tabIndex={-1} className="outline-none">
         {children}

@@ -1,6 +1,7 @@
 'use client';
 
 import { CircleCheck, Mail, Smartphone, User } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useRef, useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { browserApi } from '@/lib/api/browser';
@@ -15,7 +16,6 @@ type Status =
   | { kind: 'error'; message: string; field?: 'email' | 'phone' };
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const ALREADY_SUBSCRIBED = 'Vous êtes déjà inscrit(e) à la lettre Mambo : merci de votre fidélité !';
 
 /**
  * Inscription à la lettre Mambo (pied de page, Figma `46:90`) : nom, e-mail, téléphone (WhatsApp) en pilules
@@ -23,6 +23,7 @@ const ALREADY_SUBSCRIBED = 'Vous êtes déjà inscrit(e) à la lettre Mambo : me
  * consentement, confirmé par l'e-mail). États : envoi, succès, déjà inscrit, erreur (annoncés aux lecteurs d'écran).
  */
 export function NewsletterForm() {
+  const t = useTranslations('site.newsletter');
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
   const startedAt = useRef(new Date().toISOString());
 
@@ -33,14 +34,14 @@ export function NewsletterForm() {
     const rawPhone = String(data.get('phone') ?? '').trim();
     const phone = rawPhone ? toE164(rawPhone) : null;
     if (!EMAIL.test(email)) {
-      setStatus({ kind: 'error', field: 'email', message: 'Merci d’indiquer une adresse e-mail valide.' });
+      setStatus({ kind: 'error', field: 'email', message: t('invalidEmail') });
       return;
     }
     if (rawPhone && !phone) {
       setStatus({
         kind: 'error',
         field: 'phone',
-        message: 'Merci d’indiquer un numéro avec l’indicatif du pays (ex. +237…).',
+        message: t('invalidPhone'),
       });
       return;
     }
@@ -65,7 +66,10 @@ export function NewsletterForm() {
         },
       });
       if (!response.ok || !result) throw toApiError(error, response);
-      setStatus({ kind: 'success', message: result.alreadySubscribed ? ALREADY_SUBSCRIBED : result.message });
+      setStatus({
+        kind: 'success',
+        message: result.alreadySubscribed ? t('alreadySubscribed') : result.message,
+      });
     } catch (caught) {
       const field = caught instanceof ApiError && caught.fieldErrors.email ? 'email' : undefined;
       setStatus({
@@ -98,16 +102,16 @@ export function NewsletterForm() {
     <form
       onSubmit={onSubmit}
       noValidate
-      aria-label="Inscription à la lettre Mambo"
+      aria-label={t('form')}
       className="flex w-full min-w-0 flex-col gap-2.5 xl:w-auto xl:flex-[0_1_auto]"
     >
       <div className="flex flex-col gap-2.5 xl:flex-row">
-        <PillInput icon={User} name="name" label="Votre nom" autoComplete="name" />
+        <PillInput icon={User} name="name" label={t('name')} autoComplete="name" />
         <PillInput
           icon={Mail}
           name="email"
           type="email"
-          label="Votre adresse e-mail"
+          label={t('email')}
           autoComplete="email"
           required
           {...field('email')}
@@ -116,7 +120,7 @@ export function NewsletterForm() {
           icon={Smartphone}
           name="phone"
           type="tel"
-          label="Téléphone (WhatsApp)"
+          label={t('phone')}
           autoComplete="tel"
           {...field('phone')}
         />
@@ -127,7 +131,7 @@ export function NewsletterForm() {
           loading={status.kind === 'sending'}
           className="focus-visible:focus-ring-inverse"
         >
-          S&apos;abonner
+          {t('submit')}
         </Button>
       </div>
       <p

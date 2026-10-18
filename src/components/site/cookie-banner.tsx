@@ -1,6 +1,7 @@
 'use client';
 
 import Script from 'next/script';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
@@ -17,6 +18,7 @@ const outlineOnDark =
  * Google Analytics 4 n'est chargé qu'après consentement à la mesure d'audience.
  */
 export function CookieBanner({ ga4MeasurementId }: { ga4MeasurementId: string | null }) {
+  const t = useTranslations('site.cookies');
   const consent = useConsent();
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const [analytics, setAnalytics] = useState(false);
@@ -57,16 +59,13 @@ export function CookieBanner({ ga4MeasurementId }: { ga4MeasurementId: string | 
               id="cookie-banner-title"
               className="font-ui text-[16px] leading-6 font-semibold text-neutral-0"
             >
-              Nous respectons votre vie privée
+              {t('title')}
             </h2>
-            <p className="font-ui text-[14px] leading-5 text-neutral-300">
-              Nous utilisons des cookies pour mesurer l’audience et améliorer le site. Vous pouvez accepter,
-              refuser ou personnaliser vos choix.
-            </p>
+            <p className="font-ui text-[14px] leading-5 text-neutral-300">{t('text')}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2.5">
             <button type="button" onClick={() => decide(false)} className={outlineOnDark}>
-              Refuser
+              {t('refuse')}
             </button>
             <button
               type="button"
@@ -76,10 +75,10 @@ export function CookieBanner({ ga4MeasurementId }: { ga4MeasurementId: string | 
               }}
               className={outlineOnDark}
             >
-              Personnaliser
+              {t('customize')}
             </button>
             <Button onClick={() => decide(true)} className="focus-visible:focus-ring-inverse max-md:flex-1">
-              Accepter
+              {t('accept')}
             </Button>
           </div>
         </section>
@@ -88,36 +87,30 @@ export function CookieBanner({ ga4MeasurementId }: { ga4MeasurementId: string | 
       <Modal
         open={preferencesOpen}
         onClose={() => setPreferencesOpen(false)}
-        title="Personnaliser les cookies"
-        description="Choisissez les cookies que vous acceptez. Vous pouvez modifier ces choix à tout moment depuis la page Cookies."
+        title={t('modalTitle')}
+        description={t('modalText')}
         footer={
           <>
             <Button variant="outline" onClick={() => decide(false)}>
-              Tout refuser
+              {t('refuseAll')}
             </Button>
-            <Button onClick={() => decide(analytics)}>Enregistrer mes choix</Button>
+            <Button onClick={() => decide(analytics)}>{t('save')}</Button>
           </>
         }
       >
         <ul className="flex flex-col divide-y divide-border-default">
           <li className="flex flex-col gap-2 pb-4">
-            <Switch id="cookies-necessaires" label="Cookies nécessaires" checked disabled readOnly />
-            <p className="font-ui text-[14px] leading-5 text-text-muted">
-              Indispensables au fonctionnement du site (mémorisation de vos choix, sécurité des formulaires).
-              Toujours actifs.
-            </p>
+            <Switch id="cookies-necessaires" label={t('necessary')} checked disabled readOnly />
+            <p className="font-ui text-[14px] leading-5 text-text-muted">{t('necessaryText')}</p>
           </li>
           <li className="flex flex-col gap-2 pt-4">
             <Switch
               id="cookies-mesure"
-              label="Mesure d’audience (Google Analytics)"
+              label={t('analytics')}
               checked={analytics}
               onChange={(event) => setAnalytics(event.target.checked)}
             />
-            <p className="font-ui text-[14px] leading-5 text-text-muted">
-              Statistiques de visite anonymisées pour améliorer le site. Désactivée tant que vous ne
-              l’acceptez pas.
-            </p>
+            <p className="font-ui text-[14px] leading-5 text-text-muted">{t('analyticsText')}</p>
           </li>
         </ul>
       </Modal>

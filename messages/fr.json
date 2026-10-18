@@ -1,5 +1,66 @@
 {
   "metadata": {
     "description": "Entretien du logement, linge, repas, colis, chef privé, massage, photographe : des intervenants de confiance à domicile, à Douala et environs."
+  },
+  "site": {
+    "skipToContent": "Aller au contenu",
+    "newTab": "{label} (nouvel onglet)",
+    "homeLink": "MAMBO Proxi — accueil",
+    "language": {
+      "label": "Langue",
+      "fr": "Français",
+      "en": "English",
+      "short": { "fr": "FR", "en": "EN" },
+      "choose": "Choisir la langue"
+    },
+    "topBar": {
+      "whatsapp": "WhatsApp",
+      "phone": "Téléphone"
+    },
+    "header": {
+      "mainNav": "Navigation principale",
+      "freeQuote": "Devis gratuit",
+      "signUp": "S'inscrire",
+      "openMenu": "Ouvrir le menu",
+      "closeMenu": "Fermer le menu",
+      "menu": "Menu",
+      "wholeCategory": "Toute la rubrique",
+      "servicesCount": "{count, plural, one {# service} other {# services}}",
+      "whatsapp": "Écrire sur WhatsApp"
+    },
+    "footer": {
+      "contactTitle": "Nous contacter",
+      "whatsapp": "WhatsApp",
+      "cameroon": "Cameroun",
+      "appointment": "Prendre rendez-vous"
+    },
+    "newsletter": {
+      "form": "Inscription à la lettre Mambo",
+      "name": "Votre nom",
+      "email": "Votre adresse e-mail",
+      "phone": "Téléphone (WhatsApp)",
+      "submit": "S'abonner",
+      "alreadySubscribed": "Vous êtes déjà inscrit(e) à la lettre Mambo : merci de votre fidélité !",
+      "invalidEmail": "Merci d’indiquer une adresse e-mail valide.",
+      "invalidPhone": "Merci d’indiquer un numéro avec l’indicatif du pays (ex. +237…)."
+    },
+    "whatsappFloat": {
+      "label": "Écrire sur WhatsApp"
+    },
+    "cookies": {
+      "title": "Nous respectons votre vie privée",
+      "text": "Nous utilisons des cookies pour mesurer l’audience et améliorer le site. Vous pouvez accepter, refuser ou personnaliser vos choix.",
+      "refuse": "Refuser",
+      "customize": "Personnaliser",
+      "accept": "Accepter",
+      "modalTitle": "Personnaliser les cookies",
+      "modalText": "Choisissez les cookies que vous acceptez. Vous pouvez modifier ces choix à tout moment depuis la page Cookies.",
+      "refuseAll": "Tout refuser",
+      "save": "Enregistrer mes choix",
+      "necessary": "Cookies nécessaires",
+      "necessaryText": "Indispensables au fonctionnement du site (mémorisation de vos choix, sécurité des formulaires). Toujours actifs.",
+      "analytics": "Mesure d’audience (Google Analytics)",
+      "analyticsText": "Statistiques de visite anonymisées pour améliorer le site. Désactivée tant que vous ne l’acceptez pas."
+    }
   }
 }

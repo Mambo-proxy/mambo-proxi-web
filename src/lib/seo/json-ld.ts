@@ -58,13 +58,17 @@ export function organizationJsonLd(settings: SiteSettings, reviews?: ReviewSumma
       { '@type': 'Country', name: 'Cameroun' },
     ],
     contactPoint: [
-      {
-        '@type': 'ContactPoint',
-        contactType: 'customer service',
-        telephone: contact.phoneFrance,
-        areaServed: 'FR',
-        availableLanguage: 'French',
-      },
+      ...(contact.phoneFrance
+        ? [
+            {
+              '@type': 'ContactPoint',
+              contactType: 'customer service',
+              telephone: contact.phoneFrance,
+              areaServed: 'FR',
+              availableLanguage: 'French',
+            },
+          ]
+        : []),
       {
         '@type': 'ContactPoint',
         contactType: 'customer service',

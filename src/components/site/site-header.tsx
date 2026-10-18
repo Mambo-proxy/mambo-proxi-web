@@ -1,6 +1,7 @@
 'use client';
 
 import { Menu } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Logo } from '@/components/brand/logo';
@@ -25,6 +26,7 @@ type SiteHeaderProps = {
  * masqué en descendant et réaffiché en remontant.
  */
 export function SiteHeader({ navigation, whatsappHref, topBar }: SiteHeaderProps) {
+  const t = useTranslations('site.header');
   const { scrolled, goingDown } = useScroll(80);
   const [menuOpen, setMenuOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -63,19 +65,19 @@ export function SiteHeader({ navigation, whatsappHref, topBar }: SiteHeaderProps
       >
         <Logo priority className="h-9 wide:h-10" />
         <DesktopNav
-          items={navigation.main}
+          items={navigation.main.filter((item) => item.placement !== 'mobile')}
           megaMenu={navigation.megaMenu}
           signUp={navigation.signUp}
           compact={scrolled}
         />
         <div className="flex items-center gap-2 xl:hidden">
           <Link href={routes.devis} className={buttonVariants({ size: 'sm', shape: 'pill' })}>
-            Devis gratuit
+            {t('freeQuote')}
           </Link>
           <button
             type="button"
             onClick={() => setMenuOpen(true)}
-            aria-label="Ouvrir le menu"
+            aria-label={t('openMenu')}
             aria-haspopup="dialog"
             aria-expanded={menuOpen}
             className="flex size-11 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-main"

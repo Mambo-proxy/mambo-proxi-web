@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { cn } from '@/lib/cn';
 
@@ -21,9 +22,10 @@ const FILES = {
  * La taille d'affichage est donnée par `className` (ex. `h-10 w-auto`).
  */
 export function Logo({ variant = 'horizontal', inverse = false, className, priority = false }: LogoProps) {
+  const t = useTranslations('site');
   const file = FILES[variant];
   return (
-    <Link href="/" aria-label="MAMBO Proxi — accueil" className={cn('inline-flex shrink-0', className)}>
+    <Link href="/" aria-label={t('homeLink')} className={cn('inline-flex shrink-0', className)}>
       <Image
         src={`/brand/${file.src}${inverse ? '-white' : ''}.svg`}
         alt=""

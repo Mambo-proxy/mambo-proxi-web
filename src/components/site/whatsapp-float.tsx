@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { WhatsappIcon } from '@/components/brand/social-icons';
 import { cn } from '@/lib/cn';
@@ -13,6 +14,7 @@ const SHOW_AFTER_MS = 4000;
  * étiquette « Écrire sur WhatsApp » au survol ; remonte quand le bandeau cookies est affiché.
  */
 export function WhatsappFloat({ href }: { href: string }) {
+  const t = useTranslations('site');
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export function WhatsappFloat({ href }: { href: string }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label="Écrire sur WhatsApp (nouvel onglet)"
+      aria-label={t('newTab', { label: t('whatsappFloat.label') })}
       data-whatsapp-float
       className={cn(
         'group/wa fixed right-4 bottom-4 z-40 flex items-center xl:right-7 xl:bottom-7',
@@ -45,7 +47,7 @@ export function WhatsappFloat({ href }: { href: string }) {
         aria-hidden
         className="mr-3 hidden max-w-0 overflow-hidden rounded-full bg-neutral-900 px-0 py-2 font-ui text-[14px] leading-5 font-semibold whitespace-nowrap text-neutral-0 opacity-0 transition-all duration-300 group-hover/wa:max-w-[220px] group-hover/wa:px-4 group-hover/wa:opacity-100 xl:block"
       >
-        Écrire sur WhatsApp
+        {t('whatsappFloat.label')}
       </span>
       <span className="relative flex size-14 items-center justify-center rounded-full bg-whatsapp text-neutral-0 shadow-whatsapp transition-colors group-hover/wa:bg-whatsapp-hover xl:size-16">
         <span
