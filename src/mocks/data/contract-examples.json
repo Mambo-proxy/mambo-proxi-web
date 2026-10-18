@@ -11,8 +11,6 @@
         "tagline": "Vos services, au plus près de vous",
         "signature": "Mambo, ce n'est pas qu'un service. C'est une expérience pensée pour vous.",
         "contact": {
-          "phoneFrance": "+33600000000",
-          "phoneFranceDisplay": "+33 6 00 00 00 00",
           "phoneCameroon": "+237600000000",
           "phoneCameroonDisplay": "+237 6 00 00 00 00",
           "email": "contact@mamboproxi.com",
@@ -21,6 +19,7 @@
         "whatsapp": {
           "enabled": true,
           "number": "+237600000000",
+          "numberDisplay": "+237 6 00 00 00 00",
           "message": "Bonjour Mambo Proxi, je souhaite des informations sur…"
         },
         "social": [
@@ -96,8 +95,107 @@
           "searchConsoleVerification": null
         },
         "seo": {
-          "defaultTitle": "MAMBO Proxi — Conciergerie de proximité France · Cameroun",
-          "defaultDescription": "Mobilité, chef privé, logement, courses, découvertes culturelles… Des prestataires de confiance pour vous simplifier la vie au Cameroun.",
+          "defaultTitle": "MAMBO Proxi — Services du quotidien à domicile à Douala",
+          "defaultDescription": "Entretien du logement, linge, repas, colis, chef privé, massage, photographe… Des intervenants de confiance à domicile, à Douala et environs.",
+          "ogImageUrl": null
+        },
+        "features": {
+          "maintenanceMode": false,
+          "newsletterTracking": false
+        },
+        "updatedAt": "2026-10-05T08:00:00.000Z"
+      },
+      "en": {
+        "siteName": "MAMBO Proxi",
+        "tagline": "Your services, close at hand",
+        "signature": "Mambo isn't just a service. It's an experience designed for you.",
+        "contact": {
+          "phoneCameroon": "+237600000000",
+          "phoneCameroonDisplay": "+237 6 00 00 00 00",
+          "email": "contact@mamboproxi.com",
+          "hoursLabel": "Mon – Sat · 8am – 8pm"
+        },
+        "whatsapp": {
+          "enabled": true,
+          "number": "+237600000000",
+          "numberDisplay": "+237 6 00 00 00 00",
+          "message": "Hello Mambo Proxi, I would like some information about…"
+        },
+        "social": [
+          {
+            "network": "instagram",
+            "url": "https://www.instagram.com/mamboproxi"
+          },
+          {
+            "network": "facebook",
+            "url": "https://www.facebook.com/mamboproxi"
+          },
+          {
+            "network": "linkedin",
+            "url": "https://www.linkedin.com/company/mamboproxi"
+          },
+          {
+            "network": "tiktok",
+            "url": "https://www.tiktok.com/@mamboproxi"
+          }
+        ],
+        "agency": {
+          "name": "MAMBO Proxi agency",
+          "addressLines": [
+            "Agency address to be confirmed"
+          ],
+          "city": "Douala",
+          "country": "CM",
+          "latitude": 4.0511,
+          "longitude": 9.7679,
+          "mapsUrl": "https://www.google.com/maps/search/?api=1&query=4.0511,9.7679",
+          "openingHours": [
+            {
+              "label": "Monday – Friday",
+              "hours": "8am – 6pm"
+            },
+            {
+              "label": "Saturday",
+              "hours": "9am – 1pm"
+            }
+          ],
+          "parcelReceptionNote": "Parcels and mail are received during opening hours."
+        },
+        "keyFigures": [
+          {
+            "key": "projects",
+            "value": 150,
+            "suffix": "+",
+            "label": "projects supported"
+          },
+          {
+            "key": "partners",
+            "value": 40,
+            "suffix": "+",
+            "label": "committed partners"
+          },
+          {
+            "key": "services",
+            "value": 19,
+            "label": "services across 4 categories",
+            "labelMobile": "services, 4 categories"
+          },
+          {
+            "key": "countries",
+            "value": 2,
+            "suffix": " countries",
+            "label": "covered: France and Cameroon",
+            "labelMobile": "France and Cameroon"
+          }
+        ],
+        "turnstileSiteKey": "1x00000000000000000000AA",
+        "analytics": {
+          "ga4MeasurementId": null,
+          "searchConsoleVerification": null
+        },
+        "seo": {
+          "defaultTitle": "MAMBO Proxi — Home services in Douala, Cameroon",
+          "defaultDescription": "Home cleaning, laundry, meals, parcels, private chef, massage, photographer: trusted professionals at your home, in Douala and the surrounding area.",
           "ogImageUrl": null
         },
         "features": {
@@ -262,6 +360,19 @@
             ]
           },
           {
+            "key": "magazine",
+            "label": "Magazine",
+            "href": "/magazine",
+            "kind": "link"
+          },
+          {
+            "key": "zones",
+            "label": "Zones d’intervention",
+            "href": "/zones-d-intervention",
+            "kind": "link",
+            "placement": "mobile"
+          },
+          {
             "key": "contact",
             "label": "Contact",
             "href": "/contact",
@@ -288,12 +399,44 @@
         "megaMenu": {
           "categories": [
             {
+              "slug": "services-a-domicile",
+              "name": "Services à domicile",
+              "tagline": "Plus de temps pour l’essentiel",
+              "icon": "ShoppingCart",
+              "tint": "vert-50",
+              "href": "/services/services-a-domicile",
+              "countLabel": "4 formules",
+              "services": [
+                {
+                  "slug": "maison-essentiel",
+                  "name": "Maison Essentiel",
+                  "href": "/services/services-a-domicile/maison-essentiel"
+                },
+                {
+                  "slug": "maison-auto",
+                  "name": "Maison + Auto",
+                  "href": "/services/services-a-domicile/maison-auto"
+                },
+                {
+                  "slug": "maison-linge",
+                  "name": "Maison + Linge",
+                  "href": "/services/services-a-domicile/maison-linge"
+                },
+                {
+                  "slug": "maison-auto-linge",
+                  "name": "Maison + Auto + Linge",
+                  "href": "/services/services-a-domicile/maison-auto-linge"
+                }
+              ]
+            },
+            {
               "slug": "experience",
               "name": "Expérience",
               "tagline": "Des moments sur mesure",
               "icon": "Sparkles",
               "tint": "orange-50",
               "href": "/services/experience",
+              "countLabel": "5 services",
               "services": [
                 {
                   "slug": "location-voiture",
@@ -329,6 +472,7 @@
               "icon": "Building",
               "tint": "neutral-100",
               "href": "/services/immobilier",
+              "countLabel": "7 services",
               "services": [
                 {
                   "slug": "recherche-logement",
@@ -351,9 +495,9 @@
                   "href": "/services/immobilier/gestion-locative"
                 },
                 {
-                  "slug": "entretien-logements",
-                  "name": "Entretien des logements",
-                  "href": "/services/immobilier/entretien-logements"
+                  "slug": "achat-vente-biens",
+                  "name": "Achat et vente de biens immobiliers",
+                  "href": "/services/immobilier/achat-vente-biens"
                 },
                 {
                   "slug": "accompagnement-installation",
@@ -374,6 +518,7 @@
               "icon": "ShoppingCart",
               "tint": "vert-50",
               "href": "/services/services-de-proximite",
+              "countLabel": "4 services",
               "services": [
                 {
                   "slug": "portage-livraison-repas",
@@ -386,9 +531,14 @@
                   "href": "/services/services-de-proximite/livraison-courses-commandes"
                 },
                 {
-                  "slug": "reception-colis-courrier",
-                  "name": "Réception de colis et de courrier",
-                  "href": "/services/services-de-proximite/reception-colis-courrier"
+                  "slug": "collecte-livraison-colis-courrier",
+                  "name": "Collecte et livraison de colis et de courrier",
+                  "href": "/services/services-de-proximite/collecte-livraison-colis-courrier"
+                },
+                {
+                  "slug": "pressing-laverie",
+                  "name": "Pressing et laverie",
+                  "href": "/services/services-de-proximite/pressing-laverie"
                 }
               ]
             },
@@ -399,6 +549,7 @@
               "icon": "Compass",
               "tint": "neutral-900",
               "href": "/services/culture-evenementiel",
+              "countLabel": "4 services",
               "services": [
                 {
                   "slug": "decouverte-cameroun",
@@ -430,7 +581,17 @@
               "label": "Devis gratuit",
               "href": "/devis"
             },
-            "illustration": "accueil"
+            "visual": {
+              "illustration": "accueil",
+              "image": {
+                "id": "photo-accueil",
+                "url": "/photos/accueil.png",
+                "width": 1448,
+                "height": 1086,
+                "variants": []
+              },
+              "alt": ""
+            }
           }
         },
         "signUp": [
@@ -446,17 +607,21 @@
           }
         ],
         "footer": {
-          "about": "Votre conciergerie de proximité entre la France et le Cameroun. Des services pensés pour vous, des personnes de confiance pour les réaliser.",
-          "copyright": "© 2026 Mambo Proxi · France — Cameroun",
+          "about": "Votre agence de services du quotidien à domicile, à Douala. Des services pensés pour vous, des personnes de confiance pour les réaliser.",
+          "copyright": "© 2026 Mambo Proxi · Douala — Cameroun",
           "newsletter": {
             "eyebrow": "La lettre Mambo",
             "title": "Restez au plus près de nos nouveautés",
-            "text": "Nouveaux services, sorties culturelles et conseils pour la France et le Cameroun. Désinscription en un clic."
+            "text": "Nouveaux services, magazine et conseils pour votre quotidien au Cameroun. Désinscription en un clic."
           },
           "columns": [
             {
               "title": "Nos services",
               "links": [
+                {
+                  "label": "Services à domicile",
+                  "href": "/services/services-a-domicile"
+                },
                 {
                   "label": "Expérience",
                   "href": "/services/experience"
@@ -487,6 +652,10 @@
                   "href": "/qui-sommes-nous"
                 },
                 {
+                  "label": "Magazine",
+                  "href": "/magazine"
+                },
+                {
                   "label": "Mission",
                   "href": "/mission"
                 },
@@ -497,6 +666,10 @@
                 {
                   "label": "Avis clients",
                   "href": "/avis-clients"
+                },
+                {
+                  "label": "Zones d’intervention",
+                  "href": "/zones-d-intervention"
                 },
                 {
                   "label": "Contact",
@@ -538,6 +711,512 @@
           },
           {
             "label": "Politique de confidentialité",
+            "href": "/confidentialite"
+          },
+          {
+            "label": "Cookies",
+            "href": "/cookies"
+          }
+        ]
+      },
+      "en": {
+        "main": [
+          {
+            "key": "accueil",
+            "label": "Home",
+            "href": "/",
+            "kind": "link"
+          },
+          {
+            "key": "services",
+            "label": "Our services",
+            "href": "/services",
+            "kind": "mega"
+          },
+          {
+            "key": "partenaires",
+            "label": "Partners",
+            "href": "/partenaires",
+            "kind": "dropdown",
+            "children": [
+              {
+                "label": "Become a partner",
+                "href": "/partenaires#devenir-partenaire",
+                "icon": "Handshake"
+              },
+              {
+                "label": "Our partners",
+                "href": "/partenaires#nos-partenaires",
+                "icon": "Users"
+              },
+              {
+                "label": "Experience providers",
+                "href": "/partenaires?categorie=EXPERIENCE#nos-partenaires",
+                "icon": "Sparkles"
+              },
+              {
+                "label": "Real estate",
+                "href": "/partenaires?categorie=IMMOBILIER#nos-partenaires",
+                "icon": "Building2"
+              },
+              {
+                "label": "Companies & providers",
+                "href": "/partenaires?categorie=ENTREPRISES#nos-partenaires",
+                "icon": "Briefcase"
+              }
+            ]
+          },
+          {
+            "key": "formation",
+            "label": "Training",
+            "href": "/formation",
+            "kind": "dropdown",
+            "children": [
+              {
+                "label": "Our training courses",
+                "href": "/formation#catalogue",
+                "icon": "GraduationCap"
+              },
+              {
+                "label": "Training for professionals",
+                "href": "/formation?categorie=PROFESSIONNELS#catalogue",
+                "icon": "Briefcase"
+              },
+              {
+                "label": "Workshops & awareness",
+                "href": "/formation?categorie=ATELIERS#catalogue",
+                "icon": "Users"
+              },
+              {
+                "label": "Training request",
+                "href": "/formation#demande",
+                "icon": "FileText"
+              }
+            ]
+          },
+          {
+            "key": "mission",
+            "label": "Mission",
+            "href": "/mission",
+            "kind": "dropdown",
+            "children": [
+              {
+                "label": "Our mission",
+                "href": "/mission#notre-mission"
+              },
+              {
+                "label": "Our vision",
+                "href": "/mission#notre-vision"
+              },
+              {
+                "label": "Our commitments",
+                "href": "/mission#nos-engagements"
+              },
+              {
+                "label": "Our coordination method",
+                "href": "/mission#notre-methode"
+              }
+            ]
+          },
+          {
+            "key": "qui-sommes-nous",
+            "label": "About us",
+            "href": "/qui-sommes-nous",
+            "kind": "dropdown",
+            "children": [
+              {
+                "label": "Overview",
+                "href": "/qui-sommes-nous#presentation"
+              },
+              {
+                "label": "Our team",
+                "href": "/qui-sommes-nous#notre-equipe"
+              },
+              {
+                "label": "Our values",
+                "href": "/qui-sommes-nous#nos-valeurs"
+              },
+              {
+                "label": "Why Mambo Proxi?",
+                "href": "/qui-sommes-nous#pourquoi-mambo"
+              }
+            ]
+          },
+          {
+            "key": "recrutement",
+            "label": "Careers",
+            "href": "/recrutement",
+            "kind": "dropdown",
+            "children": [
+              {
+                "label": "Job offers",
+                "href": "/recrutement#offres",
+                "icon": "Briefcase"
+              },
+              {
+                "label": "Spontaneous application",
+                "href": "/recrutement?poste=spontanee#candidature",
+                "icon": "FileText"
+              },
+              {
+                "label": "Become a provider / collaborator",
+                "href": "/partenaires#devenir-partenaire",
+                "icon": "Handshake"
+              }
+            ]
+          },
+          {
+            "key": "magazine",
+            "label": "Magazine",
+            "href": "/magazine",
+            "kind": "link"
+          },
+          {
+            "key": "zones",
+            "label": "Service areas",
+            "href": "/zones-d-intervention",
+            "kind": "link",
+            "placement": "mobile"
+          },
+          {
+            "key": "contact",
+            "label": "Contact",
+            "href": "/contact",
+            "kind": "dropdown",
+            "children": [
+              {
+                "label": "Contact us",
+                "href": "/contact#formulaire",
+                "icon": "Mail"
+              },
+              {
+                "label": "Book an appointment",
+                "href": "/contact#rendez-vous",
+                "icon": "CalendarDays"
+              },
+              {
+                "label": "Information request",
+                "href": "/contact?onglet=information#formulaire",
+                "icon": "Info"
+              }
+            ]
+          }
+        ],
+        "megaMenu": {
+          "categories": [
+            {
+              "slug": "services-a-domicile",
+              "name": "Home services",
+              "tagline": "More time for what matters",
+              "icon": "ShoppingCart",
+              "tint": "vert-50",
+              "href": "/services/services-a-domicile",
+              "countLabel": "4 packages",
+              "services": [
+                {
+                  "slug": "maison-essentiel",
+                  "name": "Home Essential",
+                  "href": "/services/services-a-domicile/maison-essentiel"
+                },
+                {
+                  "slug": "maison-auto",
+                  "name": "Home + Car",
+                  "href": "/services/services-a-domicile/maison-auto"
+                },
+                {
+                  "slug": "maison-linge",
+                  "name": "Home + Laundry",
+                  "href": "/services/services-a-domicile/maison-linge"
+                },
+                {
+                  "slug": "maison-auto-linge",
+                  "name": "Home + Car + Laundry",
+                  "href": "/services/services-a-domicile/maison-auto-linge"
+                }
+              ]
+            },
+            {
+              "slug": "experience",
+              "name": "Experience",
+              "tagline": "Tailor-made moments",
+              "icon": "Sparkles",
+              "tint": "orange-50",
+              "href": "/services/experience",
+              "countLabel": "5 services",
+              "services": [
+                {
+                  "slug": "location-voiture",
+                  "name": "Car rental",
+                  "href": "/services/experience/location-voiture"
+                },
+                {
+                  "slug": "photographe",
+                  "name": "Photographer",
+                  "href": "/services/experience/photographe"
+                },
+                {
+                  "slug": "chef-prive",
+                  "name": "Private chef",
+                  "href": "/services/experience/chef-prive"
+                },
+                {
+                  "slug": "massage-bien-etre",
+                  "name": "Wellness massage",
+                  "href": "/services/experience/massage-bien-etre"
+                },
+                {
+                  "slug": "services-evenementiels",
+                  "name": "Event services",
+                  "href": "/services/experience/services-evenementiels"
+                }
+              ]
+            },
+            {
+              "slug": "immobilier",
+              "name": "Real estate",
+              "tagline": "Find a home with peace of mind",
+              "icon": "Building",
+              "tint": "neutral-100",
+              "href": "/services/immobilier",
+              "countLabel": "7 services",
+              "services": [
+                {
+                  "slug": "recherche-logement",
+                  "name": "Home search",
+                  "href": "/services/immobilier/recherche-logement"
+                },
+                {
+                  "slug": "location-sous-location-colocation",
+                  "name": "Rental, subletting and flatsharing",
+                  "href": "/services/immobilier/location-sous-location-colocation"
+                },
+                {
+                  "slug": "logement-adapte-meuble",
+                  "name": "Adapted housing and furnished apartments",
+                  "href": "/services/immobilier/logement-adapte-meuble"
+                },
+                {
+                  "slug": "gestion-locative",
+                  "name": "Property management",
+                  "href": "/services/immobilier/gestion-locative"
+                },
+                {
+                  "slug": "achat-vente-biens",
+                  "name": "Buying and selling property",
+                  "href": "/services/immobilier/achat-vente-biens"
+                },
+                {
+                  "slug": "accompagnement-installation",
+                  "name": "Help settling in",
+                  "href": "/services/immobilier/accompagnement-installation"
+                },
+                {
+                  "slug": "logement-temporaire",
+                  "name": "Temporary housing solutions",
+                  "href": "/services/immobilier/logement-temporaire"
+                }
+              ]
+            },
+            {
+              "slug": "services-de-proximite",
+              "name": "Local services",
+              "tagline": "Everyday life, simplified",
+              "icon": "ShoppingCart",
+              "tint": "vert-50",
+              "href": "/services/services-de-proximite",
+              "countLabel": "4 services",
+              "services": [
+                {
+                  "slug": "portage-livraison-repas",
+                  "name": "Meal delivery",
+                  "href": "/services/services-de-proximite/portage-livraison-repas"
+                },
+                {
+                  "slug": "livraison-courses-commandes",
+                  "name": "Grocery and order delivery",
+                  "href": "/services/services-de-proximite/livraison-courses-commandes"
+                },
+                {
+                  "slug": "collecte-livraison-colis-courrier",
+                  "name": "Parcel and mail collection and delivery",
+                  "href": "/services/services-de-proximite/collecte-livraison-colis-courrier"
+                },
+                {
+                  "slug": "pressing-laverie",
+                  "name": "Dry cleaning and laundry",
+                  "href": "/services/services-de-proximite/pressing-laverie"
+                }
+              ]
+            },
+            {
+              "slug": "culture-evenementiel",
+              "name": "Culture & events",
+              "tagline": "Experience Cameroon",
+              "icon": "Compass",
+              "tint": "neutral-900",
+              "href": "/services/culture-evenementiel",
+              "countLabel": "4 services",
+              "services": [
+                {
+                  "slug": "decouverte-cameroun",
+                  "name": "Discover Cameroon",
+                  "href": "/services/culture-evenementiel/decouverte-cameroun"
+                },
+                {
+                  "slug": "activites-culturelles-loisirs-sorties",
+                  "name": "Cultural activities, leisure and outings",
+                  "href": "/services/culture-evenementiel/activites-culturelles-loisirs-sorties"
+                },
+                {
+                  "slug": "organisation-activites-evenements",
+                  "name": "Organising activities and events",
+                  "href": "/services/culture-evenementiel/organisation-activites-evenements"
+                },
+                {
+                  "slug": "decouverte-integration-locale",
+                  "name": "Discovery and local integration",
+                  "href": "/services/culture-evenementiel/decouverte-integration-locale"
+                }
+              ]
+            }
+          ],
+          "promo": {
+            "title": "Need something specific?",
+            "text": "Free quote, reply within 24 hours.",
+            "cta": {
+              "label": "Free quote",
+              "href": "/devis"
+            },
+            "visual": {
+              "illustration": "accueil",
+              "image": {
+                "id": "photo-accueil",
+                "url": "/photos/accueil.png",
+                "width": 1448,
+                "height": 1086,
+                "variants": []
+              },
+              "alt": ""
+            }
+          }
+        },
+        "signUp": [
+          {
+            "label": "I'm an individual",
+            "href": "/inscription",
+            "icon": "User"
+          },
+          {
+            "label": "I'm a professional / partner",
+            "href": "/inscription?profil=professionnel",
+            "icon": "Briefcase"
+          }
+        ],
+        "footer": {
+          "about": "Your everyday home services agency in Douala. Services designed for you, trusted people to deliver them.",
+          "copyright": "© 2026 Mambo Proxi · Douala — Cameroon",
+          "newsletter": {
+            "eyebrow": "The Mambo letter",
+            "title": "Stay close to what's new",
+            "text": "New services, magazine and tips for everyday life in Cameroon. Unsubscribe in one click."
+          },
+          "columns": [
+            {
+              "title": "Our services",
+              "links": [
+                {
+                  "label": "Home services",
+                  "href": "/services/services-a-domicile"
+                },
+                {
+                  "label": "Experience",
+                  "href": "/services/experience"
+                },
+                {
+                  "label": "Real estate",
+                  "href": "/services/immobilier"
+                },
+                {
+                  "label": "Local services",
+                  "href": "/services/services-de-proximite"
+                },
+                {
+                  "label": "Culture & events",
+                  "href": "/services/culture-evenementiel"
+                },
+                {
+                  "label": "Free quote",
+                  "href": "/devis"
+                }
+              ]
+            },
+            {
+              "title": "Mambo Proxi",
+              "links": [
+                {
+                  "label": "About us",
+                  "href": "/qui-sommes-nous"
+                },
+                {
+                  "label": "Magazine",
+                  "href": "/magazine"
+                },
+                {
+                  "label": "Mission",
+                  "href": "/mission"
+                },
+                {
+                  "label": "Partners",
+                  "href": "/partenaires"
+                },
+                {
+                  "label": "Customer reviews",
+                  "href": "/avis-clients"
+                },
+                {
+                  "label": "Service areas",
+                  "href": "/zones-d-intervention"
+                },
+                {
+                  "label": "Contact",
+                  "href": "/contact"
+                }
+              ]
+            },
+            {
+              "title": "Join us",
+              "links": [
+                {
+                  "label": "Sign up",
+                  "href": "/inscription"
+                },
+                {
+                  "label": "Become a partner",
+                  "href": "/partenaires#devenir-partenaire"
+                },
+                {
+                  "label": "Careers",
+                  "href": "/recrutement"
+                },
+                {
+                  "label": "Training",
+                  "href": "/formation"
+                }
+              ]
+            }
+          ]
+        },
+        "legal": [
+          {
+            "label": "Legal notice",
+            "href": "/mentions-legales"
+          },
+          {
+            "label": "Terms of use",
+            "href": "/cgu"
+          },
+          {
+            "label": "Privacy policy",
             "href": "/confidentialite"
           },
           {

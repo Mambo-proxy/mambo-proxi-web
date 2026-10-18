@@ -2165,7 +2165,10 @@ export interface components {
         /** @description Image optimisée (variantes AVIF/WebP 480/960/1600). */
         MediaImage: {
             id: components["schemas"]["Id"];
-            /** Format: uri */
+            /**
+             * Format: uri-reference
+             * @description Adresse absolue (stockage des médias) ou relative au site (médias livrés avec le site).
+             */
             url: string;
             width: number;
             height: number;
@@ -2176,7 +2179,7 @@ export interface components {
             } | null;
             blurDataUrl?: string | null;
             variants: {
-                /** Format: uri */
+                /** Format: uri-reference */
                 url: string;
                 /** @enum {integer} */
                 width: 480 | 960 | 1600;
@@ -2259,7 +2262,11 @@ export interface components {
             value: number;
             /** @default  */
             prefix: string;
-            /** @example + */
+            /**
+             * @example +
+             * @example pays
+             * @example countries
+             */
             suffix?: string;
             /** @default 0 */
             decimals: number;
@@ -2276,7 +2283,8 @@ export interface components {
             /** @example Mambo, ce n'est pas qu'un service. C'est une expérience pensée pour vous. */
             signature?: string;
             contact: {
-                phoneFrance: components["schemas"]["PhoneE164"];
+                /** @description Facultatif depuis le recentrage sur Douala (n'est plus affiché par le site). */
+                phoneFrance?: components["schemas"]["PhoneE164"];
                 /** @example +33 6 00 00 00 00 */
                 phoneFranceDisplay?: string;
                 phoneCameroon: components["schemas"]["PhoneE164"];
@@ -2289,6 +2297,11 @@ export interface components {
             whatsapp: {
                 enabled: boolean;
                 number: components["schemas"]["PhoneE164"];
+                /**
+                 * @description Numéro WhatsApp tel qu'affiché (barre supérieure, pied de page).
+                 * @example +237 6 00 00 00 00
+                 */
+                numberDisplay?: string;
                 /** @description Message pré-rempli (le nom du service ou la référence y est ajouté selon le contexte). */
                 message: string;
             };
@@ -2348,6 +2361,12 @@ export interface components {
             href: string;
             /** @enum {string} */
             kind: "link" | "mega" | "dropdown";
+            /**
+             * @description `mobile` : entrée du menu mobile seulement (absente de l'en-tête desktop).
+             * @default all
+             * @enum {string}
+             */
+            placement: "all" | "mobile";
             children?: components["schemas"]["NavLink"][];
         };
         MegaMenuCategory: {
@@ -2357,6 +2376,12 @@ export interface components {
             icon: components["schemas"]["IconName"];
             tint?: components["schemas"]["CategoryTint"];
             href: string;
+            /**
+             * @description Nombre d'entrées affiché dans le menu mobile.
+             * @example 4 formules
+             * @example 5 services
+             */
+            countLabel?: string;
             services: {
                 slug: components["schemas"]["Slug"];
                 name: string;
@@ -2371,7 +2396,7 @@ export interface components {
                     title: string;
                     text: string;
                     cta: components["schemas"]["Link"];
-                    illustration: components["schemas"]["IllustrationScene"];
+                    visual: components["schemas"]["Visual"];
                 };
             };
             signUp: components["schemas"]["NavLink"][];
@@ -4214,6 +4239,11 @@ export interface components {
         };
     };
     parameters: {
+        /**
+         * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+         *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+         */
+        Lang: "fr" | "en";
         Page: number;
         PageSize: number;
         /** @description Champ de tri, préfixé de `-` pour un tri décroissant. */
@@ -4439,6 +4469,7 @@ export type ResponseConflict = components['responses']['Conflict'];
 export type ResponseTooManyRequests = components['responses']['TooManyRequests'];
 export type ResponseSpamRejected = components['responses']['SpamRejected'];
 export type ResponseNoContent = components['responses']['NoContent'];
+export type ParameterLang = components['parameters']['Lang'];
 export type ParameterPage = components['parameters']['Page'];
 export type ParameterPageSize = components['parameters']['PageSize'];
 export type ParameterSort = components['parameters']['Sort'];
@@ -4458,7 +4489,13 @@ export type $defs = Record<string, never>;
 export interface operations {
     getSiteSettings: {
         parameters: {
-            query?: never;
+            query?: {
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -4479,7 +4516,13 @@ export interface operations {
     };
     getNavigation: {
         parameters: {
-            query?: never;
+            query?: {
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -4531,6 +4574,11 @@ export interface operations {
     getPage: {
         parameters: {
             query?: {
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
                 /** @description Jeton de prévisualisation délivré par le back-office ; renvoie le brouillon. */
                 preview?: components["parameters"]["Preview"];
             };
@@ -4635,6 +4683,11 @@ export interface operations {
     listCategories: {
         parameters: {
             query?: {
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
                 /** @description `services` pour inclure les services publiés de chaque rubrique. */
                 include?: "services";
             };
@@ -4659,6 +4712,11 @@ export interface operations {
     getCategory: {
         parameters: {
             query?: {
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
                 /** @description Jeton de prévisualisation délivré par le back-office ; renvoie le brouillon. */
                 preview?: components["parameters"]["Preview"];
             };
@@ -4685,6 +4743,11 @@ export interface operations {
     listServices: {
         parameters: {
             query?: {
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
                 category?: components["schemas"]["Slug"];
                 featured?: boolean;
                 /** @description Recherche plein texte. */
@@ -4711,6 +4774,11 @@ export interface operations {
     getService: {
         parameters: {
             query?: {
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
                 /** @description Jeton de prévisualisation délivré par le back-office ; renvoie le brouillon. */
                 preview?: components["parameters"]["Preview"];
             };
@@ -4737,6 +4805,11 @@ export interface operations {
     listReviews: {
         parameters: {
             query?: {
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
                 category?: components["schemas"]["Slug"];
                 service?: components["schemas"]["Slug"];
                 featured?: boolean;
@@ -4768,6 +4841,11 @@ export interface operations {
     getReviewSummary: {
         parameters: {
             query?: {
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
                 category?: components["schemas"]["Slug"];
                 service?: components["schemas"]["Slug"];
             };
@@ -4806,6 +4884,11 @@ export interface operations {
     listPartners: {
         parameters: {
             query?: {
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
                 category?: components["schemas"]["PartnerCategory"];
             };
             header?: never;
@@ -4829,6 +4912,11 @@ export interface operations {
     listTrainings: {
         parameters: {
             query?: {
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
                 category?: components["schemas"]["TrainingCategory"];
             };
             header?: never;
@@ -4852,6 +4940,11 @@ export interface operations {
     listJobs: {
         parameters: {
             query?: {
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
                 city?: string;
                 contract?: string;
                 /** @description Recherche plein texte. */
@@ -4878,6 +4971,11 @@ export interface operations {
     getJob: {
         parameters: {
             query?: {
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
                 /** @description Jeton de prévisualisation délivré par le back-office ; renvoie le brouillon. */
                 preview?: components["parameters"]["Preview"];
             };
@@ -4921,6 +5019,11 @@ export interface operations {
     listEvents: {
         parameters: {
             query?: {
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
                 upcoming?: boolean;
                 limit?: number;
                 page?: components["parameters"]["Page"];
@@ -5460,7 +5563,13 @@ export interface operations {
     };
     getSurvey: {
         parameters: {
-            query?: never;
+            query?: {
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
+            };
             header?: never;
             path: {
                 token: string;
