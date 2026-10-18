@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import type { Route } from 'next';
 import Link from 'next/link';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { ConfirmDialog, PublishStatusBadge } from '@/components/admin/editor/editor-ui';
 import { DragHandle, SortableItem, SortableList, moveItem } from '@/components/admin/editor/sortable';
@@ -56,7 +56,6 @@ const editHref = (id: string) => `${adminRoutes.services}/${id}` as Route;
 /** Rubrique et page lues dans l'adresse (`?category=&page=`). */
 function useFilters() {
   const params = useSearchParams();
-  const router = useRouter();
   const pathname = usePathname();
   const filters = {
     category: params.get('category') ?? 'ALL',
@@ -74,7 +73,9 @@ function useFilters() {
       else next.set('page', String(changes.page));
     }
     const query = next.toString();
-    router.replace(`${pathname}${query ? `?${query}` : ''}` as Route, { scroll: false });
+    // Filtres purement côté client : l'adresse est mise à jour sans aller-retour serveur (Next synchronise
+    // `useSearchParams` avec l'historique natif).
+    window.history.replaceState(null, '', `${pathname}${query ? `?${query}` : ''}`);
   }
   return { filters, update };
 }
@@ -88,15 +89,24 @@ function RowActions({
   onMove,
   onDelete,
   canMove,
+  compact,
 }: {
   service: AdminServiceListItem;
   mutations: Mutations;
   onMove: (offset: -1 | 1) => void;
   onDelete: () => void;
   canMove: { up: boolean; down: boolean };
+  /** Cartes (mobile) : aperçu et modification regroupés dans le menu « … ». */
+  compact?: boolean;
 }) {
   const published = service.status === 'PUBLISHED';
   const items: ActionMenuItem[] = [
+    ...(compact
+      ? [
+          { label: 'Modifier', icon: Pencil, href: editHref(service.id) },
+          { label: 'Aperçu (nouvel onglet)', icon: Eye, onSelect: () => void openServicePreview(service.id) },
+        ]
+      : []),
     { label: 'Monter dans la rubrique', icon: ArrowUp, onSelect: () => onMove(-1), disabled: !canMove.up },
     {
       label: 'Descendre dans la rubrique',
@@ -114,6 +124,7 @@ function RowActions({
   ];
   const iconButton =
     'flex size-8 items-center justify-center rounded-sm text-icon-default hover:bg-neutral-100 hover:text-text-main';
+  if (compact) return <ActionMenu label={`Actions pour « ${service.name} »`} items={items} />;
   return (
     <div className="flex items-center justify-end gap-2.5">
       <button
@@ -289,8 +300,9 @@ export function ServicesView() {
     />
   );
 
-  const actions = (service: AdminServiceListItem) => (
+  const actions = (service: AdminServiceListItem, compact = false) => (
     <RowActions
+      compact={compact}
       service={service}
       mutations={mutations}
       onMove={(offset) => move(service, offset)}
@@ -384,12 +396,12 @@ export function ServicesView() {
                           {categoryLabel(service.category)} · {service.requests30d} demande
                           {service.requests30d > 1 ? 's' : ''} (30 j)
                         </span>
-                        <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-2">
+                        <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-2 whitespace-nowrap">
                           <PublishStatusBadge status={service.status} />
                           {menuSwitch(service, 'm', false)}
                         </div>
                       </div>
-                      <div className="shrink-0 [&>div]:gap-0.5">{actions(service)}</div>
+                      <div className="shrink-0">{actions(service, true)}</div>
                     </SortableItem>
                   )}
                 />
