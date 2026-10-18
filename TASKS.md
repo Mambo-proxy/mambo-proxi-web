@@ -92,6 +92,23 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [ ] Revalidation `/api/revalidate` (tags), `/health`, `middleware` (protection `/admin`, en-têtes de sécurité, CSP avec nonce)
 - [ ] Accessibilité (axe, clavier), performance (Lighthouse ≥ 90 mobile, JS initial < 170 Ko)
 
+## Phase 1 bis — Refonte des maquettes (octobre 2026)
+
+Les maquettes ont été refondues mi-octobre 2026 (recentrage sur Douala et les services à domicile, photos à la place des illustrations, 5 rubriques et 24 services, Magazine, Zones d'intervention, sélecteur FR | EN). Chaque page déjà intégrée est reprise d'après les nouveaux cadres ; captures de référence régénérées dans `qa/reference/`.
+
+- [x] Captures de référence régénérées (62 cadres du site, composants, e-mails)
+- [x] Site bilingue : next-intl, français sans préfixe, anglais sous `/en` avec adresses traduites, `SiteLink`, langue transmise à l'API (`?lang=en`), exemples anglais dans les mocks
+- [x] Gabarit : barre supérieure (WhatsApp, Téléphone, FR | EN), en-tête (Magazine), méga-menu à 5 rubriques avec photo, menu mobile (langue, Zones d'intervention, « 4 formules »), pied de page Douala
+- [x] Accueil : formules « Services à domicile », bento en photos, engagements (photo, chiffres « Douala »), carte interactive des zones avec recherche de quartier — fidélité 1440 et 390 section par section
+- [ ] Nos services `/services` (5 rubriques, formules)
+- [ ] Rubrique Services à domicile `/services/services-a-domicile` (nouvelle) et fiche « Entretien du logement » (offres en carrousel)
+- [ ] Rubriques Expérience, Immobilier, Services de proximité, Culture & événementiel ; fiche service (Chef privé)
+- [ ] Magazine (édition n° 1) et Zones d'intervention (nouvelles pages)
+- [ ] Qui sommes-nous, Mission, Partenaires, Formation, Recrutement, offre d'emploi, Avis clients, Contact, Devis, Confirmation, Inscription, Suivi, pages légales, questionnaire, 404
+- [ ] E-mails (4 modèles mis à jour)
+- [ ] Back-office : tableau de bord modifié, Magazine, Zones d'intervention, édition du Magazine ; écrans en cours sur les branches `bo/services-en-cours`, `bo/pages-textes-en-cours`, `bo/recrutement-en-cours`
+- [ ] Implémentation de l'API (phase 2) : `?lang`, zones, formules, citations d'avis
+
 ## Phase 3 — Intégration
 
 - [ ] Branchement sur l'API réelle, téléversements, OTP, revalidation par tags

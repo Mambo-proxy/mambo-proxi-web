@@ -332,3 +332,27 @@
 - **« À faire aujourd'hui » en mobile** : rendez-vous avant candidatures, comme la maquette mobile (ordre inverse en desktop).
 - **Rôle affiché** « Administrateur·rice » (la maquette indique « Administratrice »), le libellé ne dépendant pas de la personne.
 - **Développement local** : les mocks exigent `NEXT_PUBLIC_API_MOCKING=enabled` (dans `.env.local`, sinon le serveur appelle l'API réelle).
+
+## Refonte des maquettes (18 octobre 2026)
+
+Les maquettes Figma ont été refondues : recentrage sur Douala et les services du quotidien à domicile, photos à la place des illustrations, 5 rubriques (nouvelle rubrique « Services à domicile » et ses 4 formules), Magazine, Zones d'intervention, sélecteur de langue FR | EN. La cliente souhaite un site fidèle de A à Z ; décisions prises avec elle : site bilingue complet, évolution du contrat d'API en même temps que le site, site public d'abord.
+
+### Site bilingue
+
+- next-intl 4 : racine `app/[locale]`, français sans préfixe (adresses historiques inchangées), anglais sous `/en` avec des adresses traduites (`src/i18n/routing.ts`) ; le back-office garde sa propre racine, en français.
+- `SiteLink` convertit une adresse interne française dans la langue de la page (`/qui-sommes-nous` → `/en/about-us`) ; `useSiteRouter` et `useSitePathname` pour la navigation programmée et l'onglet actif. Le proxy oriente vers la langue et affiche la maintenance de la langue demandée.
+- L'API reçoit `?lang=en` sur ses lectures publiques (ajouté par le client serveur) ; le paramètre fait partie de l'adresse, donc du cache. Dans les mocks, l'exemple anglais d'un exemple du contrat porte le même nom suffixé `En`.
+
+### Gabarit et accueil
+
+- Barre supérieure (WhatsApp, Téléphone, FR | EN), en-tête (9 onglets dont Magazine ; marges réduites entre 1 280 et 1 439 px pour qu'ils tiennent), méga-menu à 5 colonnes avec photo, menu mobile avec sélecteur de langue et « Zones d'intervention », pied de page recentré sur Douala.
+- Accueil : formules (cartes à hauteur libre, « Réserver un créneau » vers la prise de rendez-vous et « Devis » vers le devis, formule présélectionnée), bento en photos (carte d'accueil propre à chaque rubrique, variante mobile), engagements (chiffre « Douala » en texte), carte des zones.
+- Fidélité : toutes les sections à la hauteur de la maquette à 1 440 px (page 8 368 px pour 8 367) et à 390 px, sauf la carte des zones en mobile (voir décisions).
+
+### Décisions
+
+- **Carte des zones** : carte stylisée de la maquette en SVG (Wouri, aires floues générées à partir des quartiers, points), avec zoom (boutons, Ctrl + molette, double clic) et déplacement (glisser, flèches), comme le demande l'annotation de la maquette ; pas de tuiles OpenStreetMap (aucun service tiers, rien à déclarer). Couleurs propres à la carte dans `src/styles/map-tokens.css`.
+- **Recherche de quartier vide au chargement** : la maquette montre un exemple rempli (« Bonamoussadi »), d'où une section plus courte en mobile (859 px pour 942).
+- **Sélecteur FR | EN** : couleurs de la maquette hors design system remplacées par `orange/400` et `neutral/300`.
+- **Avis** : citation courte saisie à la mise en avant (`excerpt`), affichée sur l'accueil en mobile ; les avis restent dans leur langue d'origine sur le site anglais.
+- **Disque plein** pendant la session : le cache de `next dev` peut remplir le disque ; il est supprimé dès qu'il gêne (`.next`).
