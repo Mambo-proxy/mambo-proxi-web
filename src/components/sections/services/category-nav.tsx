@@ -1,6 +1,7 @@
 'use client';
 
 import { Check } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { chipVariants } from '@/components/ui/chip';
 import { frenchTypography } from '@/lib/format/typography';
@@ -12,6 +13,7 @@ type CategoryNavProps = { items: { slug: string; name: string }[] };
  * horizontal en mobile. Clic = défilement fluide vers la rubrique ; la puce active suit la section visible.
  */
 export function CategoryNav({ items }: CategoryNavProps) {
+  const t = useTranslations('services');
   const [active, setActive] = useState(items[0]?.slug ?? '');
   const listRef = useRef<HTMLUListElement>(null);
 
@@ -39,7 +41,7 @@ export function CategoryNav({ items }: CategoryNavProps) {
 
   return (
     <nav
-      aria-label="Rubriques"
+      aria-label={t('categoriesNav')}
       className="sticky top-(--site-header-h,0px) z-30 border-b border-border-default bg-neutral-0 transition-[top] duration-200"
     >
       <ul

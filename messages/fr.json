@@ -91,5 +91,11 @@
     "zoomOut": "Dézoomer",
     "reset": "Recentrer la carte",
     "mapHint": "Faites glisser pour déplacer la carte, utilisez + et − pour zoomer."
+  },
+  "services": {
+    "book": "Réserver un créneau",
+    "learnMore": "En savoir plus",
+    "discoverCategory": "Découvrir la rubrique",
+    "categoriesNav": "Rubriques"
   }
 }

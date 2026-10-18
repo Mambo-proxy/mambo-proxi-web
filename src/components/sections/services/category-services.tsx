@@ -1,11 +1,12 @@
 import { ArrowRight, ArrowUpRight, ChevronRight } from 'lucide-react';
-import type { Route } from 'next';
+import { useTranslations } from 'next-intl';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { Icon } from '@/components/ui/icon';
 import { Reveal } from '@/components/ui/reveal';
 import { Visual } from '@/components/ui/visual';
 import type { CategorySummary, ServiceSummary } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
+import { formulaLinks } from '../home/formula-cards';
 import { frenchTypography } from '@/lib/format/typography';
 
 /** Pastille d'icône des cartes service, par teinte de rubrique (maquette : Culture = fond sombre, icône orange). */
@@ -19,7 +20,11 @@ const BADGES: Record<string, string> = {
 type Tone = { section: string; card: string };
 
 function ServiceCard({ service, tone, badge }: { service: ServiceSummary; tone: Tone; badge: string }) {
+  const t = useTranslations('services');
   const name = service.shortName ?? service.name;
+  // Une formule n'a pas de fiche : sa carte mène à la prise de rendez-vous, formule présélectionnée.
+  const isFormula = service.kind === 'formula';
+  const href = isFormula ? formulaLinks(service.slug).booking : service.href;
   return (
     <article
       className={cn(
@@ -45,7 +50,7 @@ function ServiceCard({ service, tone, badge }: { service: ServiceSummary; tone: 
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5 md:gap-3.5">
         <h3 className="font-ui text-[15px] leading-6 font-semibold text-text-main md:font-brand md:text-[20px] md:leading-7">
-          <Link href={service.href as Route} className="after:absolute after:inset-0 after:rounded-[inherit]">
+          <Link href={href} className="after:absolute after:inset-0 after:rounded-[inherit]">
             {frenchTypography(name)}
           </Link>
         </h3>
@@ -56,7 +61,7 @@ function ServiceCard({ service, tone, badge }: { service: ServiceSummary; tone: 
           aria-hidden
           className="hidden items-center gap-1.5 font-ui text-[14px] leading-5 font-semibold text-text-brand md:inline-flex"
         >
-          En savoir plus
+          {isFormula ? t('book') : t('learnMore')}
           <ArrowRight
             size={16}
             className="transition-transform duration-200 group-hover/card:translate-x-[3px]"
@@ -71,13 +76,16 @@ function ServiceCard({ service, tone, badge }: { service: ServiceSummary; tone: 
 /**
  * Rubrique de la page « Nos services » (Figma `58:978`…) : présentation 400 px (numéro `orange/200`, titre 40/48,
  * accroche orange, description, « Découvrir la rubrique », illustration) + grille de cartes 2 × 416 (gap 16) ;
- * en mobile, liste de lignes cliquables (`58:1602`). Fonds alternés blanc / `neutral/50`.
+ * en mobile, liste de lignes cliquables (`58:1602`). Fonds alternés blanc / `neutral/50` à partir de la deuxième
+ * rubrique, la première (Services à domicile, ajoutée en tête) étant blanche comme la suivante.
  */
 export function CategoryServices({ category, index }: { category: CategorySummary; index: number }) {
-  const tone: Tone =
-    index % 2 === 0
-      ? { section: 'bg-neutral-0', card: 'bg-neutral-50' }
-      : { section: 'bg-neutral-50', card: 'bg-neutral-0' };
+  const t = useTranslations('services');
+  // Fonds alternés à partir d'Expérience (blanc, gris, blanc…) ; la rubrique de tête est blanche elle aussi.
+  const light = index === 0 || (index - 1) % 2 === 0;
+  const tone: Tone = light
+    ? { section: 'bg-neutral-0', card: 'bg-neutral-50' }
+    : { section: 'bg-neutral-50', card: 'bg-neutral-0' };
   const badge = BADGES[category.tint] ?? BADGES['neutral-100']!;
   const number = category.number ?? String(category.sortOrder).padStart(2, '0');
   return (
@@ -107,10 +115,10 @@ export function CategoryServices({ category, index }: { category: CategorySummar
             {frenchTypography(category.description)}
           </p>
           <Link
-            href={category.href as Route}
+            href={category.href}
             className="group/link inline-flex items-center gap-1.5 self-start rounded-xs font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main"
           >
-            Découvrir la rubrique
+            {t('discoverCategory')}
             <span className="sr-only"> {category.name}</span>
             <ArrowRight
               aria-hidden
@@ -118,11 +126,7 @@ export function CategoryServices({ category, index }: { category: CategorySummar
               className="transition-transform duration-200 group-hover/link:translate-x-[3px]"
             />
           </Link>
-          <Visual
-            visual={category.visual}
-            sizes="400px"
-            className="mt-2 hidden h-[260px] rounded-xl xl:block"
-          />
+          <Visual visual={category.visual} sizes="400px" className="hidden h-[260px] rounded-xl xl:block" />
         </div>
         <ul className="grid items-start gap-2.5 md:grid-cols-2 md:gap-4">
           {(category.services ?? []).map((service, serviceIndex) => (

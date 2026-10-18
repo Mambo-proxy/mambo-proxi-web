@@ -91,5 +91,11 @@
     "zoomOut": "Zoom out",
     "reset": "Recentre the map",
     "mapHint": "Drag to move the map, use + and − to zoom."
+  },
+  "services": {
+    "book": "Book a slot",
+    "learnMore": "Learn more",
+    "discoverCategory": "Discover the category",
+    "categoriesNav": "Categories"
   }
 }

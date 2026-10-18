@@ -39,7 +39,11 @@ export function getServices(lang: Lang = 'fr'): ServiceSummary[] {
         alt: '',
       },
       category: { slug: categorySlug, name: category?.name ?? categorySlug },
-      href: `/services/${categorySlug}/${seed.slug}`,
+      // Une formule n'a pas de fiche : elle renvoie à la section des formules de sa rubrique.
+      href:
+        seed.kind === 'formula'
+          ? `/services/${categorySlug}#formules`
+          : `/services/${categorySlug}/${seed.slug}`,
       featuredOnHome: seed.featuredOnHome ?? false,
       kind: seed.kind ?? 'service',
     }));
