@@ -408,22 +408,22 @@
                 {
                   "slug": "maison-essentiel",
                   "name": "Maison Essentiel",
-                  "href": "/services/services-a-domicile/maison-essentiel"
+                  "href": "/services/services-a-domicile#formules"
                 },
                 {
                   "slug": "maison-auto",
                   "name": "Maison + Auto",
-                  "href": "/services/services-a-domicile/maison-auto"
+                  "href": "/services/services-a-domicile#formules"
                 },
                 {
                   "slug": "maison-linge",
                   "name": "Maison + Linge",
-                  "href": "/services/services-a-domicile/maison-linge"
+                  "href": "/services/services-a-domicile#formules"
                 },
                 {
                   "slug": "maison-auto-linge",
                   "name": "Maison + Auto + Linge",
-                  "href": "/services/services-a-domicile/maison-auto-linge"
+                  "href": "/services/services-a-domicile#formules"
                 }
               ]
             },
@@ -914,22 +914,22 @@
                 {
                   "slug": "maison-essentiel",
                   "name": "Home Essential",
-                  "href": "/services/services-a-domicile/maison-essentiel"
+                  "href": "/services/services-a-domicile#formules"
                 },
                 {
                   "slug": "maison-auto",
                   "name": "Home + Car",
-                  "href": "/services/services-a-domicile/maison-auto"
+                  "href": "/services/services-a-domicile#formules"
                 },
                 {
                   "slug": "maison-linge",
                   "name": "Home + Laundry",
-                  "href": "/services/services-a-domicile/maison-linge"
+                  "href": "/services/services-a-domicile#formules"
                 },
                 {
                   "slug": "maison-auto-linge",
                   "name": "Home + Car + Laundry",
-                  "href": "/services/services-a-domicile/maison-auto-linge"
+                  "href": "/services/services-a-domicile#formules"
                 }
               ]
             },
@@ -1784,10 +1784,10 @@
         "key": "services",
         "title": "Nos services",
         "isPreview": false,
-        "updatedAt": "2026-10-05T08:00:00.000Z",
+        "updatedAt": "2026-10-18T08:00:00.000Z",
         "seo": {
           "title": "Nos services",
-          "description": "Expérience, immobilier, services de proximité, culture et événementiel : 19 services coordonnés par MAMBO Proxi au Cameroun. Devis gratuit sous 24 h.",
+          "description": "Services à domicile, expérience, immobilier, services de proximité, culture et événementiel : 30 services à Douala, un seul interlocuteur. Devis gratuit sous 24 h.",
           "ogImageUrl": null,
           "noindex": false
         },
@@ -1799,8 +1799,8 @@
             "variant": "page",
             "tone": "muted",
             "eyebrow": "Nos services",
-            "title": "19 services, ==un seul interlocuteur.==",
-            "lead": "Expérience, immobilier, services de proximité, culture et événementiel : choisissez votre besoin, nous coordonnons tout avec des prestataires sélectionnés. Tarifs communiqués sur devis.",
+            "title": "30 services, un seul interlocuteur.",
+            "lead": "Expérience, immobilier, services de proximité, culture et événementiel : choisissez votre besoin, nous nous occupons de tout avec des prestataires sélectionnés. Tarifs communiqués sur devis.",
             "primaryCta": {
               "label": "Demander un devis gratuit",
               "href": "/devis"
@@ -1808,8 +1808,14 @@
             "showWhatsapp": true,
             "visual": {
               "illustration": "accueil",
-              "image": null,
-              "alt": ""
+              "image": {
+                "id": "photo-douala-ville",
+                "url": "/photos/douala-ville.png",
+                "width": 1536,
+                "height": 1024,
+                "variants": []
+              },
+              "alt": "Douala au coucher du soleil, le pont sur le Wouri."
             }
           },
           {
@@ -1826,6 +1832,64 @@
             "text": "Décrivez-nous votre projet : nous trouvons la bonne solution et vous répondons sous 24 h.",
             "primaryCta": {
               "label": "Demander un devis gratuit",
+              "href": "/devis"
+            },
+            "showWhatsapp": true
+          }
+        ]
+      },
+      "servicesEn": {
+        "key": "services",
+        "title": "Our services",
+        "isPreview": false,
+        "updatedAt": "2026-10-18T08:00:00.000Z",
+        "seo": {
+          "title": "Our services",
+          "description": "Home services, experience, real estate, local services, culture and events: 30 services in Douala, a single point of contact. Free quote within 24 hours.",
+          "ogImageUrl": null,
+          "noindex": false
+        },
+        "sections": [
+          {
+            "id": "hero",
+            "type": "hero",
+            "enabled": true,
+            "variant": "page",
+            "tone": "muted",
+            "eyebrow": "Our services",
+            "title": "30 services, a single point of contact.",
+            "lead": "Experience, real estate, local services, culture and events: choose what you need, we take care of everything with selected professionals. Rates provided on quotation.",
+            "primaryCta": {
+              "label": "Request a free quote",
+              "href": "/devis"
+            },
+            "showWhatsapp": true,
+            "visual": {
+              "illustration": "accueil",
+              "image": {
+                "id": "photo-douala-ville",
+                "url": "/photos/douala-ville.png",
+                "width": 1536,
+                "height": 1024,
+                "variants": []
+              },
+              "alt": "Douala at sunset, the bridge over the Wouri."
+            }
+          },
+          {
+            "id": "rubriques",
+            "type": "dynamic",
+            "enabled": true,
+            "source": "categories-list"
+          },
+          {
+            "id": "cta",
+            "type": "ctaBand",
+            "enabled": true,
+            "title": "Can't find\nwhat you need?",
+            "text": "Tell us about your project: we find the right solution and reply within 24 hours.",
+            "primaryCta": {
+              "label": "Request a free quote",
               "href": "/devis"
             },
             "showWhatsapp": true
@@ -2304,7 +2368,13 @@
           "iconColor": "orange-700",
           "visual": {
             "illustration": "chef",
-            "image": null,
+            "image": {
+              "id": "photo-exp-hero",
+              "url": "/photos/exp-hero.png",
+              "width": 1280,
+              "height": 960,
+              "variants": []
+            },
             "alt": ""
           },
           "thumbnail": {
@@ -2351,7 +2421,13 @@
           "iconColor": "neutral-800",
           "visual": {
             "illustration": "logement",
-            "image": null,
+            "image": {
+              "id": "photo-immo-hero",
+              "url": "/photos/immo-hero.png",
+              "width": 1280,
+              "height": 960,
+              "variants": []
+            },
             "alt": ""
           },
           "thumbnail": {
@@ -2529,7 +2605,13 @@
           "iconColor": "orange-700",
           "visual": {
             "illustration": "chef",
-            "image": null,
+            "image": {
+              "id": "photo-exp-hero",
+              "url": "/photos/exp-hero.png",
+              "width": 1280,
+              "height": 960,
+              "variants": []
+            },
             "alt": ""
           },
           "thumbnail": {
@@ -2576,7 +2658,13 @@
           "iconColor": "neutral-800",
           "visual": {
             "illustration": "logement",
-            "image": null,
+            "image": {
+              "id": "photo-immo-hero",
+              "url": "/photos/immo-hero.png",
+              "width": 1280,
+              "height": 960,
+              "variants": []
+            },
             "alt": ""
           },
           "thumbnail": {
