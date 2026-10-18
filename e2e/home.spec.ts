@@ -13,9 +13,11 @@ test.describe('accueil', () => {
     );
     const titles = await page.locator('main h2:visible').allInnerTexts();
     const order = [
+      'Une intervenante chez vous',
       'Tout ce dont vous avez besoin',
       'Simple comme un message.',
       'La proximité',
+      'Nous intervenons partout à Douala.',
       'Ils',
       'Ils travaillent à nos côtés',
       'Un projet, une question',
@@ -29,11 +31,9 @@ test.describe('accueil', () => {
   });
 
   test('textes raccourcis en mobile, complets en desktop', async ({ page, viewport }) => {
-    const lead = page
-      .getByText('Des prestataires de confiance pour vous simplifier la vie au Cameroun.', { exact: false })
-      .first();
+    const lead = page.getByText('se déplacent chez vous, à Douala.', { exact: false }).first();
     const fullLead = page
-      .getByText('que vous y viviez ou que vous prépariez votre venue', { exact: false })
+      .getByText('se déplacent chez vous, à Douala et environs.', { exact: false })
       .first();
     if (isMobile(viewport?.width)) {
       await expect(lead).toBeVisible();
@@ -54,7 +54,42 @@ test.describe('accueil', () => {
 
   test('chiffres clés lisibles par les lecteurs d’écran', async ({ page }) => {
     await expect(page.getByText('150+', { exact: true }).first()).toBeAttached();
-    await expect(page.getByText('2 pays', { exact: true }).first()).toBeAttached();
+    await expect(page.getByText('Douala', { exact: true }).first()).toBeAttached();
+  });
+
+  test('formules : réservation et devis avec la formule présélectionnée', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: 'Maison + Linge', level: 3 })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Réserver un créneau — Maison Essentiel' })).toHaveAttribute(
+      'href',
+      '/contact?service=maison-essentiel#rendez-vous',
+    );
+    await expect(page.getByRole('link', { name: 'Devis — Maison + Auto', exact: true })).toHaveAttribute(
+      'href',
+      '/devis?service=maison-auto',
+    );
+  });
+
+  test('zones : recherche d’un quartier au clavier', async ({ page }) => {
+    const search = page.getByRole('combobox', { name: 'Rechercher un quartier' });
+    await search.fill('bonam');
+    await expect(page.getByRole('option', { name: /Bonamoussadi/ })).toBeVisible();
+    await search.press('Enter');
+    await expect(page.getByText('Bonamoussadi est en Zone 3 — Élargie.')).toBeVisible();
+    await search.fill('Atlantis');
+    await search.press('Enter');
+    await expect(page.getByText('Nous n’avons pas trouvé « Atlantis ».')).toBeVisible();
+  });
+
+  test('version anglaise', async ({ page }) => {
+    await page.goto('/en', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(
+      "It's an experience designed for you.",
+    );
+    await expect(page.getByRole('link', { name: 'Book a slot — Home Essential' })).toHaveAttribute(
+      'href',
+      '/en/contact?service=maison-essentiel#rendez-vous',
+    );
   });
 
   test('carrousel des avis : défilement au clavier et indicateur de position', async ({ page, viewport }) => {

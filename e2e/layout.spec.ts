@@ -17,7 +17,7 @@ test.describe('gabarit des pages publiques', () => {
   test('méga-menu au clavier (desktop)', async ({ page, viewport }) => {
     test.skip(!isDesktop(viewport?.width), 'Navigation desktop uniquement');
     const tab = page.getByRole('link', { name: 'Nos services' }).first();
-    const firstService = page.getByRole('link', { name: 'Location de voiture' }).first();
+    const firstService = page.getByRole('link', { name: 'Maison Essentiel' }).first();
     await expect(async () => {
       await tab.focus();
       await page.keyboard.press('ArrowDown');
@@ -25,7 +25,7 @@ test.describe('gabarit des pages publiques', () => {
     }).toPass();
     await expect(tab).toHaveAttribute('aria-expanded', 'true');
     await page.keyboard.press('ArrowDown');
-    await expect(page.getByRole('link', { name: 'Photographe' }).first()).toBeFocused();
+    await expect(page.getByRole('link', { name: 'Maison + Auto', exact: true }).first()).toBeFocused();
     await page.keyboard.press('Escape');
     await expect(tab).toBeFocused();
     await expect(tab).toHaveAttribute('aria-expanded', 'false');
