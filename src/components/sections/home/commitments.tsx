@@ -1,4 +1,4 @@
-import { CountUp } from '@/components/ui/count-up';
+import { FigureValue } from '@/components/ui/count-up';
 import { Icon } from '@/components/ui/icon';
 import { Reveal } from '@/components/ui/reveal';
 import { Visual } from '@/components/ui/visual';
@@ -22,7 +22,7 @@ function FigureTile({ figure, index, className }: { figure: KeyFigure; index: nu
   return (
     <div
       className={cn(
-        'flex flex-col gap-1.5 rounded-[20px] p-5 md:rounded-[28px] md:p-7',
+        'flex flex-col gap-1 rounded-[20px] p-5 md:gap-1.5 md:rounded-[28px] md:p-7',
         tone.card,
         className,
       )}
@@ -34,7 +34,7 @@ function FigureTile({ figure, index, className }: { figure: KeyFigure; index: nu
           tone.value,
         )}
       >
-        <CountUp value={figure.value} prefix={figure.prefix ?? ''} suffix={figure.suffix ?? ''} />
+        <FigureValue figure={figure} />
       </p>
       <p className={cn('font-ui text-[13px] leading-5 md:text-[14px]', tone.label)}>
         <ResponsiveText
@@ -59,17 +59,18 @@ export function Commitments({
   keyFigures: KeyFigure[];
 }) {
   const figures = (section.figures?.length ? section.figures : keyFigures) as KeyFigure[];
-  const [projects, partners, services, countries] = figures;
+  const [projects, partners, services, area] = figures;
   return (
     <section className="bg-neutral-0 py-16 xl:py-28">
-      <div className="container-site grid gap-8 xl:grid-cols-[560px_1fr] xl:items-center xl:gap-16">
-        <div className="flex flex-col gap-6 xl:gap-8">
+      <div className="container-site grid gap-6 md:gap-8 xl:grid-cols-[560px_1fr] xl:items-center xl:gap-16">
+        <div className="flex min-w-0 flex-col gap-6 xl:gap-8">
           <SectionHeading
             eyebrow={section.eyebrow}
             title={section.title}
             titleMobile={section.titleMobile}
             lead={section.lead}
             leadMobile={section.leadMobile}
+            className="gap-3 md:gap-4"
           />
           <ul className="flex flex-col gap-6 md:gap-0">
             {section.items.map((item, index) => (
@@ -77,13 +78,13 @@ export function Commitments({
                 as="li"
                 key={item.title}
                 delay={index * 70}
-                className="flex gap-4 md:gap-5 md:border-t md:border-border-default md:py-5"
+                className="flex gap-3.5 md:gap-5 md:border-t md:border-border-default md:py-5"
               >
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-[14px] bg-vert-50 text-vert-700 md:size-12">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-md bg-vert-50 text-vert-700 md:size-12 md:rounded-[14px]">
                   {item.icon && <Icon name={item.icon} className="size-5 md:size-[22px]" />}
                 </span>
-                <span className="flex flex-col gap-1">
-                  <span className="font-ui text-[16px] leading-6 font-semibold text-text-main md:font-brand md:text-[19px] md:leading-7">
+                <span className="flex flex-col gap-0.5 md:gap-1">
+                  <span className="font-ui text-[16px] leading-6 font-semibold text-text-main min-[390px]:whitespace-nowrap md:font-brand md:text-[19px] md:leading-7">
                     {frenchTypography(item.title)}
                   </span>
                   {item.text && (
@@ -109,7 +110,7 @@ export function Commitments({
           ))}
         </div>
 
-        {/* Desktop : illustration + 150+ à gauche ; 40+, 19, 2 pays à droite. */}
+        {/* Desktop : photo + 150+ à gauche ; 40+, 30, Douala à droite. */}
         <div className="hidden grid-cols-2 gap-4 xl:grid">
           <div className="flex flex-col gap-4">
             {section.visual && (
@@ -134,9 +135,9 @@ export function Commitments({
                 <FigureTile figure={services} index={2} />
               </Reveal>
             )}
-            {countries && (
+            {area && (
               <Reveal delay={210}>
-                <FigureTile figure={countries} index={3} />
+                <FigureTile figure={area} index={3} />
               </Reveal>
             )}
           </div>

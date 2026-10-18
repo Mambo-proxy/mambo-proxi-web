@@ -56,7 +56,7 @@ function ReviewCard({ review, index }: { review: Review; index: number }) {
   );
 }
 
-/** Carte du carrousel mobile et tablette (`54:683`) : 300 px, rayon 24, citation 16/25 limitée à 4 lignes. */
+/** Carte du carrousel mobile et tablette (`54:683`) : 300 px, rayon 24, citation courte (sinon texte limité à 4 lignes). */
 function CompactReviewCard({ review, index }: { review: Review; index: number }) {
   const subtitle = [review.city, review.service?.name].filter(Boolean).join(' · ');
   return (
@@ -66,7 +66,7 @@ function CompactReviewCard({ review, index }: { review: Review; index: number })
         <Stars rating={review.rating} size={14} />
       </div>
       <blockquote className="line-clamp-4 font-ui text-[16px] leading-[25px] text-text-main">
-        {quoted(review.text)}
+        {quoted(review.excerpt ?? review.text)}
       </blockquote>
       <figcaption className="mt-auto flex items-center gap-3">
         <span

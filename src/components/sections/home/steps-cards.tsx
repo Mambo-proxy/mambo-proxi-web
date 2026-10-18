@@ -1,5 +1,5 @@
 import { CalendarCheck, FileText } from 'lucide-react';
-import type { Route } from 'next';
+import { useTranslations } from 'next-intl';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { WhatsappIcon } from '@/components/brand/social-icons';
 import { Icon } from '@/components/ui/icon';
@@ -24,6 +24,7 @@ export function StepsCards({
   section: StepsSection;
   whatsappHref: string | null;
 }) {
+  const t = useTranslations('home');
   const channelHref = (channel: Channel): string | null =>
     ({
       form: routes.devis,
@@ -42,8 +43,9 @@ export function StepsCards({
           titleMobile={section.titleMobile}
           lead={section.lead}
           leadMobile={section.leadMobile}
+          className="gap-3 md:gap-4"
         />
-        <ol className="grid gap-3 md:grid-cols-3 md:gap-6">
+        <ol className="grid gap-6 md:grid-cols-3">
           {section.items.map((item, index) => (
             <Reveal
               as="li"
@@ -64,7 +66,7 @@ export function StepsCards({
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-1 md:gap-5">
                 <h3 className="font-ui text-[16px] leading-6 font-semibold text-text-main md:font-brand md:text-[22px] md:leading-[30px]">
-                  <span className="sr-only">Étape {item.number} : </span>
+                  <span className="sr-only">{t('step', { number: item.number ?? index + 1 })}</span>
                   {frenchTypography(item.title)}
                 </h3>
                 {item.text && (
@@ -119,7 +121,7 @@ export function StepsCards({
                   {content}
                 </a>
               ) : (
-                <Link key={channel.kind} href={href as Route} className={className}>
+                <Link key={channel.kind} href={href} className={className}>
                   {content}
                 </Link>
               );

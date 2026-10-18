@@ -1,6 +1,8 @@
 import type { Metadata, Route } from 'next';
 import { notFound } from 'next/navigation';
 import { CategoriesBento } from '@/components/sections/home/categories-bento';
+import { FormulaCards } from '@/components/sections/home/formula-cards';
+import { ZonesSection } from '@/components/sections/zones/zones-section';
 import { Commitments } from '@/components/sections/home/commitments';
 import { HomeHero } from '@/components/sections/home/home-hero';
 import { PartnersStrip } from '@/components/sections/home/partners-strip';
@@ -19,7 +21,7 @@ import { JsonLd } from '@/components/seo/json-ld';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo/json-ld';
 
 async function getHomeData() {
-  const [page, settings, categories, reviews, summary, partners] = await Promise.all([
+  const [page, settings, categories, reviews, summary, partners, zones] = await Promise.all([
     unwrapOrNull(
       api.GET('/v1/pages/{key}', {
         params: { path: { key: 'accueil' } },
@@ -36,8 +38,22 @@ async function getHomeData() {
     ),
     unwrap(api.GET('/v1/reviews/summary', cached([cacheTags.reviews]))),
     unwrap(api.GET('/v1/partners', cached([cacheTags.partners]))),
+    unwrapOrNull(api.GET('/v1/zones', cached([cacheTags.zones]))),
   ]);
-  return { page, settings, categories, reviews: reviews.data, summary, partners };
+  const formulaCategories = page?.sections.flatMap((section) =>
+    section.type === 'dynamic' && section.source === 'formulas' && section.categorySlug
+      ? [section.categorySlug]
+      : [],
+  );
+  const formulas = formulaCategories?.length
+    ? await unwrap(
+        api.GET('/v1/services', {
+          params: { query: { category: formulaCategories[0] } },
+          ...cached([cacheTags.services]),
+        }),
+      )
+    : [];
+  return { page, settings, categories, reviews: reviews.data, summary, partners, zones, formulas };
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -95,6 +111,16 @@ export default async function HomePage() {
               summary={data.summary}
             />
           );
+        if (section.source === 'formulas')
+          return (
+            <FormulaCards
+              key={section.id}
+              section={section}
+              formulas={data.formulas.filter((service) => service.category.slug === section.categorySlug)}
+            />
+          );
+        if (section.source === 'zones-map')
+          return data.zones ? <ZonesSection key={section.id} section={section} areas={data.zones} /> : null;
         if (section.source === 'partners-strip')
           return <PartnersStrip key={section.id} section={section} partners={data.partners} />;
         return null;

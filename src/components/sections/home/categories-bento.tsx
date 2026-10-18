@@ -1,5 +1,5 @@
 import { ArrowRight, ArrowUpRight, Check, Package, ShoppingCart, Utensils } from 'lucide-react';
-import type { Route } from 'next';
+import { useTranslations } from 'next-intl';
 import { SiteLink as Link } from '@/i18n/site-link';
 import type { ReactNode } from 'react';
 import { buttonVariants } from '@/components/ui/button';
@@ -17,13 +17,17 @@ type CardProps = { category: CategorySummary };
 const titleOf = (category: CategorySummary) => category.homeCard?.title ?? category.tagline;
 const textOf = (category: CategorySummary) => category.homeCard?.text ?? category.description;
 const chipsOf = (category: CategorySummary) => category.homeCard?.chips ?? [];
+/** Visuel de la carte : celui de la carte d'accueil, sinon celui de la rubrique ; en mobile, sa variante éventuelle. */
+const visualOf = (category: CategorySummary) => category.homeCard?.visual ?? category.visual;
+const visualMobileOf = (category: CategorySummary) => category.homeCard?.visualMobile ?? visualOf(category);
 
 /** Lien couvrant toute la carte (le bouton flèche n'est que visuel). */
 function CardLink({ category }: CardProps) {
+  const t = useTranslations('site.header');
   return (
-    <Link href={category.href as Route} className="absolute inset-0 z-10 rounded-[inherit]">
+    <Link href={category.href} className="absolute inset-0 z-10 rounded-[inherit]">
       <span className="sr-only">
-        {category.name} — {category.serviceCount} services
+        {category.name} — {t('servicesCount', { count: category.serviceCount })}
       </span>
     </Link>
   );
@@ -64,6 +68,7 @@ function Chips({ items, tone, more = 0 }: { items: string[]; tone: 'glass' | 'li
 }
 
 function CountTag({ category, dark = false }: CardProps & { dark?: boolean }) {
+  const t = useTranslations('site.header');
   return (
     <span
       className={cn(
@@ -72,7 +77,7 @@ function CountTag({ category, dark = false }: CardProps & { dark?: boolean }) {
       )}
     >
       <Icon name={category.icon} size={14} className="text-text-brand" />
-      {category.serviceCount} services
+      {t('servicesCount', { count: category.serviceCount })}
     </span>
   );
 }
@@ -81,7 +86,7 @@ function CountTag({ category, dark = false }: CardProps & { dark?: boolean }) {
 function FeaturedCard({ category }: CardProps) {
   return (
     <article className="group/card relative flex min-h-[540px] overflow-hidden rounded-[32px] text-neutral-0">
-      <Visual visual={category.visual} sizes="780px" className="absolute inset-0" />
+      <Visual visual={visualOf(category)} sizes="780px" className="absolute inset-0" />
       <span
         aria-hidden
         className="absolute inset-0 bg-[linear-gradient(180deg,transparent_25%,color-mix(in_srgb,var(--mp-color-neutral-900)_82%,transparent))]"
@@ -105,7 +110,7 @@ function ImageTopCard({ category }: CardProps) {
   const chips = chipsOf(category);
   return (
     <article className="group/card relative flex min-h-[540px] flex-col overflow-hidden rounded-[32px] border border-border-default bg-neutral-50">
-      <Visual visual={category.visual} sizes="516px" className="h-[250px] shrink-0" />
+      <Visual visual={visualOf(category)} sizes="516px" className="h-[250px] shrink-0" />
       <div className="flex flex-col gap-3.5 px-8 pt-7 pb-8">
         <div className="flex items-center justify-between gap-4">
           <h3 className="font-brand text-[30px] leading-10 font-semibold tracking-[-0.01em] text-text-main">
@@ -180,7 +185,7 @@ function DarkSplitCard({ category }: CardProps) {
         <Chips items={chipsOf(category)} tone="glass" />
       </div>
       <div className="relative">
-        <Visual visual={category.visual} sizes="380px" className="absolute inset-0" />
+        <Visual visual={visualOf(category)} sizes="380px" className="absolute inset-0" />
         <ArrowButton tone="light" className="absolute top-8 right-8" />
       </div>
       <CardLink category={category} />
@@ -190,9 +195,14 @@ function DarkSplitCard({ category }: CardProps) {
 
 /** Carte mobile et tablette (`53:622`…) : illustration pleine, voile, étiquette, titre 24/30, flèche 40. */
 function CompactCard({ category }: CardProps) {
+  const t = useTranslations('site.header');
   return (
     <article className="group/card relative flex h-[300px] overflow-hidden rounded-xl text-neutral-0 md:h-[360px]">
-      <Visual visual={category.visual} sizes="(min-width: 768px) 50vw, 100vw" className="absolute inset-0" />
+      <Visual
+        visual={visualMobileOf(category)}
+        sizes="(min-width: 768px) 50vw, 100vw"
+        className="absolute inset-0"
+      />
       <span
         aria-hidden
         className="absolute inset-0 bg-[linear-gradient(180deg,transparent_20%,color-mix(in_srgb,var(--mp-color-neutral-900)_85%,transparent))]"
@@ -205,7 +215,7 @@ function CompactCard({ category }: CardProps) {
       </span>
       <div className="relative mt-auto flex flex-col gap-2 p-5">
         <span className="self-start rounded-full bg-neutral-0 px-2.5 py-1 font-ui text-[11px] leading-4 font-semibold text-text-main">
-          {category.serviceCount} services
+          {t('servicesCount', { count: category.serviceCount })}
         </span>
         <h3 className="font-brand text-[24px] leading-[30px] font-semibold">
           {frenchTypography(titleOf(category))}
@@ -240,7 +250,9 @@ export function CategoriesBento({
   section: DynamicSection;
   categories: CategorySummary[];
 }) {
-  const [first, second, third, fourth] = categories;
+  // Rubriques présentées dans le bento : celles qui ont une carte d'accueil (« Services à domicile » a sa section).
+  const cards = categories.filter((category) => category.homeCard);
+  const [first, second, third, fourth] = cards;
   const desktop = (category: CategorySummary | undefined) => {
     if (!category) return null;
     const Card = DESKTOP_CARDS[category.slug] ?? ImageTopCard;
@@ -256,11 +268,11 @@ export function CategoriesBento({
             titleMobile={section.titleMobile}
             lead={section.lead}
             leadMobile={section.leadMobile}
-            className="xl:max-w-[720px]"
+            className="gap-3 md:gap-4 xl:max-w-[720px]"
           />
           {section.link && (
             <Link
-              href={section.link.href as Route}
+              href={section.link.href}
               className={cn(
                 buttonVariants({ variant: 'outline', shape: 'pill' }),
                 'group/link self-start px-[22px] py-3.5 max-md:hidden xl:self-auto',
@@ -276,7 +288,7 @@ export function CategoriesBento({
         </div>
 
         <div className="grid gap-3.5 md:grid-cols-2 md:gap-4 xl:hidden">
-          {categories.map((category, index) => (
+          {cards.map((category, index) => (
             <Reveal key={category.slug} delay={Math.min(index, 5) * 70}>
               <CompactCard category={category} />
             </Reveal>

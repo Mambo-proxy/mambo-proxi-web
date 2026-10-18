@@ -53,3 +53,13 @@ export function CountUp({ value, prefix = '', suffix = '', durationMs = 1200 }: 
     </span>
   );
 }
+
+/** Valeur d'un chiffre clé : texte fixe (`valueText`, ex. « Douala ») ou nombre animé. */
+export function FigureValue({
+  figure,
+}: {
+  figure: { value?: number; valueText?: string | null; prefix?: string; suffix?: string };
+}) {
+  if (figure.valueText) return figure.valueText;
+  return <CountUp value={figure.value ?? 0} prefix={figure.prefix ?? ''} suffix={figure.suffix ?? ''} />;
+}

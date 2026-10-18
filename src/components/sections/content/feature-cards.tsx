@@ -1,4 +1,4 @@
-import { CountUp } from '@/components/ui/count-up';
+import { FigureValue } from '@/components/ui/count-up';
 import { Icon } from '@/components/ui/icon';
 import { Reveal } from '@/components/ui/reveal';
 import type { FeatureListSection, KeyFigure } from '@/lib/api/schema';
@@ -75,7 +75,7 @@ export function FeatureCards({
               >
                 <dt className="font-ui text-[14px] leading-5 text-text-muted">{figure.label}</dt>
                 <dd className="font-brand text-[32px] leading-[38px] font-semibold tracking-[-0.02em] text-text-main xl:text-[48px] xl:leading-[56px]">
-                  <CountUp value={figure.value} prefix={figure.prefix ?? ''} suffix={figure.suffix ?? ''} />
+                  <FigureValue figure={figure} />
                 </dd>
               </div>
             ))}

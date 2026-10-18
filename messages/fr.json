@@ -10,7 +10,10 @@
       "label": "Langue",
       "fr": "Français",
       "en": "English",
-      "short": { "fr": "FR", "en": "EN" },
+      "short": {
+        "fr": "FR",
+        "en": "EN"
+      },
       "choose": "Choisir la langue"
     },
     "topBar": {
@@ -61,6 +64,32 @@
       "necessaryText": "Indispensables au fonctionnement du site (mémorisation de vos choix, sécurité des formulaires). Toujours actifs.",
       "analytics": "Mesure d’audience (Google Analytics)",
       "analyticsText": "Statistiques de visite anonymisées pour améliorer le site. Désactivée tant que vous ne l’acceptez pas."
+    },
+    "cta": {
+      "quote": "Demander un devis gratuit"
     }
+  },
+  "home": {
+    "formulas": {
+      "book": "Réserver un créneau",
+      "quote": "Devis"
+    },
+    "step": "Étape {number} : "
+  },
+  "zones": {
+    "mapLabel": "Carte des zones d’intervention à Douala",
+    "wouri": "Wouri",
+    "searchTitle": "Trouvez votre quartier",
+    "searchLabel": "Rechercher un quartier",
+    "searchPlaceholder": "Rechercher un quartier",
+    "suggestions": "Quartiers correspondants",
+    "result": "{quarter} est en {zone}.",
+    "notFoundTitle": "Nous n’avons pas trouvé « {query} ».",
+    "notFoundText": "Votre quartier n’apparaît pas ? Contactez-nous : nous étudions chaque demande.",
+    "legend": "Légende",
+    "zoomIn": "Zoomer",
+    "zoomOut": "Dézoomer",
+    "reset": "Recentrer la carte",
+    "mapHint": "Faites glisser pour déplacer la carte, utilisez + et − pour zoomer."
   }
 }

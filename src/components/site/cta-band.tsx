@@ -7,6 +7,7 @@ import { cn } from '@/lib/cn';
 import { routes } from '@/lib/routes';
 import { ResponsiveText } from '@/components/sections/responsive-text';
 import { frenchTypography } from '@/lib/format/typography';
+import { useTranslations } from 'next-intl';
 
 type CtaBandProps = {
   /**
@@ -34,10 +35,11 @@ export function CtaBand({
   text,
   textMobile,
   href = routes.devis,
-  ctaLabel = 'Demander un devis gratuit',
+  ctaLabel,
   whatsappHref,
   className,
 }: CtaBandProps) {
+  const t = useTranslations('site');
   return (
     <section className={cn('container-site pb-14 xl:pb-28', className)}>
       <div className="relative animate-[cta-wave_12s_ease-in-out_infinite] overflow-hidden rounded-[28px] bg-gradient-energie bg-[length:200%_200%] p-7 motion-reduce:animate-none xl:rounded-[40px] xl:p-[72px]">
@@ -64,7 +66,7 @@ export function CtaBand({
               mobile={textMobile ? frenchTypography(textMobile) : null}
             />
           </p>
-          <div className="mt-1 flex flex-col gap-3 md:flex-row md:flex-wrap">
+          <div className="mt-1 flex flex-col gap-3 md:flex-row md:flex-wrap xl:mt-0">
             <Link
               href={href}
               className={cn(
@@ -72,7 +74,7 @@ export function CtaBand({
                 'group/cta max-md:w-full max-md:px-5',
               )}
             >
-              {ctaLabel}
+              {ctaLabel ?? t('cta.quote')}
               <ArrowRight
                 aria-hidden
                 className="transition-transform duration-200 group-hover/cta:translate-x-[3px] max-md:hidden"
@@ -85,7 +87,7 @@ export function CtaBand({
                 rel="noopener noreferrer"
                 className={cn(buttonVariants({ variant: 'whatsapp' }), 'max-md:w-full')}
               >
-                Écrire sur WhatsApp
+                {t('header.whatsapp')}
               </a>
             )}
           </div>

@@ -10,7 +10,10 @@
       "label": "Language",
       "fr": "Français",
       "en": "English",
-      "short": { "fr": "FR", "en": "EN" },
+      "short": {
+        "fr": "FR",
+        "en": "EN"
+      },
       "choose": "Choose the language"
     },
     "topBar": {
@@ -61,6 +64,32 @@
       "necessaryText": "Essential for the website to work (remembering your choices, form security). Always active.",
       "analytics": "Audience measurement (Google Analytics)",
       "analyticsText": "Anonymised visit statistics to improve the website. Disabled until you accept it."
+    },
+    "cta": {
+      "quote": "Request a free quote"
     }
+  },
+  "home": {
+    "formulas": {
+      "book": "Book a slot",
+      "quote": "Quote"
+    },
+    "step": "Step {number}: "
+  },
+  "zones": {
+    "mapLabel": "Map of our service areas in Douala",
+    "wouri": "Wouri",
+    "searchTitle": "Find your neighbourhood",
+    "searchLabel": "Search for a neighbourhood",
+    "searchPlaceholder": "Search for a neighbourhood",
+    "suggestions": "Matching neighbourhoods",
+    "result": "{quarter} is in {zone}.",
+    "notFoundTitle": "We could not find “{query}”.",
+    "notFoundText": "Can’t find your neighbourhood? Contact us: we look at every request.",
+    "legend": "Legend",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "reset": "Recentre the map",
+    "mapHint": "Drag to move the map, use + and − to zoom."
   }
 }
