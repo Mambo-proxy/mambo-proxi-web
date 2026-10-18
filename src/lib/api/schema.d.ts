@@ -78,6 +78,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/zones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Zones d'intervention et quartiers desservis
+         * @description Carte, recherche de quartier et liste par zone (accueil, page Zones d'intervention). Tag de revalidation `zones`.
+         */
+        get: operations["getServiceAreas"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/sitemap": {
         parameters: {
             query?: never;
@@ -2255,11 +2275,14 @@ export interface components {
         AccentText: string;
         /** @enum {string} */
         SocialNetwork: "instagram" | "facebook" | "linkedin" | "tiktok" | "youtube" | "x";
+        /** @description Chiffre clé ; `valueText` remplace le nombre animé (ex. « Douala »). */
         KeyFigure: {
             /** @example projects */
             key: string;
             /** @example 150 */
-            value: number;
+            value?: number;
+            /** @example Douala */
+            valueText?: string | null;
             /** @default  */
             prefix: string;
             /**
@@ -2388,6 +2411,60 @@ export interface components {
                 href: string;
             }[];
         };
+        /**
+         * @description Couleur de la zone sur la carte et dans la légende.
+         * @enum {string}
+         */
+        ZoneTone: "zone1" | "zone2" | "zone3" | "special";
+        ZoneQuarter: {
+            /** @example Bonamoussadi */
+            name: string;
+            /**
+             * @description Précision affichée dans la liste.
+             * @example rive ouest du Wouri
+             */
+            detail?: string | null;
+            /**
+             * @description Libellé sur la carte ; null = nom.
+             * @example Cité SIC · base de départ
+             */
+            mapLabel?: string | null;
+            /**
+             * @description Base de départ des interventions (point mis en avant).
+             * @default false
+             */
+            isBase: boolean;
+            /**
+             * @description Libellé affiché sur la carte réduite (mobile) ; les autres apparaissent en zoomant.
+             * @default false
+             */
+            labelOnSmallMap: boolean;
+            /** @description Position sur la carte stylisée de Douala (0 à 1, origine en haut à gauche) ; null = absent de la carte. */
+            position?: {
+                x: number;
+                y: number;
+            } | null;
+        };
+        Zone: {
+            key: components["schemas"]["Slug"];
+            /** @example Zone 3 — Élargie */
+            name: string;
+            tone: components["schemas"]["ZoneTone"];
+            /** @example Quartiers résidentiels et périphérie. */
+            description: string;
+            /**
+             * @description Réponse affichée quand un quartier de la zone est recherché.
+             * @example Intervention à domicile et livraison possibles. Conditions confirmées sur devis.
+             */
+            result: string;
+            quarters: components["schemas"]["ZoneQuarter"][];
+        };
+        ServiceAreas: {
+            zones: components["schemas"]["Zone"][];
+            /** @example Votre quartier n'apparaît pas ? Contactez-nous : nous étudions chaque demande. */
+            note?: string | null;
+            updatedAt?: components["schemas"]["DateTime"];
+        };
         Navigation: {
             main: components["schemas"]["NavItem"][];
             megaMenu: {
@@ -2419,7 +2496,7 @@ export interface components {
             legal: components["schemas"]["NavLink"][];
         };
         /** @enum {string} */
-        PageKey: "accueil" | "services" | "qui-sommes-nous" | "mission" | "partenaires" | "formation" | "recrutement" | "avis-clients" | "contact" | "devis" | "devis-confirmation" | "inscription" | "suivi-mambo" | "questionnaire" | "mentions-legales" | "confidentialite" | "cookies" | "cgu" | "404" | "erreur" | "maintenance" | "newsletter-confirmation" | "newsletter-desinscription";
+        PageKey: "accueil" | "services" | "zones-d-intervention" | "magazine" | "qui-sommes-nous" | "mission" | "partenaires" | "formation" | "recrutement" | "avis-clients" | "contact" | "devis" | "devis-confirmation" | "inscription" | "suivi-mambo" | "questionnaire" | "mentions-legales" | "confidentialite" | "cookies" | "cgu" | "404" | "erreur" | "maintenance" | "newsletter-confirmation" | "newsletter-desinscription";
         Page: {
             key: components["schemas"]["PageKey"];
             title: string;
@@ -2533,6 +2610,10 @@ export interface components {
                 /** @description Texte raccourci en mobile ; null = texte principal. */
                 textMobile?: string | null;
                 chips?: string[];
+                /** @description Visuel de la carte de l'accueil ; null = visuel principal de la rubrique. */
+                visual?: components["schemas"]["Visual"] | null;
+                /** @description Visuel de la carte en mobile ; null = visuel de la carte. */
+                visualMobile?: components["schemas"]["Visual"] | null;
             };
             /** @description Présent avec `include=services`. */
             services?: components["schemas"]["ServiceSummary"][];
@@ -2595,6 +2676,12 @@ export interface components {
             /** @example /services/experience/chef-prive */
             href: string;
             featuredOnHome?: boolean;
+            /**
+             * @description `formula` : formule de la rubrique « Services à domicile » (carte avec photo, « Réserver un créneau » et « Devis »).
+             * @default service
+             * @enum {string}
+             */
+            kind: "service" | "formula";
         };
         ServiceDetail: components["schemas"]["ServiceSummary"] & {
             tagline: string;
@@ -2635,6 +2722,8 @@ export interface components {
             city?: string | null;
             rating: number;
             text: string;
+            /** @description Citation courte d'un avis mis en avant (accueil en mobile) ; null = texte tronqué. */
+            excerpt?: string | null;
             service?: {
                 slug: components["schemas"]["Slug"];
                 name: string;
@@ -4080,7 +4169,9 @@ export interface components {
             /** @constant */
             type: "dynamic";
             /** @enum {string} */
-            source: "categories-bento" | "categories-list" | "reviews-highlight" | "reviews-list" | "partners-strip" | "partners-grid" | "trainings-catalog" | "jobs-list" | "contact-cards" | "appointment-booking" | "agency-map" | "quote-form" | "registration-form" | "partner-form" | "training-form" | "application-form" | "suivi-preview";
+            source: "categories-bento" | "categories-list" | "reviews-highlight" | "reviews-list" | "partners-strip" | "partners-grid" | "trainings-catalog" | "jobs-list" | "contact-cards" | "appointment-booking" | "agency-map" | "quote-form" | "registration-form" | "partner-form" | "training-form" | "application-form" | "suivi-preview" | "formulas" | "zones-map";
+            /** @description Rubrique dont les services sont affichés (source `formulas`). */
+            categorySlug?: components["schemas"]["Slug"] | null;
             link?: components["schemas"]["Link"] | null;
             limit?: number | null;
             note?: string | null;
@@ -4300,6 +4391,10 @@ export type SiteSettings = components['schemas']['SiteSettings'];
 export type NavLink = components['schemas']['NavLink'];
 export type NavItem = components['schemas']['NavItem'];
 export type MegaMenuCategory = components['schemas']['MegaMenuCategory'];
+export type ZoneTone = components['schemas']['ZoneTone'];
+export type ZoneQuarter = components['schemas']['ZoneQuarter'];
+export type Zone = components['schemas']['Zone'];
+export type ServiceAreas = components['schemas']['ServiceAreas'];
 export type Navigation = components['schemas']['Navigation'];
 export type PageKey = components['schemas']['PageKey'];
 export type Page = components['schemas']['Page'];
@@ -4600,6 +4695,33 @@ export interface operations {
                 };
             };
             404: components["responses"]["NotFound"];
+        };
+    };
+    getServiceAreas: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Zones publiées, dans l'ordre du back-office. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceAreas"];
+                };
+            };
+            429: components["responses"]["TooManyRequests"];
         };
     };
     getSitemap: {
