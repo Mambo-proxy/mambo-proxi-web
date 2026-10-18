@@ -84,7 +84,8 @@ async function admin(request: NextRequest): Promise<NextResponse> {
 /** Langue d'une adresse publique : `/en` ou `/en/…` pour l'anglais, sinon le français (sans préfixe). */
 function localeOf(pathname: string): string {
   const prefix = routing.locales.find(
-    (locale) => locale !== routing.defaultLocale && (pathname === `/${locale}` || pathname.startsWith(`/${locale}/`)),
+    (locale) =>
+      locale !== routing.defaultLocale && (pathname === `/${locale}` || pathname.startsWith(`/${locale}/`)),
   );
   return prefix ?? routing.defaultLocale;
 }
