@@ -100,8 +100,9 @@ Les maquettes ont été refondues mi-octobre 2026 (recentrage sur Douala et les 
 - [x] Site bilingue : next-intl, français sans préfixe, anglais sous `/en` avec adresses traduites, `SiteLink`, langue transmise à l'API (`?lang=en`), exemples anglais dans les mocks
 - [x] Gabarit : barre supérieure (WhatsApp, Téléphone, FR | EN), en-tête (Magazine), méga-menu à 5 rubriques avec photo, menu mobile (langue, Zones d'intervention, « 4 formules »), pied de page Douala
 - [x] Accueil : formules « Services à domicile », bento en photos, engagements (photo, chiffres « Douala »), carte interactive des zones avec recherche de quartier — fidélité 1440 et 390 section par section
-- [ ] Nos services `/services` (5 rubriques, formules)
-- [ ] Rubrique Services à domicile `/services/services-a-domicile` (nouvelle) et fiche « Entretien du logement » (offres en carrousel)
+- [x] Nos services `/services` (5 rubriques, formules) — 6 663 px pour 6 662 en desktop, 7 795 identique en mobile
+- [x] Rubrique Services à domicile `/services/services-a-domicile` (nouvelle) — sections au pixel près en desktop ; en mobile, note de la bande et première étape sur deux lignes (voir JOURNAL)
+- [ ] Fiche « Entretien du logement » (offres en carrousel)
 - [ ] Rubriques Expérience, Immobilier, Services de proximité, Culture & événementiel ; fiche service (Chef privé)
 - [ ] Magazine (édition n° 1) et Zones d'intervention (nouvelles pages)
 - [ ] Qui sommes-nous, Mission, Partenaires, Formation, Recrutement, offre d'emploi, Avis clients, Contact, Devis, Confirmation, Inscription, Suivi, pages légales, questionnaire, 404

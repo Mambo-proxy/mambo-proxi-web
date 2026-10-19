@@ -356,3 +356,15 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Sélecteur FR | EN** : couleurs de la maquette hors design system remplacées par `orange/400` et `neutral/300`.
 - **Avis** : citation courte saisie à la mise en avant (`excerpt`), affichée sur l'accueil en mobile ; les avis restent dans leur langue d'origine sur le site anglais.
 - **Disque plein** pendant la session : le cache de `next dev` peut remplir le disque ; il est supprimé dès qu'il gêne (`.next`).
+
+### Nos services et Services à domicile (19 octobre 2026)
+
+- « Nos services » : 5 rubriques (Services à domicile en tête), photos des rubriques, cartes de formule « Réserver un créneau » (une formule n'a pas de fiche : sa carte mène à la prise de rendez-vous, et les liens du méga-menu vers la section `#formules` de sa rubrique). Fonds alternés à partir d'Expérience, comme sur la maquette.
+- Rubrique « Services à domicile » : formules en cartes photo (même composant que l'accueil), bande « Des intervenantes de confiance » (type `STEPS_BAND`, présentation de la réception de colis), déroulé « Comment ça marche ? » (`processEyebrow`), témoignage avec photo, autres rubriques choisies par la maquette. Fil d'Ariane « Nos formules ».
+- Composants de rubrique recalés sur les nouvelles maquettes (Pour qui, déroulé, témoignage, bande sombre) ; sur-titres traduits.
+
+### Décisions
+
+- **Note de la bande en mobile** : la maquette la garde sur une ligne, coupée au bord de l'écran ; elle passe ici à la ligne pour rester lisible (+20 px).
+- **Première étape du déroulé en mobile** : son texte tient sur une ligne dans Figma et passe à la ligne dans le navigateur, à 1 ou 2 px près (+20 px).
+- **Texte de la formule Maison + Auto + Linge** : la page Nos services en donne une version courte ; le texte de l'accueil et de la rubrique (plus complet) est retenu, une seule donnée par formule.
