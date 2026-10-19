@@ -2618,10 +2618,13 @@ export interface components {
             /** @description Présent avec `include=services`. */
             services?: components["schemas"]["ServiceSummary"][];
         };
-        /** @description Bloc spécifique à une rubrique (réception de colis, agenda culturel). */
+        /** @description Bloc spécifique à une rubrique (réception de colis, agenda culturel, bande d'engagements). */
         CategoryHighlight: {
-            /** @enum {string} */
-            kind: "PARCEL_RECEPTION" | "AGENDA";
+            /**
+             * @description `STEPS_BAND` : bande sombre de cartes numérotées avec note (ex. « Des intervenantes de confiance »), même présentation que la réception de colis.
+             * @enum {string}
+             */
+            kind: "PARCEL_RECEPTION" | "AGENDA" | "STEPS_BAND";
             eyebrow?: string | null;
             title: components["schemas"]["AccentText"];
             text?: string | null;
@@ -2647,6 +2650,11 @@ export interface components {
                 serviceSlugs: components["schemas"]["Slug"][];
             }[];
             highlight?: components["schemas"]["CategoryHighlight"] | null;
+            /**
+             * @description Sur-titre du déroulé ; null = libellé par défaut.
+             * @example Comment ça marche ?
+             */
+            processEyebrow?: string | null;
             processTitle?: string | null;
             processSteps: components["schemas"]["StepItem"][];
             testimonial?: components["schemas"]["Review"] | null;

@@ -2377,11 +2377,7 @@
             },
             "alt": ""
           },
-          "thumbnail": {
-            "illustration": "accueil",
-            "image": null,
-            "alt": ""
-          },
+          "thumbnail": null,
           "sortOrder": 2,
           "serviceCount": 5,
           "href": "/services/experience",
@@ -2430,11 +2426,7 @@
             },
             "alt": ""
           },
-          "thumbnail": {
-            "illustration": "logement",
-            "image": null,
-            "alt": ""
-          },
+          "thumbnail": null,
           "sortOrder": 3,
           "serviceCount": 7,
           "href": "/services/immobilier",
@@ -2482,11 +2474,7 @@
             },
             "alt": ""
           },
-          "thumbnail": {
-            "illustration": "courses",
-            "image": null,
-            "alt": ""
-          },
+          "thumbnail": null,
           "sortOrder": 4,
           "serviceCount": 4,
           "href": "/services/services-de-proximite",
@@ -2523,11 +2511,7 @@
             },
             "alt": ""
           },
-          "thumbnail": {
-            "illustration": "culture",
-            "image": null,
-            "alt": ""
-          },
+          "thumbnail": null,
           "sortOrder": 5,
           "serviceCount": 4,
           "href": "/services/culture-evenementiel",
@@ -2614,11 +2598,7 @@
             },
             "alt": ""
           },
-          "thumbnail": {
-            "illustration": "accueil",
-            "image": null,
-            "alt": ""
-          },
+          "thumbnail": null,
           "sortOrder": 2,
           "serviceCount": 5,
           "href": "/services/experience",
@@ -2667,11 +2647,7 @@
             },
             "alt": ""
           },
-          "thumbnail": {
-            "illustration": "logement",
-            "image": null,
-            "alt": ""
-          },
+          "thumbnail": null,
           "sortOrder": 3,
           "serviceCount": 7,
           "href": "/services/immobilier",
@@ -2719,11 +2695,7 @@
             },
             "alt": ""
           },
-          "thumbnail": {
-            "illustration": "courses",
-            "image": null,
-            "alt": ""
-          },
+          "thumbnail": null,
           "sortOrder": 4,
           "serviceCount": 4,
           "href": "/services/services-de-proximite",
@@ -2760,11 +2732,7 @@
             },
             "alt": ""
           },
-          "thumbnail": {
-            "illustration": "culture",
-            "image": null,
-            "alt": ""
-          },
+          "thumbnail": null,
           "sortOrder": 5,
           "serviceCount": 4,
           "href": "/services/culture-evenementiel",
