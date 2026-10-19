@@ -2401,7 +2401,7 @@ export interface components {
             href: string;
             /**
              * @description Nombre d'entrées affiché dans le menu mobile.
-             * @example 4 formules
+             * @example 4 formules · 2 services
              * @example 5 services
              */
             countLabel?: string;
@@ -2699,7 +2699,7 @@ export interface components {
             servicesTitle?: string | null;
             /** @example Zones desservies communiquées lors du devis. */
             servicesLead?: string | null;
-            /** @description Groupes titrés de services (ex. Immobilier). Vide = liste simple. */
+            /** @description Groupes titrés de services (ex. Immobilier). Vide = liste simple. Rubrique de formules : services proposés à la carte, sous les formules. */
             groups: {
                 title: string;
                 serviceSlugs: components["schemas"]["Slug"][];

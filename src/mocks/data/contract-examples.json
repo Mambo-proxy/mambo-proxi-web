@@ -403,7 +403,7 @@
               "icon": "ShoppingCart",
               "tint": "vert-50",
               "href": "/services/services-a-domicile",
-              "countLabel": "4 formules",
+              "countLabel": "4 formules · 2 services",
               "services": [
                 {
                   "slug": "maison-essentiel",
@@ -424,6 +424,16 @@
                   "slug": "maison-auto-linge",
                   "name": "Maison + Auto + Linge",
                   "href": "/services/services-a-domicile#formules"
+                },
+                {
+                  "slug": "entretien-du-logement",
+                  "name": "Entretien du logement",
+                  "href": "/services/services-a-domicile/entretien-du-logement"
+                },
+                {
+                  "slug": "nettoyage-automobile",
+                  "name": "Nettoyage automobile",
+                  "href": "/services/services-a-domicile/nettoyage-automobile"
                 }
               ]
             },
@@ -909,7 +919,7 @@
               "icon": "ShoppingCart",
               "tint": "vert-50",
               "href": "/services/services-a-domicile",
-              "countLabel": "4 packages",
+              "countLabel": "4 packages · 2 services",
               "services": [
                 {
                   "slug": "maison-essentiel",
@@ -930,6 +940,16 @@
                   "slug": "maison-auto-linge",
                   "name": "Home + Car + Laundry",
                   "href": "/services/services-a-domicile#formules"
+                },
+                {
+                  "slug": "entretien-du-logement",
+                  "name": "Home cleaning",
+                  "href": "/services/services-a-domicile/entretien-du-logement"
+                },
+                {
+                  "slug": "nettoyage-automobile",
+                  "name": "Car cleaning",
+                  "href": "/services/services-a-domicile/nettoyage-automobile"
                 }
               ]
             },
@@ -2353,7 +2373,7 @@
           },
           "thumbnail": null,
           "sortOrder": 1,
-          "serviceCount": 4,
+          "serviceCount": 6,
           "href": "/services/services-a-domicile"
         },
         {
@@ -2574,7 +2594,7 @@
           },
           "thumbnail": null,
           "sortOrder": 1,
-          "serviceCount": 4,
+          "serviceCount": 6,
           "href": "/services/services-a-domicile"
         },
         {
