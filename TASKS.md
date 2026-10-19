@@ -102,13 +102,13 @@ Les maquettes ont été refondues mi-octobre 2026 (recentrage sur Douala et les 
 - [x] Accueil : formules « Services à domicile », bento en photos, engagements (photo, chiffres « Douala »), carte interactive des zones avec recherche de quartier — fidélité 1440 et 390 section par section
 - [x] Nos services `/services` (5 rubriques, formules) — 6 663 px pour 6 662 en desktop, 7 795 identique en mobile
 - [x] Rubrique Services à domicile `/services/services-a-domicile` (nouvelle) — sections au pixel près en desktop ; en mobile, note de la bande et première étape sur deux lignes (voir JOURNAL)
-- [ ] Fiche « Entretien du logement » (offres en carrousel)
-- [ ] Rubriques Expérience, Immobilier, Services de proximité, Culture & événementiel ; fiche service (Chef privé)
+- [x] Fiche service : carrousel « Nos offres » (Entretien du logement, Chef privé mis à jour), textes traduits — `qa/fidelite/fiche-*.png` ; à valider : où relier Entretien du logement et Nettoyage automobile
+- [ ] Rubriques Expérience, Immobilier, Services de proximité, Culture & événementiel
 - [ ] Magazine (édition n° 1) et Zones d'intervention (nouvelles pages)
 - [ ] Qui sommes-nous, Mission, Partenaires, Formation, Recrutement, offre d'emploi, Avis clients, Contact, Devis, Confirmation, Inscription, Suivi, pages légales, questionnaire, 404
 - [ ] E-mails (4 modèles mis à jour)
 - [ ] Back-office : tableau de bord modifié, Magazine, Zones d'intervention, édition du Magazine ; écrans en cours sur les branches `bo/services-en-cours`, `bo/pages-textes-en-cours`, `bo/recrutement-en-cours`
-- [ ] Implémentation de l'API (phase 2) : `?lang`, zones, formules, citations d'avis
+- [ ] Implémentation de l'API (phase 2) : `?lang`, zones, formules, citations d'avis, offres des fiches service
 
 ## Phase 3 — Intégration
 

@@ -368,3 +368,21 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Note de la bande en mobile** : la maquette la garde sur une ligne, coupée au bord de l'écran ; elle passe ici à la ligne pour rester lisible (+20 px).
 - **Première étape du déroulé en mobile** : son texte tient sur une ligne dans Figma et passe à la ligne dans le navigateur, à 1 ou 2 px près (+20 px).
 - **Texte de la formule Maison + Auto + Linge** : la page Nos services en donne une version courte ; le texte de l'accueil et de la rubrique (plus complet) est retenu, une seule donnée par formule.
+
+### Fiches service : carrousel « Nos offres » (19 octobre 2026)
+
+- Gabarit de la fiche recalé sur les nouvelles maquettes (Chef privé `62:4161`, Entretien du logement `253:25267`) : carrousel « Nos offres » sous le héros (section `offers` du contrat, facultative), textes de l'interface traduits (espace `service` des messages), fiches simulées en français et en anglais.
+- Carrousel : défilement natif aimanté, rogné au bord du conteneur ; flèches 48 px à droite de l'en-tête (absentes en mobile, où l'on fait glisser), désactivées en bout de piste ; points de position décoratifs. Carte d'offre : photo 220, pastille d'icône facultative (absente sur les chefs), titre, texte et libellé d'action avec variantes mobiles (« Devis gratuit », « Devis », « Réserver »).
+- Deux actions par offre, comme les cartes de formule : l'action principale (devis ou prise de rendez-vous selon l'offre, ex. « Je réserve mon évaluation ») et l'autre en flèche ↗, service présélectionné.
+- Chef privé mis à jour d'après la maquette (offres « Nos chefs », public « Aux familles en séjour à Douala », « Puis-je réserver pour un proche ? », photos). Nouvelles photos exportées de Figma dans `public/photos/` (`offre-*`, `fiche-*`) ; « Chef Paul » et « Dîner sur la terrasse » réutilisent `chef-2` et `exp-hero` (mêmes images).
+- Fidélité : en desktop, chaque section à la hauteur de la maquette (Chef privé 6 076 px pour 6 073, Entretien 6 087 pour 6 084 : +2 px déjà présents dans le bloc de contenu) ; en mobile, héros, offres et bandeau identiques (`qa/fidelite/fiche-*.png`).
+
+### Décisions
+
+- **« Entretien du logement » et « Nettoyage automobile »** : services de « Services à domicile » que les maquettes ne relient nulle part (la rubrique, le méga-menu et « Nos services » ne montrent que les 4 formules). Leur fiche existe à son adresse, hors des listes ; « Nettoyage automobile » (lié depuis Entretien) a un contenu provisoire. À valider avec la cliente : où relier ces fiches.
+- **Carte « Formules à domicile » des services liés** : elle renvoie à la section des formules de la rubrique (`#formules`), comme une formule.
+- **Titre de la fiche en mobile** : dans la maquette, « Entretien du logement » et le fil d'Ariane débordent de l'écran ; ils passent ici à la ligne (+64 px pour le héros).
+- **Flèche « suivant »** : chevron `text/on-primary` sur l'orange, comme les boutons principaux (le blanc de la maquette n'atteint pas 3:1).
+- **Icône des offres d'entretien** : couverts (`Utensils`), comme sur la maquette ; l'icône est une donnée modifiable dans le back-office.
+- **Photos de la fiche Entretien** (héros, 3 premières offres) : exportées à l'échelle 1 ; les originaux en haute définition restent à récupérer.
+- **Formules sans fiche** : elles ne sont plus générées comme fiches (adresse `/services/<rubrique>/<formule>` en 404), leur carte menant à la section des formules.
