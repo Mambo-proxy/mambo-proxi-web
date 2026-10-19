@@ -102,7 +102,7 @@ Les maquettes ont été refondues mi-octobre 2026 (recentrage sur Douala et les 
 - [x] Accueil : formules « Services à domicile », bento en photos, engagements (photo, chiffres « Douala »), carte interactive des zones avec recherche de quartier — fidélité 1440 et 390 section par section
 - [x] Nos services `/services` (5 rubriques, formules) — 6 663 px pour 6 662 en desktop, 7 795 identique en mobile
 - [x] Rubrique Services à domicile `/services/services-a-domicile` (nouvelle) — sections au pixel près en desktop ; en mobile, note de la bande et première étape sur deux lignes (voir JOURNAL)
-- [x] Fiche service : carrousel « Nos offres » (Entretien du logement, Chef privé mis à jour), textes traduits — `qa/fidelite/fiche-*.png` ; à valider : où relier Entretien du logement et Nettoyage automobile
+- [x] Fiche service : carrousel « Nos offres » (Entretien du logement, Chef privé mis à jour), textes traduits — `qa/fidelite/fiche-*.png` ; Entretien du logement et Nettoyage automobile reliés comme services à la carte (rubrique, Nos services, méga-menu)
 - [ ] Rubriques Expérience, Immobilier, Services de proximité, Culture & événementiel
 - [ ] Magazine (édition n° 1) et Zones d'intervention (nouvelles pages)
 - [ ] Qui sommes-nous, Mission, Partenaires, Formation, Recrutement, offre d'emploi, Avis clients, Contact, Devis, Confirmation, Inscription, Suivi, pages légales, questionnaire, 404

@@ -379,7 +379,7 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 
 ### Décisions
 
-- **« Entretien du logement » et « Nettoyage automobile »** : services de « Services à domicile » que les maquettes ne relient nulle part (la rubrique, le méga-menu et « Nos services » ne montrent que les 4 formules). Leur fiche existe à son adresse, hors des listes ; « Nettoyage automobile » (lié depuis Entretien) a un contenu provisoire. À valider avec la cliente : où relier ces fiches.
+- **« Entretien du logement » et « Nettoyage automobile »** : aucune maquette ne les relie (la rubrique, le méga-menu et « Nos services » ne montrent que les 4 formules). Reliés comme services à la carte de « Services à domicile », les formules combinant ces prestations (Maison = entretien du logement, Auto = nettoyage du véhicule) : groupe « Les services à la carte » sous les formules de la rubrique (groupes titrés de la rubrique, comme Immobilier, donc modifiables dans le back-office), cartes dans « Nos services », lignes après les formules dans le méga-menu (« 4 formules · 2 services » en mobile). L'accueil ne montre que les formules. « Nettoyage automobile » a un contenu provisoire.
 - **Carte « Formules à domicile » des services liés** : elle renvoie à la section des formules de la rubrique (`#formules`), comme une formule.
 - **Titre de la fiche en mobile** : dans la maquette, « Entretien du logement » et le fil d'Ariane débordent de l'écran ; ils passent ici à la ligne (+64 px pour le héros).
 - **Flèche « suivant »** : chevron `text/on-primary` sur l'orange, comme les boutons principaux (le blanc de la maquette n'atteint pas 3:1).
