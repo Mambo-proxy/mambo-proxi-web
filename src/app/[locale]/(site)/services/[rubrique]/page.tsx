@@ -10,6 +10,7 @@ import { ParcelHighlight } from '@/components/sections/rubrique/parcel-highlight
 import { ProcessSteps } from '@/components/sections/rubrique/process-steps';
 import { RubriqueServices } from '@/components/sections/rubrique/rubrique-services';
 import { Testimonial } from '@/components/sections/rubrique/testimonial';
+import { tintBadge } from '@/components/sections/rubrique/tint';
 import { CtaBand } from '@/components/site/cta-band';
 import type { HeroSection } from '@/lib/api/schema';
 import { unwrap, unwrapOrNull } from '@/lib/api/result';
@@ -67,7 +68,10 @@ export default async function RubriquePage({ params }: Params) {
   ]);
   if (!category) notFound();
   const services = category.services ?? [];
-  const isFormulaCategory = services.length > 0 && services.every((service) => service.kind === 'formula');
+  // Rubrique de formules (Services à domicile) : formules en cartes photo, services à la carte en groupes dessous.
+  const formulas = services.filter((service) => service.kind === 'formula');
+  const isFormulaCategory = formulas.length > 0;
+  const bySlug = new Map(services.map((service) => [service.slug, service]));
   const agenda =
     category.highlight?.kind === 'AGENDA'
       ? await unwrap(
@@ -128,7 +132,12 @@ export default async function RubriquePage({ params }: Params) {
             title: category.servicesTitle,
             lead: category.servicesLead,
           }}
-          formulas={services}
+          formulas={formulas}
+          badge={tintBadge(category.tint)}
+          groups={category.groups.map((group) => ({
+            title: group.title,
+            services: group.serviceSlugs.flatMap((slug) => bySlug.get(slug) ?? []),
+          }))}
         />
       ) : (
         <RubriqueServices category={category} />

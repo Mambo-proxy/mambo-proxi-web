@@ -19,43 +19,6 @@ const detailed: Record<string, Record<Lang, ServiceDetail>> = {
   'entretien-du-logement': { fr: examples.entretienDuLogement!, en: examples.entretienDuLogementEn! },
 };
 
-/**
- * Services des maquettes absents des listes (la rubrique « Services à domicile » ne présente que ses formules) :
- * leur fiche existe, reliée depuis les services liés.
- */
-const unlisted: Record<Lang, ServiceSummary[]> = {
-  fr: [
-    {
-      id: 'svc_nettoyage_automobile',
-      slug: 'nettoyage-automobile',
-      name: 'Nettoyage automobile',
-      shortName: null,
-      summary: 'Votre véhicule nettoyé à domicile.',
-      icon: 'Car',
-      visual: examples.entretienDuLogement!.related[1]!.visual,
-      category: { slug: 'services-a-domicile', name: 'Services à domicile' },
-      href: '/services/services-a-domicile/nettoyage-automobile',
-      featuredOnHome: false,
-      kind: 'service',
-    },
-  ],
-  en: [
-    {
-      id: 'svc_nettoyage_automobile',
-      slug: 'nettoyage-automobile',
-      name: 'Car cleaning',
-      shortName: null,
-      summary: 'Your vehicle cleaned at home.',
-      icon: 'Car',
-      visual: examples.entretienDuLogement!.related[1]!.visual,
-      category: { slug: 'services-a-domicile', name: 'Home services' },
-      href: '/services/services-a-domicile/nettoyage-automobile',
-      featuredOnHome: false,
-      kind: 'service',
-    },
-  ],
-};
-
 type DetailFields = Omit<ServiceDetail, keyof ServiceSummary>;
 type Localized<T> = Record<Lang, T>;
 
@@ -291,7 +254,7 @@ function provisional(service: ServiceSummary, all: ServiceSummary[], lang: Lang)
 }
 
 function buildDetails(lang: Lang): Record<string, ServiceDetail> {
-  const all = [...getServices(lang), ...unlisted[lang]];
+  const all = getServices(lang);
   const fiches = all.filter((service) => service.kind !== 'formula');
   return {
     ...Object.fromEntries(

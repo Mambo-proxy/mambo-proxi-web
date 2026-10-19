@@ -16,7 +16,7 @@ export type ServiceSeed = {
 };
 
 /**
- * Catalogue des nouvelles maquettes (page « Nos services » `58:828`, accueil `251:25576`) : 5 rubriques, 24 services,
+ * Catalogue des nouvelles maquettes (page « Nos services » `58:828`, accueil `251:25576`, fiche `253:25267`) : 5 rubriques, 26 services,
  * textes français relevés mot pour mot, traductions anglaises rédigées pour le site.
  */
 export const catalogueSeed: Record<string, ServiceSeed[]> = {
@@ -65,6 +65,26 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       icon: 'Package',
       illustration: 'voiture',
       photo: { url: '/photos/formule-maison-auto-linge.png', width: 1536, height: 1024 },
+    },
+    // Services à la carte : présentés sous les formules (fiche « Entretien du logement » `253:25267`).
+    {
+      slug: 'entretien-du-logement',
+      name: { fr: 'Entretien du logement', en: 'Home cleaning' },
+      summary: {
+        fr: 'Ménage, cuisine et salle de bain, sols et surfaces, ponctuellement ou chaque semaine.',
+        en: 'Cleaning, kitchen and bathroom, floors and surfaces, as a one-off or every week.',
+      },
+      icon: 'Sparkles',
+      illustration: 'logement',
+      photo: { url: '/photos/fiche-entretien.png', width: 860, height: 480 },
+    },
+    {
+      slug: 'nettoyage-automobile',
+      name: { fr: 'Nettoyage automobile', en: 'Car cleaning' },
+      summary: { fr: 'Votre véhicule nettoyé à domicile.', en: 'Your vehicle cleaned at home.' },
+      icon: 'Car',
+      illustration: 'voiture',
+      photo: { url: '/photos/formule-maison-auto.png', width: 1536, height: 1024 },
     },
   ],
   experience: [

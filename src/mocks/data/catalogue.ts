@@ -3,7 +3,7 @@ import { catalogueSeed } from './catalogue-services';
 import operations from './contract-examples.json';
 
 /**
- * Catalogue simulé des nouvelles maquettes : 5 rubriques et 24 services, en français et en anglais (`?lang=en`).
+ * Catalogue simulé des nouvelles maquettes : 5 rubriques et 26 services (dont 4 formules), en français et en anglais (`?lang=en`).
  * Les résumés de rubriques viennent des exemples `Categories` / `CategoriesEn` du contrat, les services de
  * `catalogue-services.ts`.
  */

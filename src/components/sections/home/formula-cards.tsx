@@ -6,6 +6,7 @@ import { Visual } from '@/components/ui/visual';
 import { SiteLink as Link } from '@/i18n/site-link';
 import type { DynamicSection, ServiceSummary } from '@/lib/api/schema';
 import { frenchTypography } from '@/lib/format/typography';
+import { GroupTitle, ServiceGrid } from '../rubrique/rubrique-services';
 import { SectionHeading } from '../section-heading';
 
 /** Adresses des deux actions d'une formule : prise de rendez-vous et devis, formule présélectionnée. */
@@ -70,7 +71,18 @@ function FormulaCard({ formula }: { formula: ServiceSummary }) {
  * 4 cartes de formule (313 px, gap 20, hauteurs libres, alignées en haut) ; pile en mobile (gap 14), 2 colonnes
  * en tablette. Photo 220 (170 en mobile), contenu p 26 (20), titre Poppins 19 (17), texte 15/23 (14/23).
  */
-export function FormulaCards({ section, formulas }: { section: DynamicSection; formulas: ServiceSummary[] }) {
+export function FormulaCards({
+  section,
+  formulas,
+  groups = [],
+  badge = '',
+}: {
+  section: DynamicSection;
+  formulas: ServiceSummary[];
+  /** Page rubrique : services à la carte présentés sous les formules (groupes titrés de la rubrique). */
+  groups?: { title: string; services: ServiceSummary[] }[];
+  badge?: string;
+}) {
   return (
     <section id={section.id} className="scroll-mt-(--site-header-h,0px) bg-neutral-50 py-14 xl:py-24">
       <div className="container-site flex flex-col gap-7 xl:gap-12">
@@ -89,6 +101,12 @@ export function FormulaCards({ section, formulas }: { section: DynamicSection; f
             </Reveal>
           ))}
         </ul>
+        {groups.map((group) => (
+          <div key={group.title} className="flex flex-col gap-3.5 xl:gap-5">
+            <GroupTitle>{group.title}</GroupTitle>
+            <ServiceGrid services={group.services} badge={badge} />
+          </div>
+        ))}
       </div>
     </section>
   );

@@ -116,7 +116,9 @@ export default async function HomePage() {
             <FormulaCards
               key={section.id}
               section={section}
-              formulas={data.formulas.filter((service) => service.category.slug === section.categorySlug)}
+              formulas={data.formulas.filter(
+                (service) => service.kind === 'formula' && service.category.slug === section.categorySlug,
+              )}
             />
           );
         if (section.source === 'zones-map')

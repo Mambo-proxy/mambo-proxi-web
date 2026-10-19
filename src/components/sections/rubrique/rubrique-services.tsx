@@ -67,7 +67,17 @@ function ServiceCard({ service, badge }: { service: ServiceSummary; badge: strin
   );
 }
 
-function ServiceGrid({ services, badge }: { services: ServiceSummary[]; badge: string }) {
+/** Titre d'un groupe de services, suivi d'un filet (Immobilier `61:2327`). */
+export function GroupTitle({ children }: { children: string }) {
+  return (
+    <h3 className="flex items-center gap-4 font-brand text-[22px] leading-8 font-semibold text-text-main xl:text-[24px]">
+      <span className="shrink-0">{frenchTypography(children)}</span>
+      <span aria-hidden className="h-px flex-1 bg-border-default" />
+    </h3>
+  );
+}
+
+export function ServiceGrid({ services, badge }: { services: ServiceSummary[]; badge: string }) {
   return (
     <ul className="grid items-start gap-3.5 md:grid-cols-2 md:gap-5 xl:grid-cols-3">
       {services.map((service, index) => (
@@ -101,10 +111,7 @@ export function RubriqueServices({ category }: { category: CategoryDetail }) {
           <div className="flex flex-col gap-7 xl:gap-10">
             {category.groups.map((group) => (
               <div key={group.title} className="flex flex-col gap-3.5 xl:gap-5">
-                <h3 className="flex items-center gap-4 font-brand text-[22px] leading-8 font-semibold text-text-main xl:text-[24px]">
-                  <span className="shrink-0">{frenchTypography(group.title)}</span>
-                  <span aria-hidden className="h-px flex-1 bg-border-default" />
-                </h3>
+                <GroupTitle>{group.title}</GroupTitle>
                 <ServiceGrid
                   services={group.serviceSlugs.flatMap((slug) => bySlug.get(slug) ?? [])}
                   badge={badge}

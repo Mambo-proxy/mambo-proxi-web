@@ -94,7 +94,9 @@ export const categoryDetails: Record<string, DetailFields> = {
     servicesTitle: '4 formules pour un quotidien plus serein.',
     servicesLead:
       'Tarifs indicatifs sur devis, ajustés selon la surface, l’état du logement et les options. Le pressing est facturé séparément.',
-    groups: [],
+    groups: [
+      { title: 'Les services à la carte', serviceSlugs: ['entretien-du-logement', 'nettoyage-automobile'] },
+    ],
     highlight: {
       kind: 'STEPS_BAND',
       eyebrow: 'Des intervenantes de confiance',
@@ -559,7 +561,9 @@ export const categoryDetailsEn: Partial<Record<string, DetailFields>> = {
     servicesTitle: '4 packages for a more relaxed daily life.',
     servicesLead:
       'Indicative rates on quotation, adjusted to the surface area, the condition of the home and the options. Dry cleaning is charged separately.',
-    groups: [],
+    groups: [
+      { title: 'Individual services', serviceSlugs: ['entretien-du-logement', 'nettoyage-automobile'] },
+    ],
     highlight: {
       kind: 'STEPS_BAND',
       eyebrow: 'Trusted housekeepers',
