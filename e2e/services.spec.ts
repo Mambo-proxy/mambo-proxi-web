@@ -6,16 +6,16 @@ test.describe('Nos services', () => {
   });
 
   test('page complète, accessible et sans débordement', async ({ page, pageErrors }) => {
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('19 services, un seul interlocuteur.');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('30 services, un seul interlocuteur.');
     await expect(page.getByRole('navigation', { name: "Fil d'Ariane" })).toContainText('Nos services');
     await expectNoHorizontalScroll(page);
     await expectAccessible(page);
     expect(pageErrors).toEqual([]);
   });
 
-  test('les 19 services mènent à leur fiche', async ({ page }) => {
+  test('les 24 cartes (20 services, 4 formules) mènent à leur fiche ou à leur formule', async ({ page }) => {
     const cards = page.locator('main section[id] article h3 a');
-    await expect(cards).toHaveCount(19);
+    await expect(cards).toHaveCount(24);
     await expect(page.getByRole('link', { name: 'Chef privé', exact: true })).toHaveAttribute(
       'href',
       '/services/experience/chef-prive',

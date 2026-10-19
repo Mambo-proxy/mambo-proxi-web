@@ -2,8 +2,8 @@ import { expect, expectAccessible, expectNoHorizontalScroll, test } from './fixt
 
 const RUBRIQUES = [
   { slug: 'experience', title: 'Des moments sur mesure, pensés pour vous.', services: 5 },
-  { slug: 'immobilier', title: 'Se loger au Cameroun, en toute sérénité.', services: 7 },
-  { slug: 'services-de-proximite', title: 'Votre quotidien simplifié, chez vous.', services: 3 },
+  { slug: 'immobilier', title: 'Se loger au Cameroun, en toute sérénité.', services: 6 },
+  { slug: 'services-de-proximite', title: 'Votre quotidien simplifié, chez vous.', services: 4 },
   { slug: 'culture-evenementiel', title: 'Vivre le Cameroun, de l’intérieur.', services: 4 },
 ];
 
