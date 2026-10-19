@@ -2551,6 +2551,61 @@ export interface components {
             question: string;
             answer: string;
         };
+        /**
+         * @description Carte du carrousel « Nos offres » d'une fiche service (offre, chef, formule…). Deux actions : l'action
+         *     principale (`action`, libellé et flèche →) et l'autre action (flèche ↗) : devis ou prise de rendez-vous,
+         *     le service étant présélectionné.
+         */
+        ServiceOffer: {
+            id: components["schemas"]["Id"];
+            /** @example Entretien régulier */
+            title: string;
+            /** @description Titre court en mobile (null = même titre). */
+            titleMobile?: string | null;
+            /**
+             * @example Ménage hebdomadaire ou bimensuel
+             * @example mêmes intervenantes à chaque passage.
+             */
+            text: string;
+            /** @description Texte court en mobile (null = même texte). */
+            textMobile?: string | null;
+            /** @description Pastille d'icône à gauche du titre (null = sans pastille). */
+            icon?: components["schemas"]["IconName"] | null;
+            visual: components["schemas"]["Visual"];
+            /**
+             * @description `QUOTE` : devis gratuit ; `BOOKING` : prise de rendez-vous.
+             * @enum {string}
+             */
+            action: "QUOTE" | "BOOKING";
+            /** @example Je demande un devis gratuit */
+            actionLabel: string;
+            /** @example Devis gratuit */
+            actionLabelMobile?: string | null;
+        };
+        ServiceOffers: {
+            /** @example Nos offres */
+            eyebrow: string;
+            title: components["schemas"]["AccentText"];
+            lead?: string | null;
+            /** @description Chapô court en mobile (null = même chapô). */
+            leadMobile?: string | null;
+            items: components["schemas"]["ServiceOffer"][];
+        };
+        ServiceOfferInput: {
+            /** @description Absent ou null pour une nouvelle offre. */
+            id?: components["schemas"]["Id"] | null;
+            title: string;
+            titleMobile?: string | null;
+            text: string;
+            textMobile?: string | null;
+            icon?: components["schemas"]["IconName"] | null;
+            illustration?: components["schemas"]["IllustrationScene"];
+            imageId?: components["schemas"]["Id"] | null;
+            /** @enum {string} */
+            action: "QUOTE" | "BOOKING";
+            actionLabel: string;
+            actionLabelMobile?: string | null;
+        };
         /** @description Champ dynamique de l'étape « Votre besoin » du devis (défini par rubrique dans le back-office). */
         QuoteField: {
             /** @example eventDate */
@@ -2702,6 +2757,8 @@ export interface components {
             gallery: components["schemas"]["Visual"][];
             showWhatsapp: boolean;
             related: components["schemas"]["ServiceSummary"][];
+            /** @description Carrousel « Nos offres » sous le héros (null = section absente). */
+            offers?: components["schemas"]["ServiceOffers"] | null;
             reviews: components["schemas"]["Review"][];
             /** @example Ils ont reçu un chef à domicile */
             reviewsTitle?: string | null;
@@ -3296,6 +3353,12 @@ export interface components {
             advantages?: components["schemas"]["IconTextItem"][];
             faq?: components["schemas"]["FaqItem"][];
             quoteBullets?: string[];
+            offersEyebrow?: string | null;
+            offersTitle?: string | null;
+            offersLead?: string | null;
+            offersLeadMobile?: string | null;
+            /** @description Vide = pas de carrousel. */
+            offers?: components["schemas"]["ServiceOfferInput"][];
             relatedServiceIds?: components["schemas"]["Id"][];
             featuredReviewIds?: components["schemas"]["Id"][];
             showInMenu?: boolean;
@@ -3325,6 +3388,13 @@ export interface components {
             advantages: components["schemas"]["IconTextItem"][];
             faq: components["schemas"]["FaqItem"][];
             quoteBullets: string[];
+            offersEyebrow?: string | null;
+            offersTitle?: string | null;
+            offersLead?: string | null;
+            offersLeadMobile?: string | null;
+            offers?: (components["schemas"]["ServiceOfferInput"] & {
+                image?: components["schemas"]["MediaImage"] | null;
+            })[];
             relatedServiceIds: components["schemas"]["Id"][];
             featuredReviewIds: components["schemas"]["Id"][];
             showWhatsapp: boolean;
@@ -4413,6 +4483,9 @@ export type CategoryTint = components['schemas']['CategoryTint'];
 export type IconTextItem = components['schemas']['IconTextItem'];
 export type StepItem = components['schemas']['StepItem'];
 export type FaqItem = components['schemas']['FaqItem'];
+export type ServiceOffer = components['schemas']['ServiceOffer'];
+export type ServiceOffers = components['schemas']['ServiceOffers'];
+export type ServiceOfferInput = components['schemas']['ServiceOfferInput'];
 export type QuoteField = components['schemas']['QuoteField'];
 export type CategoryRef = components['schemas']['CategoryRef'];
 export type CategorySummary = components['schemas']['CategorySummary'];
