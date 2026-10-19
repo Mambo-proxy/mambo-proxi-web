@@ -1,4 +1,5 @@
 import { Quote } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Reveal } from '@/components/ui/reveal';
 import { Stars } from '@/components/ui/stars';
 import type { Review } from '@/lib/api/schema';
@@ -10,11 +11,12 @@ import { SectionHeading } from '../section-heading';
  * guillemet violet 28 (usage autorisé du violet) et 5 étoiles 15, citation 18/29 (16/25), signature 14/20.
  */
 export function ServiceReviews({ title, reviews }: { title: string | null | undefined; reviews: Review[] }) {
+  const t = useTranslations('service.reviews');
   if (reviews.length === 0) return null;
   return (
     <section className="bg-neutral-50 py-14 xl:py-24">
       <div className="container-site flex flex-col gap-7 xl:gap-12">
-        <SectionHeading eyebrow="Avis clients" title={title ?? 'Ils nous ont fait confiance'} />
+        <SectionHeading eyebrow={t('eyebrow')} title={title ?? t('title')} />
         <ul className="grid gap-4 md:grid-cols-2">
           {reviews.map((review, index) => (
             <Reveal as="li" key={review.id} delay={index * 70}>

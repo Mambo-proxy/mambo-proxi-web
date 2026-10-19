@@ -1,4 +1,5 @@
 import { Check } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import { Accordion } from '@/components/ui/accordion';
 import { Icon } from '@/components/ui/icon';
@@ -37,11 +38,12 @@ type ServiceContentProps = {
  * py 80. En mobile, chaque bloc devient une section (py 44) et « Les avantages » passe sur fond `neutral/50`.
  */
 export function ServiceContent({ service, aside }: ServiceContentProps) {
+  const t = useTranslations('service');
   return (
     <section className="bg-neutral-0 xl:py-20">
       <div className="container-site grid xl:grid-cols-[minmax(0,1fr)_400px] xl:gap-x-16 xl:gap-y-[72px]">
         {service.audiences.length > 0 && (
-          <Block title="À qui s’adresse ce service ?">
+          <Block title={t('audiences')}>
             <ul className="grid gap-3 md:grid-cols-2 xl:max-w-[764px]">
               {service.audiences.map((audience) => (
                 <li
@@ -62,7 +64,7 @@ export function ServiceContent({ service, aside }: ServiceContentProps) {
         )}
 
         <aside
-          aria-label="Demande de devis"
+          aria-label={t('asideLabel')}
           className="pb-11 xl:col-start-2 xl:row-span-4 xl:row-start-1 xl:pb-0"
         >
           <div className="flex flex-col gap-4 xl:sticky xl:top-[calc(var(--site-header-h,85px)+24px)]">
@@ -71,7 +73,7 @@ export function ServiceContent({ service, aside }: ServiceContentProps) {
         </aside>
 
         {service.steps.length > 0 && (
-          <Block title="Ce que Mambo fait concrètement">
+          <Block title={t('steps')}>
             <ol>
               {service.steps.map((step, index) => {
                 const last = index === service.steps.length - 1;
@@ -107,10 +109,7 @@ export function ServiceContent({ service, aside }: ServiceContentProps) {
         )}
 
         {service.advantages.length > 0 && (
-          <Block
-            title="Les avantages pour vous"
-            className="bleed-x bg-neutral-50 xl:mx-0 xl:bg-transparent xl:px-0"
-          >
+          <Block title={t('advantages')} className="bleed-x bg-neutral-50 xl:mx-0 xl:bg-transparent xl:px-0">
             <ul className="grid gap-4 md:grid-cols-2 xl:max-w-[768px]">
               {service.advantages.map((advantage, index) => (
                 <Reveal
@@ -138,7 +137,7 @@ export function ServiceContent({ service, aside }: ServiceContentProps) {
         )}
 
         {service.faq.length > 0 && (
-          <Block title="Questions fréquentes" className="gap-2.5 xl:gap-3">
+          <Block title={t('faq')} className="gap-2.5 xl:gap-3">
             <Accordion
               name="faq-service"
               roomy

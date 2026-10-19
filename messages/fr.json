@@ -110,5 +110,49 @@
     "quote": "Devis",
     "home": "Accueil",
     "whatsappContext": "Rubrique : {name}"
+  },
+  "service": {
+    "home": "Accueil",
+    "services": "Nos services",
+    "formulas": "Nos formules",
+    "quote": "Demander un devis gratuit",
+    "whatsapp": "Écrire sur WhatsApp",
+    "whatsappContext": "Service : {name}",
+    "audiences": "À qui s’adresse ce service ?",
+    "steps": "Ce que Mambo fait concrètement",
+    "advantages": "Les avantages pour vous",
+    "faq": "Questions fréquentes",
+    "asideLabel": "Demande de devis",
+    "quoteCard": {
+      "price": "Tarif communiqué sur devis",
+      "title": "Recevez votre devis gratuit sous 24 h",
+      "call": "ou appelez le {phone}"
+    },
+    "appointment": {
+      "title": "Préférez un rendez-vous ?",
+      "link": "Prendre rendez-vous"
+    },
+    "reviews": {
+      "eyebrow": "Avis clients",
+      "title": "Ils nous ont fait confiance"
+    },
+    "related": {
+      "eyebrow": "Services liés",
+      "title": "Pour aller plus loin"
+    },
+    "actionBar": {
+      "quote": "Devis gratuit",
+      "quoteFor": "pour {name}",
+      "whatsapp": "WhatsApp",
+      "newTab": "(nouvel onglet)"
+    },
+    "offers": {
+      "list": "{title} (faire défiler horizontalement)",
+      "previous": "Offre précédente",
+      "next": "Offre suivante",
+      "quote": "Devis gratuit",
+      "booking": "Prendre rendez-vous",
+      "otherAction": "{action} — {title}"
+    }
   }
 }

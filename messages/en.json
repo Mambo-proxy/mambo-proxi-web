@@ -110,5 +110,49 @@
     "quote": "Quote",
     "home": "Home",
     "whatsappContext": "Category: {name}"
+  },
+  "service": {
+    "home": "Home",
+    "services": "Our services",
+    "formulas": "Our packages",
+    "quote": "Ask for a free quote",
+    "whatsapp": "Message us on WhatsApp",
+    "whatsappContext": "Service: {name}",
+    "audiences": "Who is this service for?",
+    "steps": "What Mambo actually does",
+    "advantages": "The benefits for you",
+    "faq": "Frequently asked questions",
+    "asideLabel": "Quote request",
+    "quoteCard": {
+      "price": "Price given in a quote",
+      "title": "Get your free quote within 24 hours",
+      "call": "or call {phone}"
+    },
+    "appointment": {
+      "title": "Prefer an appointment?",
+      "link": "Book an appointment"
+    },
+    "reviews": {
+      "eyebrow": "Customer reviews",
+      "title": "They trusted us"
+    },
+    "related": {
+      "eyebrow": "Related services",
+      "title": "Going further"
+    },
+    "actionBar": {
+      "quote": "Free quote",
+      "quoteFor": "for {name}",
+      "whatsapp": "WhatsApp",
+      "newTab": "(new tab)"
+    },
+    "offers": {
+      "list": "{title} (scroll horizontally)",
+      "previous": "Previous offer",
+      "next": "Next offer",
+      "quote": "Free quote",
+      "booking": "Book an appointment",
+      "otherAction": "{action} — {title}"
+    }
   }
 }

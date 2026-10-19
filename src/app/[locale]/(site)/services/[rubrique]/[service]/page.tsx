@@ -1,10 +1,12 @@
 import type { Metadata, Route } from 'next';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { QuoteCard, AppointmentCard } from '@/components/sections/service/quote-card';
 import { RelatedServices } from '@/components/sections/service/related-services';
 import { ServiceActionBar } from '@/components/sections/service/service-action-bar';
 import { ServiceContent } from '@/components/sections/service/service-content';
 import { ServiceHero } from '@/components/sections/service/service-hero';
+import { ServiceOffers } from '@/components/sections/service/service-offers';
 import { ServiceReviews } from '@/components/sections/service/service-reviews';
 import { CtaBand } from '@/components/site/cta-band';
 import { unwrap, unwrapOrNull } from '@/lib/api/result';
@@ -32,7 +34,10 @@ async function getService(rubrique: string, slug: string) {
 
 export async function generateStaticParams() {
   const services = await unwrap(api.GET('/v1/services', cached([cacheTags.services])));
-  return services.map((service) => ({ rubrique: service.category.slug, service: service.slug }));
+  // Une formule n'a pas de fiche : sa carte mène à la section des formules de sa rubrique.
+  return services
+    .filter((service) => service.kind !== 'formula')
+    .map((service) => ({ rubrique: service.category.slug, service: service.slug }));
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
@@ -47,16 +52,27 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   });
 }
 
-/** Fiche service (Chef privé desktop `62:4161`, mobile `62:4733`) : gabarit commun aux 19 services. */
+/**
+ * Fiche service (Chef privé `62:4161`, mobile `62:4733` ; Entretien du logement `253:25267`, mobile `253:25641`) :
+ * gabarit commun à tous les services, avec le carrousel « Nos offres » sous le héros quand la fiche en a.
+ */
 export default async function ServicePage({ params }: Params) {
   const { rubrique, service: slug } = await params;
-  const [service, settings] = await Promise.all([getService(rubrique, slug), getSiteSettings()]);
+  const [service, settings, t] = await Promise.all([
+    getService(rubrique, slug),
+    getSiteSettings(),
+    getTranslations('service'),
+  ]);
   if (!service) notFound();
 
   const quoteHref = `/devis?service=${service.slug}` as Route;
   const whatsappHref =
     service.showWhatsapp && settings.whatsapp.enabled
-      ? whatsappUrl(settings.whatsapp.number, settings.whatsapp.message, `Service : ${service.name}`)
+      ? whatsappUrl(
+          settings.whatsapp.number,
+          settings.whatsapp.message,
+          t('whatsappContext', { name: service.name }),
+        )
       : null;
   const { contact } = settings;
 
@@ -68,12 +84,13 @@ export default async function ServicePage({ params }: Params) {
         quoteHref={quoteHref}
         whatsappHref={whatsappHref}
         breadcrumb={[
-          { label: 'Accueil', href: routes.home },
-          { label: 'Nos services', href: '/services' as Route },
+          { label: t('home'), href: routes.home },
+          { label: t('services'), href: '/services' as Route },
           { label: service.category.name, href: `/services/${service.category.slug}` as Route },
           { label: service.name },
         ]}
       />
+      {service.offers && <ServiceOffers offers={service.offers} serviceSlug={service.slug} />}
       <ServiceContent
         service={service}
         aside={

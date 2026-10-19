@@ -1,5 +1,6 @@
 import { ArrowRight, CalendarCheck, Check, Smartphone } from 'lucide-react';
 import type { Route } from 'next';
+import { useTranslations } from 'next-intl';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/cn';
@@ -19,11 +20,12 @@ type QuoteCardProps = {
  * Aucun prix n'est affiché (cahier §5.5).
  */
 export function QuoteCard({ bullets, quoteHref, whatsappHref, phone }: QuoteCardProps) {
+  const t = useTranslations('service');
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-border-default bg-neutral-0 p-5 shadow-1 xl:w-[338px] xl:p-7">
-      <p className="font-ui text-[14px] leading-5 font-medium text-text-muted">Tarif communiqué sur devis</p>
+      <p className="font-ui text-[14px] leading-5 font-medium text-text-muted">{t('quoteCard.price')}</p>
       <h2 className="font-brand text-[20px] leading-7 font-semibold text-text-main">
-        {frenchTypography('Recevez votre devis gratuit sous 24 h')}
+        {frenchTypography(t('quoteCard.title'))}
       </h2>
       {bullets.length > 0 && (
         <ul className="flex flex-col gap-4">
@@ -44,7 +46,7 @@ export function QuoteCard({ bullets, quoteHref, whatsappHref, phone }: QuoteCard
         </ul>
       )}
       <Link href={quoteHref} className={buttonVariants({ fullWidth: true })}>
-        Demander un devis gratuit
+        {t('quote')}
       </Link>
       {whatsappHref && (
         <a
@@ -53,7 +55,7 @@ export function QuoteCard({ bullets, quoteHref, whatsappHref, phone }: QuoteCard
           rel="noopener noreferrer"
           className={buttonVariants({ variant: 'whatsapp', fullWidth: true })}
         >
-          Écrire sur WhatsApp
+          {t('whatsapp')}
         </a>
       )}
       {phone && (
@@ -62,7 +64,7 @@ export function QuoteCard({ bullets, quoteHref, whatsappHref, phone }: QuoteCard
           className="inline-flex items-center justify-center gap-1.5 self-center rounded-xs font-ui text-[13px] leading-4 text-text-muted hover:text-text-main"
         >
           <Smartphone aria-hidden size={14} />
-          <span>{`ou appelez le ${phone.display}`}</span>
+          <span>{t('quoteCard.call', { phone: phone.display })}</span>
         </a>
       )}
     </div>
@@ -71,6 +73,7 @@ export function QuoteCard({ bullets, quoteHref, whatsappHref, phone }: QuoteCard
 
 /** Encart « Préférez un rendez-vous ? » (`62:4483`) : fond `neutral/50`, rayon 20, p 20 ; absent en mobile. */
 export function AppointmentCard({ className }: { className?: string }) {
+  const t = useTranslations('service.appointment');
   return (
     <div className={cn('flex items-center gap-4 rounded-[20px] bg-neutral-50 p-5', className)}>
       <span
@@ -81,13 +84,13 @@ export function AppointmentCard({ className }: { className?: string }) {
       </span>
       <div className="flex flex-col">
         <p className="font-ui text-[15px] leading-6 font-semibold text-text-main">
-          {frenchTypography('Préférez un rendez-vous ?')}
+          {frenchTypography(t('title'))}
         </p>
         <Link
           href={routes.rendezVous}
           className="group/rdv inline-flex items-center gap-1.5 self-start rounded-xs font-ui text-[14px] leading-5 font-semibold text-text-brand"
         >
-          Prendre rendez-vous
+          {t('link')}
           <ArrowRight
             aria-hidden
             size={16}

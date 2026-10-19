@@ -1,5 +1,6 @@
 import { ArrowUpRight } from 'lucide-react';
 import type { Route } from 'next';
+import { useTranslations } from 'next-intl';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { Reveal } from '@/components/ui/reveal';
 import { Visual } from '@/components/ui/visual';
@@ -18,14 +19,15 @@ export function RelatedServices({
   title: string | null | undefined;
   services: ServiceSummary[];
 }) {
+  const t = useTranslations('service.related');
   if (services.length === 0) return null;
   return (
     <section className="bg-neutral-0 py-14 xl:py-24">
       <div className="container-site flex flex-col gap-7 xl:gap-12">
-        <SectionHeading eyebrow="Services liés" title={title ?? 'Pour aller plus loin'} />
+        <SectionHeading eyebrow={t('eyebrow')} title={title ?? t('title')} />
         <ul className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {services.map((service, index) => (
-            <Reveal as="li" key={service.slug} delay={index * 70}>
+            <Reveal as="li" key={service.id} delay={index * 70}>
               <Link
                 href={service.href as Route}
                 className="group/related flex h-full items-center gap-4 rounded-[22px] border border-border-default bg-neutral-0 p-3.5 transition-[border-color,box-shadow] duration-200 hover:border-border-strong hover:shadow-2 xl:p-4"

@@ -26,8 +26,8 @@ export const catalogueHandlers = [
     );
   }),
 
-  http.get('*/v1/services/:slug', ({ params }) => {
-    const detail = serviceDetails[String(params.slug)];
+  http.get('*/v1/services/:slug', ({ params, request }) => {
+    const detail = serviceDetails[langOf(request)][String(params.slug)];
     return detail ? HttpResponse.json(detail) : problem(404, "Ce service n'existe pas.");
   }),
 

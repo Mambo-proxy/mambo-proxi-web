@@ -1,4 +1,5 @@
 import type { Route } from 'next';
+import { useTranslations } from 'next-intl';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { Breadcrumb, type BreadcrumbItem } from '@/components/ui/breadcrumb';
 import { buttonVariants } from '@/components/ui/button';
@@ -23,6 +24,7 @@ const tag =
  * (absents en mobile, portés par la barre d'action) ; galerie 860 + 2 × 436 × 232, rayon 28 (350 × 220 en mobile).
  */
 export function ServiceHero({ service, breadcrumb, quoteHref, whatsappHref }: ServiceHeroProps) {
+  const t = useTranslations('service');
   const [main, ...side] = service.gallery.length > 0 ? service.gallery : [service.visual];
   return (
     <section className="bg-neutral-50">
@@ -45,7 +47,7 @@ export function ServiceHero({ service, breadcrumb, quoteHref, whatsappHref }: Se
           </div>
           <div className="flex gap-2.5 max-md:hidden xl:shrink-0">
             <Link href={quoteHref} className={buttonVariants()}>
-              Demander un devis gratuit
+              {t('quote')}
             </Link>
             {service.showWhatsapp && whatsappHref && (
               <a
@@ -54,7 +56,7 @@ export function ServiceHero({ service, breadcrumb, quoteHref, whatsappHref }: Se
                 rel="noopener noreferrer"
                 className={buttonVariants({ variant: 'whatsapp' })}
               >
-                Écrire sur WhatsApp
+                {t('whatsapp')}
               </a>
             )}
           </div>
