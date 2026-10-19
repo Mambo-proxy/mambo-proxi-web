@@ -13,12 +13,16 @@ test.describe('Nos services', () => {
     expect(pageErrors).toEqual([]);
   });
 
-  test('les 24 cartes (20 services, 4 formules) mènent à leur fiche ou à leur formule', async ({ page }) => {
+  test('les 26 cartes (22 services, 4 formules) mènent à leur fiche ou à leur formule', async ({ page }) => {
     const cards = page.locator('main section[id] article h3 a');
-    await expect(cards).toHaveCount(24);
+    await expect(cards).toHaveCount(26);
     await expect(page.getByRole('link', { name: 'Chef privé', exact: true })).toHaveAttribute(
       'href',
       '/services/experience/chef-prive',
+    );
+    await expect(page.getByRole('link', { name: 'Entretien du logement', exact: true })).toHaveAttribute(
+      'href',
+      '/services/services-a-domicile/entretien-du-logement',
     );
     await expect(page.getByRole('link', { name: 'Logement adapté et appartement meublé' })).toHaveAttribute(
       'href',

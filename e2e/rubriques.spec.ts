@@ -26,6 +26,20 @@ test.describe('pages rubrique', () => {
     await expect(page.getByRole('heading', { level: 3, name: 'Vous êtes propriétaire' })).toBeVisible();
   });
 
+  test('Services à domicile : formules, puis services à la carte', async ({ page }) => {
+    await page.goto('/services/services-a-domicile', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 3, name: 'Maison Essentiel' })).toBeVisible();
+    await expect(page.getByRole('heading', { level: 3, name: 'Les services à la carte' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Voir le service Entretien du logement' })).toHaveAttribute(
+      'href',
+      '/services/services-a-domicile/entretien-du-logement',
+    );
+    await expect(page.getByRole('link', { name: 'Voir le service Nettoyage automobile' })).toHaveAttribute(
+      'href',
+      '/services/services-a-domicile/nettoyage-automobile',
+    );
+  });
+
   test('rubrique inconnue : 404', async ({ page }) => {
     const response = await page.goto('/services/inconnue');
     expect(response?.status()).toBe(404);

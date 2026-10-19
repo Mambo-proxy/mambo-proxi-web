@@ -41,6 +41,9 @@ test.describe('gabarit des pages publiques', () => {
     }).toPass();
     await menu.getByRole('button', { name: 'Nos services' }).click();
     await expect(menu.getByRole('link', { name: 'Immobilier 7 services' })).toBeVisible();
+    await expect(
+      menu.getByRole('link', { name: 'Services à domicile 4 formules · 2 services' }),
+    ).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(menu).toBeHidden();
     await expect(opener).toBeFocused();
