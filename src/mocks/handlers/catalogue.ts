@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import { categoryDetails } from '../data/category-details';
+import { categoryDetails, categoryDetailsEn, otherCategorySlugs } from '../data/category-details';
 import { serviceDetails } from '../data/service-details';
 import { problem } from '../problem';
 import { getCategories, getCategorySummaries, getServices, langOf, normalize } from '../data/catalogue';
@@ -36,13 +36,17 @@ export const catalogueHandlers = [
     const slug = String(params.slug);
     const lang = langOf(request);
     const category = getCategories(lang).find((item) => item.slug === slug);
-    const detail = categoryDetails[slug];
+    const detail = (lang === 'en' ? categoryDetailsEn[slug] : undefined) ?? categoryDetails[slug];
     if (!category || !detail) return problem(404, "Cette rubrique n'existe pas.");
+    const summaries = getCategorySummaries(lang);
+    const others = otherCategorySlugs[slug];
     return HttpResponse.json({
       ...category,
       ...detail,
       services: category.services ?? [],
-      otherCategories: getCategorySummaries(lang).filter((item) => item.slug !== slug),
+      otherCategories: others
+        ? others.flatMap((other) => summaries.filter((item) => item.slug === other))
+        : summaries.filter((item) => item.slug !== slug).slice(0, 3),
     });
   }),
 ];

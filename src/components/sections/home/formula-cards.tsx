@@ -72,7 +72,7 @@ function FormulaCard({ formula }: { formula: ServiceSummary }) {
  */
 export function FormulaCards({ section, formulas }: { section: DynamicSection; formulas: ServiceSummary[] }) {
   return (
-    <section className="bg-neutral-50 py-14 xl:py-24">
+    <section id={section.id} className="scroll-mt-(--site-header-h,0px) bg-neutral-50 py-14 xl:py-24">
       <div className="container-site flex flex-col gap-7 xl:gap-12">
         <SectionHeading
           eyebrow={section.eyebrow}

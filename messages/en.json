@@ -97,5 +97,18 @@
     "learnMore": "Learn more",
     "discoverCategory": "Discover the category",
     "categoriesNav": "Categories"
+  },
+  "rubrique": {
+    "audiences": "Who is it for?",
+    "process": "How it works",
+    "othersEyebrow": "Discover also",
+    "othersTitle": "Our other categories",
+    "services": "Our services",
+    "formulas": "Our packages",
+    "seeService": "See the service",
+    "quoteFor": "for {name}",
+    "quote": "Quote",
+    "home": "Home",
+    "whatsappContext": "Category: {name}"
   }
 }

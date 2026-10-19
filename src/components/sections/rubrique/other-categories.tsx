@@ -6,17 +6,19 @@ import { Visual } from '@/components/ui/visual';
 import type { CategoryDetail } from '@/lib/api/schema';
 import { frenchTypography } from '@/lib/format/typography';
 import { SectionHeading } from '../section-heading';
+import { useTranslations } from 'next-intl';
 
 /**
  * « Nos autres rubriques » (`60:1886`) : 3 cartes horizontales (rayon 20) — vignette 88 (72 en mobile), nom,
  * « accroche · N services », flèche ↗. Empilées en mobile.
  */
 export function OtherCategories({ category }: { category: CategoryDetail }) {
+  const t = useTranslations('rubrique');
   if (category.otherCategories.length === 0) return null;
   return (
     <section className="bg-neutral-0 py-14 xl:py-24">
       <div className="container-site flex flex-col gap-7 xl:gap-12">
-        <SectionHeading eyebrow="Découvrir aussi" title="Nos autres rubriques" />
+        <SectionHeading eyebrow={t('othersEyebrow')} title={t('othersTitle')} />
         <ul className="grid gap-4 md:grid-cols-3">
           {category.otherCategories.map((other, index) => (
             <Reveal as="li" key={other.slug} delay={index * 70}>

@@ -1,7 +1,7 @@
 import type { CategoryDetail, Review } from '@/lib/api/schema';
 
 /**
- * Contenu des 4 pages rubrique (maquettes `60:1491`, `61:2156`, `61:3356`, `61:5620`, relevés dans qa/inventory/site).
+ * Contenu des pages rubrique (maquettes `249:24507`, `60:1491`, `61:2156`, `61:3356`, `61:5620`).
  * Champs propres à la page détail ; le résumé, les services et les autres rubriques sont assemblés par le gestionnaire.
  * Sert aussi de référence pour les données d'amorçage de l'API.
  */
@@ -17,6 +17,7 @@ type DetailFields = Pick<
   | 'servicesLead'
   | 'groups'
   | 'highlight'
+  | 'processEyebrow'
   | 'processTitle'
   | 'processSteps'
   | 'testimonial'
@@ -42,11 +43,123 @@ const visual = (illustration: CategoryDetail['visual']['illustration']) => ({
   alt: '',
 });
 
+/** Photo des maquettes (`public/photos/`), avec l'illustration de repli. */
+const photo = (
+  illustration: CategoryDetail['visual']['illustration'],
+  file: string,
+  width: number,
+  height: number,
+  alt = '',
+) => ({
+  illustration,
+  image: { id: `photo-${file}`, url: `/photos/${file}.png`, width, height, variants: [] },
+  alt,
+});
+
 function review(fields: Omit<Review, 'rating' | 'verified' | 'featured' | 'reply'>): Review {
   return { rating: 5, verified: true, featured: false, reply: null, ...fields };
 }
 
 export const categoryDetails: Record<string, DetailFields> = {
+  'services-a-domicile': {
+    eyebrow: 'Services à domicile',
+    heroTitle: 'Plus de temps pour l’essentiel.',
+    heroLead:
+      'Une intervenante Mambo Proxi se déplace chez vous selon la formule choisie : entretien du logement, nettoyage du véhicule, collecte du linge.',
+    heroVisual: photo(
+      'logement',
+      'sad-hero',
+      1280,
+      960,
+      'Une intervenante Mambo Proxi arrive chez une cliente avec son matériel.',
+    ),
+    audiencesTitle: 'Pour les particuliers et les professionnels, à Douala et environs.',
+    audiences: [
+      {
+        icon: 'Users',
+        title: 'Actifs et familles',
+        text: 'Un logement entretenu sans y consacrer vos soirées.',
+      },
+      {
+        icon: 'HouseHeart',
+        title: 'Propriétaires et locations',
+        text: 'Ménage entre deux locations saisonnières ou après travaux.',
+      },
+      {
+        icon: 'Package',
+        title: 'Proches accompagnés',
+        text: 'Vous êtes loin : nous entretenons le domicile de vos proches.',
+      },
+    ],
+    servicesTitle: '4 formules pour un quotidien plus serein.',
+    servicesLead:
+      'Tarifs indicatifs sur devis, ajustés selon la surface, l’état du logement et les options. Le pressing est facturé séparément.',
+    groups: [],
+    highlight: {
+      kind: 'STEPS_BAND',
+      eyebrow: 'Des intervenantes de confiance',
+      title: 'Sélectionnées, formées et suivies à chaque intervention.',
+      steps: [
+        {
+          icon: 'Package',
+          title: '1. Une sélection rigoureuse',
+          text: 'Références vérifiées, tests théoriques et pratiques avant toute intervention.',
+        },
+        {
+          icon: 'Smartphone',
+          title: '2. Un suivi qualité',
+          text: 'Une personne dédiée accompagne les intervenantes ; retour terrain après chaque prestation.',
+        },
+        {
+          icon: 'MapPin',
+          title: '3. Une réponse rapide',
+          text: 'Par téléphone ou WhatsApp, pour vos demandes, renseignements et réservations.',
+        },
+      ],
+      note: 'Évaluation à domicile possible : un conseiller se déplace pour définir la formule adaptée.',
+    },
+    processEyebrow: 'Comment ça marche ?',
+    processTitle: 'Un service simple, du choix de la formule à la validation.',
+    processSteps: [
+      { title: 'Choix de la formule', text: 'Sur le site, par téléphone ou WhatsApp.' },
+      { title: 'Créneau confirmé', text: 'L’agence confirme la date, l’heure et le montant.' },
+      { title: 'Intervention à domicile', text: 'Entretien, véhicule et collecte du linge si demandée.' },
+      {
+        title: 'Règlement et validation',
+        text: 'Règlement auprès de l’agence (Mobile Money accepté), puis votre avis.',
+      },
+    ],
+    testimonial: review({
+      id: 'rev_aicha',
+      authorName: 'Aïcha M.',
+      initials: 'AM',
+      city: 'Bonamoussadi',
+      text: 'L’intervenante vient chaque semaine, mon linge revient repassé le lendemain. Je réserve sur WhatsApp, c’est simple et fiable.',
+      service: {
+        slug: 'maison-linge',
+        name: 'Maison + Linge',
+        categorySlug: 'services-a-domicile',
+        categoryName: 'Services à domicile',
+      },
+      date: '2026-10-02T10:00:00.000Z',
+    }),
+    testimonialVisual: photo('logement', 'temoin-sad', 1280, 960),
+    quoteFields: [
+      { name: 'eventDate', label: 'Date souhaitée', type: 'date', required: false, width: 'half' },
+      { name: 'city', label: 'Ville', type: 'city', required: false, options: CITIES, width: 'half' },
+    ],
+    cta: {
+      title: 'Besoin d’un coup de main\nà la maison ?',
+      text: 'Choisissez votre formule : nous confirmons votre créneau sous 24 h.',
+    },
+    seo: {
+      title: 'Services à domicile à Douala : entretien du logement, véhicule, linge',
+      description:
+        'Une intervenante Mambo Proxi chez vous, selon la formule choisie : entretien du logement, nettoyage du véhicule, collecte du linge. Devis gratuit.',
+      ogImageUrl: null,
+      noindex: false,
+    },
+  },
   experience: {
     eyebrow: 'Expérience',
     heroTitle: 'Des moments sur mesure, ==pensés pour vous.==',
@@ -407,4 +520,114 @@ export const categoryDetails: Record<string, DetailFields> = {
       noindex: false,
     },
   },
+};
+
+/**
+ * Pages rubrique en anglais (`?lang=en`) ; une rubrique non encore traduite est servie en français, comme le fait l'API.
+ */
+export const categoryDetailsEn: Partial<Record<string, DetailFields>> = {
+  'services-a-domicile': {
+    eyebrow: 'Home services',
+    heroTitle: 'More time for what matters.',
+    heroLead:
+      'A Mambo Proxi housekeeper comes to your home with the package you choose: home cleaning, car cleaning, laundry pick-up.',
+    heroVisual: photo(
+      'logement',
+      'sad-hero',
+      1280,
+      960,
+      'A Mambo Proxi housekeeper arrives at a client’s home with her equipment.',
+    ),
+    audiencesTitle: 'For individuals and professionals, in Douala and the surrounding area.',
+    audiences: [
+      {
+        icon: 'Users',
+        title: 'Working people and families',
+        text: 'A well-kept home without spending your evenings on it.',
+      },
+      {
+        icon: 'HouseHeart',
+        title: 'Owners and rentals',
+        text: 'Cleaning between two holiday lets or after building work.',
+      },
+      {
+        icon: 'Package',
+        title: 'Loved ones looked after',
+        text: 'You live far away: we look after your loved ones’ home.',
+      },
+    ],
+    servicesTitle: '4 packages for a more relaxed daily life.',
+    servicesLead:
+      'Indicative rates on quotation, adjusted to the surface area, the condition of the home and the options. Dry cleaning is charged separately.',
+    groups: [],
+    highlight: {
+      kind: 'STEPS_BAND',
+      eyebrow: 'Trusted housekeepers',
+      title: 'Selected, trained and supervised on every visit.',
+      steps: [
+        {
+          icon: 'Package',
+          title: '1. Careful selection',
+          text: 'Checked references, written and practical tests before any visit.',
+        },
+        {
+          icon: 'Smartphone',
+          title: '2. Quality follow-up',
+          text: 'A dedicated person supports the housekeepers, with field feedback after every visit.',
+        },
+        {
+          icon: 'MapPin',
+          title: '3. A quick reply',
+          text: 'By phone or WhatsApp, for your requests, questions and bookings.',
+        },
+      ],
+      note: 'Home assessment available: an adviser visits you to find the right package.',
+    },
+    processEyebrow: 'How does it work?',
+    processTitle: 'A simple service, from choosing your package to sign-off.',
+    processSteps: [
+      { title: 'Choose your package', text: 'On the website, by phone or WhatsApp.' },
+      { title: 'Slot confirmed', text: 'The agency confirms the date, time and amount.' },
+      { title: 'Visit at your home', text: 'Cleaning, car and laundry pick-up if requested.' },
+      {
+        title: 'Payment and feedback',
+        text: 'Payment at the agency (Mobile Money accepted), then your review.',
+      },
+    ],
+    testimonial: review({
+      id: 'rev_aicha',
+      authorName: 'Aïcha M.',
+      initials: 'AM',
+      city: 'Bonamoussadi',
+      text: 'L’intervenante vient chaque semaine, mon linge revient repassé le lendemain. Je réserve sur WhatsApp, c’est simple et fiable.',
+      service: {
+        slug: 'maison-linge',
+        name: 'Home + Laundry',
+        categorySlug: 'services-a-domicile',
+        categoryName: 'Home services',
+      },
+      date: '2026-10-02T10:00:00.000Z',
+    }),
+    testimonialVisual: photo('logement', 'temoin-sad', 1280, 960),
+    quoteFields: [
+      { name: 'eventDate', label: 'Preferred date', type: 'date', required: false, width: 'half' },
+      { name: 'city', label: 'City', type: 'city', required: false, options: CITIES, width: 'half' },
+    ],
+    cta: {
+      title: 'Need a hand\nat home?',
+      text: 'Choose your package: we confirm your slot within 24 hours.',
+    },
+    seo: {
+      title: 'Home services in Douala: home cleaning, car, laundry',
+      description:
+        'A Mambo Proxi housekeeper at your home, with the package you choose: home cleaning, car cleaning, laundry pick-up. Free quote.',
+      ogImageUrl: null,
+      noindex: false,
+    },
+  },
+};
+
+/** Autres rubriques proposées en bas de page (maquettes) ; par défaut, les rubriques suivantes, trois au plus. */
+export const otherCategorySlugs: Record<string, string[]> = {
+  'services-a-domicile': ['experience', 'immobilier', 'culture-evenementiel'],
 };

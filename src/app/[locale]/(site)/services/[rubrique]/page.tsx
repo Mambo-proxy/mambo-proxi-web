@@ -1,5 +1,7 @@
-import type { Metadata, Route } from 'next';
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
+import { FormulaCards } from '@/components/sections/home/formula-cards';
 import { PageHero } from '@/components/sections/page-hero';
 import { Agenda } from '@/components/sections/rubrique/agenda';
 import { Audiences } from '@/components/sections/rubrique/audiences';
@@ -51,11 +53,21 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   });
 }
 
-/** Page rubrique (Expérience `60:1491`, Immobilier `61:2156`, Proximité `61:3356`, Culture `61:5620`). */
+/**
+ * Page rubrique (Services à domicile `249:24507`, Expérience `60:1491`, Immobilier `61:2156`, Proximité `61:3356`,
+ * Culture `61:5620`). Une rubrique de formules (Services à domicile) présente ses formules en cartes photo et
+ * « Nos formules » dans le fil d'Ariane.
+ */
 export default async function RubriquePage({ params }: Params) {
   const { rubrique } = await params;
-  const [category, settings] = await Promise.all([getCategory(rubrique), getSiteSettings()]);
+  const [category, settings, t] = await Promise.all([
+    getCategory(rubrique),
+    getSiteSettings(),
+    getTranslations(),
+  ]);
   if (!category) notFound();
+  const services = category.services ?? [];
+  const isFormulaCategory = services.length > 0 && services.every((service) => service.kind === 'formula');
   const agenda =
     category.highlight?.kind === 'AGENDA'
       ? await unwrap(
@@ -66,7 +78,11 @@ export default async function RubriquePage({ params }: Params) {
         )
       : null;
   const whatsappHref = settings.whatsapp.enabled
-    ? whatsappUrl(settings.whatsapp.number, settings.whatsapp.message, `Rubrique : ${category.name}`)
+    ? whatsappUrl(
+        settings.whatsapp.number,
+        settings.whatsapp.message,
+        t('rubrique.whatsappContext', { name: category.name }),
+      )
     : null;
 
   const hero: HeroSection = {
@@ -78,7 +94,7 @@ export default async function RubriquePage({ params }: Params) {
     title: category.heroTitle,
     lead: category.heroLead,
     primaryCta: {
-      label: 'Demander un devis gratuit',
+      label: t('site.cta.quote'),
       href: `/devis?rubrique=${category.slug}`,
       external: false,
     },
@@ -94,14 +110,32 @@ export default async function RubriquePage({ params }: Params) {
         whatsappHref={whatsappHref}
         visualClassName="xl:h-[440px]"
         breadcrumb={[
-          { label: 'Accueil', href: routes.home },
-          { label: 'Nos services', href: '/services' as Route },
+          { label: t('rubrique.home'), href: routes.home },
+          { label: isFormulaCategory ? t('rubrique.formulas') : t('rubrique.services'), href: '/services' },
           { label: category.name },
         ]}
       />
       <Audiences category={category} />
-      <RubriqueServices category={category} />
-      {category.highlight?.kind === 'PARCEL_RECEPTION' && <ParcelHighlight highlight={category.highlight} />}
+      {isFormulaCategory ? (
+        <FormulaCards
+          section={{
+            id: 'formules',
+            type: 'dynamic',
+            enabled: true,
+            source: 'formulas',
+            categorySlug: category.slug,
+            eyebrow: t('rubrique.formulas'),
+            title: category.servicesTitle,
+            lead: category.servicesLead,
+          }}
+          formulas={services}
+        />
+      ) : (
+        <RubriqueServices category={category} />
+      )}
+      {(category.highlight?.kind === 'PARCEL_RECEPTION' || category.highlight?.kind === 'STEPS_BAND') && (
+        <ParcelHighlight highlight={category.highlight} />
+      )}
       {category.highlight?.kind === 'AGENDA' && agenda && (
         <Agenda highlight={category.highlight} events={agenda.data} />
       )}
@@ -111,7 +145,7 @@ export default async function RubriquePage({ params }: Params) {
       <CtaBand
         title={category.cta.title}
         text={category.cta.text}
-        href={`/devis?rubrique=${category.slug}` as Route}
+        href={`/devis?rubrique=${category.slug}`}
         whatsappHref={whatsappHref}
       />
     </>

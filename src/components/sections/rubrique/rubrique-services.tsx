@@ -1,5 +1,4 @@
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
-import type { Route } from 'next';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { Icon } from '@/components/ui/icon';
 import { Reveal } from '@/components/ui/reveal';
@@ -9,12 +8,14 @@ import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
 import { SectionHeading } from '../section-heading';
 import { tintBadge } from './tint';
+import { useTranslations } from 'next-intl';
 
 /**
  * Carte service illustrée (Expérience `60:1665`) : illustration 220 (170 en mobile), icône 18 dans un carré 40,
  * titre Poppins 19/26, résumé 15/23, actions « Voir le service » et « Devis ↗ ».
  */
 function ServiceCard({ service, badge }: { service: ServiceSummary; badge: string }) {
+  const t = useTranslations('rubrique');
   const name = service.shortName ?? service.name;
   return (
     <article className="group/card flex flex-col overflow-hidden rounded-xl border border-border-default bg-neutral-0">
@@ -37,10 +38,10 @@ function ServiceCard({ service, badge }: { service: ServiceSummary; badge: strin
         </p>
         <div className="mt-auto flex items-center justify-between pt-1.5">
           <Link
-            href={service.href as Route}
+            href={service.href}
             className="group/link inline-flex items-center gap-1.5 rounded-xs font-ui text-[14px] leading-5 font-semibold text-text-main"
           >
-            Voir le service
+            {t('seeService')}
             <span className="sr-only"> {name}</span>
             <ArrowRight
               aria-hidden
@@ -49,11 +50,11 @@ function ServiceCard({ service, badge }: { service: ServiceSummary; badge: strin
             />
           </Link>
           <Link
-            href={`/devis?service=${service.slug}` as Route}
+            href={`/devis?service=${service.slug}`}
             className="group/devis inline-flex items-center gap-1 rounded-xs font-ui text-[14px] leading-5 font-semibold text-text-brand"
           >
-            Devis
-            <span className="sr-only"> pour {name}</span>
+            {t('quote')}
+            <span className="sr-only"> {t('quoteFor', { name })}</span>
             <ArrowUpRight
               aria-hidden
               size={16}
@@ -83,6 +84,7 @@ function ServiceGrid({ services, badge }: { services: ServiceSummary[]; badge: s
  * (`61:2327`). Une colonne en mobile.
  */
 export function RubriqueServices({ category }: { category: CategoryDetail }) {
+  const t = useTranslations('rubrique');
   const badge = tintBadge(category.tint);
   const services = category.services ?? [];
   const bySlug = new Map(services.map((service) => [service.slug, service]));
@@ -90,7 +92,7 @@ export function RubriqueServices({ category }: { category: CategoryDetail }) {
     <section className="bg-neutral-50 py-14 xl:py-24">
       <div className="container-site flex flex-col gap-7 xl:gap-12">
         <SectionHeading
-          eyebrow="Nos services"
+          eyebrow={t('services')}
           title={category.servicesTitle}
           lead={category.servicesLead}
           className="xl:max-w-[720px]"

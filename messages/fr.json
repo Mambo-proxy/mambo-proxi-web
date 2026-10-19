@@ -97,5 +97,18 @@
     "learnMore": "En savoir plus",
     "discoverCategory": "Découvrir la rubrique",
     "categoriesNav": "Rubriques"
+  },
+  "rubrique": {
+    "audiences": "Pour qui ?",
+    "process": "Comment ça se passe",
+    "othersEyebrow": "Découvrir aussi",
+    "othersTitle": "Nos autres rubriques",
+    "services": "Nos services",
+    "formulas": "Nos formules",
+    "seeService": "Voir le service",
+    "quoteFor": "pour {name}",
+    "quote": "Devis",
+    "home": "Accueil",
+    "whatsappContext": "Rubrique : {name}"
   }
 }

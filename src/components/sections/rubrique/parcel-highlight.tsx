@@ -6,15 +6,15 @@ import type { CategoryHighlight } from '@/lib/api/schema';
 import { frenchTypography } from '@/lib/format/typography';
 
 /**
- * Réception de colis et de courrier (Services de proximité `61:3632`) : section sombre `neutral/900`, sur-titre
- * `orange/400`, titre blanc 48/56 ; 3 cartes `neutral/800` rayon 20 (pastille 48 `neutral/700`, icône orange 22) ;
- * note informative.
+ * Bande sombre de cartes (réception de colis `61:3632`, « Des intervenantes de confiance » `249:24704`) : section
+ * `neutral/900`, sur-titre `orange/400`, titre blanc 48/56 ; 3 cartes `neutral/800` rayon 24 (20 en mobile), pastille
+ * 48 `neutral/700`, icône orange 22, contenu espacé de 14 ; note informative.
  */
 export function ParcelHighlight({ highlight }: { highlight: CategoryHighlight }) {
   return (
     <section className="bg-neutral-900 py-14 text-neutral-0 xl:py-24">
       <div className="container-site flex flex-col gap-7 xl:gap-12">
-        <div className="flex flex-col gap-4 xl:max-w-[760px]">
+        <div className="flex flex-col gap-4 xl:max-w-[760px] xl:gap-3.5">
           {highlight.eyebrow && (
             <p className="font-ui text-[12px] leading-4 font-semibold tracking-[0.08em] text-orange-400 uppercase xl:text-[13px]">
               {frenchTypography(highlight.eyebrow)}
@@ -33,12 +33,12 @@ export function ParcelHighlight({ highlight }: { highlight: CategoryHighlight })
               as="li"
               key={step.title}
               delay={index * 70}
-              className="flex flex-col gap-4 rounded-[20px] bg-neutral-800 p-5 md:p-7"
+              className="flex flex-col gap-4 rounded-[20px] bg-neutral-800 p-5 md:gap-3.5 md:rounded-xl md:p-7"
             >
               <span className="flex size-12 items-center justify-center rounded-md bg-neutral-700 text-orange-400">
                 {step.icon && <Icon name={step.icon} size={22} />}
               </span>
-              <span className="flex flex-col gap-2">
+              <span className="flex flex-col gap-3 md:gap-3.5">
                 <span className="font-brand text-[19px] leading-7 font-semibold">
                   {frenchTypography(step.title)}
                 </span>

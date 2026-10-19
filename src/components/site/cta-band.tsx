@@ -1,6 +1,5 @@
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
-import type { Route } from 'next';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/cn';
@@ -19,7 +18,7 @@ type CtaBandProps = {
   /** Texte raccourci en mobile (contrat : `textMobile`). */
   textMobile?: string | null;
   /** Lien du bouton principal (devis pré-rempli selon la page). */
-  href?: Route;
+  href?: string;
   ctaLabel?: string;
   whatsappHref?: string | null;
   className?: string;

@@ -3,21 +3,23 @@ import type { CategoryDetail } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
 import { SectionHeading } from '../section-heading';
+import { useTranslations } from 'next-intl';
 
 /**
  * « Comment ça se passe » (`60:1833`) : 4 cartes bordées (rayon 20, p 27) ; pastille numérotée 36 sombre,
  * la dernière en orange ; titre Inter SemiBold 16/24, texte 14/20. Lignes empilées en mobile.
  */
 export function ProcessSteps({ category }: { category: CategoryDetail }) {
+  const t = useTranslations('rubrique');
   const steps = category.processSteps;
   if (steps.length === 0) return null;
   return (
     <section className="bg-neutral-0 py-14 xl:py-24">
       <div className="container-site flex flex-col gap-7 xl:gap-12">
         <SectionHeading
-          eyebrow="Comment ça se passe"
+          eyebrow={category.processEyebrow ?? t('process')}
           title={category.processTitle}
-          className="xl:max-w-[720px]"
+          className="gap-3 md:gap-4 xl:max-w-[820px]"
         />
         <ol className="grid gap-3 md:grid-cols-2 md:gap-4 xl:grid-cols-4">
           {steps.map((step, index) => {
@@ -27,18 +29,18 @@ export function ProcessSteps({ category }: { category: CategoryDetail }) {
                 as="li"
                 key={step.title}
                 delay={index * 70}
-                className="flex items-center gap-3.5 rounded-[20px] border border-border-default bg-neutral-0 p-[18px] md:flex-col md:items-start md:gap-4 md:p-[27px]"
+                className="flex items-start gap-3.5 rounded-[22px] border border-border-default bg-neutral-0 p-[18px] md:flex-col md:gap-4 md:rounded-[20px] md:p-6"
               >
                 <span
                   className={cn(
-                    'flex size-9 shrink-0 items-center justify-center rounded-full font-ui text-[14px] leading-5 font-semibold',
+                    'flex size-9 shrink-0 items-center justify-center rounded-full font-ui text-[15px] leading-6 font-semibold md:text-[14px] md:leading-5',
                     last ? 'bg-brand-primary text-neutral-900' : 'bg-neutral-900 text-neutral-0',
                   )}
                 >
                   {index + 1}
                 </span>
-                <span className="flex flex-col gap-0.5 md:gap-1">
-                  <span className="font-ui text-[16px] leading-6 font-semibold text-text-main">
+                <span className="flex flex-col gap-1">
+                  <span className="font-ui text-[15px] leading-6 font-semibold text-text-main md:text-[16px]">
                     {frenchTypography(step.title)}
                   </span>
                   <span className="font-ui text-[14px] leading-5 text-text-muted">
