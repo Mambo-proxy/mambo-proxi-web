@@ -40,6 +40,19 @@ test.describe('pages rubrique', () => {
     );
   });
 
+  test('Expérience : carrousels des véhicules et des prestataires sous les services', async ({ page }) => {
+    await page.goto('/services/experience', { waitUntil: 'domcontentloaded' });
+    const vehicles = page.getByRole('list', { name: /^Nos véhicules.*faire défiler horizontalement/ });
+    const providers = page.getByRole('list', { name: /^Photographes, chefs.*faire défiler horizontalement/ });
+    await expect(vehicles.getByRole('article')).toHaveCount(4);
+    await expect(providers.getByRole('article')).toHaveCount(5);
+    await expect(vehicles.getByRole('heading', { name: 'Minibus 15 places' })).toBeAttached();
+    await expect(providers.getByRole('heading', { name: /Réception privée/ })).toBeAttached();
+    // Chaque offre présélectionne son service dans le formulaire de devis.
+    await expect(vehicles.locator('a[href="/devis?service=location-voiture"]').first()).toBeAttached();
+    await expect(providers.locator('a[href="/devis?service=services-evenementiels"]').first()).toBeAttached();
+  });
+
   test('rubrique inconnue : 404', async ({ page }) => {
     const response = await page.goto('/services/inconnue');
     expect(response?.status()).toBe(404);
