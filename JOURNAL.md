@@ -397,3 +397,17 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 ### Décisions
 
 - **« Nos prestataires » en desktop** : la maquette le pose au-dessus de la barre supérieure ; il suit ici les véhicules, comme en mobile.
+
+### Rubrique Immobilier : biens disponibles (20 octobre 2026)
+
+- Immobilier d'après la maquette (`61:2156`, `61:2808`) : carrousel « Biens disponibles » (6 biens, chacun relié au service qu'il présélectionne dans le devis : location, meublé, achat et vente, logement temporaire), textes courts en mobile, version anglaise (nouvelle).
+- « Vous êtes propriétaire ou investisseur » : le groupe pointait encore vers `entretien-logements`, retiré du catalogue (6 cartes au lieu de 7) ; il présente désormais « Achat et vente de biens immobiliers », comme la maquette.
+- Héros, public et témoignage (Serge M., Kotto) mis à jour ; photos des 7 cartes de services, du héros et du témoignage (originaux de Figma, `immo-*`, `offre-terrain`, `temoin-immo`) ; le carrousel réutilise les photos des services (mêmes images). Autres rubriques : Expérience, Proximité, Culture.
+- En-tête « Nos services » des rubriques à 820 de large (720 dans les anciennes maquettes), groupes espacés de 48 (aussi « Les services à la carte » de Services à domicile, sans maquette).
+- Fidélité : en desktop, chaque section à la hauteur de la maquette (6 798 px pour 6 797) ; en mobile, 8 947 px pour 8 882 (voir les décisions, +4 px dans les autres rubriques comme sur Expérience).
+
+### Décisions
+
+- **Textes des instances Figma** : les noms de calques d'une instance gardent le texte du composant (le bandeau final y affiche « Un projet, une question ? Parlons-en. ») ; le texte réel est celui de la capture de référence, « Un logement à trouver ou à confier ? », conservé.
+- **Titre « Vous êtes propriétaire ou investisseur » en mobile** : il déborde de l'écran dans la maquette ; il passe ici à la ligne (+32 px).
+- **Texte du bandeau final en mobile** : « immobilier : » reste groupé (espace insécable avant les deux-points), le texte passe sur trois lignes (+24 px).
