@@ -71,7 +71,7 @@ function ServiceCard({ service, badge }: { service: ServiceSummary; badge: strin
 export function GroupTitle({ children }: { children: string }) {
   return (
     <h3 className="flex items-center gap-4 font-brand text-[22px] leading-8 font-semibold text-text-main xl:text-[24px]">
-      <span className="shrink-0">{frenchTypography(children)}</span>
+      <span className="min-w-0 md:shrink-0">{frenchTypography(children)}</span>
       <span aria-hidden className="h-px flex-1 bg-border-default" />
     </h3>
   );
@@ -90,8 +90,8 @@ export function ServiceGrid({ services, badge }: { services: ServiceSummary[]; b
 }
 
 /**
- * « Nos services » de la rubrique : grille de 3 colonnes (424, gap 20) ; Immobilier : groupes titrés suivis d'un filet
- * (`61:2327`). Une colonne en mobile.
+ * « Nos services » de la rubrique : en-tête 820, grille de 3 colonnes (424, gap 20) ; Immobilier : groupes titrés suivis
+ * d'un filet, espacés de 48 (28 en mobile) (`61:2327`). Une colonne en mobile.
  */
 export function RubriqueServices({ category }: { category: CategoryDetail }) {
   const t = useTranslations('rubrique');
@@ -105,10 +105,10 @@ export function RubriqueServices({ category }: { category: CategoryDetail }) {
           eyebrow={t('services')}
           title={category.servicesTitle}
           lead={category.servicesLead}
-          className="xl:max-w-[720px]"
+          className="xl:max-w-[820px]"
         />
         {category.groups.length > 0 ? (
-          <div className="flex flex-col gap-7 xl:gap-10">
+          <div className="flex flex-col gap-7 xl:gap-12">
             {category.groups.map((group) => (
               <div key={group.title} className="flex flex-col gap-3.5 xl:gap-5">
                 <GroupTitle>{group.title}</GroupTitle>
