@@ -156,6 +156,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'Wrench',
       illustration: 'logement',
+      photo: { url: '/photos/immo-achat.png', width: 1536, height: 1024 },
     },
     {
       slug: 'recherche-logement',
@@ -166,6 +167,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'Search',
       illustration: 'logement',
+      photo: { url: '/photos/immo-recherche.png', width: 1536, height: 1024 },
     },
     {
       slug: 'location-sous-location-colocation',
@@ -176,6 +178,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'Key',
       illustration: 'logement',
+      photo: { url: '/photos/immo-location.png', width: 1536, height: 1024 },
     },
     {
       slug: 'logement-adapte-meuble',
@@ -187,6 +190,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'HouseHeart',
       illustration: 'logement',
+      photo: { url: '/photos/immo-meuble.png', width: 1536, height: 1024 },
     },
     {
       slug: 'gestion-locative',
@@ -197,6 +201,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'Building',
       illustration: 'equipe',
+      photo: { url: '/photos/immo-gestion.png', width: 1536, height: 1024 },
     },
     {
       slug: 'accompagnement-installation',
@@ -207,6 +212,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'House',
       illustration: 'accueil',
+      photo: { url: '/photos/accueil.png', width: 1448, height: 1086 },
     },
     {
       slug: 'logement-temporaire',
@@ -217,6 +223,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'Clock',
       illustration: 'logement',
+      photo: { url: '/photos/immo-temporaire.png', width: 1536, height: 1024 },
     },
   ],
   'services-de-proximite': [
