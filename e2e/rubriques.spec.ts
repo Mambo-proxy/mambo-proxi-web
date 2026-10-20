@@ -2,7 +2,7 @@ import { expect, expectAccessible, expectNoHorizontalScroll, test } from './fixt
 
 const RUBRIQUES = [
   { slug: 'experience', title: 'Des moments sur mesure, pensés pour vous.', services: 5 },
-  { slug: 'immobilier', title: 'Se loger au Cameroun, en toute sérénité.', services: 6 },
+  { slug: 'immobilier', title: 'Se loger au Cameroun, en toute sérénité.', services: 7 },
   { slug: 'services-de-proximite', title: 'Votre quotidien simplifié, chez vous.', services: 4 },
   { slug: 'culture-evenementiel', title: 'Vivre le Cameroun, de l’intérieur.', services: 4 },
 ];
@@ -20,10 +20,21 @@ test.describe('pages rubrique', () => {
     });
   }
 
-  test('Immobilier : services regroupés', async ({ page }) => {
+  test('Immobilier : services regroupés, puis carrousel des biens disponibles', async ({ page }) => {
     await page.goto('/services/immobilier', { waitUntil: 'domcontentloaded' });
     await expect(page.getByRole('heading', { level: 3, name: 'Vous cherchez un logement' })).toBeVisible();
-    await expect(page.getByRole('heading', { level: 3, name: 'Vous êtes propriétaire' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 3, name: 'Vous êtes propriétaire ou investisseur' }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: 'Voir le service Achat et vente de biens immobiliers' }),
+    ).toHaveAttribute('href', '/services/immobilier/achat-vente-biens');
+    const properties = page.getByRole('list', {
+      name: /^Logements et terrains.*faire défiler horizontalement/,
+    });
+    await expect(properties.getByRole('article')).toHaveCount(6);
+    await expect(properties.getByRole('heading', { name: /Terrain 500 m²/ })).toBeAttached();
+    await expect(properties.locator('a[href="/devis?service=achat-vente-biens"]').first()).toBeAttached();
   });
 
   test('Services à domicile : formules, puis services à la carte', async ({ page }) => {
