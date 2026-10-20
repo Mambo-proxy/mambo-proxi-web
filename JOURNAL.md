@@ -386,3 +386,14 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Icône des offres d'entretien** : couverts (`Utensils`), comme sur la maquette ; l'icône est une donnée modifiable dans le back-office.
 - **Photos de la fiche Entretien** (héros, 3 premières offres) : exportées à l'échelle 1 ; les originaux en haute définition restent à récupérer.
 - **Formules sans fiche** : elles ne sont plus générées comme fiches (adresse `/services/<rubrique>/<formule>` en 404), leur carte menant à la section des formules.
+
+### Rubrique Expérience : carrousels d'offres (20 octobre 2026)
+
+- Contrat : une rubrique peut porter des carrousels d'offres sous ses services (`offerSections`, facultatif), avec le même composant que les fiches ; chaque offre présélectionne son service dans le devis.
+- Expérience d'après la maquette (`60:1491`, `60:2082`) : « Nos véhicules » (4 véhicules, Location de voiture) puis « Nos prestataires » (photographe, deux chefs, massage, réception privée), textes courts en mobile, version anglaise. Photos dans le héros, les cartes de services et le témoignage ; « Familles en séjour » et titre du déroulé mis à jour.
+- Photos : originaux de Figma (`offre-citadine`, `offre-berline`, `offre-suv`, `offre-minibus`, `offre-photographe`, `offre-massage`) ; les cartes de services Location de voiture, Photographe et Massage réutilisent les mêmes fichiers, la réception privée `offre-buffet-reception` (même image). Les originaux de la citadine, du photographe et du massage ne font que 380 à 470 px de large.
+- Fidélité : en desktop, chaque section à la hauteur de la maquette (7 090 px pour 7 089) ; en mobile, carrousels identiques, 8 807 px pour 8 794 (+8 px dans la grille des services, +8 px dans les autres rubriques, déjà présents avant).
+
+### Décisions
+
+- **« Nos prestataires » en desktop** : la maquette le pose au-dessus de la barre supérieure ; il suit ici les véhicules, comme en mobile.
