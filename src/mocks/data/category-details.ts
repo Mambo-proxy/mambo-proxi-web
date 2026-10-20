@@ -17,6 +17,7 @@ type DetailFields = Pick<
   | 'servicesLead'
   | 'groups'
   | 'highlight'
+  | 'offerSections'
   | 'processEyebrow'
   | 'processTitle'
   | 'processSteps'
@@ -55,6 +56,22 @@ const photo = (
   image: { id: `photo-${file}`, url: `/photos/${file}.png`, width, height, variants: [] },
   alt,
 });
+
+type Offer = NonNullable<CategoryDetail['offerSections']>[number]['items'][number];
+
+function offer(
+  fields: Pick<Offer, 'id' | 'title' | 'text' | 'actionLabel' | 'serviceSlug'> &
+    Partial<Pick<Offer, 'titleMobile' | 'textMobile' | 'actionLabelMobile'>> & { visual: Offer['visual'] },
+): Offer {
+  return {
+    titleMobile: null,
+    textMobile: null,
+    actionLabelMobile: null,
+    icon: null,
+    action: 'QUOTE',
+    ...fields,
+  };
+}
 
 function review(fields: Omit<Review, 'rating' | 'verified' | 'featured' | 'reply'>): Review {
   return { rating: 5, verified: true, featured: false, reply: null, ...fields };
@@ -167,7 +184,7 @@ export const categoryDetails: Record<string, DetailFields> = {
     heroTitle: 'Des moments sur mesure, ==pensés pour vous.==',
     heroLead:
       'Location de voiture, chef privé, massage, photographe, événementiel : nous réservons pour vous des prestataires de confiance, au Cameroun.',
-    heroVisual: visual('chef'),
+    heroVisual: photo('chef', 'exp-hero', 1280, 960),
     audiencesTitle: 'Pour les particuliers, les familles et ceux qui reçoivent.',
     audiences: [
       {
@@ -178,7 +195,7 @@ export const categoryDetails: Record<string, DetailFields> = {
       {
         icon: 'Users',
         title: 'Familles en séjour',
-        text: 'Vous rentrez au pays en vacances : tout est prêt à votre arrivée.',
+        text: 'Vous arrivez à Douala : tout est prêt à votre arrivée.',
       },
       {
         icon: 'PartyPopper',
@@ -190,7 +207,121 @@ export const categoryDetails: Record<string, DetailFields> = {
     servicesLead: 'Chaque prestation fait l’objet d’un devis gratuit et personnalisé.',
     groups: [],
     highlight: null,
-    processTitle: 'Nous coordonnons tout, du premier message au suivi.',
+    offerSections: [
+      {
+        eyebrow: 'Location de voiture',
+        title: 'Nos véhicules, avec ou sans chauffeur.',
+        titleMobile: null,
+        lead: 'Faites défiler les véhicules disponibles, puis réservez sur devis.',
+        leadMobile: 'Faites défiler, puis réservez sur devis.',
+        items: [
+          offer({
+            id: 'off_citadine',
+            title: 'Citadine confort',
+            text: 'Citadine · 4 places · climatisation · trajets en ville',
+            textMobile: 'Citadine · 4 places · climatisation',
+            actionLabel: 'Réservation sur devis',
+            actionLabelMobile: 'Réserver',
+            serviceSlug: 'location-voiture',
+            visual: photo('voiture', 'offre-citadine', 470, 325),
+          }),
+          offer({
+            id: 'off_berline',
+            title: 'Berline avec chauffeur',
+            text: 'Berline · 4 places · chauffeur professionnel · transferts',
+            textMobile: 'Berline · 4 places · chauffeur pro',
+            actionLabel: 'Réservation sur devis',
+            actionLabelMobile: 'Réserver',
+            serviceSlug: 'location-voiture',
+            visual: photo('voiture', 'offre-berline', 1536, 1024),
+          }),
+          offer({
+            id: 'off_suv',
+            title: 'SUV 7 places',
+            text: 'SUV · 7 places · grand coffre · longs trajets et familles',
+            textMobile: 'SUV · 7 places · longs trajets',
+            actionLabel: 'Réservation sur devis',
+            actionLabelMobile: 'Réserver',
+            serviceSlug: 'location-voiture',
+            visual: photo('voiture', 'offre-suv', 1536, 1024),
+          }),
+          offer({
+            id: 'off_minibus',
+            title: 'Minibus 15 places',
+            text: 'Minibus · 15 places · mariages, groupes, aéroport',
+            textMobile: 'Minibus · mariages, groupes, aéroport',
+            actionLabel: 'Réservation sur devis',
+            actionLabelMobile: 'Réserver',
+            serviceSlug: 'location-voiture',
+            visual: photo('voiture', 'offre-minibus', 1536, 1024),
+          }),
+        ],
+      },
+      {
+        eyebrow: 'Nos prestataires',
+        title: 'Photographes, chefs, praticiens : choisissez le vôtre.',
+        titleMobile: 'Photographes, chefs, praticiens.',
+        lead: 'Chaque prestataire est sélectionné et suivi par l’agence.',
+        leadMobile: 'Choisissez votre prestataire.',
+        items: [
+          offer({
+            id: 'off_photographe',
+            title: 'Photographe — portraits et couples',
+            titleMobile: 'Photographe — portraits',
+            text: 'Séance en studio ou en extérieur · retouches incluses',
+            textMobile: 'Studio ou extérieur · retouches',
+            actionLabel: 'Demander un devis',
+            actionLabelMobile: 'Devis',
+            serviceSlug: 'photographe',
+            visual: photo('photo', 'offre-photographe', 380, 340),
+          }),
+          offer({
+            id: 'off_chef_camerounais',
+            title: 'Chef privé — cuisine camerounaise',
+            titleMobile: 'Chef — cuisine camerounaise',
+            text: 'Dîners, buffets et réceptions · menus sur mesure',
+            textMobile: 'Dîners, buffets, réceptions',
+            actionLabel: 'Demander un devis',
+            actionLabelMobile: 'Devis',
+            serviceSlug: 'chef-prive',
+            visual: photo('chef', 'chef-2', 1536, 1024),
+          }),
+          offer({
+            id: 'off_chef_fusion',
+            title: 'Chef privé — cuisine fusion',
+            titleMobile: 'Chef — cuisine fusion',
+            text: 'Dîner gastronomique à domicile · 2 à 12 convives',
+            textMobile: 'Dîner gastronomique à domicile',
+            actionLabel: 'Demander un devis',
+            actionLabelMobile: 'Devis',
+            serviceSlug: 'chef-prive',
+            visual: photo('chef', 'offre-chef-aicha', 1536, 864),
+          }),
+          offer({
+            id: 'off_massage',
+            title: 'Massage bien-être à domicile',
+            titleMobile: 'Massage à domicile',
+            text: 'Massage relaxant · 60 ou 90 min · chez vous',
+            textMobile: 'Relaxant · 60 ou 90 min',
+            actionLabel: 'Demander un devis',
+            actionLabelMobile: 'Devis',
+            serviceSlug: 'massage-bien-etre',
+            visual: photo('massage', 'offre-massage', 435, 470),
+          }),
+          offer({
+            id: 'off_reception',
+            title: 'Réception privée',
+            text: 'Décoration, traiteur et service pour vos événements',
+            textMobile: 'Décoration, traiteur, service',
+            actionLabel: 'Demander un devis',
+            actionLabelMobile: 'Devis',
+            serviceSlug: 'services-evenementiels',
+            visual: photo('evenement', 'offre-buffet-reception', 1536, 1024),
+          }),
+        ],
+      },
+    ],
+    processTitle: 'Nous nous occupons de tout, du premier message au suivi.',
     processSteps: PROCESS_STEPS,
     testimonial: review({
       id: 'rev_jean_marc',
@@ -206,7 +337,7 @@ export const categoryDetails: Record<string, DetailFields> = {
       },
       date: '2026-09-12T10:00:00.000Z',
     }),
-    testimonialVisual: visual('equipe'),
+    testimonialVisual: photo('chef', 'offre-tete-a-tete', 1280, 960),
     quoteFields: [
       { name: 'eventDate', label: 'Date souhaitée', type: 'date', required: false, width: 'half' },
       { name: 'city', label: 'Ville', type: 'city', required: false, options: CITIES, width: 'half' },
@@ -629,9 +760,207 @@ export const categoryDetailsEn: Partial<Record<string, DetailFields>> = {
       noindex: false,
     },
   },
+  experience: {
+    eyebrow: 'Experience',
+    heroTitle: 'Tailor-made moments, ==designed for you.==',
+    heroLead:
+      'Car rental, private chef, massage, photographer, events: we book trusted providers for you in Cameroon.',
+    heroVisual: photo('chef', 'exp-hero', 1280, 960),
+    audiencesTitle: 'For individuals, families and hosts.',
+    audiences: [
+      {
+        icon: 'User',
+        title: 'Individuals',
+        text: 'You want to treat yourself or make a stay easier, without searching for hours.',
+      },
+      {
+        icon: 'Users',
+        title: 'Families visiting',
+        text: 'You arrive in Douala: everything is ready when you get there.',
+      },
+      {
+        icon: 'PartyPopper',
+        title: 'Organisers',
+        text: 'Birthday, wedding, reception: reliable providers for your private event.',
+      },
+    ],
+    servicesTitle: '5 services to make the most of every moment.',
+    servicesLead: 'Every service comes with a free, personalised quote.',
+    groups: [],
+    highlight: null,
+    offerSections: [
+      {
+        eyebrow: 'Car rental',
+        title: 'Our vehicles, with or without a driver.',
+        titleMobile: null,
+        lead: 'Scroll through the available vehicles, then book on quotation.',
+        leadMobile: 'Scroll through, then book on quotation.',
+        items: [
+          offer({
+            id: 'off_citadine',
+            title: 'Comfort city car',
+            text: 'City car · 4 seats · air conditioning · city trips',
+            textMobile: 'City car · 4 seats · air conditioning',
+            actionLabel: 'Book on quotation',
+            actionLabelMobile: 'Book',
+            serviceSlug: 'location-voiture',
+            visual: photo('voiture', 'offre-citadine', 470, 325),
+          }),
+          offer({
+            id: 'off_berline',
+            title: 'Sedan with driver',
+            text: 'Sedan · 4 seats · professional driver · transfers',
+            textMobile: 'Sedan · 4 seats · pro driver',
+            actionLabel: 'Book on quotation',
+            actionLabelMobile: 'Book',
+            serviceSlug: 'location-voiture',
+            visual: photo('voiture', 'offre-berline', 1536, 1024),
+          }),
+          offer({
+            id: 'off_suv',
+            title: '7-seater SUV',
+            text: 'SUV · 7 seats · large boot · long trips and families',
+            textMobile: 'SUV · 7 seats · long trips',
+            actionLabel: 'Book on quotation',
+            actionLabelMobile: 'Book',
+            serviceSlug: 'location-voiture',
+            visual: photo('voiture', 'offre-suv', 1536, 1024),
+          }),
+          offer({
+            id: 'off_minibus',
+            title: '15-seater minibus',
+            text: 'Minibus · 15 seats · weddings, groups, airport',
+            textMobile: 'Minibus · weddings, groups, airport',
+            actionLabel: 'Book on quotation',
+            actionLabelMobile: 'Book',
+            serviceSlug: 'location-voiture',
+            visual: photo('voiture', 'offre-minibus', 1536, 1024),
+          }),
+        ],
+      },
+      {
+        eyebrow: 'Our providers',
+        title: 'Photographers, chefs, practitioners: choose yours.',
+        titleMobile: 'Photographers, chefs, practitioners.',
+        lead: 'Every provider is selected and followed up by the agency.',
+        leadMobile: 'Choose your provider.',
+        items: [
+          offer({
+            id: 'off_photographe',
+            title: 'Photographer — portraits and couples',
+            titleMobile: 'Photographer — portraits',
+            text: 'Studio or outdoor session · retouching included',
+            textMobile: 'Studio or outdoor · retouching',
+            actionLabel: 'Ask for a quote',
+            actionLabelMobile: 'Quote',
+            serviceSlug: 'photographe',
+            visual: photo('photo', 'offre-photographe', 380, 340),
+          }),
+          offer({
+            id: 'off_chef_camerounais',
+            title: 'Private chef — Cameroonian cuisine',
+            titleMobile: 'Chef — Cameroonian cuisine',
+            text: 'Dinners, buffets and receptions · tailor-made menus',
+            textMobile: 'Dinners, buffets, receptions',
+            actionLabel: 'Ask for a quote',
+            actionLabelMobile: 'Quote',
+            serviceSlug: 'chef-prive',
+            visual: photo('chef', 'chef-2', 1536, 1024),
+          }),
+          offer({
+            id: 'off_chef_fusion',
+            title: 'Private chef — fusion cuisine',
+            titleMobile: 'Chef — fusion cuisine',
+            text: 'Gourmet dinner at home · 2 to 12 guests',
+            textMobile: 'Gourmet dinner at home',
+            actionLabel: 'Ask for a quote',
+            actionLabelMobile: 'Quote',
+            serviceSlug: 'chef-prive',
+            visual: photo('chef', 'offre-chef-aicha', 1536, 864),
+          }),
+          offer({
+            id: 'off_massage',
+            title: 'Wellness massage at home',
+            titleMobile: 'Massage at home',
+            text: 'Relaxing massage · 60 or 90 min · at your place',
+            textMobile: 'Relaxing · 60 or 90 min',
+            actionLabel: 'Ask for a quote',
+            actionLabelMobile: 'Quote',
+            serviceSlug: 'massage-bien-etre',
+            visual: photo('massage', 'offre-massage', 435, 470),
+          }),
+          offer({
+            id: 'off_reception',
+            title: 'Private reception',
+            text: 'Decoration, catering and service for your events',
+            textMobile: 'Decoration, catering, service',
+            actionLabel: 'Ask for a quote',
+            actionLabelMobile: 'Quote',
+            serviceSlug: 'services-evenementiels',
+            visual: photo('evenement', 'offre-buffet-reception', 1536, 1024),
+          }),
+        ],
+      },
+    ],
+    processTitle: 'We take care of everything, from the first message to the follow-up.',
+    processSteps: [
+      { title: 'Your request', text: 'Form, WhatsApp or appointment.' },
+      { title: 'Tailor-made quote', text: 'A clear proposal within 24 hours.' },
+      { title: 'Service', text: 'A selected provider, constant follow-up.' },
+      { title: 'Your feedback', text: 'A short questionnaire after every service.' },
+    ],
+    testimonial: review({
+      id: 'rev_jean_marc',
+      authorName: 'Jean-Marc T.',
+      initials: 'JT',
+      city: 'Yaoundé',
+      text: "Le chef privé a régalé nos invités pour l'anniversaire de ma mère. Service impeccable, équipe aux petits soins du début à la fin.",
+      service: {
+        slug: 'chef-prive',
+        name: 'Private chef',
+        categorySlug: 'experience',
+        categoryName: 'Experience',
+      },
+      date: '2026-09-12T10:00:00.000Z',
+    }),
+    testimonialVisual: photo('chef', 'offre-tete-a-tete', 1280, 960),
+    quoteFields: [
+      { name: 'eventDate', label: 'Preferred date', type: 'date', required: false, width: 'half' },
+      { name: 'city', label: 'City', type: 'city', required: false, options: CITIES, width: 'half' },
+      {
+        name: 'guests',
+        label: 'Number of people',
+        type: 'number',
+        required: false,
+        min: 1,
+        max: 500,
+        width: 'half',
+      },
+      {
+        name: 'occasion',
+        label: 'Type of occasion',
+        type: 'select',
+        required: false,
+        options: ['Birthday', 'Wedding', 'Dinner with friends', 'Family stay', 'Corporate event', 'Other'],
+        width: 'half',
+      },
+    ],
+    cta: {
+      title: 'Fancy a tailor-made\nmoment?',
+      text: 'Tell us what you have in mind: we send you a free quote within 24 hours.',
+    },
+    seo: {
+      title: 'Experience: private chef, car rental, photographer in Cameroon',
+      description:
+        'Trusted providers booked for you in Cameroon: car rental, private chef, massage, photographer, events.',
+      ogImageUrl: null,
+      noindex: false,
+    },
+  },
 };
 
 /** Autres rubriques proposées en bas de page (maquettes) ; par défaut, les rubriques suivantes, trois au plus. */
 export const otherCategorySlugs: Record<string, string[]> = {
   'services-a-domicile': ['experience', 'immobilier', 'culture-evenementiel'],
+  experience: ['immobilier', 'services-de-proximite', 'culture-evenementiel'],
 };

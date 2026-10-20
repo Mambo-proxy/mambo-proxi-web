@@ -98,6 +98,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'Car',
       illustration: 'voiture',
+      photo: { url: '/photos/offre-citadine.png', width: 470, height: 325 },
     },
     {
       slug: 'photographe',
@@ -108,6 +109,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'Camera',
       illustration: 'photo',
+      photo: { url: '/photos/offre-photographe.png', width: 380, height: 340 },
     },
     {
       slug: 'chef-prive',
@@ -119,6 +121,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'ChefHat',
       illustration: 'chef',
+      photo: { url: '/photos/chef-2.png', width: 1536, height: 1024 },
     },
     {
       slug: 'massage-bien-etre',
@@ -129,6 +132,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'Flower2',
       illustration: 'massage',
+      photo: { url: '/photos/offre-massage.png', width: 435, height: 470 },
     },
     {
       slug: 'services-evenementiels',
@@ -139,6 +143,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'PartyPopper',
       illustration: 'evenement',
+      photo: { url: '/photos/offre-buffet-reception.png', width: 1536, height: 1024 },
     },
   ],
   immobilier: [

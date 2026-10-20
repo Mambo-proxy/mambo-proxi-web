@@ -20,7 +20,7 @@ const action =
  */
 function OfferCard({ offer, serviceSlug }: { offer: ServiceOffer; serviceSlug: string }) {
   const t = useTranslations('service.offers');
-  const links = formulaLinks(serviceSlug);
+  const links = formulaLinks(offer.serviceSlug ?? serviceSlug);
   const [primary, secondary] =
     offer.action === 'BOOKING'
       ? [links.booking, { href: links.quote, label: t('quote') }]
@@ -79,13 +79,22 @@ function OfferCard({ offer, serviceSlug }: { offer: ServiceOffer; serviceSlug: s
 }
 
 /**
- * « Nos offres » de la fiche service (Entretien du logement `254:11429`, Chef privé `289:14062`) : fond blanc,
- * py 80 (56 en mobile) ; en-tête titre 48/56 (28/34 en mobile) et chapô 18/28 ; carrousel des offres.
+ * « Nos offres » de la fiche service (Entretien du logement `254:11429`, Chef privé `289:14062`) et carrousels d'une
+ * rubrique (véhicules et prestataires d'Expérience) : fond blanc, py 80 (56 en mobile) ; en-tête titre 48/56 (28/34 en
+ * mobile) et chapô 18/28 ; carrousel des offres. Sur une rubrique, chaque offre précise son service (`serviceSlug`).
  */
-export function ServiceOffers({ offers, serviceSlug }: { offers: ServiceOffersData; serviceSlug: string }) {
+export function ServiceOffers({
+  offers,
+  serviceSlug = '',
+  id = 'offres',
+}: {
+  offers: ServiceOffersData;
+  serviceSlug?: string;
+  id?: string;
+}) {
   const t = useTranslations('service.offers');
   return (
-    <section id="offres" className="scroll-mt-(--site-header-h,0px) bg-neutral-0 py-14 xl:py-20">
+    <section id={id} className="scroll-mt-(--site-header-h,0px) bg-neutral-0 py-14 xl:py-20">
       <div className="container-site">
         <OffersCarousel
           labels={{ list: t('list', { title: offers.title }), previous: t('previous'), next: t('next') }}
@@ -93,6 +102,7 @@ export function ServiceOffers({ offers, serviceSlug }: { offers: ServiceOffersDa
             <SectionHeading
               eyebrow={offers.eyebrow}
               title={offers.title}
+              titleMobile={offers.titleMobile}
               lead={offers.lead}
               leadMobile={offers.leadMobile}
               titleClassName="max-md:text-[28px]! max-md:leading-[34px]! max-md:tracking-[-0.02em]!"

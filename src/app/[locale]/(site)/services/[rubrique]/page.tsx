@@ -10,6 +10,7 @@ import { ParcelHighlight } from '@/components/sections/rubrique/parcel-highlight
 import { ProcessSteps } from '@/components/sections/rubrique/process-steps';
 import { RubriqueServices } from '@/components/sections/rubrique/rubrique-services';
 import { Testimonial } from '@/components/sections/rubrique/testimonial';
+import { ServiceOffers } from '@/components/sections/service/service-offers';
 import { tintBadge } from '@/components/sections/rubrique/tint';
 import { CtaBand } from '@/components/site/cta-band';
 import type { HeroSection } from '@/lib/api/schema';
@@ -142,6 +143,9 @@ export default async function RubriquePage({ params }: Params) {
       ) : (
         <RubriqueServices category={category} />
       )}
+      {(category.offerSections ?? []).map((offers, index) => (
+        <ServiceOffers key={offers.eyebrow} offers={offers} id={`offres-${index + 1}`} />
+      ))}
       {(category.highlight?.kind === 'PARCEL_RECEPTION' || category.highlight?.kind === 'STEPS_BAND') && (
         <ParcelHighlight highlight={category.highlight} />
       )}
