@@ -2581,11 +2581,15 @@ export interface components {
             actionLabel: string;
             /** @example Devis gratuit */
             actionLabelMobile?: string | null;
+            /** @description Service présélectionné par les deux actions (carrousels d'une rubrique) ; null = service de la fiche. */
+            serviceSlug?: components["schemas"]["Slug"] | null;
         };
         ServiceOffers: {
             /** @example Nos offres */
             eyebrow: string;
             title: components["schemas"]["AccentText"];
+            /** @description Titre court en mobile (null = même titre). */
+            titleMobile?: string | null;
             lead?: string | null;
             /** @description Chapô court en mobile (null = même chapô). */
             leadMobile?: string | null;
@@ -2605,6 +2609,8 @@ export interface components {
             action: "QUOTE" | "BOOKING";
             actionLabel: string;
             actionLabelMobile?: string | null;
+            /** @description Service présélectionné (carrousels d'une rubrique) ; null = service de la fiche. */
+            serviceId?: components["schemas"]["Id"] | null;
         };
         /** @description Champ dynamique de l'étape « Votre besoin » du devis (défini par rubrique dans le back-office). */
         QuoteField: {
@@ -2705,6 +2711,8 @@ export interface components {
                 serviceSlugs: components["schemas"]["Slug"][];
             }[];
             highlight?: components["schemas"]["CategoryHighlight"] | null;
+            /** @description Carrousels d'offres sous les services de la rubrique (ex. véhicules, prestataires) ; chaque offre précise son service. */
+            offerSections?: components["schemas"]["ServiceOffers"][];
             /**
              * @description Sur-titre du déroulé ; null = libellé par défaut.
              * @example Comment ça marche ?
@@ -3446,6 +3454,14 @@ export interface components {
                 serviceSlugs: components["schemas"]["Slug"][];
             }[];
             highlight?: components["schemas"]["CategoryHighlight"] | null;
+            offerSections?: {
+                eyebrow: string;
+                title: string;
+                titleMobile?: string | null;
+                lead?: string | null;
+                leadMobile?: string | null;
+                offers: components["schemas"]["ServiceOfferInput"][];
+            }[];
             quoteFields?: components["schemas"]["QuoteField"][];
             ctaTitle?: string | null;
             ctaText?: string | null;
