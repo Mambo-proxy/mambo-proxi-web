@@ -23,13 +23,13 @@ describe('client API serveur (sur les mocks)', () => {
     expect(unknown).toBeNull();
   });
 
-  it('expose les 5 rubriques et les 24 services du catalogue, dont 4 formules', async () => {
+  it('expose les 5 rubriques et les 26 services du catalogue, dont 4 formules et 2 services à la carte', async () => {
     const categories = await unwrap(
       api.GET('/v1/categories', { params: { query: { include: 'services' } } }),
     );
     expect(categories).toHaveLength(5);
     const services = categories.flatMap((category) => category.services ?? []);
-    expect(services).toHaveLength(24);
+    expect(services).toHaveLength(26);
     expect(services.filter((service) => service.kind === 'formula').map((service) => service.slug)).toEqual([
       'maison-essentiel',
       'maison-auto',
