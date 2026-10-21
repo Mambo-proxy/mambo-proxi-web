@@ -50,7 +50,7 @@ const schema = z.object({
   fullName: fieldRules.fullName,
   email: fieldRules.email,
   phone: fieldRules.phone,
-  location: z.string().min(1, 'Merci de choisir votre pays et votre ville.'),
+  location: z.string().min(1, 'Merci de choisir votre ville.'),
   presentation: z.string().trim().max(3000, 'Ce texte est trop long (3 000 caractères au plus).'),
   consent: fieldRules.consent,
 });
@@ -75,9 +75,8 @@ export function PartnerForm({ initialType }: { initialType: string | null }) {
     resolver: zodResolver(schema),
     mode: 'onTouched',
     defaultValues: {
-      partnershipType: isPartnershipType(initialType)
-        ? initialType
-        : (undefined as unknown as PartnershipType),
+      // Premier type présélectionné, comme sur la maquette (`65:6017`).
+      partnershipType: isPartnershipType(initialType) ? initialType : 'PRESTATAIRE_EXPERIENCE',
       organization: '',
       activity: '',
       fullName: '',
@@ -167,7 +166,7 @@ export function PartnerForm({ initialType }: { initialType: string | null }) {
         >
           <input {...antiSpam.honeypotProps} />
           <fieldset>
-            <legend className="mb-3 font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main">
+            <legend className="mb-2.5 font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main">
               Type de partenariat<span className="text-text-brand"> *</span>
             </legend>
             <div className="flex flex-wrap gap-2">
@@ -201,7 +200,8 @@ export function PartnerForm({ initialType }: { initialType: string | null }) {
               </p>
             )}
           </fieldset>
-          <div className="grid gap-4 md:grid-cols-2 md:gap-y-5">
+          {/* En mobile, champs groupés par deux comme les rangées du desktop : 16 dans une paire, 20 entre deux (`65:6419`). */}
+          <div className="grid gap-4 md:grid-cols-2 md:gap-y-5 max-md:[&>*:nth-child(2n+3)]:mt-1">
             <Field label="Nom de la structure" required error={errors.organization?.message}>
               {(control) => (
                 <Input
@@ -243,7 +243,7 @@ export function PartnerForm({ initialType }: { initialType: string | null }) {
             <Field label="Téléphone / WhatsApp" required error={errors.phone?.message}>
               {(control) => <PhoneInput icon={Smartphone} {...control} {...form.register('phone')} />}
             </Field>
-            <Field label="Pays et ville" required error={errors.location?.message}>
+            <Field label="Ville et quartier" required error={errors.location?.message}>
               {(control) => (
                 <Select {...control} {...form.register('location')}>
                   <option value="">Choisir</option>
@@ -266,6 +266,8 @@ export function PartnerForm({ initialType }: { initialType: string | null }) {
             >
               {(control) => (
                 <Textarea
+                  rows={3}
+                  className="min-h-[120px]"
                   placeholder="Expérience, zones d’intervention, disponibilités…"
                   {...control}
                   {...form.register('presentation')}
@@ -287,7 +289,8 @@ export function PartnerForm({ initialType }: { initialType: string | null }) {
               </p>
             )}
           </div>
-          <p className="flex items-center gap-2 text-caption text-text-muted">
+          {/* Une seule ligne : en mobile, la mention empiète sur la marge intérieure, comme sur la maquette (`65:6477`). */}
+          <p className="flex items-center gap-2 text-caption text-text-muted max-md:-mr-3 max-md:whitespace-nowrap">
             <Lock aria-hidden size={16} />
             Formulaire protégé contre les envois automatiques
           </p>
