@@ -6,9 +6,13 @@ import { chipVariants } from '@/components/ui/chip';
 import type { Link } from '@/lib/api/schema';
 import { frenchTypography } from '@/lib/format/typography';
 
+/** Ligne de lecture : une section devient active quand son haut passe sous l'en-tête, à 45 % de la fenêtre. */
+const READING_LINE = 0.45;
+
 /**
- * Puces d'ancrage du héros (Qui sommes-nous `63:4851`, Mission `64:5378`) : la première est active au chargement,
- * puis la puce suit la section visible ; clic = défilement fluide vers la section.
+ * Puces d'ancrage du héros (Qui sommes-nous `63:4851`, Mission `64:5378`, Magazine `254:26277`) : la première est
+ * active en haut de page, puis la puce suit la dernière section passée sous la ligne de lecture ; clic = défilement
+ * fluide vers la section.
  */
 export function AnchorChips({ links }: { links: Link[] }) {
   const ids = links.map((link) => link.href.replace(/^#/, ''));
@@ -16,19 +20,32 @@ export function AnchorChips({ links }: { links: Link[] }) {
   const key = ids.join(',');
 
   useEffect(() => {
-    const sections = key
-      .split(',')
-      .map((id) => document.getElementById(id))
-      .filter((section): section is HTMLElement => section !== null);
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries.filter((entry) => entry.isIntersecting);
-        if (visible[0]) setActive(visible[0].target.id);
-      },
-      { rootMargin: '-140px 0px -55% 0px' },
-    );
-    sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
+    const anchors = key.split(',');
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const line = window.innerHeight * READING_LINE;
+      let current = anchors[0] ?? '';
+      let currentTop = -Infinity;
+      for (const id of anchors) {
+        const top = document.getElementById(id)?.getBoundingClientRect().top;
+        // À hauteur égale (cartes d'une même rangée), la première de la liste reste active.
+        if (top !== undefined && top <= line && top > currentTop) {
+          current = id;
+          currentTop = top;
+        }
+      }
+      setActive(current);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(frame);
+    };
   }, [key]);
 
   return (
