@@ -236,6 +236,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'Utensils',
       illustration: 'livraison',
+      photo: { url: '/photos/prox-scooter.png', width: 1280, height: 960 },
     },
     {
       slug: 'livraison-courses-commandes',
@@ -246,6 +247,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'ShoppingCart',
       illustration: 'livraison',
+      photo: { url: '/photos/prox-courses.png', width: 1536, height: 1024 },
     },
     {
       slug: 'collecte-livraison-colis-courrier',
@@ -259,6 +261,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'Package',
       illustration: 'colis',
+      photo: { url: '/photos/prox-colis.png', width: 1536, height: 1024 },
     },
     {
       slug: 'pressing-laverie',
@@ -269,6 +272,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'Package',
       illustration: 'livraison',
+      photo: { url: '/photos/prox-laverie.png', width: 1536, height: 1024 },
     },
   ],
   'culture-evenementiel': [
