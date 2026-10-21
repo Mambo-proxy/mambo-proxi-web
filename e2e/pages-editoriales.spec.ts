@@ -20,6 +20,12 @@ const PAGES = [
     anchors: ['edito', 'sante-et-nutrition', 'beaute-et-bien-etre', 'recevoir-le-magazine'],
     cta: 'Recevez chaque numéro par e-mail.',
   },
+  {
+    path: '/zones-d-intervention',
+    title: 'Nous intervenons partout à Douala.',
+    anchors: ['la-carte', 'trouver-votre-quartier', 'quartiers-par-zone', 'zone-speciale'],
+    cta: 'Une demande à nous confier ?',
+  },
 ];
 
 test.describe('pages éditoriales', () => {
@@ -63,5 +69,23 @@ test.describe('pages éditoriales', () => {
     await expect(page).toHaveURL(/\/en\/magazine$/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Mambo Proxi — Issue 1');
     await expect(page.getByRole('link', { name: 'Read in French' })).toHaveAttribute('href', '/magazine');
+  });
+
+  test('Zones d’intervention : quartiers par zone, recherche et version anglaise', async ({ page }) => {
+    await page.goto('/zones-d-intervention', { waitUntil: 'domcontentloaded' });
+    const zone3 = page.locator('#zone-3');
+    await expect(zone3.getByRole('heading', { level: 4 })).toHaveText('Zone 3 — Élargie');
+    await expect(zone3.getByRole('listitem')).toHaveCount(8);
+    await expect(page.locator('#zone-speciale')).toContainText('Bonabéri (rive ouest du Wouri)');
+    await expect(page.getByText('Délai moyen de livraison : 30 à 60 minutes selon le trafic.')).toBeVisible();
+    const search = page.getByRole('combobox', { name: 'Rechercher un quartier' });
+    await search.fill('kotto');
+    await search.press('Enter');
+    await expect(page.getByText('Kotto est en Zone 3 — Élargie.')).toBeVisible();
+
+    await page.goto('/en/service-areas', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('We cover all of Douala.');
+    await expect(page.getByRole('heading', { level: 3, name: 'Neighbourhoods, area by area' })).toBeVisible();
+    await expect(page.locator('#zone-1').getByRole('heading', { level: 4 })).toHaveText('Zone 1 — Nearby');
   });
 });
