@@ -101,7 +101,8 @@ export function Dropzone({
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
         className={cn(
-          'flex flex-col items-center gap-2 rounded-lg border border-dashed bg-neutral-50 p-7 text-center transition-colors',
+          // p 28 (20 en mobile, `67:7444`) ; en mobile, le libellé peut empiéter sur la marge intérieure pour tenir sur une ligne.
+          'flex flex-col items-center gap-2 rounded-lg border border-dashed bg-neutral-50 p-5 text-center transition-colors md:p-7',
           dragging ? 'border-brand-primary bg-orange-50' : 'border-border-strong',
           message && 'border-feedback-error',
         )}
@@ -115,7 +116,7 @@ export function Dropzone({
           aria-describedby={[`${id}-help`, message ? `${id}-error` : null, props['aria-describedby']]
             .filter(Boolean)
             .join(' ')}
-          className="cursor-pointer rounded-xs font-ui text-[14px] leading-5 font-medium text-text-main underline-offset-2 hover:underline"
+          className="cursor-pointer rounded-xs font-ui text-[14px] leading-5 font-medium text-text-main underline-offset-2 hover:underline max-md:w-[calc(100%+2.5rem)]"
         >
           {label}
         </button>

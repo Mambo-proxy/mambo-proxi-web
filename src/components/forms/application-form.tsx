@@ -125,7 +125,8 @@ export function ApplicationForm({ jobs, initialJob }: ApplicationFormProps) {
           className="flex flex-col gap-5"
         >
           <input {...antiSpam.honeypotProps} />
-          <div className="grid gap-4 md:grid-cols-2 md:gap-y-5">
+          {/* En mobile, champs groupés comme les rangées du desktop : 16 dans une paire, 20 ailleurs (`67:7394`). */}
+          <div className="grid gap-4 md:grid-cols-2 md:gap-y-5 max-md:[&>*:last-child]:mt-1 max-md:[&>*:nth-child(2n)]:mt-1">
             <Field label="Poste visé" required error={errors.jobSlug?.message} className="md:col-span-2">
               {(control) => (
                 <Select {...control} {...form.register('jobSlug')}>
