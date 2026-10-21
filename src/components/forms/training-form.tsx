@@ -139,7 +139,8 @@ export function TrainingForm({ trainings }: { trainings: Training[] }) {
           className="flex flex-col gap-5"
         >
           <input {...antiSpam.honeypotProps} />
-          <div className="grid gap-4 md:grid-cols-2 md:gap-y-5">
+          {/* En mobile, champs groupés comme les rangées du desktop : 16 dans une paire, 20 entre deux (`66:6993`). */}
+          <div className="grid gap-4 md:grid-cols-2 md:gap-y-5 max-md:[&>*:nth-child(2n+2)]:mt-1">
             <Field
               label="Formation souhaitée"
               required

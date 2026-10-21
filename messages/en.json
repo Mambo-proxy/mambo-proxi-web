@@ -166,5 +166,10 @@
       "IMMOBILIER": "Real estate",
       "ENTREPRISES": "Business"
     }
+  },
+  "trainings": {
+    "filter": "Filter training courses",
+    "all": "All",
+    "request": "Request this course"
   }
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowRight, Clock, MapPin } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { Chip } from '@/components/ui/chip';
 import { Icon } from '@/components/ui/icon';
@@ -21,8 +22,9 @@ function isCategory(value: string | null, trainings: Training[]): value is Train
 
 /**
  * Catalogue (Formation `66:6354`) : filtres (Toutes + catégories, `?categorie=` dans l'adresse), cartes 3 colonnes
- * (1 en mobile) alignées en haut : pastille `vert/50`, badge de catégorie, titre Poppins 20/28, durée et format · lieu,
- * séparateur, « Demander cette formation → » qui présélectionne la formation dans le formulaire.
+ * (1 en mobile) alignées en haut : pastille `vert/50`, badge de catégorie centré, titre Poppins 20/28 (17/28 en
+ * mobile), durée et format · lieu, séparateur, « Demander cette formation → » qui présélectionne la formation dans le
+ * formulaire.
  */
 export function TrainingsCatalog({
   section,
@@ -33,6 +35,7 @@ export function TrainingsCatalog({
   trainings: Training[];
   initialFilter: string | null;
 }) {
+  const t = useTranslations('trainings');
   const [filter, setFilter] = useState<Filter>(
     isCategory(initialFilter, trainings) ? initialFilter : 'TOUTES',
   );
@@ -79,10 +82,12 @@ export function TrainingsCatalog({
         titleMobile={section.titleMobile}
         lead={section.lead}
         leadMobile={section.leadMobile}
+        // En-tête mobile (`66:6805`) : écarts de 12.
+        className="gap-3 md:gap-4"
       />
-      <div role="group" aria-label="Filtrer les formations" className="flex flex-wrap gap-2">
+      <div role="group" aria-label={t('filter')} className="flex flex-wrap gap-2">
         <Chip selected={filter === 'TOUTES'} onClick={() => choose('TOUTES')}>
-          Toutes
+          {t('all')}
         </Chip>
         {categories.map(([category, label]) => (
           <Chip key={category} selected={filter === category} onClick={() => choose(category)}>
@@ -96,7 +101,7 @@ export function TrainingsCatalog({
             key={training.slug}
             className="flex flex-col gap-3.5 rounded-3xl border border-border-default bg-neutral-0 p-5 xl:p-7"
           >
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center justify-between gap-3">
               <span
                 aria-hidden
                 className="flex size-11 items-center justify-center rounded-[13px] bg-vert-50"
@@ -114,7 +119,7 @@ export function TrainingsCatalog({
                 {training.categoryLabel}
               </span>
             </div>
-            <h3 className="font-brand text-[20px] leading-7 font-semibold text-text-main">
+            <h3 className="font-brand text-[17px] leading-7 font-semibold text-text-main xl:text-[20px]">
               {frenchTypography(training.title)}
             </h3>
             <p className="flex flex-wrap gap-x-4 gap-y-1 font-ui text-[13px] leading-5 text-text-muted">
@@ -132,7 +137,7 @@ export function TrainingsCatalog({
               onClick={() => request(training)}
               className="group/cta inline-flex items-center gap-1.5 self-stretch rounded-xs border-t border-border-default pt-3.5 font-ui text-[14px] leading-5 font-semibold text-text-brand"
             >
-              Demander cette formation
+              {t('request')}
               <span className="sr-only"> : {training.title}</span>
               <ArrowRight
                 aria-hidden

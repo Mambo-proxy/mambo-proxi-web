@@ -317,7 +317,10 @@ export function CardGrid({ section }: { section: CardGridSection }) {
       <ul
         className={cn(
           'grid',
-          section.layout === 'compact' ? 'gap-3.5 xl:gap-6' : 'gap-4',
+          // Énoncés (Mission `64:5401`) : 14, 24 en desktop ; offres avec lien (Formation `66:6778`) : 16 partout.
+          section.layout === 'compact' && !section.items.some((item) => item.cta)
+            ? 'gap-3.5 xl:gap-6'
+            : 'gap-4',
           GRID_COLUMNS[section.columns] ?? GRID_COLUMNS[2],
           section.layout === 'compact' && 'md:grid-cols-1 xl:grid-cols-2',
         )}

@@ -166,5 +166,10 @@
       "IMMOBILIER": "Immobilier",
       "ENTREPRISES": "Entreprise"
     }
+  },
+  "trainings": {
+    "filter": "Filtrer les formations",
+    "all": "Toutes",
+    "request": "Demander cette formation"
   }
 }
