@@ -76,6 +76,16 @@ test.describe('pages rubrique', () => {
     await expect(formulas.locator('a[href="/devis?service=pressing-laverie"]').first()).toBeAttached();
   });
 
+  test('Culture & événementiel : carrousel des sorties sous les services', async ({ page }) => {
+    await page.goto('/services/culture-evenementiel', { waitUntil: 'domcontentloaded' });
+    const outings = page.getByRole('list', {
+      name: /^Découvrir le Cameroun autrement.*faire défiler horizontalement/,
+    });
+    await expect(outings.getByRole('article')).toHaveCount(6);
+    await expect(outings.getByRole('heading', { name: /Soirée culturelle/ })).toBeAttached();
+    await expect(outings.locator('a[href="/devis?service=decouverte-cameroun"]').first()).toBeAttached();
+  });
+
   test('rubrique inconnue : 404', async ({ page }) => {
     const response = await page.goto('/services/inconnue');
     expect(response?.status()).toBe(404);
