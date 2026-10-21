@@ -106,7 +106,8 @@ Les maquettes ont été refondues mi-octobre 2026 (recentrage sur Douala et les 
 - [x] Rubriques Expérience, Immobilier, Services de proximité, Culture & événementiel — `qa/fidelite/rubrique-*.png`
 - [x] Magazine (édition n° 1) et Zones d'intervention (nouvelles pages) — `qa/fidelite/magazine-*.png`, `qa/fidelite/zones-*.png`
 - [x] Qui sommes-nous — `qa/fidelite/qui-sommes-nous-*.png`
-- [ ] Mission, Partenaires, Formation, Recrutement, offre d'emploi, Avis clients, Contact, Devis, Confirmation, Inscription, Suivi, pages légales, questionnaire, 404
+- [x] Mission — `qa/fidelite/mission-*.png`
+- [ ] Partenaires, Formation, Recrutement, offre d'emploi, Avis clients, Contact, Devis, Confirmation, Inscription, Suivi, pages légales, questionnaire, 404
 - [ ] E-mails (4 modèles mis à jour)
 - [ ] Back-office : tableau de bord modifié, Magazine, Zones d'intervention, édition du Magazine ; écrans en cours sur les branches `bo/services-en-cours`, `bo/pages-textes-en-cours`, `bo/recrutement-en-cours`
 - [ ] Implémentation de l'API (phase 2) : `?lang`, zones, formules, citations d'avis, offres des fiches service

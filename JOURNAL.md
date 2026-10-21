@@ -480,3 +480,16 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Chiffres de « Pourquoi Mambo Proxi ? »** : la maquette affiche « 2 univers de services » et « 19 services », repris à l'identique ; le site compte 5 rubriques et 26 services (catalogue simulé). Ce sont des données modifiables dans le back-office : à faire valider par la cliente.
 - **Libellés des chiffres en mobile** : « projets accompagnés » dépasse de 10 px la zone de texte de la tuile dans la maquette et tient sur une ligne ; le libellé peut ici empiéter de 12 px sur la marge intérieure.
 - **Fin de la citation de la fondatrice en desktop** : la maquette laisse « » » seul sur la dernière ligne ; l'espace insécable le garde avec « siens. » (même hauteur).
+
+### Mission (21 octobre 2026)
+
+- Page recalée sur la maquette (`64:5257`, `64:5667`), mise en page inchangée : héros « Simplifier la vie, au plus près de vous. » (sans orange), énoncés de la mission et de la vision recentrés sur le Cameroun et le domicile, « Notre méthode d’intervention » et quatrième étape « Intervention », version anglaise (nouvelle).
+- Photos : héros `mission-hero` (original de Figma) ; citation `douala-ville` (déjà servie par l'accueil, même image).
+- Ancres des énoncés : « Our mission » et « Our vision » donnent les mêmes ancres que le français (`#mission`, `#vision`).
+- Fil d'Ariane traduit (« Home ») sur Mission et sur Qui sommes-nous, qui affichait encore « Accueil » en anglais ; même construction que le Magazine (titre de la page).
+- Espacements recalés : en mobile, en-têtes des engagements et de la méthode à 12 (16 auparavant).
+- Fidélité : chaque section à la hauteur de la maquette, en desktop (4 542 px pour 4 541) et en mobile (5 856 pour 5 855, écart dans le pied de page commun).
+
+### Décisions
+
+- **« la méthode qui nous permet de organiser »** : coquille de la maquette (élision manquante), écrite ici « d’organiser ». Texte modifiable dans le back-office.
