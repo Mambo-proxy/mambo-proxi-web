@@ -507,3 +507,16 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 
 - **Type de partenariat présélectionné** : la maquette montre « Prestataire Expérience » choisi ; le formulaire s'ouvre ainsi, ce qui supprime l'erreur « Merci de choisir un type de partenariat » au premier envoi.
 - **« Ville et quartier »** : la maquette renomme le champ mais montre toujours « Cameroun · Douala » ; la liste reste au format « Pays · Ville » exigé par le contrat (code pays + ville). Une vraie liste de quartiers demanderait d'étendre le contrat de `POST /v1/partner-requests`.
+
+### Formation (21 octobre 2026)
+
+- Page recalée sur la maquette (`66:6190`, `66:6730`), mise en page inchangée : chapô du héros « transmettre le savoir-faire, le savoir-être et les bonnes pratiques » (sans la France), version anglaise (nouvelle) : textes de la page, filtres « All », « Request this course », formations servies en anglais par l'API (`?lang=en` : titres, durées, format, catégories), fil d'Ariane « Home ».
+- Photos : héros `formation-hero` et photo de la demande de formation `formation-form` (originaux de Figma).
+- Contrat : visuel facultatif d'une section dynamique (`DynamicSection.visual`), pour la photo à côté du formulaire, jusque-là une illustration écrite dans la page ; ajouté dans l'API puis synchronisé.
+- Espacements recalés : offres avec lien espacées de 16 (24 en desktop et 14 en mobile auparavant, l'écart des énoncés de Mission) ; en mobile, en-tête du catalogue à 12 et champs de la demande groupés par deux comme les rangées du desktop (20 entre deux paires) ; cartes du catalogue : badge centré sur la pastille, titre 17/28 en mobile.
+- Fidélité : chaque section à la hauteur de la maquette, en desktop (3 934 px pour 3 933) et en mobile (6 422 pour 6 422).
+
+### Décisions
+
+- **« Une formation pour votre équipe ? »** : la maquette renvoie « ? » seul à la ligne en desktop (espace ordinaire) ; l'espace insécable le garde avec « équipe » (même hauteur).
+- **Formulaires du site anglais** : la demande de formation reste en français, comme les autres formulaires (traduction des formulaires à faire).
