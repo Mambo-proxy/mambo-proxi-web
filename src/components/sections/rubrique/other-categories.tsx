@@ -18,7 +18,7 @@ export function OtherCategories({ category }: { category: CategoryDetail }) {
   return (
     <section className="bg-neutral-0 py-14 xl:py-24">
       <div className="container-site flex flex-col gap-7 xl:gap-12">
-        <SectionHeading eyebrow={t('othersEyebrow')} title={t('othersTitle')} />
+        <SectionHeading eyebrow={t('othersEyebrow')} title={t('othersTitle')} className="gap-3 md:gap-4" />
         <ul className="grid gap-4 md:grid-cols-3">
           {category.otherCategories.map((other, index) => (
             <Reveal as="li" key={other.slug} delay={index * 70}>

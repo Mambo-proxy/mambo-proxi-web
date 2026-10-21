@@ -12,7 +12,7 @@ import { useTranslations } from 'next-intl';
 
 /**
  * Carte service illustrée (Expérience `60:1665`) : illustration 220 (170 en mobile), icône 18 dans un carré 40,
- * titre Poppins 19/26, résumé 15/23, actions « Voir le service » et « Devis ↗ ».
+ * titre Poppins 19/26 (17 en mobile), résumé 15/23 (14 en mobile), actions « Voir le service » et « Devis ↗ ».
  */
 function ServiceCard({ service, badge }: { service: ServiceSummary; badge: string }) {
   const t = useTranslations('rubrique');
@@ -29,11 +29,11 @@ function ServiceCard({ service, badge }: { service: ServiceSummary; badge: strin
           <span className={cn('flex size-10 shrink-0 items-center justify-center rounded-md', badge)}>
             <Icon name={service.icon} size={18} />
           </span>
-          <h3 className="font-brand text-[19px] leading-[26px] font-semibold text-text-main">
+          <h3 className="font-brand text-[17px] leading-[26px] font-semibold text-text-main md:text-[19px]">
             {frenchTypography(name)}
           </h3>
         </div>
-        <p className="font-ui text-[15px] leading-[23px] text-text-muted">
+        <p className="font-ui text-[14px] leading-[23px] text-text-muted md:text-[15px]">
           {frenchTypography(service.summary)}
         </p>
         <div className="mt-auto flex items-center justify-between pt-1.5">
@@ -105,7 +105,7 @@ export function RubriqueServices({ category }: { category: CategoryDetail }) {
           eyebrow={t('services')}
           title={category.servicesTitle}
           lead={category.servicesLead}
-          className="xl:max-w-[820px]"
+          className="gap-3 md:gap-4 xl:max-w-[820px]"
         />
         {category.groups.length > 0 ? (
           <div className="flex flex-col gap-7 xl:gap-12">
