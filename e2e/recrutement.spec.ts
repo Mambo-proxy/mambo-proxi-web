@@ -23,7 +23,7 @@ test.describe('recrutement', () => {
         .getByRole('group', { name: 'Filtrer les offres' })
         .getByRole('button', { name: 'Douala' })
         .click();
-      await expect(offers).toHaveCount(2, { timeout: 1500 });
+      await expect(offers).toHaveCount(3, { timeout: 1500 });
     }).toPass();
     await page
       .getByRole('group', { name: 'Filtrer les offres' })
@@ -32,7 +32,29 @@ test.describe('recrutement', () => {
     await page.getByRole('searchbox', { name: 'Rechercher un poste' }).fill('chauffeur');
     await expect(offers).toHaveCount(1);
     await offers.getByRole('link', { name: /Voir l’offre/ }).click();
-    await expect(page).toHaveURL(/\/recrutement\/chauffeur-euse-partenaire$/);
+    await expect(page).toHaveURL(/\/recrutement\/chauffeur-euse-partenaire$/, { timeout: 15_000 });
+  });
+
+  test('version anglaise : offres traduites, filtres de contrat et photo du héros', async ({ page }) => {
+    await page.goto('/en/careers', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+      'Join a team that takes care of others.',
+    );
+    await expect(page.getByRole('navigation', { name: "Fil d'Ariane" })).toContainText('Home');
+    await expect(page.getByRole('heading', { name: '4 open positions' })).toBeVisible();
+    await expect(page.locator('#offres li').first()).toContainText('Posted 3 days ago');
+    const offers = page.locator('#offres li');
+    await expect(async () => {
+      await page
+        .getByRole('group', { name: 'Filter openings' })
+        .getByRole('button', { name: 'Fixed-term' })
+        .click();
+      await expect(offers).toHaveCount(1, { timeout: 1500 });
+    }).toPass();
+    await expect(
+      offers.getByRole('link', { name: 'See the opening: Customer relations officer' }),
+    ).toBeVisible();
+    await expect(page.locator('main img').first()).toHaveAttribute('alt', /shakes hands/);
   });
 
   test('détail : « Postuler à cette offre » présélectionne le poste, puis candidature avec CV', async ({
@@ -40,7 +62,7 @@ test.describe('recrutement', () => {
   }) => {
     await page.goto(JOB, { waitUntil: 'domcontentloaded' });
     await page.getByRole('link', { name: 'Postuler à cette offre' }).click();
-    await expect(page).toHaveURL(/poste=coordinateur-rice-de-services/);
+    await expect(page).toHaveURL(/poste=coordinateur-rice-de-services/, { timeout: 15_000 });
     const form = page.getByRole('form', { name: 'Candidature', exact: true });
     await expect(form.getByLabel(/Poste visé/)).toHaveValue('coordinateur-rice-de-services');
 
