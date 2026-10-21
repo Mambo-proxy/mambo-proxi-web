@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { PartnerForm } from '@/components/forms/partner-form';
 import { FormSection } from '@/components/sections/content/form-section';
 import { PageSections } from '@/components/sections/content/page-sections';
@@ -23,10 +24,11 @@ type SearchParams = { searchParams: Promise<{ categorie?: string; type?: string 
 /** Partenaires (desktop `65:5704`, mobile `65:6208`) : logos filtrables, types de partenariat, formulaire. Pas de bandeau CTA. */
 export default async function PartnersPage({ searchParams }: SearchParams) {
   const query = await searchParams;
-  const [page, settings, partners] = await Promise.all([
+  const [page, settings, partners, t] = await Promise.all([
     getPage('partenaires'),
     getSiteSettings(),
     unwrap(api.GET('/v1/partners', cached([cacheTags.partners]))),
+    getTranslations('rubrique'),
   ]);
   if (!page) notFound();
   const initialFilter = CATEGORIES.find((category) => category === query.categorie) ?? 'TOUS';
@@ -34,7 +36,7 @@ export default async function PartnersPage({ searchParams }: SearchParams) {
   return (
     <PageSections
       page={page}
-      breadcrumb={[{ label: 'Accueil', href: routes.home }, { label: 'Partenaires' }]}
+      breadcrumb={[{ label: t('home'), href: routes.home }, { label: page.title }]}
       whatsappHref={null}
       keyFigures={settings.keyFigures ?? []}
       heroVisualClassName="xl:h-[440px]"
