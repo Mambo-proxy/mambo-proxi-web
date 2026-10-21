@@ -451,3 +451,19 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 
 - **Sur-titre de l'édito en mobile** : « Édito · Édition spéciale — Ensemble vers un bien-être global » tient sur une ligne dans la maquette en dépassant de l'écran (467 px pour 350) ; il passe ici à la ligne (+16 px).
 - **« Immobilier et cadre de vie »** : en desktop, le titre de la carte dépasse de 6 px sa colonne dans la maquette et reste sur une ligne ; les titres des cartes de valeurs peuvent empiéter de 8 px sur la marge de droite.
+
+### Zones d'intervention (21 octobre 2026)
+
+- Nouvelle page `/zones-d-intervention` (anglais : `/en/service-areas`) d'après la maquette (`255:12322`, `255:12506`) : page `zones-d-intervention` du contrat (héros et pastilles, section `dynamic` `zones-map`, bandeau final) et zones de `GET /v1/zones`. Photo du héros : `prox-scooter` (même image).
+- Section de la carte partagée avec l'accueil ; sur cette page, elle se prolonge par « Les quartiers, zone par zone » : 4 cartes bordées (rayon 20), quartiers un par ligne, à la suite séparés par « · » en mobile, et la note de l'API (`ServiceAreas.note`). Le titre de la liste est un texte de l'interface (`zones.listTitle`), comme « Trouvez votre quartier » et « Légende ».
+- Pastilles du héros : « La carte » (section), « Mon quartier » (recherche), « Les zones » (liste), « Hors zone » (carte de la zone spéciale, ancrée par sa clé `zone-speciale`).
+- Colonne de recherche recalée (aussi sur l'accueil) : champ 48 px, réponse 90 px, « Légende » 17 px, hauteurs de ligne de la maquette (52,5, 102,5 et 21 px auparavant). Couleurs des zones dans `zone-tones.ts`, communes à la carte et à la liste.
+- Contrat : apostrophe typographique dans la note des zones (« n’apparaît », « Can’t »), corrigée dans l'API puis synchronisée. Plan du site de secours : Magazine et Zones d'intervention ajoutés.
+- Fidélité : en desktop, chaque section à la hauteur de la maquette (3 321 px pour 3 321) ; en mobile, 4 464 px pour 4 466, avec la recherche « Bonamoussadi » saisie comme sur la maquette.
+
+### Décisions
+
+- **État de la maquette** : la maquette montre la recherche « Bonamoussadi » et sa réponse ; la page s'ouvre champ vide (la comparaison de `qa/fidelite/zones-*.png` est faite après la même saisie).
+- **« Carte indicative. Sur le site : carte interactive… »** : annotation de la maquette, non reprise (la carte est interactive).
+- **Zone spéciale en mobile** : ses entrées restent une par ligne, comme sur la maquette (« Bonabéri (rive ouest du Wouri) » puis « Autres quartiers hors zone ») ; les autres zones sont à la suite.
+- **Titre du héros** : espace insécable dans « à Douala » pour garder la coupure « partout / à Douala » de la maquette en desktop.
