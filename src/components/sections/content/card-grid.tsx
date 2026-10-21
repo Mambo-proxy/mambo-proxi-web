@@ -105,7 +105,8 @@ function HorizontalCard({ item }: { item: SectionItem }) {
 
 /**
  * Carte illustrée (Partenaires `65:5893`) : bordée, rayon 24 ; illustration pleine largeur 200 (150 en mobile),
- * corps p 28 (20) : titre Poppins 20/28, sous-titre orange 14/20, texte 15/23, lien « Je candidate → ».
+ * corps p 28 (20) : titre Poppins 20/28, sous-titre orange 14/20, texte 15/23, lien « Je candidate → » à la suite du
+ * texte (écarts de 10, comme la carte Immobilier `65:5931`).
  */
 function IllustratedCard({ item }: { item: SectionItem }) {
   return (
@@ -133,7 +134,7 @@ function IllustratedCard({ item }: { item: SectionItem }) {
           <Link
             href={item.cta.href as Route}
             data-partnership-link
-            className="group/cta mt-auto inline-flex items-center gap-1.5 self-start rounded-xs pt-1.5 font-ui text-[14px] leading-5 font-semibold text-text-main"
+            className="group/cta inline-flex items-center gap-1.5 self-start rounded-xs font-ui text-[14px] leading-5 font-semibold text-text-main"
           >
             {item.cta.label}
             <span className="sr-only"> : {item.title}</span>
@@ -308,13 +309,9 @@ export function CardGrid({ section }: { section: CardGridSection }) {
           lead={section.lead}
           leadMobile={section.leadMobile}
           inverse={inverse}
-          // Valeurs sur fond sombre (`63:4982`, `254:26402`) : sur-titre et titre espacés de 14 ; engagements numérotés
-          // (`64:5737`) : 12 en mobile.
-          className={cn(
-            'xl:max-w-[820px]',
-            inverse && 'gap-3.5',
-            section.layout === 'numbered' && 'gap-3 md:gap-4',
-          )}
+          // Valeurs sur fond sombre (`63:4982`, `254:26402`) : sur-titre et titre espacés de 14 ; sur fond clair
+          // (engagements `64:5737`, types de partenariat `65:6296`) : 12 en mobile.
+          className={cn('xl:max-w-[820px]', inverse ? 'gap-3.5' : 'gap-3 md:gap-4')}
         />
       )}
       <ul

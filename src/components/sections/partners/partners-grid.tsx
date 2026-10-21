@@ -1,18 +1,12 @@
 'use client';
 
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Chip } from '@/components/ui/chip';
 import type { DynamicSection, Partner, PartnerCategory } from '@/lib/api/schema';
 import { SectionHeading } from '../section-heading';
 import { SectionShell } from '../content/section-shell';
-
-/** Libellé court du badge de catégorie (maquette : « Expérience », « Immobilier », « Entreprise »). */
-const BADGES: Record<PartnerCategory, string> = {
-  EXPERIENCE: 'Expérience',
-  IMMOBILIER: 'Immobilier',
-  ENTREPRISES: 'Entreprise',
-};
 
 type Filter = PartnerCategory | 'TOUS';
 
@@ -29,6 +23,8 @@ export function PartnersGrid({
   partners: Partner[];
   initialFilter: Filter;
 }) {
+  // Badge de catégorie : libellé court de la maquette (« Expérience », « Immobilier », « Entreprise »).
+  const t = useTranslations('partners');
   const [filter, setFilter] = useState<Filter>(initialFilter);
   const categories = [
     ...new Map(partners.map((partner) => [partner.category, partner.categoryLabel])).entries(),
@@ -45,10 +41,16 @@ export function PartnersGrid({
 
   return (
     <SectionShell section={section} innerClassName="flex flex-col gap-7 xl:gap-12">
-      <SectionHeading eyebrow={section.eyebrow} title={section.title} titleMobile={section.titleMobile} />
-      <div role="group" aria-label="Filtrer les partenaires" className="flex flex-wrap gap-2">
+      <SectionHeading
+        eyebrow={section.eyebrow}
+        title={section.title}
+        titleMobile={section.titleMobile}
+        // En-tête mobile (`65:6256`) : écart de 12.
+        className="gap-3 md:gap-4"
+      />
+      <div role="group" aria-label={t('filter')} className="flex flex-wrap gap-2">
         <Chip selected={filter === 'TOUS'} onClick={() => choose('TOUS')}>
-          Tous
+          {t('all')}
         </Chip>
         {categories.map(([category, label]) => (
           <Chip key={category} selected={filter === category} onClick={() => choose(category)}>
@@ -77,7 +79,7 @@ export function PartnersGrid({
                 </span>
               )}
               <span className="rounded-full bg-neutral-0 px-[9px] py-[3px] font-ui text-[11px] leading-4 tracking-[0.01em] text-text-muted">
-                {BADGES[partner.category]}
+                {t(`badges.${partner.category}`)}
               </span>
             </>
           );

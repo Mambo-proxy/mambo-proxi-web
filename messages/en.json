@@ -157,5 +157,14 @@
       "booking": "Book an appointment",
       "otherAction": "{action} — {title}"
     }
+  },
+  "partners": {
+    "filter": "Filter partners",
+    "all": "All",
+    "badges": {
+      "EXPERIENCE": "Experience",
+      "IMMOBILIER": "Real estate",
+      "ENTREPRISES": "Business"
+    }
   }
 }

@@ -157,5 +157,14 @@
       "booking": "Prendre rendez-vous",
       "otherAction": "{action} — {title}"
     }
+  },
+  "partners": {
+    "filter": "Filtrer les partenaires",
+    "all": "Tous",
+    "badges": {
+      "EXPERIENCE": "Expérience",
+      "IMMOBILIER": "Immobilier",
+      "ENTREPRISES": "Entreprise"
+    }
   }
 }

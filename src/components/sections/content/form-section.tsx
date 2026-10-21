@@ -6,7 +6,8 @@ import { SectionShell } from './section-shell';
 
 /**
  * Section formulaire (Partenaires `65:5991`, Formation) : colonne d'informations (420 : sur-titre, titre, chapô et
- * encadré « Et ensuite ? » en 3 étapes numérotées, masqué en mobile) et carte formulaire, écart 64.
+ * encadré « Et ensuite ? » en 3 étapes numérotées, masqué en mobile) et carte formulaire, écart 64. En-tête espacé
+ * de 20, chapô 16/26 (`65:5993`, `65:6399`).
  */
 export function FormSection({
   section,
@@ -35,7 +36,8 @@ export function FormSection({
           lead={section.lead}
           leadMobile={section.leadMobile}
           titleClassName={titleClassName}
-          leadClassName="md:text-[16px] md:leading-[26px]"
+          className="gap-5"
+          leadClassName="leading-[26px] md:text-[16px] md:leading-[26px]"
         />
         {aside && <div className="hidden xl:block">{aside}</div>}
         {steps.length > 0 && (
