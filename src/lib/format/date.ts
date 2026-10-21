@@ -1,6 +1,6 @@
 import { TZDate } from '@date-fns/tz';
 import { differenceInCalendarDays, format, formatDistanceStrict } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { enGB, fr } from 'date-fns/locale';
 
 /** Fuseau d'affichage par défaut (docs/05 §1). */
 export const DEFAULT_TIME_ZONE = 'Africa/Douala';
@@ -71,14 +71,26 @@ export function formatRelative(
 
 /**
  * Ancienneté d'une publication (liste des offres) : « aujourd’hui », « il y a 3 jours », « il y a 1 semaine »,
- * « il y a 3 semaines », puis « le 2 octobre 2026 » au-delà d'un mois.
+ * « il y a 3 semaines », puis « le 2 octobre 2026 » au-delà d'un mois. En anglais : « today », « 3 days ago »,
+ * « 1 week ago », « on 2 October 2026 ».
  */
 export function formatPublishedAgo(
   date: DateInput,
   now: DateInput = Date.now(),
   timeZone = DEFAULT_TIME_ZONE,
+  locale: 'fr' | 'en' = 'fr',
 ): string {
   const days = differenceInCalendarDays(inZone(now, timeZone), inZone(date, timeZone));
+  if (locale === 'en') {
+    if (days <= 0) return 'today';
+    if (days === 1) return 'yesterday';
+    if (days < 7) return `${days}\u00A0days ago`;
+    if (days < 31) {
+      const weeks = Math.floor(days / 7);
+      return `${weeks}\u00A0week${weeks > 1 ? 's' : ''} ago`;
+    }
+    return `on ${format(inZone(date, timeZone), 'd MMMM yyyy', { locale: enGB })}`;
+  }
   if (days <= 0) return 'aujourd’hui';
   if (days === 1) return 'hier';
   if (days < 7) return `il y a ${days}\u00A0jours`;

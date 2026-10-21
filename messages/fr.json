@@ -171,5 +171,17 @@
     "filter": "Filtrer les formations",
     "all": "Toutes",
     "request": "Demander cette formation"
+  },
+  "jobs": {
+    "count": "{count, plural, =0 {Aucun poste ouvert} one {# poste ouvert} other {# postes ouverts}}",
+    "search": "Rechercher un poste",
+    "filter": "Filtrer les offres",
+    "all": "Tous",
+    "contracts": ["CDI", "CDD", "Freelance", "Stage", "Alternance"],
+    "new": "Nouveau",
+    "published": "Publiée {ago}",
+    "view": "Voir l’offre",
+    "viewLabel": "Voir l’offre : {title}",
+    "empty": "Aucune offre ne correspond à votre recherche. Vous pouvez envoyer une candidature spontanée."
   }
 }

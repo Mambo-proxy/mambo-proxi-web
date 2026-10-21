@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatDateTime, formatRelative, formatTime } from './date';
+import { formatDate, formatDateTime, formatPublishedAgo, formatRelative, formatTime } from './date';
 import { formatFileSize, formatNumber, formatPercent, formatRating } from './number';
 import { frenchTypography } from './typography';
 
@@ -54,5 +54,15 @@ describe('dates (fuseau Africa/Douala par défaut)', () => {
     expect(formatRelative('2026-10-05T15:00:00.000Z', now)).toBe('hier');
     expect(formatRelative('2026-10-03T15:00:00.000Z', now)).toBe(`il y a 3${NBSP}jours`);
     expect(formatRelative('2026-09-20T15:00:00.000Z', now)).toBe('20 septembre 2026');
+  });
+
+  it('formate l’ancienneté d’une offre en français et en anglais', () => {
+    const now = '2026-10-06T15:00:00.000Z';
+    expect(formatPublishedAgo('2026-10-03T15:00:00.000Z', now)).toBe(`il y a 3${NBSP}jours`);
+    expect(formatPublishedAgo('2026-09-22T15:00:00.000Z', now)).toBe(`il y a 2${NBSP}semaines`);
+    expect(formatPublishedAgo('2026-08-20T15:00:00.000Z', now)).toBe('le 20 août 2026');
+    expect(formatPublishedAgo('2026-10-06T08:00:00.000Z', now, undefined, 'en')).toBe('today');
+    expect(formatPublishedAgo('2026-09-29T15:00:00.000Z', now, undefined, 'en')).toBe(`1${NBSP}week ago`);
+    expect(formatPublishedAgo('2026-08-20T15:00:00.000Z', now, undefined, 'en')).toBe('on 20 August 2026');
   });
 });

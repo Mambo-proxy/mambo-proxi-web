@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { ApplicationForm } from '@/components/forms/application-form';
 import { FormSection } from '@/components/sections/content/form-section';
 import { PageSections } from '@/components/sections/content/page-sections';
@@ -20,10 +21,11 @@ type SearchParams = { searchParams: Promise<{ poste?: string }> };
 /** Recrutement (desktop `67:6710`, mobile `67:7189`) : atouts, offres, bandeau prestataires, candidature. */
 export default async function RecruitmentPage({ searchParams }: SearchParams) {
   const { poste } = await searchParams;
-  const [page, settings, jobs] = await Promise.all([
+  const [page, settings, jobs, t] = await Promise.all([
     getPage('recrutement'),
     getSiteSettings(),
     unwrap(api.GET('/v1/jobs', cached([cacheTags.jobs]))),
+    getTranslations('rubrique'),
   ]);
   if (!page) notFound();
   const now = new Date().toISOString();
@@ -31,7 +33,7 @@ export default async function RecruitmentPage({ searchParams }: SearchParams) {
   return (
     <PageSections
       page={page}
-      breadcrumb={[{ label: 'Accueil', href: routes.home }, { label: 'Recrutement' }]}
+      breadcrumb={[{ label: t('home'), href: routes.home }, { label: page.title }]}
       whatsappHref={null}
       keyFigures={settings.keyFigures ?? []}
       heroVisualClassName="xl:h-[440px]"
