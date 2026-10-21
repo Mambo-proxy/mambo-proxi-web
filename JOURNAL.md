@@ -434,6 +434,6 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 
 ### Décisions
 
-- **Nombre de services de « Services de proximité »** dans les autres rubriques : la maquette affiche encore « 3 services » ; le compteur vient des données (4 depuis l'ajout de Pressing et laverie).
+- **Nombre de services de « Services de proximité »** dans les autres rubriques : la maquette affiche encore « 3 services » ; le compteur vient des données (4 depuis l'ajout de Pressing et laverie). Validé par la cliente le 21 octobre 2026 : le site affiche 4 partout (contrat, données, pages) ; la maquette, en lecture seule, reste à corriger dans Figma.
 - **Événements sur le site anglais** : titres, étiquettes et lieux restent en français tant que l'API ne fournit pas de version anglaise des événements ; la fenêtre d'inscription reste en français, comme les autres formulaires du site (traduction des formulaires à faire).
 - **Disque plein** : le cache Turbopack écrit pendant que le disque était plein était corrompu (« next/font/google queries have exactly one entry ») ; `.next` supprimé, build propre.
