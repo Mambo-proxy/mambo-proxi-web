@@ -109,7 +109,9 @@
     "quoteFor": "pour {name}",
     "quote": "Devis",
     "home": "Accueil",
-    "whatsappContext": "Rubrique : {name}"
+    "whatsappContext": "Rubrique : {name}",
+    "join": "Je participe",
+    "limitedPlaces": "Places limitées"
   },
   "service": {
     "home": "Accueil",

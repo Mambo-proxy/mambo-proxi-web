@@ -109,7 +109,9 @@
     "quoteFor": "for {name}",
     "quote": "Quote",
     "home": "Home",
-    "whatsappContext": "Category: {name}"
+    "whatsappContext": "Category: {name}",
+    "join": "Join",
+    "limitedPlaces": "Limited places"
   },
   "service": {
     "home": "Home",

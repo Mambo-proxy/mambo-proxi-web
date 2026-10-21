@@ -38,7 +38,7 @@ export function AgendaList({
     ) : null;
   return (
     <>
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+      <div className="flex flex-col md:gap-4 xl:flex-row xl:items-end xl:justify-between">
         {heading}
         {more}
       </div>

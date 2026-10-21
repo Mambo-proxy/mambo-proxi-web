@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, CircleCheck, Mail, User } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -32,6 +33,7 @@ type FormOutput = z.output<typeof schema>;
  * nom, e-mail, téléphone/WhatsApp, nombre de places, consentement → `POST /v1/event-registrations`.
  */
 export function EventRegistrationDialog({ event }: { event: Event }) {
+  const t = useTranslations('rubrique');
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState<string | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
@@ -82,7 +84,7 @@ export function EventRegistrationDialog({ event }: { event: Event }) {
         onClick={() => setOpen(true)}
         className="group/cta inline-flex cursor-pointer items-center gap-1.5 rounded-xs font-ui text-[14px] leading-5 font-semibold text-text-brand"
       >
-        Je participe
+        {t('join')}
         <span className="sr-only"> : {event.title}</span>
         <ArrowRight
           aria-hidden
@@ -93,7 +95,7 @@ export function EventRegistrationDialog({ event }: { event: Event }) {
       <Modal
         open={open}
         onClose={close}
-        title={done ? 'Inscription envoyée' : 'Je participe'}
+        title={done ? 'Inscription envoyée' : t('join')}
         description={`${event.title} · ${formatWeekdayDate(event.startsAt)} · ${event.city}`}
       >
         {done ? (
