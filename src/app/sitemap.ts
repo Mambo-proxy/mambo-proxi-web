@@ -18,6 +18,8 @@ const STATIC_PATHS = [
   '/devis',
   '/inscription',
   '/suivi-mambo',
+  '/magazine',
+  '/zones-d-intervention',
   '/mentions-legales',
   '/confidentialite',
   '/cookies',

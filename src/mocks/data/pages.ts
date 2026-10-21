@@ -954,6 +954,122 @@ const magazineEn: Page = {
   ],
 };
 
+/** Zones d'intervention (`255:12322`, `255:12506`) : héros, carte et quartiers par zone (`GET /v1/zones`), bandeau final. */
+const zones: Page = {
+  key: 'zones-d-intervention',
+  title: 'Zones d’intervention',
+  updatedAt: '2026-10-18T08:00:00.000Z',
+  isPreview: false,
+  seo: {
+    title: 'Zones d’intervention à Douala — quartiers desservis',
+    description:
+      'Quatre zones au départ de Cité SIC : trouvez votre quartier à Douala et les conditions d’intervention à domicile et de livraison, confirmées sur devis.',
+    ogImageUrl: null,
+    noindex: false,
+  },
+  sections: [
+    {
+      id: 'hero',
+      type: 'hero',
+      enabled: true,
+      variant: 'page',
+      eyebrow: 'Zones d’intervention',
+      title: 'Nous intervenons partout à\u00a0Douala.',
+      lead: 'Quatre zones au départ de Cité SIC. Trouvez votre quartier : les conditions d’intervention et de livraison vous sont confirmées sur devis.',
+      leadMobile: 'Quatre zones au départ de Cité SIC. Conditions confirmées sur devis.',
+      visual: photo(
+        'livraison',
+        'prox-scooter',
+        1280,
+        960,
+        'Un livreur Mambo Proxi à scooter sur une avenue bordée de palmiers, à Douala.',
+      ),
+      showWhatsapp: false,
+      anchors: [
+        { label: 'La carte', href: '#la-carte', external: false },
+        { label: 'Mon quartier', href: '#trouver-votre-quartier', external: false },
+        { label: 'Les zones', href: '#quartiers-par-zone', external: false },
+        { label: 'Hors zone', href: '#zone-speciale', external: false },
+      ],
+    },
+    {
+      id: 'carte',
+      type: 'dynamic',
+      enabled: true,
+      anchor: 'la-carte',
+      source: 'zones-map',
+      eyebrow: 'La carte',
+      title: 'Quatre zones, une même exigence.',
+    },
+    {
+      id: 'cta',
+      type: 'ctaBand',
+      enabled: true,
+      title: 'Une demande\nà nous confier ?',
+      text: 'Nous l’étudions avec soin et vous répondons sous 24 h.',
+      primaryCta: { label: 'Demander un devis gratuit', href: '/devis', external: false },
+      showWhatsapp: true,
+    },
+  ],
+};
+
+/** Zones d'intervention en anglais (`?lang=en`). */
+const zonesEn: Page = {
+  ...zones,
+  title: 'Service areas',
+  seo: {
+    title: 'Service areas in Douala — neighbourhoods we cover',
+    description:
+      'Four areas from our Cité SIC base: find your neighbourhood in Douala and the terms for home visits and delivery, confirmed in the quote.',
+    ogImageUrl: null,
+    noindex: false,
+  },
+  sections: [
+    {
+      id: 'hero',
+      type: 'hero',
+      enabled: true,
+      variant: 'page',
+      eyebrow: 'Service areas',
+      title: 'We cover all of Douala.',
+      lead: 'Four areas from our Cité SIC base. Find your neighbourhood: the terms for home visits and delivery are confirmed in your quote.',
+      leadMobile: 'Four areas from our Cité SIC base. Terms confirmed in the quote.',
+      visual: photo(
+        'livraison',
+        'prox-scooter',
+        1280,
+        960,
+        'A Mambo Proxi delivery rider on a scooter on a palm-lined avenue in Douala.',
+      ),
+      showWhatsapp: false,
+      anchors: [
+        { label: 'The map', href: '#la-carte', external: false },
+        { label: 'My area', href: '#trouver-votre-quartier', external: false },
+        { label: 'The zones', href: '#quartiers-par-zone', external: false },
+        { label: 'Outside the zones', href: '#zone-speciale', external: false },
+      ],
+    },
+    {
+      id: 'carte',
+      type: 'dynamic',
+      enabled: true,
+      anchor: 'la-carte',
+      source: 'zones-map',
+      eyebrow: 'The map',
+      title: 'Four areas, one standard.',
+    },
+    {
+      id: 'cta',
+      type: 'ctaBand',
+      enabled: true,
+      title: 'Something\nwe can help with?',
+      text: 'We look at it carefully and reply within 24 hours.',
+      primaryCta: { label: 'Request a free quote', href: '/devis', external: false },
+      showWhatsapp: true,
+    },
+  ],
+};
+
 export const pages: Partial<Record<Page['key'], Page>> = {
   'qui-sommes-nous': quiSommesNous,
   mission,
@@ -963,9 +1079,11 @@ export const pages: Partial<Record<Page['key'], Page>> = {
   'avis-clients': avisClients,
   'suivi-mambo': suiviMambo,
   magazine,
+  'zones-d-intervention': zones,
 };
 
 /** Pages traduites (`?lang=en`) ; une page non encore traduite est servie en français, comme le fait l'API. */
 export const pagesEn: Partial<Record<Page['key'], Page>> = {
   magazine: magazineEn,
+  'zones-d-intervention': zonesEn,
 };

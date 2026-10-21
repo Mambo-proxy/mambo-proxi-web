@@ -86,6 +86,7 @@
     "result": "{quarter} est en {zone}.",
     "notFoundTitle": "Nous n’avons pas trouvé « {query} ».",
     "notFoundText": "Votre quartier n’apparaît pas ? Contactez-nous : nous étudions chaque demande.",
+    "listTitle": "Les quartiers, zone par zone",
     "legend": "Légende",
     "zoomIn": "Zoomer",
     "zoomOut": "Dézoomer",

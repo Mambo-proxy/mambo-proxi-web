@@ -1,15 +1,28 @@
 import type { DynamicSection, ServiceAreas } from '@/lib/api/schema';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { frenchTypography } from '@/lib/format/typography';
+import { QuarterList } from './quarter-list';
 import { ZonesMap } from './zones-map';
 
 /**
- * « Nos zones d'intervention » de l'accueil (Figma `290:31634`, mobile `290:31736`) : fond blanc, py 88 (56),
- * sur-titre Inter SemiBold 13 orange, titre Poppins 40 (28/34 en mobile), gap 12 ; carte et recherche à 40 (28) px.
+ * Carte des zones d'intervention : accueil (Figma `290:31634`, mobile `290:31736`) et page Zones d'intervention
+ * (`256:12724`, `256:12824`) : fond blanc, py 88 (56), sur-titre Inter SemiBold 13 orange, titre Poppins 40 (28/34 en
+ * mobile), gap 12 ; carte et recherche à 40 (28) px, puis la liste des quartiers par zone sur la page Zones.
  */
-export function ZonesSection({ section, areas }: { section: DynamicSection; areas: ServiceAreas }) {
+export function ZonesSection({
+  section,
+  areas,
+  withQuarterList = false,
+}: {
+  section: DynamicSection;
+  areas: ServiceAreas;
+  withQuarterList?: boolean;
+}) {
   return (
-    <section className="bg-neutral-0 py-14 xl:py-[88px]">
+    <section
+      id={section.anchor ?? undefined}
+      className="scroll-mt-(--site-header-h,0px) bg-neutral-0 py-14 xl:py-[88px]"
+    >
       <div className="container-site flex flex-col gap-7 xl:gap-10">
         <div className="flex flex-col gap-3">
           {section.eyebrow && (
@@ -36,6 +49,7 @@ export function ZonesSection({ section, areas }: { section: DynamicSection; area
             )
           }
         />
+        {withQuarterList && <QuarterList areas={areas} />}
       </div>
     </section>
   );
