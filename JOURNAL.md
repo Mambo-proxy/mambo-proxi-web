@@ -520,3 +520,19 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 
 - **« Une formation pour votre équipe ? »** : la maquette renvoie « ? » seul à la ligne en desktop (espace ordinaire) ; l'espace insécable le garde avec « équipe » (même hauteur).
 - **Formulaires du site anglais** : la demande de formation reste en français, comme les autres formulaires (traduction des formulaires à faire).
+
+### Recrutement (22 octobre 2026)
+
+- Page recalée sur la maquette (`67:6710`, `67:7189`), mise en page inchangée : chapô du héros « nous recherchons à Douala des personnes fiables… », premier atout « À Douala et au Cameroun, on avance ensemble. », deuxième offre « Chargé·e de relation clients » à Douala sur site (anciennement « … diaspora », en France), version anglaise (nouvelle, `/en/careers`) : textes de la page, liste des offres (`jobs` dans les messages), offres servies en anglais par l'API (`?lang=en`), ancienneté « Posted 3 days ago », fil d'Ariane « Home ».
+- Photo du héros : `recrut-hero` (original de Figma).
+- Filtres de contrat : libellés de la langue de la page (`jobs.contracts` : CDI, CDD… ou Permanent, Fixed-term…), retenus s'ils figurent dans au moins une offre (recherche sans casse ni accents dans le type de contrat).
+- Espacements recalés en mobile : en-tête des offres à 12, recherche collée au titre, titres des offres en 17/28, 12 avant « Voir l’offre » ; bandeau sombre : titre avec interlettrage −0,01, 16 avant le bouton ; candidature : champs groupés comme les rangées du desktop (16 dans une paire, 20 ailleurs), zone de dépôt du CV à p 20, libellé sur une ligne en empiétant sur la marge intérieure.
+- Fidélité : en desktop, chaque section à la hauteur de la maquette (4 168 px pour 4 167) ; en mobile, sections identiques sauf les offres et le bandeau sombre (5 825 px pour 5 703, voir les décisions).
+
+### Décisions
+
+- **Filtres des offres** : la maquette montre « Tous, Douala, Yaoundé, Douala, CDI, Freelance » (le calque « France » affiche « Douala ») ; les filtres restent tirés des offres publiées : Tous, Douala, Yaoundé, CDI, CDD, Freelance.
+- **Lignes d'offre en mobile** : dans la maquette, les informations (lieu, contrat, ancienneté) tiennent sur une ligne en sortant de la carte (jusqu'à 134 px), et le badge « Nouveau » dépasse de 28 px ; ils passent ici à la ligne (+94 px sur la section).
+- **Titre du bandeau sombre en mobile** : la maquette renvoie « ? » seul en début de ligne ; l'espace insécable le garde avec « entreprise », le titre passe sur trois lignes (+28 px).
+- **Formulaire de candidature du site anglais** : reste en français, comme les autres formulaires (traduction des formulaires à faire).
+
