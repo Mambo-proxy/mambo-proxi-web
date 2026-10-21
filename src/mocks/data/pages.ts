@@ -691,7 +691,13 @@ const partenaires: Page = {
       eyebrow: 'Partenaires',
       title: 'Construisons ensemble des services ==de confiance.==',
       lead: 'Chauffeurs, chefs, photographes, propriétaires, agences, entreprises : rejoignez le réseau MAMBO Proxi et recevez des demandes qualifiées.',
-      visual: visual('equipe'),
+      visual: photo(
+        'equipe',
+        'part-hero',
+        1280,
+        960,
+        'Une partenaire et un responsable de Mambo Proxi se serrent la main autour d’un bureau.',
+      ),
       primaryCta: { label: 'Devenir partenaire', href: '#formulaire', external: false },
       secondaryCta: { label: 'Voir nos partenaires', href: '#partenaires', external: false },
       showWhatsapp: false,
@@ -720,7 +726,7 @@ const partenaires: Page = {
           title: 'Prestataires Expérience',
           subtitle: 'Chauffeurs, photographes, chefs privés, masseurs, prestataires événementiels.',
           text: 'Recevez des demandes de prestations près de chez vous.',
-          visual: visual('equipe'),
+          visual: photo('equipe', 'part-exp', 1536, 864, ''),
           cta: {
             label: 'Je candidate',
             href: '/partenaires?type=PRESTATAIRE_EXPERIENCE#formulaire',
@@ -731,14 +737,14 @@ const partenaires: Page = {
           title: 'Immobilier',
           subtitle: 'Propriétaires, agences et acteurs immobiliers.',
           text: 'Confiez une gestion locative ou proposez vos logements.',
-          visual: visual('logement'),
+          visual: photo('logement', 'immo-recherche', 1536, 1024, ''),
           cta: { label: 'Je candidate', href: '/partenaires?type=IMMOBILIER#formulaire', external: false },
         },
         {
           title: 'Entreprises & prestataires',
           subtitle: 'Livraison, entretien, culture, loisirs, services aux familles.',
           text: 'Développez votre activité avec un partenaire de confiance.',
-          visual: visual('equipe'),
+          visual: photo('equipe', 'part-entreprise', 1536, 864, ''),
           cta: {
             label: 'Je candidate',
             href: '/partenaires?type=ENTREPRISE_PRESTATAIRE#formulaire',
@@ -770,7 +776,7 @@ const partenaires: Page = {
         {
           icon: 'Users',
           title: 'Une visibilité nouvelle',
-          text: 'En France comme au Cameroun, auprès de la diaspora.',
+          text: 'À Douala, auprès des familles, des actifs et des professionnels.',
         },
         {
           icon: 'GraduationCap',
@@ -794,6 +800,140 @@ const partenaires: Page = {
         { title: 'Étude de votre demande' },
         { title: 'Échange avec notre équipe' },
         { title: 'Signature de la charte partenaire' },
+      ],
+    },
+  ],
+};
+
+/** Partenaires en anglais (`?lang=en`) : textes rédigés pour le site. */
+const partenairesEn: Page = {
+  ...partenaires,
+  title: 'Partners',
+  seo: {
+    title: 'Become a MAMBO Proxi partner in Douala',
+    description:
+      'Drivers, chefs, photographers, landlords, agencies, businesses: join the MAMBO Proxi network and receive qualified requests.',
+    ogImageUrl: null,
+    noindex: false,
+  },
+  sections: [
+    {
+      id: 'hero',
+      type: 'hero',
+      enabled: true,
+      variant: 'page',
+      eyebrow: 'Partners',
+      title: 'Let’s build services ==you can trust.==',
+      lead: 'Drivers, chefs, photographers, landlords, agencies, businesses: join the MAMBO Proxi network and receive qualified requests.',
+      visual: photo(
+        'equipe',
+        'part-hero',
+        1280,
+        960,
+        'A partner and a Mambo Proxi manager shake hands across a desk.',
+      ),
+      primaryCta: { label: 'Become a partner', href: '#formulaire', external: false },
+      secondaryCta: { label: 'See our partners', href: '#partenaires', external: false },
+      showWhatsapp: false,
+    },
+    {
+      id: 'partenaires',
+      type: 'dynamic',
+      enabled: true,
+      anchor: 'partenaires',
+      tone: 'light',
+      source: 'partners-grid',
+      eyebrow: 'Our partners',
+      title: 'They work alongside us',
+    },
+    {
+      id: 'types',
+      type: 'cardGrid',
+      enabled: true,
+      tone: 'muted',
+      layout: 'illustrated',
+      columns: 3,
+      eyebrow: 'Become a partner',
+      title: 'Three ways to work with us',
+      items: [
+        {
+          title: 'Experience providers',
+          subtitle: 'Drivers, photographers, private chefs, massage therapists, event providers.',
+          text: 'Receive service requests close to where you are.',
+          visual: photo('equipe', 'part-exp', 1536, 864, ''),
+          cta: {
+            label: 'Apply',
+            href: '/partenaires?type=PRESTATAIRE_EXPERIENCE#formulaire',
+            external: false,
+          },
+        },
+        {
+          title: 'Real estate',
+          subtitle: 'Landlords, agencies and property professionals.',
+          text: 'Entrust us with property management or list your homes.',
+          visual: photo('logement', 'immo-recherche', 1536, 1024, ''),
+          cta: { label: 'Apply', href: '/partenaires?type=IMMOBILIER#formulaire', external: false },
+        },
+        {
+          title: 'Businesses & providers',
+          subtitle: 'Delivery, cleaning, culture, leisure, family services.',
+          text: 'Grow your business with a partner you can trust.',
+          visual: photo('equipe', 'part-entreprise', 1536, 864, ''),
+          cta: {
+            label: 'Apply',
+            href: '/partenaires?type=ENTREPRISE_PRESTATAIRE#formulaire',
+            external: false,
+          },
+        },
+      ],
+    },
+    {
+      id: 'avantages',
+      type: 'cardGrid',
+      enabled: true,
+      tone: 'light',
+      layout: 'cards',
+      columns: 4,
+      eyebrow: 'Why join us?',
+      title: 'A network that values your skills',
+      items: [
+        {
+          icon: 'Mail',
+          title: 'Qualified requests',
+          text: 'Clients whose needs are already clearly defined.',
+        },
+        {
+          icon: 'ShieldCheck',
+          title: 'A clear relationship',
+          text: 'Written commitments, simple rules.',
+        },
+        {
+          icon: 'Users',
+          title: 'New visibility',
+          text: 'In Douala, among families, working people and professionals.',
+        },
+        {
+          icon: 'GraduationCap',
+          title: 'Training and support',
+          text: 'Workshops to grow and raise your standards.',
+        },
+      ],
+    },
+    {
+      id: 'formulaire',
+      type: 'dynamic',
+      enabled: true,
+      anchor: 'formulaire',
+      tone: 'muted',
+      source: 'partner-form',
+      eyebrow: 'Application form',
+      title: 'Become a partner',
+      lead: 'Tell us about your business in a few minutes. We will get back to you within 72 hours to get to know you.',
+      note: 'What happens next?',
+      items: [
+        { title: 'We review your application' },
+        { title: 'A conversation with our team' },
+        { title: 'Signing the partner charter' },
       ],
     },
   ],
@@ -1431,6 +1571,7 @@ export const pages: Partial<Record<Page['key'], Page>> = {
 export const pagesEn: Partial<Record<Page['key'], Page>> = {
   'qui-sommes-nous': quiSommesNousEn,
   mission: missionEn,
+  partenaires: partenairesEn,
   magazine: magazineEn,
   'zones-d-intervention': zonesEn,
 };
