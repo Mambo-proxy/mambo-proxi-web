@@ -467,3 +467,16 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **« Carte indicative. Sur le site : carte interactive… »** : annotation de la maquette, non reprise (la carte est interactive).
 - **Zone spéciale en mobile** : ses entrées restent une par ligne, comme sur la maquette (« Bonabéri (rive ouest du Wouri) » puis « Autres quartiers hors zone ») ; les autres zones sont à la suite.
 - **Titre du héros** : espace insécable dans « à Douala » pour garder la coupure « partout / à Douala » de la maquette en desktop.
+
+### Qui sommes-nous (21 octobre 2026)
+
+- Page recalée sur la maquette (`63:4730`, `63:5199`), mise en page inchangée : textes recentrés sur Douala (héros « Une agence de services de proximité au Cameroun. », sans orange, présentation, citation et parcours de la fondatrice, équipe « présente à Douala », valeur Proximité, troisième engagement « Des intervenants sélectionnés et suivis »), chiffre « univers de services », version anglaise (nouvelle).
+- Photos : héros `qsn-hero` (original de Figma) et `fondatrice` (celle du Magazine, même image). Portraits de l'équipe : les 4 variantes de l'illustration de la maquette (vêtement et teint), exportées de Figma dans `public/illustrations/portraits/` et servies comme images de l'équipe, en attendant les photos du back-office.
+- Espacements recalés : en mobile, en-têtes de l'équipe et de « Pourquoi Mambo Proxi ? » à 12, cartes d'engagement à p 22, 28 avant les chiffres, paragraphes de la présentation en 16/25 et colonnes espacées de 20 ; en-tête des cartes sur fond sombre à 14 (aussi le Magazine, désormais 3 674 px pour 3 673).
+- Fidélité : chaque section à la hauteur de la maquette, en desktop (5 475 px pour 5 474) et en mobile (7 521 pour 7 520).
+
+### Décisions
+
+- **Chiffres de « Pourquoi Mambo Proxi ? »** : la maquette affiche « 2 univers de services » et « 19 services », repris à l'identique ; le site compte 5 rubriques et 26 services (catalogue simulé). Ce sont des données modifiables dans le back-office : à faire valider par la cliente.
+- **Libellés des chiffres en mobile** : « projets accompagnés » dépasse de 10 px la zone de texte de la tuile dans la maquette et tient sur une ligne ; le libellé peut ici empiéter de 12 px sur la marge intérieure.
+- **Fin de la citation de la fondatrice en desktop** : la maquette laisse « » » seul sur la dernière ligne ; l'espace insécable le garde avec « siens. » (même hauteur).
