@@ -729,6 +729,231 @@ const suiviMambo: Page = {
   ],
 };
 
+/** Photo des maquettes (`public/photos/`), avec l'illustration de repli. */
+const photo = (
+  illustration: Visual['illustration'],
+  file: string,
+  width: number,
+  height: number,
+  alt = '',
+): Visual => ({
+  illustration,
+  image: { id: `photo-${file}`, url: `/photos/${file}.png`, width, height, variants: [] },
+  alt,
+});
+
+/** Magazine, édition n° 1 (`254:26265`, `254:26493`). */
+const magazine: Page = {
+  key: 'magazine',
+  title: 'Magazine',
+  updatedAt: '2026-10-02T08:00:00.000Z',
+  isPreview: false,
+  seo: {
+    title: 'Magazine Mambo Proxi — Édition n° 1 : ensemble vers un bien-être global',
+    description:
+      'Le magazine du bien-être global : santé, nutrition, beauté, immobilier, solidarité et culture. À lire en ligne et à recevoir par e-mail.',
+    ogImageUrl: null,
+    noindex: false,
+  },
+  sections: [
+    {
+      id: 'hero',
+      type: 'hero',
+      enabled: true,
+      variant: 'page',
+      eyebrow: 'Magazine',
+      title: 'Mambo Proxi — Édition n° 1',
+      lead: 'Le magazine du bien-être global : santé, nutrition, beauté, immobilier, solidarité et culture. Un rendez-vous de partage et de découverte, à lire en ligne et à recevoir par e-mail.',
+      visual: photo(
+        'portrait',
+        'magazine-hero',
+        1280,
+        960,
+        'Une lectrice feuillette le magazine Mambo Proxi sur une terrasse, devant un petit-déjeuner de fruits.',
+      ),
+      showWhatsapp: false,
+      anchors: [
+        { label: 'Édito', href: '#edito', external: false },
+        { label: 'Santé et nutrition', href: '#sante-et-nutrition', external: false },
+        { label: 'Beauté et bien-être', href: '#beaute-et-bien-etre', external: false },
+        { label: 'Recevoir le magazine', href: '#recevoir-le-magazine', external: false },
+      ],
+    },
+    {
+      id: 'edito',
+      type: 'textMedia',
+      reverse: false,
+      enabled: true,
+      anchor: 'edito',
+      tone: 'muted',
+      eyebrow: 'Édito · Édition spéciale — Ensemble vers un bien-être global',
+      title: null,
+      quote:
+        'Ce premier numéro est bien plus qu’un magazine : c’est une histoire de vie que je partage avec vous.',
+      paragraphs: [
+        'Chers lecteurs, chères lectrices,',
+        'Ce premier numéro de Mambo Proxi est bien plus qu’un magazine : c’est une histoire de vie que je partage avec vous.',
+        'Pendant 26 ans, mon chemin a été marqué par de nombreux apprentissages, des défis relevés et des expériences qui m’ont façonnée. Ce parcours m’a permis de comprendre une chose essentielle : le bien-être ne se limite pas à la santé, il est global. Il touche à notre alimentation, à notre environnement, à notre beauté intérieure et extérieure, à nos relations sociales, à nos traditions et à nos projets d’avenir.',
+        'Avec Mambo Proxi, mon souhait est de partager avec ma communauté ce que j’ai appris au fil du temps. Pas pour donner des leçons, mais pour inspirer, informer et accompagner chacun et chacune dans sa vie quotidienne.',
+        'Ce magazine sera un rendez-vous de partage et de découverte. Ensemble, nous parlerons de santé, de nutrition, de beauté, de bien-être, d’immobilier, de solidarité et de culture. Parce que chaque aspect de nos vies contribue à ce que nous soyons équilibrés, confiants et tournés vers l’avenir.',
+        'Je vous invite à parcourir ces pages comme on explore un chemin nouveau : avec curiosité, simplicité et ouverture. Ce numéro n’est qu’un début, et je suis heureuse de le vivre avec vous.',
+        'Avec gratitude et sincérité,',
+      ],
+      signature: 'Mireille Bell — Fondatrice de Mambo Proxi',
+      visual: photo('portrait', 'fondatrice', 1117, 1185, 'Mireille Bell, fondatrice de Mambo Proxi.'),
+      chips: [],
+    },
+    {
+      id: 'dans-ce-numero',
+      type: 'cardGrid',
+      enabled: true,
+      anchor: 'dans-ce-numero',
+      tone: 'dark',
+      layout: 'cards',
+      columns: 4,
+      eyebrow: 'Dans ce numéro',
+      title: 'Le bien-être, sous toutes ses formes.',
+      items: [
+        {
+          icon: 'Users',
+          title: 'Santé et nutrition',
+          text: 'Bien manger, prendre soin de soi et de sa famille au quotidien.',
+        },
+        {
+          icon: 'ShieldCheck',
+          title: 'Beauté et bien-être',
+          text: 'Beauté intérieure et extérieure, rituels et moments pour soi.',
+        },
+        {
+          icon: 'Sparkles',
+          title: 'Immobilier et cadre de vie',
+          text: 'Se loger, investir et bâtir ses projets d’avenir au Cameroun.',
+        },
+        {
+          icon: 'GraduationCap',
+          title: 'Solidarité et culture',
+          text: 'Traditions, entraide et initiatives qui nous rassemblent.',
+        },
+      ],
+    },
+    {
+      id: 'recevoir',
+      type: 'ctaBand',
+      enabled: true,
+      anchor: 'recevoir-le-magazine',
+      title: 'Recevez chaque\nnuméro par e-mail.',
+      text: 'Inscrivez-vous à la lettre Mambo : le magazine et nos nouveautés, en français ou en anglais. Désinscription en un clic.',
+      primaryCta: { label: 'S’abonner à la lettre Mambo', href: '#lettre-mambo', external: false },
+      secondaryCta: { label: 'Lire en anglais', href: '/en/magazine', external: false },
+      showWhatsapp: false,
+    },
+  ],
+};
+
+/** Magazine en anglais (`?lang=en`) : textes rédigés pour le site, l'édito traduit fidèlement. */
+const magazineEn: Page = {
+  ...magazine,
+  seo: {
+    title: 'Mambo Proxi magazine — Issue 1: together towards overall well-being',
+    description:
+      'The magazine of overall well-being: health, nutrition, beauty, real estate, solidarity and culture. Read online and receive by email.',
+    ogImageUrl: null,
+    noindex: false,
+  },
+  sections: [
+    {
+      id: 'hero',
+      type: 'hero',
+      enabled: true,
+      variant: 'page',
+      eyebrow: 'Magazine',
+      title: 'Mambo Proxi — Issue 1',
+      lead: 'The magazine of overall well-being: health, nutrition, beauty, real estate, solidarity and culture. A place to share and discover, to read online and to receive by email.',
+      visual: photo(
+        'portrait',
+        'magazine-hero',
+        1280,
+        960,
+        'A reader browses the Mambo Proxi magazine on a terrace, over a fruit breakfast.',
+      ),
+      showWhatsapp: false,
+      anchors: [
+        { label: 'Editorial', href: '#edito', external: false },
+        { label: 'Health and nutrition', href: '#health-and-nutrition', external: false },
+        { label: 'Beauty and well-being', href: '#beauty-and-well-being', external: false },
+        { label: 'Get the magazine', href: '#recevoir-le-magazine', external: false },
+      ],
+    },
+    {
+      id: 'edito',
+      type: 'textMedia',
+      reverse: false,
+      enabled: true,
+      anchor: 'edito',
+      tone: 'muted',
+      eyebrow: 'Editorial · Special issue — Together towards overall well-being',
+      title: null,
+      quote: 'This first issue is much more than a magazine: it is a life story that I am sharing with you.',
+      paragraphs: [
+        'Dear readers,',
+        'This first issue of Mambo Proxi is much more than a magazine: it is a life story that I am sharing with you.',
+        'For 26 years, my path has been shaped by many lessons, challenges overcome and experiences that made me who I am. This journey taught me one essential thing: well-being is not limited to health, it is global. It touches our diet, our environment, our inner and outer beauty, our social relationships, our traditions and our plans for the future.',
+        'With Mambo Proxi, my wish is to share with my community what I have learned over time. Not to lecture, but to inspire, inform and support each and every one of you in your daily life.',
+        'This magazine will be a place to share and discover. Together, we will talk about health, nutrition, beauty, well-being, real estate, solidarity and culture. Because every part of our lives helps us to be balanced, confident and looking to the future.',
+        'I invite you to browse these pages the way you would explore a new path: with curiosity, simplicity and openness. This issue is only a beginning, and I am happy to share it with you.',
+        'With gratitude and sincerity,',
+      ],
+      signature: 'Mireille Bell — Founder of Mambo Proxi',
+      visual: photo('portrait', 'fondatrice', 1117, 1185, 'Mireille Bell, founder of Mambo Proxi.'),
+      chips: [],
+    },
+    {
+      id: 'dans-ce-numero',
+      type: 'cardGrid',
+      enabled: true,
+      anchor: 'dans-ce-numero',
+      tone: 'dark',
+      layout: 'cards',
+      columns: 4,
+      eyebrow: 'In this issue',
+      title: 'Well-being, in all its forms.',
+      items: [
+        {
+          icon: 'Users',
+          title: 'Health and nutrition',
+          text: 'Eating well, taking care of yourself and your family every day.',
+        },
+        {
+          icon: 'ShieldCheck',
+          title: 'Beauty and well-being',
+          text: 'Inner and outer beauty, rituals and moments for yourself.',
+        },
+        {
+          icon: 'Sparkles',
+          title: 'Real estate and living',
+          text: 'Finding a home, investing and building your future in Cameroon.',
+        },
+        {
+          icon: 'GraduationCap',
+          title: 'Solidarity and culture',
+          text: 'Traditions, mutual support and initiatives that bring us together.',
+        },
+      ],
+    },
+    {
+      id: 'recevoir',
+      type: 'ctaBand',
+      enabled: true,
+      anchor: 'recevoir-le-magazine',
+      title: 'Get every issue\nby email.',
+      text: 'Sign up for the Mambo newsletter: the magazine and our news, in French or in English. Unsubscribe in one click.',
+      primaryCta: { label: 'Subscribe to the Mambo newsletter', href: '#lettre-mambo', external: false },
+      secondaryCta: { label: 'Read in French', href: '/magazine', external: false },
+      showWhatsapp: false,
+    },
+  ],
+};
+
 export const pages: Partial<Record<Page['key'], Page>> = {
   'qui-sommes-nous': quiSommesNous,
   mission,
@@ -737,4 +962,10 @@ export const pages: Partial<Record<Page['key'], Page>> = {
   recrutement,
   'avis-clients': avisClients,
   'suivi-mambo': suiviMambo,
+  magazine,
+};
+
+/** Pages traduites (`?lang=en`) ; une page non encore traduite est servie en français, comme le fait l'API. */
+export const pagesEn: Partial<Record<Page['key'], Page>> = {
+  magazine: magazineEn,
 };
