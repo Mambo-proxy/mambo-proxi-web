@@ -14,6 +14,12 @@ const PAGES = [
     anchors: ['mission', 'vision', 'engagements', 'methode'],
     cta: 'Une demande à nous confier ?',
   },
+  {
+    path: '/magazine',
+    title: 'Mambo Proxi — Édition n° 1',
+    anchors: ['edito', 'sante-et-nutrition', 'beaute-et-bien-etre', 'recevoir-le-magazine'],
+    cta: 'Recevez chaque numéro par e-mail.',
+  },
 ];
 
 test.describe('pages éditoriales', () => {
@@ -44,5 +50,18 @@ test.describe('pages éditoriales', () => {
       await expect(chip).toHaveAttribute('aria-current', 'location', { timeout: 1500 });
     }).toPass();
     await expect(page.locator('#engagements')).toBeInViewport();
+  });
+
+  test('Magazine : abonnement à la lettre Mambo et lecture dans l’autre langue', async ({ page }) => {
+    await page.goto('/magazine', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('link', { name: 'S’abonner à la lettre Mambo' })).toHaveAttribute(
+      'href',
+      '#lettre-mambo',
+    );
+    await expect(page.locator('#lettre-mambo')).toHaveCount(1);
+    await page.getByRole('link', { name: 'Lire en anglais' }).click();
+    await expect(page).toHaveURL(/\/en\/magazine$/);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Mambo Proxi — Issue 1');
+    await expect(page.getByRole('link', { name: 'Read in French' })).toHaveAttribute('href', '/magazine');
   });
 });
