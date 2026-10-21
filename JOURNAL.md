@@ -411,3 +411,15 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Textes des instances Figma** : les noms de calques d'une instance gardent le texte du composant (le bandeau final y affiche « Un projet, une question ? Parlons-en. ») ; le texte réel est celui de la capture de référence, « Un logement à trouver ou à confier ? », conservé.
 - **Titre « Vous êtes propriétaire ou investisseur » en mobile** : il déborde de l'écran dans la maquette ; il passe ici à la ligne (+32 px).
 - **Texte du bandeau final en mobile** : « immobilier : » reste groupé (espace insécable avant les deux-points), le texte passe sur trois lignes (+24 px).
+
+### Rubrique Services de proximité : carrousel des formules (21 octobre 2026)
+
+- Services de proximité d'après la maquette (`61:3356`, `61:3914`) : 4 services (Pressing et laverie compris), carrousel « Nos formules » (5 formules : portage de repas, courses, colis express, pressing, livraison à scooter, chacune reliée au service qu'elle présélectionne dans le devis), textes courts en mobile, version anglaise (nouvelle).
+- Public recentré sur Douala, bande « Collecte et livraison de colis et de courrier », déroulé « Nous nous occupons de tout », témoignage de Clarisse N. (Akwa) ; autres rubriques : Expérience, Immobilier, Culture.
+- Photos : originaux de Figma (`prox-scooter`, `prox-courses`, `prox-colis`, `prox-laverie`, `prox-repas`) ; la carte « Portage et livraison de repas » et la formule « Livraison à scooter » partagent la même image, comme la formule « Portage de repas » et le témoignage.
+- Cartes de services des rubriques en mobile : titre 17 px et résumé 14 px (19 et 15 en desktop), en-têtes « Nos services » et « Nos autres rubriques » espacés de 12 px en mobile, comme sur les maquettes. Les écarts mobiles relevés sur Expérience (+8, désormais 8 795 px pour 8 794) et Immobilier (8 939 pour 8 882, l'écart restant vient des décisions déjà notées) disparaissent.
+- Fidélité : en desktop, chaque section à la hauteur de la maquette (6 916 px pour 6 915) ; en mobile, sections identiques sauf la bande des colis (8 569 px pour 8 530, voir les décisions).
+
+### Décisions
+
+- **Bande des colis en mobile** : dans la maquette, le sur-titre et la note tiennent sur une ligne en dépassant de 1 et 15 px la largeur du conteneur ; ils passent ici à la ligne (+38 px), comme la note de la bande de Services à domicile.
