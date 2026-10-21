@@ -1,0 +1,22 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="480" height="360" viewBox="0 0 480 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Art" clip-path="url(#clip0_0_31)">
+<path id="Vector" d="M480 0H0V360H480V0Z" fill="url(#paint0_linear_0_31)"/>
+<path id="Vector_2" opacity="0.35" d="M352.5 210C410.49 210 457.5 162.99 457.5 105C457.5 47.0101 410.49 0 352.5 0C294.51 0 247.5 47.0101 247.5 105C247.5 162.99 294.51 210 352.5 210Z" fill="white"/>
+<g id="Group">
+<path id="Vector_3" d="M193.2 342.75L199.05 450H232.2L240 372L247.8 450H280.95L286.8 342.75H193.2Z" fill="#2E2B28"/>
+<path id="Vector_4" d="M181.5 352.5V251.1C181.5 217.3 198.4 200.4 232.2 200.4H247.8C281.6 200.4 298.5 217.3 298.5 251.1V352.5H181.5Z" fill="#FF7A00"/>
+<path id="Vector_5" d="M253.65 180.9H226.35V208.2H253.65V180.9Z" fill="#6B3E26"/>
+<path id="Vector_6" d="M240 190.65C266.924 190.65 288.75 168.824 288.75 141.9C288.75 114.976 266.924 93.15 240 93.15C213.076 93.15 191.25 114.976 191.25 141.9C191.25 168.824 213.076 190.65 240 190.65Z" fill="#1C1A18"/>
+<path id="Vector_7" d="M240 194.55C260.462 194.55 277.05 177.962 277.05 157.5C277.05 137.038 260.462 120.45 240 120.45C219.538 120.45 202.95 137.038 202.95 157.5C202.95 177.962 219.538 194.55 240 194.55Z" fill="#6B3E26"/>
+</g>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_31" x1="0" y1="0" x2="345.6" y2="460.8" gradientUnits="userSpaceOnUse">
+<stop stop-color="#FCE7D5"/>
+<stop offset="1" stop-color="#F8B272"/>
+</linearGradient>
+<clipPath id="clip0_0_31">
+<rect width="480" height="360" fill="white"/>
+</clipPath>
+</defs>
+</svg>

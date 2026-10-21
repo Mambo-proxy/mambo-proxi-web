@@ -6,17 +6,44 @@ import type { Page, Visual } from '@/lib/api/schema';
  */
 const visual = (illustration: Visual['illustration']): Visual => ({ illustration, image: null, alt: '' });
 
+/** Photo des maquettes (`public/photos/`), avec l'illustration de repli. */
+const photo = (
+  illustration: Visual['illustration'],
+  file: string,
+  width: number,
+  height: number,
+  alt = '',
+): Visual => ({
+  illustration,
+  image: { id: `photo-${file}`, url: `/photos/${file}.png`, width, height, variants: [] },
+  alt,
+});
+
+/** Portraits provisoires de l'équipe (`63:4924`) : variantes de l'illustration exportées de Figma. */
+const portrait = (index: number): Visual => ({
+  illustration: 'portrait',
+  image: {
+    id: `portrait-${index}`,
+    url: `/illustrations/portraits/portrait-${index}.svg`,
+    width: 480,
+    height: 360,
+    variants: [],
+  },
+  alt: '',
+});
+
 const UPDATED_AT = '2026-10-05T08:00:00.000Z';
 
+/** Qui sommes-nous ? (`63:4730`, `63:5199`). */
 const quiSommesNous: Page = {
   key: 'qui-sommes-nous',
   title: 'Qui sommes-nous ?',
-  updatedAt: UPDATED_AT,
+  updatedAt: '2026-10-18T08:00:00.000Z',
   isPreview: false,
   seo: {
-    title: 'Qui sommes-nous ? Une agence entre la France et le Cameroun',
+    title: 'Qui sommes-nous ? Une agence de services de proximité au Cameroun',
     description:
-      'MAMBO Proxi, agence de coordination multiservices : immobilier, services de proximité, expérience, culture et événementiel, entre la France et le Cameroun.',
+      'MAMBO Proxi, agence de services de proximité à Douala : services à domicile, immobilier, services du quotidien, expérience, culture et événementiel, avec des intervenants de confiance.',
     ogImageUrl: null,
     noindex: false,
   },
@@ -27,9 +54,15 @@ const quiSommesNous: Page = {
       enabled: true,
       variant: 'page',
       eyebrow: 'Qui sommes-nous ?',
-      title: 'Une agence qui relie ==la France et le Cameroun.==',
-      lead: 'MAMBO Proxi est une agence de coordination multiservices. Nous accompagnons les personnes, les familles et les organisations dans l’immobilier, les services de proximité, l’expérience, la culture et l’événementiel.',
-      visual: visual('equipe'),
+      title: 'Une agence de services de proximité au Cameroun.',
+      lead: 'MAMBO Proxi est une agence de services de proximité née d’un constat : au Cameroun, il est difficile de trouver rapidement des services compétents. Nous intervenons à domicile et dans l’immobilier, les services du quotidien, l’expérience, la culture et l’événementiel.',
+      visual: photo(
+        'equipe',
+        'qsn-hero',
+        1280,
+        960,
+        'Une conseillère Mambo Proxi accueille un couple au comptoir de l’agence.',
+      ),
       showWhatsapp: false,
       anchors: [
         { label: 'Présentation', href: '#presentation', external: false },
@@ -48,8 +81,8 @@ const quiSommesNous: Page = {
       eyebrow: 'Présentation',
       title: 'Mambo, ce n’est pas qu’un service. C’est une expérience pensée pour vous.',
       paragraphs: [
-        'Né du constat qu’il est difficile d’organiser sa vie au Cameroun à distance, ou d’y trouver des prestataires fiables, MAMBO Proxi réunit en un seul lieu des services essentiels et des expériences de qualité.',
-        'Notre rôle : comprendre votre besoin, trouver la bonne solution, coordonner les prestataires et vous tenir informé à chaque étape. En France comme au Cameroun, vous avez un seul interlocuteur.',
+        'Né du constat qu’il est difficile de trouver facilement des services compétents au Cameroun, MAMBO Proxi réunit des intervenants fiables, sélectionnés et suivis, pour simplifier votre quotidien.',
+        'Notre rôle : comprendre votre besoin, trouver la bonne solution, intervenir chez vous avec des personnes de confiance et vous tenir informé à chaque étape. Vous avez un seul interlocuteur.',
       ],
       chips: ['Vie', 'Expérience', 'Culture', 'Transmission'],
       visual: null,
@@ -65,12 +98,12 @@ const quiSommesNous: Page = {
       eyebrow: 'Le parcours de la fondatrice',
       title: null,
       quote:
-        'J’ai voulu créer le service dont chaque famille entre la France et le Cameroun a besoin : quelqu’un de confiance, sur place, qui s’occupe de tout comme pour les siens.',
+        'J’ai voulu créer le service dont chaque famille au Cameroun a besoin : quelqu’un de confiance, sur place, qui s’occupe de tout comme pour les siens.',
       paragraphs: [
-        'Fondatrice de MAMBO Proxi, Mireille Bell a fait de la proximité le cœur de son engagement : relier deux pays qu’elle connaît intimement et accompagner chacun avec attention et exigence.',
+        'Fondatrice de MAMBO Proxi, Mireille Bell a fait de la proximité le cœur de son engagement : partager son savoir-faire et accompagner chacun avec attention et exigence.',
       ],
       signature: 'Mireille Bell — Fondatrice et directrice',
-      visual: visual('portrait'),
+      visual: photo('portrait', 'fondatrice', 1117, 1185, 'Mireille Bell, fondatrice de Mambo Proxi.'),
       chips: [],
     },
     {
@@ -81,12 +114,12 @@ const quiSommesNous: Page = {
       tone: 'light',
       eyebrow: 'Notre équipe',
       title: 'Des visages derrière chaque service',
-      lead: 'Une équipe présente en France et au Cameroun, joignable et à l’écoute.',
+      lead: 'Une équipe présente à Douala, joignable et à l’écoute.',
       members: [
-        { name: 'Prénom Nom', role: 'Coordination', location: 'Douala', visual: visual('portrait') },
-        { name: 'Prénom Nom', role: 'Relation clients', location: 'France', visual: visual('portrait') },
-        { name: 'Prénom Nom', role: 'Immobilier', location: 'Yaoundé', visual: visual('portrait') },
-        { name: 'Prénom Nom', role: 'Partenariats', location: 'Douala', visual: visual('portrait') },
+        { name: 'Prénom Nom', role: 'Opérations', location: 'Douala', visual: portrait(1) },
+        { name: 'Prénom Nom', role: 'Relation clients', location: 'Douala', visual: portrait(2) },
+        { name: 'Prénom Nom', role: 'Immobilier', location: 'Yaoundé', visual: portrait(3) },
+        { name: 'Prénom Nom', role: 'Partenariats', location: 'Douala', visual: portrait(4) },
       ],
     },
     {
@@ -103,7 +136,7 @@ const quiSommesNous: Page = {
         {
           icon: 'Users',
           title: 'Proximité',
-          text: 'Être présents, accessibles et attentifs, ici et là-bas.',
+          text: 'Être présents, accessibles et attentifs, au plus près de vous.',
         },
         {
           icon: 'ShieldCheck',
@@ -142,14 +175,14 @@ const quiSommesNous: Page = {
         {
           icon: 'Globe',
           number: '03',
-          title: 'Un pont entre la France et le Cameroun',
-          text: 'Préparez depuis la France, nous agissons sur place.',
+          title: 'Des intervenants sélectionnés et suivis',
+          text: 'Une équipe sur place, à Douala.',
         },
       ],
       figures: [
         { key: 'projects', value: 150, prefix: '', suffix: '+', decimals: 0, label: 'projets accompagnés' },
         { key: 'partners', value: 40, prefix: '', suffix: '+', decimals: 0, label: 'partenaires engagés' },
-        { key: 'countries', value: 2, prefix: '', decimals: 0, label: 'pays couverts' },
+        { key: 'universes', value: 2, prefix: '', decimals: 0, label: 'univers de services' },
         { key: 'services', value: 19, prefix: '', decimals: 0, label: 'services' },
       ],
       visual: null,
@@ -161,6 +194,165 @@ const quiSommesNous: Page = {
       title: 'Faisons\nconnaissance.',
       text: 'Une question, un projet ? Échangeons par téléphone, WhatsApp ou lors d’un rendez-vous.',
       primaryCta: { label: 'Demander un devis gratuit', href: '/devis', external: false },
+      showWhatsapp: true,
+    },
+  ],
+};
+
+/** Qui sommes-nous ? en anglais (`?lang=en`) : textes rédigés pour le site. */
+const quiSommesNousEn: Page = {
+  ...quiSommesNous,
+  title: 'About us',
+  seo: {
+    title: 'About us: a local services agency in Cameroon',
+    description:
+      'MAMBO Proxi, a local services agency in Douala: home services, real estate, everyday services, experiences, culture and events, with people you can trust.',
+    ogImageUrl: null,
+    noindex: false,
+  },
+  sections: [
+    {
+      id: 'hero',
+      type: 'hero',
+      enabled: true,
+      variant: 'page',
+      eyebrow: 'About us',
+      title: 'A local services agency in Cameroon.',
+      lead: 'MAMBO Proxi is a local services agency born from a simple observation: in Cameroon, it is hard to find skilled services quickly. We work in your home and in real estate, everyday services, experiences, culture and events.',
+      visual: photo(
+        'equipe',
+        'qsn-hero',
+        1280,
+        960,
+        'A Mambo Proxi adviser welcomes a couple at the agency’s front desk.',
+      ),
+      showWhatsapp: false,
+      anchors: [
+        { label: 'Who we are', href: '#presentation', external: false },
+        { label: 'Our team', href: '#notre-equipe', external: false },
+        { label: 'Our values', href: '#nos-valeurs', external: false },
+        { label: 'Why Mambo Proxi?', href: '#pourquoi-mambo', external: false },
+      ],
+    },
+    {
+      id: 'presentation',
+      type: 'textMedia',
+      reverse: false,
+      enabled: true,
+      anchor: 'presentation',
+      tone: 'light',
+      eyebrow: 'Who we are',
+      title: 'Mambo is more than a service. It’s an experience designed for you.',
+      paragraphs: [
+        'Born from the observation that skilled services are hard to find in Cameroon, MAMBO Proxi brings together reliable people, selected and monitored, to make your everyday life simpler.',
+        'Our role: understand your need, find the right solution, send trusted people to your home and keep you informed at every step. You have a single point of contact.',
+      ],
+      chips: ['Life', 'Experience', 'Culture', 'Sharing'],
+      visual: null,
+      quote: null,
+      signature: null,
+    },
+    {
+      id: 'fondatrice',
+      type: 'textMedia',
+      reverse: false,
+      enabled: true,
+      tone: 'muted',
+      eyebrow: 'Our founder’s story',
+      title: null,
+      quote:
+        'I wanted to create the service every family in Cameroon needs: someone trustworthy, on the spot, who takes care of everything as if for their own.',
+      paragraphs: [
+        'Founder of MAMBO Proxi, Mireille Bell has made closeness the heart of her commitment: sharing her know-how and supporting everyone with care and high standards.',
+      ],
+      signature: 'Mireille Bell — Founder and director',
+      visual: photo('portrait', 'fondatrice', 1117, 1185, 'Mireille Bell, founder of Mambo Proxi.'),
+      chips: [],
+    },
+    {
+      id: 'equipe',
+      type: 'team',
+      enabled: true,
+      anchor: 'notre-equipe',
+      tone: 'light',
+      eyebrow: 'Our team',
+      title: 'The faces behind every service',
+      lead: 'A team based in Douala, easy to reach and ready to listen.',
+      members: [
+        { name: 'First Last', role: 'Operations', location: 'Douala', visual: portrait(1) },
+        { name: 'First Last', role: 'Customer relations', location: 'Douala', visual: portrait(2) },
+        { name: 'First Last', role: 'Real estate', location: 'Yaoundé', visual: portrait(3) },
+        { name: 'First Last', role: 'Partnerships', location: 'Douala', visual: portrait(4) },
+      ],
+    },
+    {
+      id: 'valeurs',
+      type: 'cardGrid',
+      enabled: true,
+      anchor: 'nos-valeurs',
+      tone: 'dark',
+      layout: 'cards',
+      columns: 4,
+      eyebrow: 'Our values',
+      title: 'What guides us, every day.',
+      items: [
+        { icon: 'Users', title: 'Closeness', text: 'Being present, available and attentive, close to you.' },
+        { icon: 'ShieldCheck', title: 'Trust', text: 'Vetted providers, commitments kept.' },
+        {
+          icon: 'Sparkles',
+          title: 'High standards',
+          text: 'The same level of quality, whatever the service.',
+        },
+        {
+          icon: 'GraduationCap',
+          title: 'Sharing',
+          text: 'Passing on culture, know-how and good practice.',
+        },
+      ],
+    },
+    {
+      id: 'pourquoi',
+      type: 'featureList',
+      enabled: true,
+      anchor: 'pourquoi-mambo',
+      tone: 'light',
+      eyebrow: 'Why Mambo Proxi?',
+      title: 'Three commitments, one promise.',
+      items: [
+        {
+          icon: 'Users',
+          number: '01',
+          title: 'A team by your side',
+          text: 'A single point of contact who guides you step by step.',
+        },
+        {
+          icon: 'ShieldCheck',
+          number: '02',
+          title: 'Practical, lasting solutions',
+          text: 'Providers who are vetted, monitored and reviewed.',
+        },
+        {
+          icon: 'Globe',
+          number: '03',
+          title: 'Selected, monitored providers',
+          text: 'A team on the ground, in Douala.',
+        },
+      ],
+      figures: [
+        { key: 'projects', value: 150, prefix: '', suffix: '+', decimals: 0, label: 'projects supported' },
+        { key: 'partners', value: 40, prefix: '', suffix: '+', decimals: 0, label: 'committed partners' },
+        { key: 'universes', value: 2, prefix: '', decimals: 0, label: 'service areas' },
+        { key: 'services', value: 19, prefix: '', decimals: 0, label: 'services' },
+      ],
+      visual: null,
+    },
+    {
+      id: 'cta',
+      type: 'ctaBand',
+      enabled: true,
+      title: 'Let’s get\nacquainted.',
+      text: 'A question, a project? Let’s talk by phone, on WhatsApp or at an appointment.',
+      primaryCta: { label: 'Request a free quote', href: '/devis', external: false },
       showWhatsapp: true,
     },
   ],
@@ -729,19 +921,6 @@ const suiviMambo: Page = {
   ],
 };
 
-/** Photo des maquettes (`public/photos/`), avec l'illustration de repli. */
-const photo = (
-  illustration: Visual['illustration'],
-  file: string,
-  width: number,
-  height: number,
-  alt = '',
-): Visual => ({
-  illustration,
-  image: { id: `photo-${file}`, url: `/photos/${file}.png`, width, height, variants: [] },
-  alt,
-});
-
 /** Magazine, édition n° 1 (`254:26265`, `254:26493`). */
 const magazine: Page = {
   key: 'magazine',
@@ -1084,6 +1263,7 @@ export const pages: Partial<Record<Page['key'], Page>> = {
 
 /** Pages traduites (`?lang=en`) ; une page non encore traduite est servie en français, comme le fait l'API. */
 export const pagesEn: Partial<Record<Page['key'], Page>> = {
+  'qui-sommes-nous': quiSommesNousEn,
   magazine: magazineEn,
   'zones-d-intervention': zonesEn,
 };
