@@ -4,10 +4,23 @@ import operations from '../data/contract-examples.json';
 
 type EventsPage = { data: Event[] };
 
+/** Photos des événements de la maquette Culture (`61:5931`), servies comme médias du back-office. */
+const photos: Record<string, { file: string; width: number; height: number }> = {
+  evt_saveurs: { file: 'chef-2', width: 1536, height: 1024 },
+  evt_lobe: { file: 'culture-randonnee', width: 1536, height: 1024 },
+  evt_artisans: { file: 'culture-artisans', width: 1536, height: 1024 },
+};
+
 /** Agenda simulé : les 3 événements du contrat (maquette Culture) suivis de 2 sorties supplémentaires. */
 const contractEvents = (
   operations.find((operation) => operation.operationId === 'listEvents')?.examples.default as EventsPage
-).data;
+).data.map((event): Event => {
+  const photo = photos[event.id];
+  if (!photo) return event;
+  const { file, width, height } = photo;
+  const image = { id: `photo-${file}`, url: `/photos/${file}.png`, width, height, variants: [] };
+  return { ...event, visual: { ...event.visual, image } };
+});
 
 export const events: Event[] = [
   ...contractEvents,

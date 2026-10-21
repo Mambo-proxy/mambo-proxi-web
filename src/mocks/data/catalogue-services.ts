@@ -285,6 +285,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'Compass',
       illustration: 'culture',
+      photo: { url: '/photos/culture-decouverte.png', width: 1536, height: 1024 },
     },
     {
       slug: 'activites-culturelles-loisirs-sorties',
@@ -298,6 +299,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'Sparkles',
       illustration: 'culture',
+      photo: { url: '/photos/culture-activites.png', width: 1536, height: 1024 },
     },
     {
       slug: 'organisation-activites-evenements',
@@ -308,6 +310,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'CalendarCheck',
       illustration: 'evenement',
+      photo: { url: '/photos/offre-buffet-reception.png', width: 1536, height: 1024 },
     },
     {
       slug: 'decouverte-integration-locale',
@@ -318,6 +321,7 @@ export const catalogueSeed: Record<string, ServiceSeed[]> = {
       },
       icon: 'Globe',
       illustration: 'culture',
+      photo: { url: '/photos/culture-integration.png', width: 1536, height: 1024 },
     },
   ],
 };
