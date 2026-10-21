@@ -4,7 +4,7 @@ import { expect, expectAccessible, expectNoHorizontalScroll, test } from './fixt
 const PAGES = [
   {
     path: '/qui-sommes-nous',
-    title: 'Une agence qui relie la France et le Cameroun.',
+    title: 'Une agence de services de proximité au Cameroun.',
     anchors: ['presentation', 'notre-equipe', 'nos-valeurs', 'pourquoi-mambo'],
     cta: 'Faisons connaissance.',
   },
@@ -87,5 +87,19 @@ test.describe('pages éditoriales', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('We cover all of Douala.');
     await expect(page.getByRole('heading', { level: 3, name: 'Neighbourhoods, area by area' })).toBeVisible();
     await expect(page.locator('#zone-1').getByRole('heading', { level: 4 })).toHaveText('Zone 1 — Nearby');
+  });
+
+  test('Qui sommes-nous : équipe à Douala, portraits et version anglaise', async ({ page }) => {
+    await page.goto('/qui-sommes-nous', { waitUntil: 'domcontentloaded' });
+    const team = page.locator('#notre-equipe');
+    await expect(team.getByText('Une équipe présente à Douala, joignable et à l’écoute.')).toBeVisible();
+    await expect(team.getByRole('listitem')).toHaveCount(4);
+    await expect(page.locator('#pourquoi-mambo')).toContainText('univers de services');
+
+    await page.goto('/en/about-us', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('A local services agency in Cameroon.');
+    await expect(
+      page.getByRole('heading', { level: 2, name: 'The faces behind every service' }),
+    ).toBeVisible();
   });
 });
