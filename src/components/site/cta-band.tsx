@@ -21,6 +21,13 @@ type CtaBandProps = {
   href?: string;
   ctaLabel?: string;
   whatsappHref?: string | null;
+  /**
+   * Second bouton (vert), à la place de WhatsApp (Magazine : « Lire en anglais »). Adresse utilisée telle quelle,
+   * sans conversion de langue : elle peut mener à l'autre langue du site.
+   */
+  secondary?: { label: string; href: string } | null;
+  /** Ancre de la section (pastilles du héros). */
+  id?: string;
   className?: string;
 };
 
@@ -36,11 +43,29 @@ export function CtaBand({
   href = routes.devis,
   ctaLabel,
   whatsappHref,
+  secondary,
+  id,
   className,
 }: CtaBandProps) {
   const t = useTranslations('site');
+  const primaryClassName = cn(
+    buttonVariants({ variant: 'dark', size: 'lg' }),
+    'group/cta max-md:w-full max-md:px-5',
+  );
+  const primaryContent = (
+    <>
+      {frenchTypography(ctaLabel ?? t('cta.quote'))}
+      <ArrowRight
+        aria-hidden
+        className="transition-transform duration-200 group-hover/cta:translate-x-[3px] max-md:hidden"
+      />
+    </>
+  );
   return (
-    <section className={cn('container-site pb-14 xl:pb-28', className)}>
+    <section
+      id={id}
+      className={cn('container-site scroll-mt-(--site-header-h,0px) pb-14 xl:pb-28', className)}
+    >
       <div className="relative animate-[cta-wave_12s_ease-in-out_infinite] overflow-hidden rounded-[28px] bg-gradient-energie bg-[length:200%_200%] p-7 motion-reduce:animate-none xl:rounded-[40px] xl:p-[72px]">
         <Image
           src="/brand/logo-symbol-white.svg"
@@ -66,20 +91,25 @@ export function CtaBand({
             />
           </p>
           <div className="mt-1 flex flex-col gap-3 md:flex-row md:flex-wrap xl:mt-0">
-            <Link
-              href={href}
-              className={cn(
-                buttonVariants({ variant: 'dark', size: 'lg' }),
-                'group/cta max-md:w-full max-md:px-5',
-              )}
-            >
-              {ctaLabel ?? t('cta.quote')}
-              <ArrowRight
-                aria-hidden
-                className="transition-transform duration-200 group-hover/cta:translate-x-[3px] max-md:hidden"
-              />
-            </Link>
-            {whatsappHref && (
+            {/* Une ancre de la page (« #lettre-mambo ») reste un lien simple, sans conversion de langue. */}
+            {href.startsWith('#') ? (
+              <a href={href} className={primaryClassName}>
+                {primaryContent}
+              </a>
+            ) : (
+              <Link href={href} className={primaryClassName}>
+                {primaryContent}
+              </Link>
+            )}
+            {secondary && (
+              <a
+                href={secondary.href}
+                className={cn(buttonVariants({ variant: 'whatsapp' }), 'max-md:w-full')}
+              >
+                {frenchTypography(secondary.label)}
+              </a>
+            )}
+            {whatsappHref && !secondary && (
               <a
                 href={whatsappHref}
                 target="_blank"

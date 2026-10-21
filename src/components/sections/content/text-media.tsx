@@ -50,7 +50,8 @@ function Presentation({ section }: { section: TextMediaSection }) {
 
 /**
  * Parcours de la fondatrice (`63:4894`) : portrait 520 × 600 (350 × 380 en mobile, au-dessus), citation Poppins 28/40
- * avec guillemet violet (usage autorisé), texte 17/28, signature (trait orange 32 × 2, nom et fonction).
+ * avec guillemet violet (usage autorisé), texte 17/28 en un seul bloc (paragraphes sans écart, édito du Magazine
+ * `254:26346`), signature (trait orange 32 × 2, nom et fonction).
  */
 function Founder({ section }: { section: TextMediaSection }) {
   const [name, role] = (section.signature ?? '').split(/\s+—\s+/);
@@ -63,7 +64,7 @@ function Founder({ section }: { section: TextMediaSection }) {
           className="h-[380px] rounded-3xl md:h-[480px] xl:h-[600px] xl:rounded-[32px]"
         />
       )}
-      <Reveal as="figure" className="flex flex-col gap-4 xl:gap-5">
+      <Reveal as="figure" className="flex flex-col gap-5">
         {section.eyebrow && <p className="text-web-eyebrow">{frenchTypography(section.eyebrow)}</p>}
         <Quote aria-hidden className="size-7 text-violet-500 xl:size-10" />
         {section.quote && (
@@ -71,16 +72,13 @@ function Founder({ section }: { section: TextMediaSection }) {
             {frenchTypography(`« ${section.quote} »`)}
           </blockquote>
         )}
-        {section.paragraphs.map((paragraph) => (
-          <p
-            key={paragraph}
-            className="font-ui text-[15px] leading-6 text-text-muted xl:text-[17px] xl:leading-7"
-          >
-            {frenchTypography(paragraph)}
-          </p>
-        ))}
+        <div className="flex flex-col font-ui text-[15px] leading-6 text-text-muted xl:text-[17px] xl:leading-7">
+          {section.paragraphs.map((paragraph) => (
+            <p key={paragraph}>{frenchTypography(paragraph)}</p>
+          ))}
+        </div>
         {name && (
-          <figcaption className="flex items-center gap-3 pt-1">
+          <figcaption className="flex items-center gap-3">
             <span aria-hidden className="h-0.5 w-8 shrink-0 bg-brand-primary" />
             <span className="flex flex-col">
               <span className="font-ui text-[16px] leading-6 font-semibold text-text-main">{name}</span>

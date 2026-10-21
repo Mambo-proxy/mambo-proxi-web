@@ -75,6 +75,8 @@ export function PageSections({
             href={(section.primaryCta?.href ?? '/devis') as Route}
             ctaLabel={section.primaryCta?.label}
             whatsappHref={section.showWhatsapp ? whatsappHref : null}
+            secondary={section.secondaryCta}
+            id={section.anchor ?? undefined}
           />
         );
       default:

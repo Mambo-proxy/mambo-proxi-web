@@ -30,17 +30,21 @@ function itemAnchor(title: string): string {
 
 /**
  * Valeurs sur fond sombre (Qui sommes-nous `63:4985`) : cartes `neutral/800` p 28 rayon 24, pastille 48 `neutral/700`
- * et icône orange, titre Poppins 20/28 blanc, texte 15/23 `neutral/300`.
+ * et icône orange, titre Poppins 20/28 blanc, texte 15/23 `neutral/300`. Ancrée par son titre (thèmes du Magazine).
  */
 function ValueCard({ item }: { item: SectionItem }) {
   return (
-    <div className="flex h-full flex-col gap-3.5 rounded-3xl bg-neutral-800 p-[22px] xl:p-7">
+    <div
+      id={itemAnchor(item.title)}
+      className="flex h-full scroll-mt-(--site-header-h,0px) flex-col gap-3.5 rounded-3xl bg-neutral-800 p-[22px] xl:p-7"
+    >
       {item.icon && (
         <span aria-hidden className="flex size-12 items-center justify-center rounded-[14px] bg-neutral-700">
           <Icon name={item.icon} size={22} className="text-orange-400" />
         </span>
       )}
-      <h3 className="font-brand text-[20px] leading-7 font-semibold text-neutral-0">
+      {/* Le titre peut empiéter sur la marge de droite (« Immobilier et cadre de vie » tient sur une ligne en maquette). */}
+      <h3 className="font-brand text-[20px] leading-7 font-semibold text-neutral-0 xl:-mr-2">
         {frenchTypography(item.title)}
       </h3>
       {item.text && (

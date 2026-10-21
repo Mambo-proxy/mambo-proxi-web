@@ -54,8 +54,9 @@ export function SiteFooter({ navigation, settings, whatsappHref }: SiteFooterPro
       <div aria-hidden className="h-1 bg-gradient-lien" />
       <div className="container-site flex flex-col gap-10 pt-16 pb-7 xl:gap-14 xl:pt-24 xl:pb-9">
         <section
+          id="lettre-mambo"
           aria-labelledby="newsletter-title"
-          className="flex flex-col rounded-[20px] bg-neutral-800 p-6 xl:flex-row xl:items-center xl:justify-between xl:gap-1 xl:rounded-[28px] xl:p-10"
+          className="flex scroll-mt-(--site-header-h,0px) flex-col rounded-[20px] bg-neutral-800 p-6 xl:flex-row xl:items-center xl:justify-between xl:gap-1 xl:rounded-[28px] xl:p-10"
         >
           <div className="flex min-w-0 flex-col gap-2 xl:max-w-[376px] xl:flex-[1_1_376px]">
             <p className="font-ui text-[12px] leading-4 font-semibold tracking-[0.08em] text-orange-400 uppercase xl:text-[13px]">
