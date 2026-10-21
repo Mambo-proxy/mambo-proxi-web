@@ -64,6 +64,18 @@ test.describe('pages rubrique', () => {
     await expect(providers.locator('a[href="/devis?service=services-evenementiels"]').first()).toBeAttached();
   });
 
+  test('Services de proximité : carrousel des formules sous les services', async ({ page }) => {
+    await page.goto('/services/services-de-proximite', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('link', { name: 'Voir le service Pressing et laverie' })).toHaveAttribute(
+      'href',
+      '/services/services-de-proximite/pressing-laverie',
+    );
+    const formulas = page.getByRole('list', { name: /^Plusieurs options.*faire défiler horizontalement/ });
+    await expect(formulas.getByRole('article')).toHaveCount(5);
+    await expect(formulas.getByRole('heading', { name: 'Livraison à scooter' })).toBeAttached();
+    await expect(formulas.locator('a[href="/devis?service=pressing-laverie"]').first()).toBeAttached();
+  });
+
   test('rubrique inconnue : 404', async ({ page }) => {
     const response = await page.goto('/services/inconnue');
     expect(response?.status()).toBe(404);
