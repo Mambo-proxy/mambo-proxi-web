@@ -364,9 +364,9 @@ const mission: Page = {
   updatedAt: UPDATED_AT,
   isPreview: false,
   seo: {
-    title: 'Notre mission : simplifier la vie, rapprocher les distances',
+    title: 'Notre mission : simplifier la vie, au plus près de vous',
     description:
-      'Notre mission, notre vision, nos engagements et la méthode qui nous permet de coordonner chaque service entre la France et le Cameroun.',
+      'Notre mission, notre vision, nos engagements et la méthode qui nous permet d’organiser chaque service à domicile, à Douala.',
     ogImageUrl: null,
     noindex: false,
   },
@@ -377,9 +377,15 @@ const mission: Page = {
       enabled: true,
       variant: 'page',
       eyebrow: 'Notre mission',
-      title: 'Simplifier la vie, ==rapprocher les distances.==',
-      lead: 'Notre mission, notre vision, nos engagements et la méthode qui nous permet de coordonner chaque service avec rigueur.',
-      visual: visual('accueil'),
+      title: 'Simplifier la vie, au plus près de vous.',
+      lead: 'Notre mission, notre vision, nos engagements et la méthode qui nous permet d’organiser chaque service avec rigueur.',
+      visual: photo(
+        'accueil',
+        'mission-hero',
+        1280,
+        960,
+        'Une conseillère Mambo Proxi prend des notes auprès d’une famille, dans son salon.',
+      ),
       showWhatsapp: false,
       anchors: [
         { label: 'Notre mission', href: '#mission', external: false },
@@ -400,13 +406,13 @@ const mission: Page = {
           icon: 'ShieldCheck',
           title: 'Notre mission',
           tone: 'orange',
-          text: 'Accompagner les personnes, les familles et les organisations entre la France et le Cameroun, en leur offrant des solutions fiables, humaines et coordonnées pour se loger, se simplifier le quotidien et vivre des expériences de qualité.',
+          text: 'Accompagner les personnes, les familles et les organisations au Cameroun, en leur offrant des services fiables et humains, à domicile et au plus près d’elles, pour se loger, se simplifier le quotidien et vivre des expériences de qualité.',
         },
         {
           icon: 'Compass',
           title: 'Notre vision',
           tone: 'dark',
-          text: 'Devenir la référence de la coordination de services entre la France et le Cameroun : un lieu unique où chacun trouve un interlocuteur de confiance, quel que soit son besoin.',
+          text: 'Devenir la référence des services de proximité au Cameroun : un lieu unique où chacun trouve un interlocuteur de confiance, quel que soit son besoin.',
         },
       ],
     },
@@ -452,7 +458,7 @@ const mission: Page = {
       anchor: 'methode',
       tone: 'light',
       layout: 'rail',
-      eyebrow: 'Notre méthode de coordination',
+      eyebrow: 'Notre méthode d’intervention',
       title: 'Cinq étapes, un seul interlocuteur.',
       lead: 'De votre premier message jusqu’à votre avis, chaque demande suit le même parcours.',
       items: [
@@ -473,7 +479,7 @@ const mission: Page = {
         },
         {
           icon: 'Users',
-          title: 'Coordination',
+          title: 'Intervention',
           text: 'Nous organisons et supervisons l’intervention des prestataires.',
         },
         {
@@ -490,7 +496,13 @@ const mission: Page = {
       tone: 'green',
       text: 'Mambo, ce n’est pas qu’un service. C’est une expérience pensée pour vous.',
       author: 'La signature de MAMBO Proxi',
-      visual: visual('culture'),
+      visual: photo(
+        'culture',
+        'douala-ville',
+        1536,
+        1024,
+        'Douala au coucher du soleil, le pont sur le Wouri.',
+      ),
     },
     {
       id: 'cta',
@@ -499,6 +511,160 @@ const mission: Page = {
       title: 'Une demande\nà nous confier ?',
       text: 'Nous l’étudions avec soin et vous répondons sous 24 h.',
       primaryCta: { label: 'Demander un devis gratuit', href: '/devis', external: false },
+      showWhatsapp: true,
+    },
+  ],
+};
+
+/** Mission en anglais (`?lang=en`) : textes rédigés pour le site. */
+const missionEn: Page = {
+  ...mission,
+  seo: {
+    title: 'Our mission: making life simpler, close to you',
+    description:
+      'Our mission, our vision, our commitments and the method we use to organise every home service in Douala.',
+    ogImageUrl: null,
+    noindex: false,
+  },
+  sections: [
+    {
+      id: 'hero',
+      type: 'hero',
+      enabled: true,
+      variant: 'page',
+      eyebrow: 'Our mission',
+      title: 'Making life simpler, close to you.',
+      lead: 'Our mission, our vision, our commitments and the method we use to organise every service with care.',
+      visual: photo(
+        'accueil',
+        'mission-hero',
+        1280,
+        960,
+        'A Mambo Proxi adviser takes notes with a family in their living room.',
+      ),
+      showWhatsapp: false,
+      anchors: [
+        { label: 'Our mission', href: '#mission', external: false },
+        { label: 'Our vision', href: '#vision', external: false },
+        { label: 'Our commitments', href: '#engagements', external: false },
+        { label: 'Our method', href: '#methode', external: false },
+      ],
+    },
+    {
+      id: 'mission-vision',
+      type: 'cardGrid',
+      enabled: true,
+      tone: 'light',
+      layout: 'compact',
+      columns: 2,
+      items: [
+        {
+          icon: 'ShieldCheck',
+          title: 'Our mission',
+          tone: 'orange',
+          text: 'To support people, families and organisations in Cameroon with reliable, caring services, at home and close to them, to find a place to live, simplify everyday life and enjoy quality experiences.',
+        },
+        {
+          icon: 'Compass',
+          title: 'Our vision',
+          tone: 'dark',
+          text: 'To become the benchmark for local services in Cameroon: one place where everyone finds someone they can trust, whatever they need.',
+        },
+      ],
+    },
+    {
+      id: 'engagements',
+      type: 'cardGrid',
+      enabled: true,
+      anchor: 'engagements',
+      tone: 'muted',
+      layout: 'numbered',
+      columns: 2,
+      eyebrow: 'Our commitments',
+      title: 'What we promise you, with every request.',
+      items: [
+        {
+          number: '01',
+          title: 'Listening',
+          text: 'Understanding what you really need before suggesting a solution.',
+        },
+        {
+          number: '02',
+          title: 'Transparency',
+          text: 'A clear quote, with no hidden costs, before any service.',
+        },
+        {
+          number: '03',
+          title: 'Reliability',
+          text: 'Service providers who are vetted, monitored and rated.',
+        },
+        { number: '04', title: 'Responsiveness', text: 'A reply within 24 hours, follow-up at every step.' },
+        {
+          number: '05',
+          title: 'Confidentiality',
+          text: 'Your information protected and used only with your consent.',
+        },
+        {
+          number: '06',
+          title: 'Continuous improvement',
+          text: 'Your feedback after every service, so we keep getting better.',
+        },
+      ],
+    },
+    {
+      id: 'methode',
+      type: 'steps',
+      enabled: true,
+      anchor: 'methode',
+      tone: 'light',
+      layout: 'rail',
+      eyebrow: 'How we work',
+      title: 'Five steps, one point of contact.',
+      lead: 'From your first message to your feedback, every request follows the same path.',
+      items: [
+        {
+          icon: 'FileText',
+          title: 'Listening',
+          text: 'You describe what you need through the form, on WhatsApp or at an appointment.',
+        },
+        {
+          icon: 'Search',
+          title: 'Analysis',
+          text: 'We find the solution and the service providers best suited to it.',
+        },
+        {
+          icon: 'Mail',
+          title: 'Proposal',
+          text: 'You receive a clear, tailored quote within 24 hours.',
+        },
+        {
+          icon: 'Users',
+          title: 'Service',
+          text: 'We organise and supervise the service providers’ work.',
+        },
+        {
+          icon: 'Sparkles',
+          title: 'Follow-up and feedback',
+          text: 'A satisfaction survey closes every service.',
+        },
+      ],
+    },
+    {
+      id: 'citation',
+      type: 'quote',
+      enabled: true,
+      tone: 'green',
+      text: 'Mambo is more than a service. It’s an experience designed for you.',
+      author: 'The MAMBO Proxi signature',
+      visual: photo('culture', 'douala-ville', 1536, 1024, 'Douala at sunset, the bridge over the Wouri.'),
+    },
+    {
+      id: 'cta',
+      type: 'ctaBand',
+      enabled: true,
+      title: 'Something\nwe can help with?',
+      text: 'We look at it carefully and reply within 24 hours.',
+      primaryCta: { label: 'Request a free quote', href: '/devis', external: false },
       showWhatsapp: true,
     },
   ],
@@ -1264,6 +1430,7 @@ export const pages: Partial<Record<Page['key'], Page>> = {
 /** Pages traduites (`?lang=en`) ; une page non encore traduite est servie en français, comme le fait l'API. */
 export const pagesEn: Partial<Record<Page['key'], Page>> = {
   'qui-sommes-nous': quiSommesNousEn,
+  mission: missionEn,
   magazine: magazineEn,
   'zones-d-intervention': zonesEn,
 };
