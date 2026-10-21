@@ -423,3 +423,17 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 ### Décisions
 
 - **Bande des colis en mobile** : dans la maquette, le sur-titre et la note tiennent sur une ligne en dépassant de 1 et 15 px la largeur du conteneur ; ils passent ici à la ligne (+38 px), comme la note de la bande de Services à domicile.
+
+### Rubrique Culture & événementiel : sorties et agenda en photos (21 octobre 2026)
+
+- Culture & événementiel d'après la maquette (`61:5620`, `61:6277`) : carrousel « Sorties et expériences » (6 sorties : chutes de la Lobé, randonnée, ateliers d'artisans, art contemporain, soirée culturelle, réception privée, chacune reliée au service qu'elle présélectionne dans le devis), textes courts en mobile, version anglaise (nouvelle).
+- Public « Visiteurs et nouveaux arrivants », déroulé « Nous nous occupons de tout », photos du héros, des services, du témoignage et des 3 événements de l'agenda (ajoutées par le gestionnaire simulé, l'exemple du contrat n'a pas d'image) ; autres rubriques : Expérience, Immobilier, Services de proximité.
+- Carte événement recalée sur la maquette : jour 22 px, mois 12 px, pastille arrondie à 14, écarts de 10 ; en-tête de l'agenda espacé de 12 en mobile, lien « Voir tout l'agenda » collé au titre. Date, « Je participe » et « Places limitées » suivent la langue de la page.
+- Photos : originaux de Figma (`culture-decouverte`, `culture-activites`, `culture-integration`, `culture-randonnee`, `culture-artisans`, `temoin-culture`) ; la soirée culturelle, « Organisation d'activités et d'événements » et la réception privée, le dîner « Nuit des saveurs » réutilisent `culture-hero`, `offre-buffet-reception` et `chef-2` (mêmes fichiers).
+- Fidélité : en desktop, chaque section à la hauteur de la maquette (6 893 px pour 6 892) ; en mobile, sections identiques (8 897 px pour 8 896).
+
+### Décisions
+
+- **Nombre de services de « Services de proximité »** dans les autres rubriques : la maquette affiche encore « 3 services » ; le compteur vient des données (4 depuis l'ajout de Pressing et laverie).
+- **Événements sur le site anglais** : titres, étiquettes et lieux restent en français tant que l'API ne fournit pas de version anglaise des événements ; la fenêtre d'inscription reste en français, comme les autres formulaires du site (traduction des formulaires à faire).
+- **Disque plein** : le cache Turbopack écrit pendant que le disque était plein était corrompu (« next/font/google queries have exactly one entry ») ; `.next` supprimé, build propre.
