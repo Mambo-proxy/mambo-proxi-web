@@ -22,7 +22,8 @@ export function MethodRail({ section }: { section: StepsSection }) {
         titleMobile={section.titleMobile}
         lead={section.lead}
         leadMobile={section.leadMobile}
-        className="xl:max-w-[820px]"
+        // En-tête mobile (`64:5772`) : écarts de 12.
+        className="gap-3 md:gap-4 xl:max-w-[820px]"
       />
       <div className="flex flex-col gap-6 xl:gap-12">
         <div aria-hidden className="hidden items-center md:flex">

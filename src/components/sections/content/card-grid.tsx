@@ -17,13 +17,13 @@ const GRID_COLUMNS: Record<number, string> = {
   4: 'md:grid-cols-2 xl:grid-cols-4',
 };
 
-/** Ancre d'une carte d'énoncé (« Notre mission » → `mission`), pour les puces du héros. */
+/** Ancre d'une carte d'énoncé (« Notre mission », « Our mission » → `mission`), pour les puces du héros. */
 function itemAnchor(title: string): string {
   return title
     .normalize('NFD')
     .replace(/\p{Diacritic}/gu, '')
     .toLowerCase()
-    .replace(/^(notre|nos|nous)\s+/, '')
+    .replace(/^(notre|nos|nous|our)\s+/, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 }
@@ -308,8 +308,13 @@ export function CardGrid({ section }: { section: CardGridSection }) {
           lead={section.lead}
           leadMobile={section.leadMobile}
           inverse={inverse}
-          // Valeurs sur fond sombre (`63:4982`, `254:26402`) : sur-titre et titre espacés de 14.
-          className={cn('xl:max-w-[820px]', inverse && 'gap-3.5')}
+          // Valeurs sur fond sombre (`63:4982`, `254:26402`) : sur-titre et titre espacés de 14 ; engagements numérotés
+          // (`64:5737`) : 12 en mobile.
+          className={cn(
+            'xl:max-w-[820px]',
+            inverse && 'gap-3.5',
+            section.layout === 'numbered' && 'gap-3 md:gap-4',
+          )}
         />
       )}
       <ul
