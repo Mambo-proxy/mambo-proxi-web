@@ -493,3 +493,17 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 ### Décisions
 
 - **« la méthode qui nous permet de organiser »** : coquille de la maquette (élision manquante), écrite ici « d’organiser ». Texte modifiable dans le back-office.
+
+### Partenaires (21 octobre 2026)
+
+- Page recalée sur la maquette (`65:5704`, `65:6208`), mise en page inchangée : avantage « Une visibilité nouvelle » recentré sur Douala, champ « Ville et quartier » (anciennement « Pays et ville », même liste), version anglaise (nouvelle) : textes de la page, filtres « All », badges et catégories des partenaires traduits (`partners` dans les messages, libellés anglais servis par l'API avec `?lang=en`), fil d'Ariane « Home ».
+- Photos : héros `part-hero`, types de partenariat `part-exp` et `part-entreprise` (originaux de Figma) ; Immobilier réutilise `immo-recherche` (même image).
+- Cartes de types : lien « Je candidate » à la suite du texte (10 px, sans marge haute), comme la carte Immobilier de la maquette, au lieu d'être calé en bas de carte.
+- Formulaire : « Prestataire Expérience » présélectionné comme sur la maquette (« Je candidate » change toujours le type) ; légende à 10 des pastilles ; en mobile, champs groupés par deux (16 dans une paire, 20 entre deux) ; zone de texte de 120 ; mention anti-spam sur une ligne. En-tête de la section formulaire espacé de 20, chapô 16/26 en mobile (aussi Formation et Recrutement, à reprendre).
+- En-têtes sur fond clair des grilles de cartes et de la grille des partenaires : 12 en mobile (16 auparavant).
+- Fidélité : chaque section à la hauteur de la maquette, en desktop (4 512 px pour 4 511) et en mobile (6 895 pour 6 895).
+
+### Décisions
+
+- **Type de partenariat présélectionné** : la maquette montre « Prestataire Expérience » choisi ; le formulaire s'ouvre ainsi, ce qui supprime l'erreur « Merci de choisir un type de partenariat » au premier envoi.
+- **« Ville et quartier »** : la maquette renomme le champ mais montre toujours « Cameroun · Douala » ; la liste reste au format « Pays · Ville » exigé par le contrat (code pays + ville). Une vraie liste de quartiers demanderait d'étendre le contrat de `POST /v1/partner-requests`.
