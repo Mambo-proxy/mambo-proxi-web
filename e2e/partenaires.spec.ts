@@ -44,9 +44,20 @@ test.describe('partenaires', () => {
     await form.getByLabel(/Nom et prénom/).fill('Paul Ndongo');
     await form.getByRole('textbox', { name: 'E-mail' }).fill('paul@exemple.fr');
     await form.getByLabel(/Téléphone/).fill('+237 6 77 00 00 00');
-    await form.getByLabel(/Pays et ville/).selectOption('CM|Douala');
+    await form.getByLabel(/Ville et quartier/).selectOption('CM|Douala');
     await form.getByText(/J'accepte que Mambo Proxi traite mes données/).click();
     await form.getByRole('button', { name: 'Envoyer ma demande' }).click();
     await expect(page.getByRole('status')).toContainText('Merci', { timeout: 15_000 });
+  });
+
+  test('version anglaise : textes, filtres et badges traduits', async ({ page }) => {
+    await page.goto('/en/partners', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Let’s build services you can trust.');
+    await expect(page.getByRole('navigation', { name: "Fil d'Ariane" })).toContainText('Home');
+    const filters = page.getByRole('group', { name: 'Filter partners' });
+    await expect(filters.getByRole('button', { name: 'All' })).toBeVisible();
+    await expect(filters.getByRole('button', { name: 'Real estate' })).toBeVisible();
+    await expect(page.locator('#partenaires li').first()).toContainText('Experience');
+    await expect(page.getByRole('link', { name: 'Apply : Real estate' })).toBeVisible();
   });
 });
