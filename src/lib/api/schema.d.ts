@@ -4250,6 +4250,8 @@ export interface components {
             /** @description Texte raccourci en mobile ; null = texte principal. */
             textMobile?: string | null;
             primaryCta?: components["schemas"]["Link"] | null;
+            /** @description Second bouton (vert), à la place du bouton WhatsApp (ex. « Lire en anglais » du Magazine). */
+            secondaryCta?: components["schemas"]["Link"] | null;
             /** @default true */
             showWhatsapp: boolean;
         } & {
