@@ -947,7 +947,7 @@ const formation: Page = {
   seo: {
     title: 'Formations pour les professionnels et ateliers au Cameroun',
     description:
-      'Formations pour les professionnels, ateliers et sessions de sensibilisation : pour élever le niveau de service, au Cameroun et en France.',
+      'Formations pour les professionnels, ateliers et sessions de sensibilisation : transmettre le savoir-faire, le savoir-être et les bonnes pratiques.',
     ogImageUrl: null,
     noindex: false,
   },
@@ -959,8 +959,14 @@ const formation: Page = {
       variant: 'page',
       eyebrow: 'Formation',
       title: 'Transmettre les savoir-faire ==qui font la qualité.==',
-      lead: 'Formations pour les professionnels, ateliers et sessions de sensibilisation : pour élever le niveau de service, au Cameroun et en France.',
-      visual: visual('formation'),
+      lead: 'Formations pour les professionnels, ateliers et sessions de sensibilisation : transmettre le savoir-faire, le savoir-être et les bonnes pratiques.',
+      visual: photo(
+        'formation',
+        'formation-hero',
+        1280,
+        960,
+        'Une formatrice anime une session devant des intervenants en tenue Mambo Proxi.',
+      ),
       primaryCta: { label: 'Demander une formation', href: '#demande-formation', external: false },
       secondaryCta: { label: 'Voir le catalogue', href: '#catalogue', external: false },
       showWhatsapp: false,
@@ -1018,6 +1024,108 @@ const formation: Page = {
       eyebrow: 'Demande de formation',
       title: 'Une formation pour votre équipe ?',
       lead: 'Dites-nous ce dont vous avez besoin : nous vous proposons un programme et un devis adaptés.',
+      visual: photo(
+        'formation',
+        'formation-form',
+        1536,
+        1024,
+        'Une formatrice montre à une intervenante comment préparer un lit.',
+      ),
+    },
+  ],
+};
+
+/** Formation en anglais (`?lang=en`) : textes rédigés pour le site. */
+const formationEn: Page = {
+  ...formation,
+  title: 'Training',
+  seo: {
+    title: 'Training for professionals and workshops in Cameroon',
+    description:
+      'Training for professionals, workshops and awareness sessions: passing on know-how, people skills and good practice.',
+    ogImageUrl: null,
+    noindex: false,
+  },
+  sections: [
+    {
+      id: 'hero',
+      type: 'hero',
+      enabled: true,
+      variant: 'page',
+      eyebrow: 'Training',
+      title: 'Passing on the skills ==that make quality.==',
+      lead: 'Training for professionals, workshops and awareness sessions: passing on know-how, people skills and good practice.',
+      visual: photo(
+        'formation',
+        'formation-hero',
+        1280,
+        960,
+        'A trainer leads a session for service providers in Mambo Proxi uniforms.',
+      ),
+      primaryCta: { label: 'Request a training course', href: '#demande-formation', external: false },
+      secondaryCta: { label: 'See the catalogue', href: '#catalogue', external: false },
+      showWhatsapp: false,
+    },
+    {
+      id: 'offres',
+      type: 'cardGrid',
+      enabled: true,
+      tone: 'light',
+      layout: 'compact',
+      columns: 2,
+      items: [
+        {
+          icon: 'Briefcase',
+          title: 'Training for professionals',
+          tone: 'dark',
+          text: 'For service providers and businesses: customer welcome, service quality, hygiene, cleaning, property management.',
+          cta: {
+            label: 'See the courses',
+            href: '/formation?categorie=PROFESSIONNELS#catalogue',
+            external: false,
+          },
+        },
+        {
+          icon: 'Users',
+          title: 'Workshops & awareness',
+          tone: 'orange',
+          text: 'For individuals, families and associations: settling in, caring for loved ones, local culture.',
+          cta: {
+            label: 'See the courses',
+            href: '/formation?categorie=ATELIERS#catalogue',
+            external: false,
+          },
+        },
+      ],
+    },
+    {
+      id: 'catalogue',
+      type: 'dynamic',
+      enabled: true,
+      anchor: 'catalogue',
+      tone: 'muted',
+      source: 'trainings-catalog',
+      eyebrow: 'Our courses',
+      title: 'The catalogue',
+      lead: 'Every course can be tailored to your organisation and your teams.',
+    },
+    {
+      id: 'demande',
+      type: 'dynamic',
+      enabled: true,
+      anchor: 'demande-formation',
+      tone: 'light',
+      source: 'training-form',
+      eyebrow: 'Training request',
+      title: 'Training for your team?',
+      lead: 'Tell us what you need: we will suggest a programme and a quote to match.',
+      visual: photo(
+        'formation',
+        'formation-form',
+        1536,
+        1024,
+        'A trainer shows a service provider how to make a bed.',
+      ),
     },
   ],
 };
@@ -1572,6 +1680,7 @@ export const pagesEn: Partial<Record<Page['key'], Page>> = {
   'qui-sommes-nous': quiSommesNousEn,
   mission: missionEn,
   partenaires: partenairesEn,
+  formation: formationEn,
   magazine: magazineEn,
   'zones-d-intervention': zonesEn,
 };
