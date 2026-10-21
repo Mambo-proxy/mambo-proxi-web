@@ -2461,7 +2461,7 @@ export interface components {
         };
         ServiceAreas: {
             zones: components["schemas"]["Zone"][];
-            /** @example Votre quartier n'apparaît pas ? Contactez-nous : nous étudions chaque demande. */
+            /** @example Votre quartier n’apparaît pas ? Contactez-nous : nous étudions chaque demande. */
             note?: string | null;
             updatedAt?: components["schemas"]["DateTime"];
         };

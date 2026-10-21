@@ -1926,7 +1926,7 @@
     "contentType": "application/json",
     "examples": {
       "default": {
-        "note": "Votre quartier n'apparaît pas ? Contactez-nous : nous étudions chaque demande. Délai moyen de livraison : 30 à 60 minutes selon le trafic.",
+        "note": "Votre quartier n’apparaît pas ? Contactez-nous : nous étudions chaque demande. Délai moyen de livraison : 30 à 60 minutes selon le trafic.",
         "updatedAt": "2026-10-18T08:00:00.000Z",
         "zones": [
           {
@@ -2113,7 +2113,7 @@
         ]
       },
       "en": {
-        "note": "Can't find your neighbourhood? Contact us: we look at every request. Average delivery time: 30 to 60 minutes depending on traffic.",
+        "note": "Can’t find your neighbourhood? Contact us: we look at every request. Average delivery time: 30 to 60 minutes depending on traffic.",
         "updatedAt": "2026-10-18T08:00:00.000Z",
         "zones": [
           {
