@@ -4271,6 +4271,8 @@ export interface components {
             link?: components["schemas"]["Link"] | null;
             limit?: number | null;
             note?: string | null;
+            /** @description Visuel à côté d'un formulaire (ex. photo de la demande de formation) ; null = aucun visuel. */
+            visual?: components["schemas"]["Visual"] | null;
             /** @description Éléments éditables complémentaires (ex. « Et ensuite ? » à côté d'un formulaire). */
             items?: components["schemas"]["SectionItem"][];
         } & {
