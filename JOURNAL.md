@@ -437,3 +437,17 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Nombre de services de « Services de proximité »** dans les autres rubriques : la maquette affiche encore « 3 services » ; le compteur vient des données (4 depuis l'ajout de Pressing et laverie). Validé par la cliente le 21 octobre 2026 : le site affiche 4 partout (contrat, données, pages) ; la maquette, en lecture seule, reste à corriger dans Figma.
 - **Événements sur le site anglais** : titres, étiquettes et lieux restent en français tant que l'API ne fournit pas de version anglaise des événements ; la fenêtre d'inscription reste en français, comme les autres formulaires du site (traduction des formulaires à faire).
 - **Disque plein** : le cache Turbopack écrit pendant que le disque était plein était corrompu (« next/font/google queries have exactly one entry ») ; `.next` supprimé, build propre.
+
+### Magazine, édition n° 1 (21 octobre 2026)
+
+- Nouvelle page `/magazine` (anglais : `/en/magazine`) d'après la maquette (`254:26265`, `254:26493`), construite comme les pages éditoriales : page `magazine` du contrat (`GET /v1/pages/magazine`), sections héros et pastilles, édito de la fondatrice (`textMedia` avec citation et signature), thèmes du numéro (`cardGrid` sombre), bandeau d'abonnement (`ctaBand`). Les éditions et articles du back-office (`267:1511`) viendront avec son écran Magazine : la page publique présente l'édition en cours.
+- Contrat : second bouton du bandeau final (`secondaryCta`, vert à la place de WhatsApp) pour « Lire en anglais » / « Read in French », adresse utilisée telle quelle (elle mène à l'autre langue). « S'abonner à la lettre Mambo » descend au formulaire de la lettre dans le pied de page (`#lettre-mambo`).
+- Pastilles du héros : « Santé et nutrition » et « Beauté et bien-être » mènent aux cartes de thèmes, ancrées par leur titre (comme les énoncés de Mission). La pastille active suit désormais la dernière section passée sous la ligne de lecture (45 % de la fenêtre) et revient à la première en haut de page ; avant, elle restait sur la dernière section vue, et la pastille cochée, plus large, faisait passer les pastilles sur trois lignes en mobile.
+- Édito : paragraphes en un seul bloc de texte (sans écart, comme la lettre de la maquette), écarts de 20 en mobile, signature sans décalage ; aussi appliqué à l'encart de la fondatrice de Qui sommes-nous (page à reprendre dans la refonte).
+- Photos : originaux de Figma (`magazine-hero`, `fondatrice`). Mocks : pages traduites servies en anglais (`?lang=en`), les autres en français comme le fait l'API.
+- Fidélité : en desktop, chaque section à la hauteur de la maquette (3 676 px pour 3 673) ; en mobile, 5 435 px pour 5 416 (voir les décisions).
+
+### Décisions
+
+- **Sur-titre de l'édito en mobile** : « Édito · Édition spéciale — Ensemble vers un bien-être global » tient sur une ligne dans la maquette en dépassant de l'écran (467 px pour 350) ; il passe ici à la ligne (+16 px).
+- **« Immobilier et cadre de vie »** : en desktop, le titre de la carte dépasse de 6 px sa colonne dans la maquette et reste sur une ligne ; les titres des cartes de valeurs peuvent empiéter de 8 px sur la marge de droite.

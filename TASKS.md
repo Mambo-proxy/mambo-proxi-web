@@ -104,7 +104,7 @@ Les maquettes ont été refondues mi-octobre 2026 (recentrage sur Douala et les 
 - [x] Rubrique Services à domicile `/services/services-a-domicile` (nouvelle) — sections au pixel près en desktop ; en mobile, note de la bande et première étape sur deux lignes (voir JOURNAL)
 - [x] Fiche service : carrousel « Nos offres » (Entretien du logement, Chef privé mis à jour), textes traduits — `qa/fidelite/fiche-*.png` ; Entretien du logement et Nettoyage automobile reliés comme services à la carte (rubrique, Nos services, méga-menu)
 - [x] Rubriques Expérience, Immobilier, Services de proximité, Culture & événementiel — `qa/fidelite/rubrique-*.png`
-- [ ] Magazine (édition n° 1) et Zones d'intervention (nouvelles pages)
+- [~] Magazine (édition n° 1) et Zones d'intervention (nouvelles pages) — Magazine fait (`qa/fidelite/magazine-*.png`) ; reste Zones d'intervention
 - [ ] Qui sommes-nous, Mission, Partenaires, Formation, Recrutement, offre d'emploi, Avis clients, Contact, Devis, Confirmation, Inscription, Suivi, pages légales, questionnaire, 404
 - [ ] E-mails (4 modèles mis à jour)
 - [ ] Back-office : tableau de bord modifié, Magazine, Zones d'intervention, édition du Magazine ; écrans en cours sur les branches `bo/services-en-cours`, `bo/pages-textes-en-cours`, `bo/recrutement-en-cours`
