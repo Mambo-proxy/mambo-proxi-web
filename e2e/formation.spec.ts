@@ -51,4 +51,18 @@ test.describe('formation', () => {
     await form.getByRole('button', { name: 'Envoyer ma demande' }).click();
     await expect(page.getByRole('status')).toContainText('Merci', { timeout: 15_000 });
   });
+
+  test('version anglaise : catalogue traduit et photo de la demande', async ({ page }) => {
+    await page.goto('/en/training', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+      'Passing on the skills that make quality.',
+    );
+    await expect(page.getByRole('navigation', { name: "Fil d'Ariane" })).toContainText('Home');
+    const filters = page.getByRole('group', { name: 'Filter training courses' });
+    await expect(filters.getByRole('button', { name: 'All' })).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: 'Request this course : Kitchen hygiene and safety' }),
+    ).toBeVisible();
+    await expect(page.locator('#demande-formation img')).toHaveAttribute('alt', /trainer/);
+  });
 });
