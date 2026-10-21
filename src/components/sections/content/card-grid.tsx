@@ -308,7 +308,8 @@ export function CardGrid({ section }: { section: CardGridSection }) {
           lead={section.lead}
           leadMobile={section.leadMobile}
           inverse={inverse}
-          className="xl:max-w-[820px]"
+          // Valeurs sur fond sombre (`63:4982`, `254:26402`) : sur-titre et titre espacés de 14.
+          className={cn('xl:max-w-[820px]', inverse && 'gap-3.5')}
         />
       )}
       <ul

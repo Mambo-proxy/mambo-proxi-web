@@ -17,7 +17,7 @@ export function TeamGrid({ section }: { section: TeamSection }) {
         titleMobile={section.titleMobile}
         lead={section.lead}
         leadMobile={section.leadMobile}
-        className="xl:max-w-[820px]"
+        className="gap-3 md:gap-4 xl:max-w-[820px]"
       />
       <ul className="grid grid-cols-2 gap-3 xl:grid-cols-4 xl:gap-5">
         {section.members.map((member, index) => (

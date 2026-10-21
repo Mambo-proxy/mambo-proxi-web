@@ -27,16 +27,16 @@ export function FeatureCards({
         titleMobile={section.titleMobile}
         lead={section.lead}
         leadMobile={section.leadMobile}
-        className="xl:max-w-[760px]"
+        className="gap-3 md:gap-4 xl:max-w-[760px]"
       />
-      <div className="flex flex-col gap-4 xl:gap-12">
+      <div className="flex flex-col gap-7 xl:gap-12">
         <ul className="grid gap-4 md:grid-cols-3">
           {section.items.map((item, index) => (
             <Reveal
               as="li"
               key={item.title}
               delay={index * 70}
-              className="flex flex-col gap-3.5 rounded-3xl border border-border-default p-[23px] xl:p-8"
+              className="flex flex-col gap-3.5 rounded-3xl border border-border-default p-[22px] xl:p-8"
             >
               <span className="flex items-start justify-between gap-4">
                 {item.icon && (
@@ -73,7 +73,8 @@ export function FeatureCards({
                 key={figure.key}
                 className="flex flex-col-reverse gap-1 rounded-[20px] bg-neutral-50 p-[18px] xl:p-7"
               >
-                <dt className="font-ui text-[14px] leading-5 text-text-muted">{figure.label}</dt>
+                {/* En mobile, le libellé peut empiéter sur la marge intérieure, comme sur la maquette (`63:5428`). */}
+                <dt className="font-ui text-[14px] leading-5 text-text-muted max-md:-mr-3">{figure.label}</dt>
                 <dd className="font-brand text-[32px] leading-[38px] font-semibold tracking-[-0.02em] text-text-main xl:text-[48px] xl:leading-[56px]">
                   <FigureValue figure={figure} />
                 </dd>

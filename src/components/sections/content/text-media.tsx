@@ -12,7 +12,7 @@ import { SectionShell } from './section-shell';
  */
 function Presentation({ section }: { section: TextMediaSection }) {
   return (
-    <div className="grid gap-6 xl:grid-cols-[520px_minmax(0,1fr)] xl:gap-20">
+    <div className="grid gap-5 xl:grid-cols-[520px_minmax(0,1fr)] xl:gap-20">
       <div className="flex flex-col gap-4">
         {section.eyebrow && <p className="text-web-eyebrow">{frenchTypography(section.eyebrow)}</p>}
         {section.title && (
@@ -25,7 +25,7 @@ function Presentation({ section }: { section: TextMediaSection }) {
         {section.paragraphs.map((paragraph) => (
           <p
             key={paragraph}
-            className="font-ui text-[16px] leading-[26px] text-text-muted xl:text-[18px] xl:leading-[30px]"
+            className="font-ui text-[16px] leading-[25px] text-text-muted xl:text-[18px] xl:leading-[30px]"
           >
             {frenchTypography(paragraph)}
           </p>
