@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { TrainingForm } from '@/components/forms/training-form';
 import { FormSection } from '@/components/sections/content/form-section';
 import { PageSections } from '@/components/sections/content/page-sections';
@@ -21,17 +22,18 @@ type SearchParams = { searchParams: Promise<{ categorie?: string }> };
 /** Formation (desktop `66:6190`, mobile `66:6730`) : offres, catalogue filtrable, demande de formation. Pas de bandeau CTA. */
 export default async function TrainingPage({ searchParams }: SearchParams) {
   const { categorie } = await searchParams;
-  const [page, settings, trainings] = await Promise.all([
+  const [page, settings, trainings, t] = await Promise.all([
     getPage('formation'),
     getSiteSettings(),
     unwrap(api.GET('/v1/trainings', cached([cacheTags.trainings]))),
+    getTranslations('rubrique'),
   ]);
   if (!page) notFound();
 
   return (
     <PageSections
       page={page}
-      breadcrumb={[{ label: 'Accueil', href: routes.home }, { label: 'Formation' }]}
+      breadcrumb={[{ label: t('home'), href: routes.home }, { label: page.title }]}
       whatsappHref={null}
       keyFigures={settings.keyFigures ?? []}
       heroVisualClassName="xl:h-[440px]"
@@ -52,11 +54,9 @@ export default async function TrainingPage({ searchParams }: SearchParams) {
               key={section.id}
               section={section}
               aside={
-                <Visual
-                  visual={{ illustration: 'formation', image: null, alt: '' }}
-                  sizes="420px"
-                  className="h-[280px] rounded-3xl"
-                />
+                section.visual && (
+                  <Visual visual={section.visual} sizes="420px" className="h-[280px] rounded-3xl" />
+                )
               }
             >
               <TrainingForm trainings={trainings} />
