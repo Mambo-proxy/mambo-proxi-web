@@ -6,22 +6,13 @@ import { useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent
 import type { ServiceAreas, Zone, ZoneQuarter } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
+import { TONES } from './zone-tones';
 
 /** Dimensions de la carte de la maquette (`290:31639`) : les positions des quartiers y sont exprimées de 0 à 1. */
 const MAP_WIDTH = 760;
 const MAP_HEIGHT = 540;
 const MIN_SCALE = 1;
 const MAX_SCALE = 3;
-
-type Tone = Zone['tone'];
-
-/** Couleur et opacité des aires (cercles flous de 62 px autour de chaque quartier) et des points, par zone. */
-const TONES: Record<Tone, { color: string; area: number; dot: string }> = {
-  zone1: { color: 'var(--mp-color-map-zone-1)', area: 0.18, dot: 'bg-map-zone-1' },
-  zone2: { color: 'var(--mp-color-map-zone-2)', area: 0.18, dot: 'bg-map-zone-2' },
-  zone3: { color: 'var(--mp-color-map-zone-3)', area: 0.06, dot: 'bg-map-zone-3' },
-  special: { color: 'var(--mp-color-map-zone-special)', area: 0.06, dot: 'bg-map-zone-special' },
-};
 
 type Located = ZoneQuarter & { zone: Zone; position: { x: number; y: number } };
 
@@ -332,7 +323,7 @@ function QuarterSearch({
         <label htmlFor={`${id}-champ`} className="sr-only">
           {t('searchLabel')}
         </label>
-        <div className="flex items-center gap-2.5 rounded-md border border-border-strong bg-neutral-0 px-4 py-3.5 focus-within:focus-ring">
+        <div className="flex items-center gap-2.5 rounded-md border border-border-strong bg-neutral-0 px-4 py-3.5 leading-[18px] focus-within:focus-ring">
           <Search aria-hidden size={18} className="shrink-0 text-icon-default" />
           <input
             id={`${id}-champ`}
@@ -353,7 +344,7 @@ function QuarterSearch({
             }}
             onKeyDown={onKeyDown}
             onBlur={() => setTimeout(() => setOpen(false), 120)}
-            className="min-w-0 flex-1 bg-transparent font-ui text-[15px] text-text-main outline-none placeholder:text-text-muted [&::-webkit-search-cancel-button]:cursor-pointer"
+            className="min-w-0 flex-1 bg-transparent font-ui text-[15px] leading-[18px] text-text-main outline-none placeholder:text-text-muted [&::-webkit-search-cancel-button]:cursor-pointer"
           />
         </div>
         {showList && (
@@ -392,18 +383,18 @@ function QuarterSearch({
       <div aria-live="polite">
         {selected && (
           <div className="flex flex-col gap-1.5 rounded-md bg-map-result px-[18px] py-4 font-ui">
-            <p className="text-[15px] font-semibold text-text-main">
+            <p className="text-[15px] leading-[1.2] font-semibold text-text-main">
               {frenchTypography(t('result', { quarter: selected.name, zone: selected.zone.name }))}
             </p>
-            <p className="text-[14px] text-neutral-700">{frenchTypography(selected.zone.result)}</p>
+            <p className="text-[14px] leading-[1.2] text-neutral-700">{frenchTypography(selected.zone.result)}</p>
           </div>
         )}
         {notFound && (
           <div className="flex flex-col gap-1.5 rounded-md bg-map-result px-[18px] py-4 font-ui">
-            <p className="text-[15px] font-semibold text-text-main">
+            <p className="text-[15px] leading-[1.2] font-semibold text-text-main">
               {frenchTypography(t('notFoundTitle', { query: query.trim() }))}
             </p>
-            <p className="text-[14px] text-neutral-700">{frenchTypography(t('notFoundText'))}</p>
+            <p className="text-[14px] leading-[1.2] text-neutral-700">{frenchTypography(t('notFoundText'))}</p>
           </div>
         )}
       </div>
@@ -430,12 +421,15 @@ export function ZonesMap({ areas, link }: { areas: ServiceAreas; link?: React.Re
   return (
     <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:gap-10">
       <DoualaMap quarters={located} selected={selectedName} />
-      <div className="flex min-w-0 flex-1 flex-col gap-5">
+      <div
+        id="trouver-votre-quartier"
+        className="flex min-w-0 flex-1 scroll-mt-(--site-header-h,0px) flex-col gap-5"
+      >
         <h3 className="font-brand text-[22px] leading-[1.5] font-semibold text-text-main">
           {t('searchTitle')}
         </h3>
         <QuarterSearch quarters={quarters} selected={selected} onSelect={setSelectedName} />
-        <p className="font-ui text-[14px] leading-[1.5] font-semibold text-text-main">{t('legend')}</p>
+        <p className="font-ui text-[14px] leading-[1.2] font-semibold text-text-main">{t('legend')}</p>
         <ul className="flex flex-col gap-5">
           {areas.zones.map((zone) => (
             <li
