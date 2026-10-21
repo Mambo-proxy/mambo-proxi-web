@@ -4,8 +4,6 @@ import type { Page, Visual } from '@/lib/api/schema';
  * Pages éditoriales simulées, relevées dans les maquettes (qa/inventory/site). Elles complètent les exemples du contrat
  * (accueil, services) et servent de référence pour les données d'amorçage de l'API.
  */
-const visual = (illustration: Visual['illustration']): Visual => ({ illustration, image: null, alt: '' });
-
 /** Photo des maquettes (`public/photos/`), avec l'illustration de repli. */
 const photo = (
   illustration: Visual['illustration'],
@@ -1136,9 +1134,9 @@ const recrutement: Page = {
   updatedAt: UPDATED_AT,
   isPreview: false,
   seo: {
-    title: 'Recrutement : rejoignez MAMBO Proxi au Cameroun et en France',
+    title: 'Recrutement : rejoignez MAMBO Proxi à Douala',
     description:
-      'Collaborateurs, prestataires, partenaires : nous recherchons des personnes fiables, attentionnées et exigeantes, au Cameroun et en France.',
+      'Collaborateurs, prestataires, partenaires : nous recherchons à Douala des personnes fiables, attentionnées et exigeantes.',
     ogImageUrl: null,
     noindex: false,
   },
@@ -1150,8 +1148,14 @@ const recrutement: Page = {
       variant: 'page',
       eyebrow: 'Recrutement',
       title: 'Rejoignez une équipe ==qui prend soin des autres.==',
-      lead: 'Collaborateurs, prestataires, partenaires : nous recherchons des personnes fiables, attentionnées et exigeantes, au Cameroun et en France.',
-      visual: visual('equipe'),
+      lead: 'Collaborateurs, prestataires, partenaires : nous recherchons à Douala des personnes fiables, attentionnées et exigeantes.',
+      visual: photo(
+        'equipe',
+        'recrut-hero',
+        1280,
+        960,
+        'Une responsable de l’agence serre la main d’une intervenante en tenue Mambo Proxi.',
+      ),
       primaryCta: { label: 'Voir nos offres', href: '#offres', external: false },
       secondaryCta: { label: 'Candidature spontanée', href: '#candidature', external: false },
       showWhatsapp: false,
@@ -1167,7 +1171,7 @@ const recrutement: Page = {
         {
           icon: 'Users',
           title: 'Une équipe soudée',
-          text: 'Entre Douala, Yaoundé et la France, on avance ensemble.',
+          text: 'À Douala et au Cameroun, on avance ensemble.',
         },
         {
           icon: 'GraduationCap',
@@ -1212,6 +1216,97 @@ const recrutement: Page = {
       eyebrow: 'Candidature',
       title: 'Postulez ou envoyez une candidature spontanée',
       lead: 'Nous lisons chaque candidature et revenons vers vous sous 15 jours.',
+    },
+  ],
+};
+
+/** Recrutement en anglais (`?lang=en`) : textes rédigés pour le site. */
+const recrutementEn: Page = {
+  ...recrutement,
+  title: 'Careers',
+  seo: {
+    title: 'Careers: join MAMBO Proxi in Douala',
+    description:
+      'Employees, service providers, partners: we are looking for reliable, caring and demanding people in Douala.',
+    ogImageUrl: null,
+    noindex: false,
+  },
+  sections: [
+    {
+      id: 'hero',
+      type: 'hero',
+      enabled: true,
+      variant: 'page',
+      eyebrow: 'Careers',
+      title: 'Join a team ==that takes care of others.==',
+      lead: 'Employees, service providers, partners: we are looking for reliable, caring and demanding people in Douala.',
+      visual: photo(
+        'equipe',
+        'recrut-hero',
+        1280,
+        960,
+        'An agency manager shakes hands with a service provider in a Mambo Proxi uniform.',
+      ),
+      primaryCta: { label: 'See our openings', href: '#offres', external: false },
+      secondaryCta: { label: 'Open application', href: '#candidature', external: false },
+      showWhatsapp: false,
+    },
+    {
+      id: 'atouts',
+      type: 'cardGrid',
+      enabled: true,
+      tone: 'light',
+      layout: 'horizontal',
+      columns: 3,
+      items: [
+        {
+          icon: 'Users',
+          title: 'A close-knit team',
+          text: 'In Douala and across Cameroon, we move forward together.',
+        },
+        {
+          icon: 'GraduationCap',
+          title: 'Ongoing training',
+          text: 'Regular sessions to grow in your profession.',
+        },
+        {
+          icon: 'Sparkles',
+          title: 'Meaningful work',
+          text: 'Every day, you make life easier for families.',
+        },
+      ],
+    },
+    {
+      id: 'offres',
+      type: 'dynamic',
+      enabled: true,
+      anchor: 'offres',
+      tone: 'muted',
+      source: 'jobs-list',
+      eyebrow: 'Our openings',
+      note: 'Openings are updated regularly by the agency.',
+    },
+    {
+      id: 'prestataire',
+      type: 'ctaBand',
+      enabled: true,
+      tone: 'dark',
+      eyebrow: 'Become a service provider / partner',
+      title: 'Freelancer or company? Offer your services.',
+      text: 'Drivers, chefs, photographers, massage therapists, cleaners: join our network of service providers.',
+      primaryCta: { label: 'Offer my services', href: '/partenaires#formulaire', external: false },
+      showWhatsapp: false,
+    },
+    {
+      id: 'candidature',
+      type: 'dynamic',
+      enabled: true,
+      anchor: 'candidature',
+      tone: 'muted',
+      source: 'application-form',
+      eyebrow: 'Apply',
+      title: 'Apply for a position or send an open application',
+      lead: 'We read every application and get back to you within 15 days.',
     },
   ],
 };
@@ -1681,6 +1776,7 @@ export const pagesEn: Partial<Record<Page['key'], Page>> = {
   mission: missionEn,
   partenaires: partenairesEn,
   formation: formationEn,
+  recrutement: recrutementEn,
   magazine: magazineEn,
   'zones-d-intervention': zonesEn,
 };
