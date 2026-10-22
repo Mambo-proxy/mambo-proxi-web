@@ -12,7 +12,6 @@ import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { toast } from '@/components/ui/toaster';
 import { browserApi } from '@/lib/api/browser';
 import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
-import { COUNTRIES } from '@/lib/countries';
 import { CONSENT_TEXT, fieldRules } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
 
@@ -29,11 +28,15 @@ const SUBJECTS = [
   'Autre',
 ];
 
+/** Villes proposées (champ « Ville » de la maquette), Douala par défaut ; « Hors du Cameroun » n'envoie ni ville ni pays. */
+const CITIES = ['Douala', 'Yaoundé', 'Autre ville du Cameroun'];
+const ABROAD = 'Hors du Cameroun';
+
 const schema = z.object({
   fullName: fieldRules.fullName,
   email: fieldRules.email,
   phone: fieldRules.optionalPhone,
-  country: z.string(),
+  city: z.string(),
   subject: z.string(),
   serviceSlug: z.string(),
   message: z
@@ -59,7 +62,7 @@ const EMPTY: FormInput = {
   fullName: '',
   email: '',
   phone: '',
-  country: 'CM',
+  city: 'Douala',
   subject: '',
   serviceSlug: '',
   message: '',
@@ -99,7 +102,8 @@ export function ContactForm({ initialTab, serviceGroups }: ContactFormProps) {
             fullName: values.fullName,
             email: values.email,
             phone: values.phone,
-            country: values.country || null,
+            country: values.city && values.city !== ABROAD ? 'CM' : null,
+            city: values.city && values.city !== ABROAD ? values.city : null,
           },
           subject: values.subject || null,
           serviceSlug: tab === 'INFORMATION' ? values.serviceSlug || null : null,
@@ -161,7 +165,7 @@ export function ContactForm({ initialTab, serviceGroups }: ContactFormProps) {
           className="flex flex-col gap-5"
         >
           <input {...antiSpam.honeypotProps} />
-          <div className="grid gap-4 md:grid-cols-2 md:gap-y-5">
+          <div className="grid gap-4 md:grid-cols-2 md:gap-y-5 max-md:[&>*:nth-child(3)]:mt-1 max-md:[&>*:nth-child(n+5)]:mt-1">
             <Field label="Nom et prénom" required error={errors.fullName?.message}>
               {(control) => (
                 <Input
@@ -188,13 +192,12 @@ export function ContactForm({ initialTab, serviceGroups }: ContactFormProps) {
             <Field label="Téléphone / WhatsApp" error={errors.phone?.message}>
               {(control) => <PhoneInput icon={Smartphone} {...control} {...form.register('phone')} />}
             </Field>
-            <Field label="Pays" error={errors.country?.message}>
+            <Field label="Ville" error={errors.city?.message}>
               {(control) => (
-                <Select autoComplete="country" {...control} {...form.register('country')}>
-                  <option value="">Choisir</option>
-                  {COUNTRIES.map((country) => (
-                    <option key={country.code} value={country.code}>
-                      {country.name}
+                <Select {...control} {...form.register('city')}>
+                  {[...CITIES, ABROAD].map((city) => (
+                    <option key={city} value={city}>
+                      {city}
                     </option>
                   ))}
                 </Select>
