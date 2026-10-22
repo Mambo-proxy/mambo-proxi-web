@@ -95,6 +95,9 @@ Fichier Figma source : `lsun63JexZYvgYUVpmSYyg` (lecture seule). Captures à l'�
 | `backoffice/bo-parametres.png` | `94:11839` | 1440 × 1527 |  |
 | `backoffice/bo-connexion.png` | `95:11689` | 1440 × 900 |  |
 | `backoffice/bo-tableau-de-bord-mobile.png` | `95:11777` | 390 × 844 |  |
+| `backoffice/bo-magazine.png` | `267:1511` | 1440 × 900 | refonte d’octobre 2026 |
+| `backoffice/bo-magazine-edition.png` | `269:1677` | 1440 × 1636 | refonte d’octobre 2026 |
+| `backoffice/bo-zones-intervention.png` | `267:1934` | 1440 × 1525 | hauteur nominale Figma 1524,1 px, arrondie au rendu |
 
 ## Composants du site
 

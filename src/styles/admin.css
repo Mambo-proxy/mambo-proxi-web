@@ -3,6 +3,11 @@
   margin-top: 0.75rem;
 }
 
+/* Variante compacte (édito du Magazine `269:2057`) : paragraphes Inter 14, espacés de 10 px. */
+.rich-text-editor-compact > * + * {
+  margin-top: 10px;
+}
+
 .rich-text-editor h2 {
   font-family: var(--font-brand);
   font-size: 20px;

@@ -110,6 +110,11 @@ export function formatDayMonth(date: DateInput, timeZone = DEFAULT_TIME_ZONE): s
   return format(inZone(date, timeZone), 'd MMM', { locale: fr });
 }
 
+/** « 2 oct. 2026 » (dates de publication du back-office). */
+export function formatDayMonthYear(date: DateInput, timeZone = DEFAULT_TIME_ZONE): string {
+  return format(inZone(date, timeZone), 'd MMM yyyy', { locale: fr });
+}
+
 /** « 5 oct. · 09:12 » (horodatage du back-office). */
 export function formatStamp(date: DateInput, timeZone = DEFAULT_TIME_ZONE): string {
   return `${formatDayMonth(date, timeZone)} · ${formatClock(date, timeZone)}`;

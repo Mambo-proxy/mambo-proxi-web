@@ -35,6 +35,11 @@ type RichTextEditorProps = {
   headings?: (2 | 3)[];
   help?: string;
   error?: string | null;
+  /**
+   * `labels` : barre d'outils à libellés (« B », « I », « Titre », « Liste », « Citation », « Lien ») posée au-dessus
+   * de la zone de saisie (édito du Magazine `269:2044`), libellé du champ masqué visuellement.
+   */
+  variant?: 'icons' | 'labels';
 };
 
 /**
@@ -51,8 +56,10 @@ export function RichTextEditor({
   headings = [2, 3],
   help,
   error,
+  variant = 'icons',
 }: RichTextEditorProps) {
   const id = useId();
+  const labelled = variant === 'labels';
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -82,8 +89,9 @@ export function RichTextEditor({
         ...(help ? { 'aria-describedby': `${id}-help` } : {}),
         ...(error ? { 'aria-invalid': 'true' } : {}),
         ...(placeholder ? { 'data-placeholder': placeholder } : {}),
-        class:
-          'rich-text-editor prose-admin min-h-(--rte-min) px-4 py-3.5 font-ui text-[15px] leading-6 text-text-main outline-none',
+        class: labelled
+          ? 'rich-text-editor rich-text-editor-compact min-h-(--rte-min) p-4 font-ui text-[14px] leading-[17px] text-text-main outline-none'
+          : 'rich-text-editor prose-admin min-h-(--rte-min) px-4 py-3.5 font-ui text-[15px] leading-6 text-text-main outline-none',
       },
     },
     onUpdate: ({ editor: instance }) => onChange(instance.isEmpty ? '' : instance.getHTML()),
@@ -95,6 +103,36 @@ export function RichTextEditor({
     const current = editor.isEmpty ? '' : editor.getHTML();
     if (value !== current) editor.commands.setContent(value, { emitUpdate: false });
   }, [editor, value]);
+
+  if (labelled)
+    return (
+      <div className="flex flex-col gap-4">
+        <span id={`${id}-label`} className="sr-only">
+          {label}
+        </span>
+        {editor && <LabelToolbar editor={editor} label={label} />}
+        <div
+          style={{ ['--rte-min' as string]: `${minHeight}px` }}
+          className={cn(
+            'overflow-hidden rounded-[10px] border border-border-strong bg-neutral-0 transition-colors',
+            'focus-within:border-brand-primary focus-within:ring-1 focus-within:ring-brand-primary focus-within:ring-inset',
+            error && 'border-feedback-error ring-1 ring-feedback-error ring-inset',
+          )}
+        >
+          <EditorContent editor={editor} />
+        </div>
+        {help && !error && (
+          <p id={`${id}-help`} className="text-caption text-text-muted">
+            {help}
+          </p>
+        )}
+        {error && (
+          <p role="alert" className="text-[13px] leading-4 text-feedback-error">
+            {error}
+          </p>
+        )}
+      </div>
+    );
 
   return (
     <div className="flex flex-col gap-2">
@@ -226,13 +264,94 @@ function Toolbar({ editor, headings, label }: { editor: Editor; headings: (2 | 3
         onClose={() => setLinkOpen(false)}
         onSubmit={(href) => {
           setLinkOpen(false);
-          if (!href) chain().extendMarkRange('link').unsetLink().run();
-          // Aucun texte sélectionné : l'adresse devient le texte du lien.
-          else if (editor.state.selection.empty && !editor.isActive('link'))
-            chain()
-              .insertContent({ type: 'text', text: href, marks: [{ type: 'link', attrs: { href } }] })
-              .run();
-          else chain().extendMarkRange('link').setLink({ href }).run();
+          applyLink(editor, href);
+        }}
+      />
+    </div>
+  );
+}
+
+/** Pose, modifie ou retire (adresse vide) le lien de la sélection ; sans sélection, l'adresse devient le texte. */
+function applyLink(editor: Editor, href: string) {
+  const chain = editor.chain().focus();
+  if (!href) chain.extendMarkRange('link').unsetLink().run();
+  else if (editor.state.selection.empty && !editor.isActive('link'))
+    chain.insertContent({ type: 'text', text: href, marks: [{ type: 'link', attrs: { href } }] }).run();
+  else chain.extendMarkRange('link').setLink({ href }).run();
+}
+
+/** Barre d'outils à libellés (`269:2044`) : fond `neutral/50`, rayon 10, padding 6/8 ; boutons Inter 13, padding 5/10. */
+function LabelToolbar({ editor, label }: { editor: Editor; label: string }) {
+  const [linkOpen, setLinkOpen] = useState(false);
+  const state = useEditorState({
+    editor,
+    selector: ({ editor: instance }) => ({
+      bold: instance.isActive('bold'),
+      italic: instance.isActive('italic'),
+      heading: instance.isActive('heading', { level: 3 }),
+      bullet: instance.isActive('bulletList'),
+      quote: instance.isActive('blockquote'),
+      link: instance.isActive('link'),
+    }),
+  });
+  const chain = () => editor.chain().focus();
+  const tools: {
+    text: string;
+    name: string;
+    active: boolean;
+    bold?: boolean;
+    italic?: boolean;
+    run: () => void;
+  }[] = [
+    { text: 'B', name: 'Gras', active: state.bold, bold: true, run: () => chain().toggleBold().run() },
+    {
+      text: 'I',
+      name: 'Italique',
+      active: state.italic,
+      italic: true,
+      run: () => chain().toggleItalic().run(),
+    },
+    {
+      text: 'Titre',
+      name: 'Titre',
+      active: state.heading,
+      run: () => chain().toggleHeading({ level: 3 }).run(),
+    },
+    { text: 'Liste', name: 'Liste', active: state.bullet, run: () => chain().toggleBulletList().run() },
+    { text: 'Citation', name: 'Citation', active: state.quote, run: () => chain().toggleBlockquote().run() },
+    { text: 'Lien', name: 'Lien', active: state.link, run: () => setLinkOpen(true) },
+  ];
+  return (
+    <div
+      role="toolbar"
+      aria-label={`Mise en forme : ${label}`}
+      className="flex flex-wrap gap-1 rounded-[10px] bg-neutral-50 px-2 py-1.5"
+    >
+      {tools.map((tool) => (
+        <button
+          key={tool.name}
+          type="button"
+          aria-label={tool.name}
+          aria-pressed={tool.active}
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={tool.run}
+          className={cn(
+            'rounded-[6px] px-2.5 py-[5px] font-ui text-[13px] leading-4 text-neutral-700 transition-colors hover:bg-neutral-100',
+            tool.bold ? 'font-semibold' : 'font-medium',
+            tool.italic && 'italic',
+            tool.active && 'bg-neutral-900 text-neutral-0 hover:bg-neutral-800',
+          )}
+        >
+          {tool.text}
+        </button>
+      ))}
+      <LinkDialog
+        open={linkOpen}
+        initial={(editor.getAttributes('link').href as string | undefined) ?? ''}
+        onClose={() => setLinkOpen(false)}
+        onSubmit={(href) => {
+          setLinkOpen(false);
+          applyLink(editor, href);
         }}
       />
     </div>

@@ -25,6 +25,9 @@ export const adminRoutes = {
   activity: '/admin/journal' as Route,
 } as const;
 
+/** Édition du magazine à modifier. */
+export const magazineEditionRoute = (id: string) => `/admin/magazine/${id}` as Route;
+
 /**
  * Page de retour après connexion (`?suite=`) : uniquement une adresse du back-office, jamais une adresse externe
  * (`//exemple.com`) ni l'écran de connexion lui-même.
