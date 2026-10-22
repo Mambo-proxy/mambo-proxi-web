@@ -249,5 +249,15 @@
     "breadcrumb": "Free quote",
     "title": "Your free quote ==in 3 minutes.==",
     "lead": "No commitment. A personalised reply within 24 hours, by email or WhatsApp."
+  },
+  "quoteConfirmation": {
+    "metaTitle": "Request sent",
+    "title": "Thank you, your request has been sent!",
+    "text": "An acknowledgement has just been sent to you by email. A MAMBO Proxi adviser will reply within 24 hours with your personalised quote.",
+    "reference": "Your request reference",
+    "whatsapp": "Follow up on WhatsApp",
+    "whatsappMessage": "My request reference: {ref}",
+    "newTab": "(new tab)",
+    "home": "Back to home"
   }
 }

@@ -1,5 +1,6 @@
 import { Check } from 'lucide-react';
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { redirect } from 'next/navigation';
 import { buttonVariants } from '@/components/ui/button';
@@ -9,10 +10,10 @@ import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
 
-export const metadata: Metadata = {
-  title: 'Demande envoyée',
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('quoteConfirmation');
+  return { title: t('metaTitle'), robots: { index: false } };
+}
 
 /** Référence d'une demande : `MP-AAAA-NNNN`. */
 const REFERENCE = /^MP-\d{4}-\d{4,6}$/;
@@ -27,9 +28,9 @@ type SearchParams = { searchParams: Promise<{ ref?: string }> };
 export default async function QuoteConfirmationPage({ searchParams }: SearchParams) {
   const { ref } = await searchParams;
   if (!ref || !REFERENCE.test(ref)) redirect(routes.devis);
-  const settings = await getSiteSettings();
+  const [settings, t] = await Promise.all([getSiteSettings(), getTranslations('quoteConfirmation')]);
   const whatsappHref = settings.whatsapp.enabled
-    ? whatsappUrl(settings.whatsapp.number, settings.whatsapp.message, `Référence de ma demande : ${ref}`)
+    ? whatsappUrl(settings.whatsapp.number, settings.whatsapp.message, t('whatsappMessage', { ref }))
     : null;
 
   return (
@@ -48,15 +49,13 @@ export default async function QuoteConfirmationPage({ searchParams }: SearchPara
           </span>
         </span>
         <h1 className="max-w-[760px] font-brand text-[28px] leading-[34px] font-semibold tracking-[-0.025em] text-text-main xl:text-[44px] xl:leading-[52px]">
-          {frenchTypography('Merci, votre demande est bien envoyée !')}
+          {frenchTypography(t('title'))}
         </h1>
         <p className="max-w-[640px] font-ui text-[16px] leading-[25px] text-text-muted xl:text-[18px] xl:leading-[29px]">
-          {frenchTypography(
-            'Un accusé de réception vient de vous être envoyé par e-mail. Un conseiller MAMBO Proxi vous répond sous 24 h avec votre devis personnalisé.',
-          )}
+          {frenchTypography(t('text'))}
         </p>
         <p className="inline-flex items-center gap-2.5 rounded-full border border-border-default bg-neutral-0 px-[18px] py-2.5 font-ui text-[14px] leading-5">
-          <span className="text-text-muted">Référence de votre demande</span>
+          <span className="text-text-muted">{t('reference')}</span>
           <span className="font-semibold tracking-[0.005em] text-text-main">{ref}</span>
         </p>
         <div className="flex w-full flex-col gap-2.5 md:w-auto md:flex-row">
@@ -67,11 +66,12 @@ export default async function QuoteConfirmationPage({ searchParams }: SearchPara
               rel="noopener noreferrer"
               className={buttonVariants({ variant: 'whatsapp' })}
             >
-              Suivre sur WhatsApp
+              {t('whatsapp')}
+              <span className="sr-only"> {t('newTab')}</span>
             </a>
           )}
           <Link href={routes.home} className={cn(buttonVariants({ variant: 'outline' }))}>
-            Retour à l’accueil
+            {t('home')}
           </Link>
         </div>
       </div>

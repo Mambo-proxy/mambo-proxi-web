@@ -249,5 +249,15 @@
     "breadcrumb": "Devis gratuit",
     "title": "Votre devis gratuit ==en 3 minutes.==",
     "lead": "Sans engagement. Réponse personnalisée sous 24 h, par e-mail ou WhatsApp."
+  },
+  "quoteConfirmation": {
+    "metaTitle": "Demande envoyée",
+    "title": "Merci, votre demande est bien envoyée !",
+    "text": "Un accusé de réception vient de vous être envoyé par e-mail. Un conseiller MAMBO Proxi vous répond sous 24 h avec votre devis personnalisé.",
+    "reference": "Référence de votre demande",
+    "whatsapp": "Suivre sur WhatsApp",
+    "whatsappMessage": "Référence de ma demande : {ref}",
+    "newTab": "(nouvel onglet)",
+    "home": "Retour à l’accueil"
   }
 }
