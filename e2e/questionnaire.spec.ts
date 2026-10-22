@@ -73,6 +73,20 @@ test.describe('pages d’erreur', () => {
     await expectAccessible(page);
   });
 
+  test('404 en anglais : textes et liens traduits', async ({ page }) => {
+    const response = await page.goto('/en/this-page-does-not-exist', { waitUntil: 'domcontentloaded' });
+    expect(response?.status()).toBe(404);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Oops, this page took another road.');
+    await expect(page.getByRole('link', { name: 'See our services' })).toHaveAttribute(
+      'href',
+      '/en/services',
+    );
+    await expect(page.getByRole('main').getByRole('link', { name: 'Free quote' })).toHaveAttribute(
+      'href',
+      '/en/free-quote',
+    );
+  });
+
   test('maintenance : page autonome accessible', async ({ page }) => {
     await page.goto('/maintenance', { waitUntil: 'domcontentloaded' });
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Le site fait une courte pause.');
