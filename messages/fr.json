@@ -277,5 +277,28 @@
       "active": "En cours",
       "new": "Nouvelle"
     }
+  },
+  "legal": {
+    "nav": "Pages légales",
+    "home": "Accueil",
+    "settings": "Modifier mes choix de cookies",
+    "pages": {
+      "mentions-legales": {
+        "label": "Mentions légales",
+        "short": "Mentions légales"
+      },
+      "confidentialite": {
+        "label": "Politique de confidentialité",
+        "short": "Confidentialité"
+      },
+      "cookies": {
+        "label": "Gestion des cookies",
+        "short": "Cookies"
+      },
+      "cgu": {
+        "label": "Conditions générales",
+        "short": "CGU"
+      }
+    }
   }
 }

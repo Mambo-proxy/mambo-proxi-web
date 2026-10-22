@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import type { Page } from '@/lib/api/schema';
-import { legalPages } from '../data/legal-pages';
+import { legalPages, legalPagesEn } from '../data/legal-pages';
 import { pages, pagesEn } from '../data/pages';
 
 /**
@@ -11,8 +11,9 @@ export const pageHandlers = [
   http.get('*/v1/pages/:key', ({ params, request }) => {
     const key = String(params.key) as Page['key'];
     const lang = new URL(request.url).searchParams.get('lang');
+    const legal = lang === 'en' ? legalPagesEn : legalPages;
     const page =
-      (lang === 'en' ? pagesEn[key] : undefined) ?? pages[key] ?? legalPages[key as keyof typeof legalPages];
+      (lang === 'en' ? pagesEn[key] : undefined) ?? pages[key] ?? legal[key as keyof typeof legalPages];
     return page ? HttpResponse.json(page) : undefined;
   }),
 ];

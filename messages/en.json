@@ -277,5 +277,28 @@
       "active": "In progress",
       "new": "New"
     }
+  },
+  "legal": {
+    "nav": "Legal pages",
+    "home": "Home",
+    "settings": "Change my cookie choices",
+    "pages": {
+      "mentions-legales": {
+        "label": "Legal notice",
+        "short": "Legal notice"
+      },
+      "confidentialite": {
+        "label": "Privacy policy",
+        "short": "Privacy"
+      },
+      "cookies": {
+        "label": "Cookie settings",
+        "short": "Cookies"
+      },
+      "cgu": {
+        "label": "Terms of use",
+        "short": "Terms"
+      }
+    }
   }
 }
