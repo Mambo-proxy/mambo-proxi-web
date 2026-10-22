@@ -5102,7 +5102,13 @@
           "categoryName": "Expérience",
           "visual": {
             "illustration": "chef",
-            "image": null,
+            "image": {
+              "id": "photo-chef-2",
+              "url": "/photos/chef-2.png",
+              "width": 1536,
+              "height": 1024,
+              "variants": []
+            },
             "alt": ""
           }
         },
