@@ -618,3 +618,10 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Lettre Mambo** : cochée sur la maquette, décochée par défaut sur le site (consentement explicite, règle RGPD).
 - **Rubriques cochées de la maquette** (trois en particulier, « Expérience » en professionnel) : exemple de saisie ; aucune n'est cochée à l'ouverture.
 - **Formulaire du site anglais** : reste en français, comme les autres formulaires.
+
+### Suivi Mambo (22 octobre 2026)
+
+- Page recalée sur la maquette (`83:9413`, `83:9731`) : troisième demande de l'aperçu « Livraison de colis » ; version anglaise (nouvelle, `/en/mambo-tracking`) : page servie en anglais par l'API, aperçu et fil d'Ariane traduits (`suivi` dans les messages).
+- Mobile : 6 entre le nom d'une demande et son statut dans l'aperçu (12 auparavant) : « Logement temporaire · Bastos » tient sur une ligne comme sur la maquette.
+- Fidélité (`qa/fidelite/suivi-mambo-*.png`) : desktop 511 · 514 · 494 (2 473 px pour 2 472), mobile 814 · 963 · 380 (3 887 pour 3 886).
+- Le formulaire « Me prévenir » reste en français sur le site anglais, comme les autres formulaires.
