@@ -17,13 +17,20 @@ test.describe('contact', () => {
   test('page complète, accessible et sans débordement', async ({ page, pageErrors }) => {
     await page.goto('/contact', { waitUntil: 'domcontentloaded' });
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Parlons de votre projet.');
-    await expect(page.getByRole('main').getByRole('link', { name: /France/ })).toHaveAttribute(
-      'href',
-      /^tel:\+33/,
-    );
+    const main = page.getByRole('main');
+    await expect(main.getByRole('link', { name: /Douala/ })).toHaveAttribute('href', /^tel:\+237/);
+    await expect(main.getByRole('link', { name: /France/ })).toHaveCount(0);
     await expect(page.getByRole('link', { name: /contact@mamboproxi\.com/ }).first()).toHaveAttribute(
       'href',
       /^mailto:/,
+    );
+    await expect(main.getByText('Adresse de l’agence · Douala, Cameroun')).toBeVisible();
+    await expect(
+      main.getByRole('heading', { level: 2, name: 'Vérifiez que votre quartier est desservi.' }),
+    ).toBeVisible();
+    await expect(main.getByRole('link', { name: /Voir toutes les zones et les quartiers/ })).toHaveAttribute(
+      'href',
+      '/zones-d-intervention',
     );
     await expect(page.locator('#rendez-vous [data-day]:not([aria-disabled])').first()).toBeVisible({
       timeout: 15_000,
@@ -44,6 +51,8 @@ test.describe('contact', () => {
     }).toPass();
     await form.getByLabel(/Nom et prénom/).fill('Awa Mbarga');
     await form.getByRole('textbox', { name: 'E-mail' }).fill('awa@exemple.fr');
+    await expect(form.getByLabel('Ville')).toHaveValue('Douala');
+    await form.getByLabel('Ville').selectOption('Yaoundé');
     await form.getByLabel('Sujet').selectOption('Partenariat');
     await form.getByLabel(/Message/).fill('Bonjour, je souhaite vous présenter mon activité de traiteur.');
     await form.getByText(/J'accepte que Mambo Proxi traite mes données/).click();
@@ -88,5 +97,19 @@ test.describe('contact', () => {
     await details.getByText(/J'accepte que Mambo Proxi traite mes données/).click();
     await details.getByRole('button', { name: 'Envoyer ma demande de rendez-vous' }).click();
     await expect(appointment.getByRole('status')).toContainText('est bien envoyée', { timeout: 15_000 });
+  });
+
+  test('version anglaise : textes, agence et zones traduits', async ({ page, pageErrors }) => {
+    await page.goto('/en/contact', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Let’s talk about your project.');
+    const main = page.getByRole('main');
+    await expect(main.getByText('Quick reply, 7 days a week')).toBeVisible();
+    await expect(main.getByText('Agency address · Douala, Cameroon')).toBeVisible();
+    await expect(main.getByRole('heading', { level: 2, name: 'Come and meet us' })).toBeVisible();
+    await expect(main.getByRole('link', { name: /See all areas and neighbourhoods/ })).toHaveAttribute(
+      'href',
+      '/en/service-areas',
+    );
+    expect(pageErrors).toEqual([]);
   });
 });
