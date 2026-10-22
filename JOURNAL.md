@@ -643,3 +643,18 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 
 - **Types générés corrompus** : après l'arrêt du serveur de développement, `.next/dev/types` peut rester incomplet ; `pnpm typecheck` échoue alors dans ces fichiers et `pnpm test:e2e` refuse de démarrer (« Failed to type check »). Supprimer `.next/dev` suffit.
 - **Avertissement « script tag »** en développement sur la 404 : React signale le script en ligne de `RootDocument` (classe `js`) quand la page introuvable est rendue côté client. Sans effet (le script s'exécute au rendu serveur) ; à reprendre avec la passe performance si besoin.
+
+### Back-office : tableau de bord et Demandes (22 octobre 2026)
+
+- E-mails : les 4 modèles sont rendus par l'API (module mail, React Email), pas encore commencé ; leur intégration suit la phase 2 de l'API. Le site public est entièrement repris.
+- Captures de référence du tableau de bord (`85:10235`, désormais 1 406 px) et des Demandes (`87:10782`) régénérées ; mobile (`95:11777`) inchangé.
+- Barre latérale : « Magazine » et « Zones d’intervention » entre Formations et Recrutement (`/admin/magazine`, `/admin/zones`, écrans à venir).
+- Tableau de bord : « Demandes par rubrique » à cinq rubriques, Services à domicile en tête (77 demandes) ; demandes simulées localisées par quartier de Douala (« Bonapriso, Douala »), téléphone en +237, « Livraison de colis » et « Maison + Linge ».
+- Demandes : filtre « Tous les quartiers » à la place de « Tous les pays » (quartiers de `/v1/zones` groupés par zone) ; rubrique « Services à domicile » dans le filtre des rubriques.
+- Contrat (API puis synchronisation) : paramètre `district` sur `GET /v1/admin/requests` et sur l'export CSV, qui reçoit aussi `category` et `country` ; exemples du back-office à Douala et à cinq rubriques. L'export suit désormais les filtres de rubrique et de quartier.
+
+### Décisions
+
+- **« Maison + Linge » sous « Proximité » sur la maquette** : la formule appartient à la rubrique Services à domicile ; la liste affiche « À domicile », cohérent avec la répartition par rubrique du tableau de bord.
+- **Écarts antérieurs non repris ici** : filtres sur deux lignes (type et recherche en plus de la maquette), Agenda et Médiathèque dans le menu (écrans non maquettés), Ruth A. parmi les dernières demandes du tableau de bord.
+
