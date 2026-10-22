@@ -259,5 +259,11 @@
     "whatsappMessage": "Référence de ma demande : {ref}",
     "newTab": "(nouvel onglet)",
     "home": "Retour à l’accueil"
+  },
+  "registration": {
+    "metaTitle": "S’inscrire",
+    "metaDescription": "Enregistrez vos informations une fois pour des demandes plus rapides, ou rejoignez notre réseau de partenaires à Douala.",
+    "breadcrumb": "S'inscrire",
+    "title": "Valider mon inscription"
   }
 }

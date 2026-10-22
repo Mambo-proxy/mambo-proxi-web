@@ -259,5 +259,11 @@
     "whatsappMessage": "My request reference: {ref}",
     "newTab": "(new tab)",
     "home": "Back to home"
+  },
+  "registration": {
+    "metaTitle": "Sign up",
+    "metaDescription": "Save your details once for faster requests, or join our network of partners in Douala.",
+    "breadcrumb": "Sign up",
+    "title": "Complete my sign-up"
   }
 }
