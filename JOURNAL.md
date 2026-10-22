@@ -625,3 +625,9 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - Mobile : 6 entre le nom d'une demande et son statut dans l'aperçu (12 auparavant) : « Logement temporaire · Bastos » tient sur une ligne comme sur la maquette.
 - Fidélité (`qa/fidelite/suivi-mambo-*.png`) : desktop 511 · 514 · 494 (2 473 px pour 2 472), mobile 814 · 963 · 380 (3 887 pour 3 886).
 - Le formulaire « Me prévenir » reste en français sur le site anglais, comme les autres formulaires.
+
+### Pages légales (22 octobre 2026)
+
+- Contenu inchangé dans la nouvelle maquette (`71:9645`, `71:9918`) ; version anglaise (nouvelle : `/en/legal-notice`, `/en/privacy-policy`, `/en/cookies`, `/en/terms`) : sommaire, fil d'Ariane et « Modifier mes choix de cookies » traduits (`legal` dans les messages), pages servies en anglais par l'API (modèles « à compléter » traduits dans les mocks, liens vers les adresses anglaises).
+- Mobile recalé : titres des articles en 20/32 (24 à partir de la tablette), texte en 15/25 ; liens du texte en graisse normale (soulignés et orange, comme avant) pour garder les retours à la ligne de la maquette.
+- Fidélité (`qa/fidelite/pages-legales-*.png`) : 1 944 px pour 1 943 en desktop, 2 850 pour 2 849 en mobile.
