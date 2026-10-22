@@ -242,5 +242,12 @@
       "title": "Vérifiez que votre quartier est desservi.",
       "link": "Voir toutes les zones et les quartiers"
     }
+  },
+  "quote": {
+    "metaTitle": "Devis gratuit",
+    "metaDescription": "Votre devis gratuit en 3 minutes : sans engagement, réponse personnalisée sous 24 h, par e-mail ou WhatsApp.",
+    "breadcrumb": "Devis gratuit",
+    "title": "Votre devis gratuit ==en 3 minutes.==",
+    "lead": "Sans engagement. Réponse personnalisée sous 24 h, par e-mail ou WhatsApp."
   }
 }

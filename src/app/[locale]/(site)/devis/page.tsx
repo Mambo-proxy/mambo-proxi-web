@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { QuoteForm } from '@/components/forms/quote/quote-form';
 import { AccentText } from '@/components/ui/accent-text';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
@@ -10,19 +11,17 @@ import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { seoMetadata } from '@/lib/seo/metadata';
 
-export const metadata: Metadata = seoMetadata({
-  title: 'Devis gratuit',
-  description:
-    'Votre devis gratuit en 3 minutes : sans engagement, réponse personnalisée sous 24 h, par e-mail ou WhatsApp.',
-  path: '/devis',
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('quote');
+  return seoMetadata({ title: t('metaTitle'), description: t('metaDescription'), path: '/devis' });
+}
 
 type SearchParams = { searchParams: Promise<{ service?: string; rubrique?: string }> };
 
 /** Devis gratuit (desktop `70:8077`, mobile `70:8481`) : en-tête, progression, formulaire en 3 étapes, récapitulatif. */
 export default async function QuotePage({ searchParams }: SearchParams) {
   const query = await searchParams;
-  const [categories, settings] = await Promise.all([
+  const [categories, settings, zones, t, tRubrique] = await Promise.all([
     unwrap(
       api.GET('/v1/categories', {
         params: { query: { include: 'services' } },
@@ -30,6 +29,9 @@ export default async function QuotePage({ searchParams }: SearchParams) {
       }),
     ),
     getSiteSettings(),
+    unwrapOrNull(api.GET('/v1/zones', cached([cacheTags.zones]))),
+    getTranslations('quote'),
+    getTranslations('rubrique'),
   ]);
   // Champs dynamiques de l'étape 2 : `quoteFields` de chaque rubrique (administrables dans le back-office).
   const details = await Promise.all(
@@ -58,12 +60,12 @@ export default async function QuotePage({ searchParams }: SearchParams) {
   return (
     <div className="bg-neutral-50">
       <section className="container-site flex flex-col gap-4 pt-5 pb-4 xl:pt-12">
-        <Breadcrumb items={[{ label: 'Accueil', href: routes.home }, { label: 'Devis gratuit' }]} />
+        <Breadcrumb items={[{ label: tRubrique('home'), href: routes.home }, { label: t('breadcrumb') }]} />
         <h1 className="font-brand text-[32px] leading-[38px] font-semibold tracking-[-0.025em] text-text-main md:text-[44px] md:leading-[50px] xl:text-[52px] xl:leading-[58px]">
-          <AccentText text="Votre devis gratuit ==en 3 minutes.==" />
+          <AccentText text={t('title')} />
         </h1>
         <p className="font-ui text-[16px] leading-6 text-text-muted xl:text-[19px] xl:leading-8">
-          {frenchTypography('Sans engagement. Réponse personnalisée sous 24 h, par e-mail ou WhatsApp.')}
+          {frenchTypography(t('lead'))}
         </p>
       </section>
       <QuoteForm
@@ -71,6 +73,10 @@ export default async function QuotePage({ searchParams }: SearchParams) {
         fieldsByCategory={fieldsByCategory}
         initialCategory={presetCategory}
         initialService={presetService?.slug ?? null}
+        areas={(zones?.zones ?? []).map((zone) => ({
+          name: zone.name,
+          quarters: zone.quarters.map((quarter) => quarter.name),
+        }))}
         whatsapp={
           settings.whatsapp.enabled
             ? { number: settings.whatsapp.number, message: settings.whatsapp.message }

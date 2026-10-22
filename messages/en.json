@@ -242,5 +242,12 @@
       "title": "Check that your neighbourhood is covered.",
       "link": "See all areas and neighbourhoods"
     }
+  },
+  "quote": {
+    "metaTitle": "Free quote",
+    "metaDescription": "Your free quote in 3 minutes: no commitment, a personalised reply within 24 hours by email or WhatsApp.",
+    "breadcrumb": "Free quote",
+    "title": "Your free quote ==in 3 minutes.==",
+    "lead": "No commitment. A personalised reply within 24 hours, by email or WhatsApp."
   }
 }
