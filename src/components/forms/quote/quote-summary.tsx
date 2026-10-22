@@ -23,7 +23,7 @@ export function QuoteSummary({ service, onClear, whatsappHref }: QuoteSummaryPro
         <h2 className="font-ui text-[16px] leading-6 font-semibold text-text-main">Votre demande</h2>
         {service ? (
           <div className="flex items-center gap-3 rounded-2xl bg-neutral-50 p-3">
-            <Visual visual={service.visual} sizes="56px" className="size-14 shrink-0 rounded-xl" />
+            <Visual visual={service.visual} sizes="56px" className="size-14 shrink-0 rounded-md" />
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="font-ui text-[15px] leading-6 font-semibold text-text-main">
                 {frenchTypography(service.name)}

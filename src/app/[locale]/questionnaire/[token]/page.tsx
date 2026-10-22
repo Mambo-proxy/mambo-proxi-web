@@ -80,14 +80,15 @@ export default async function SurveyPage({ params }: Params) {
         <h1 className="font-brand text-[24px] leading-[30px] font-semibold tracking-[-0.01em] text-text-main md:text-[32px] md:leading-10">
           {frenchTypography('Comment s’est passée votre prestation ?')}
         </h1>
-      </div>
-      <div className="flex items-center gap-3 rounded-2xl bg-neutral-50 p-3.5">
-        <Visual visual={survey.service.visual} sizes="48px" className="size-12 shrink-0 rounded-xl" />
-        <div className="flex flex-col">
-          <p className="font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main">
-            {[survey.service.name, date].filter(Boolean).join(' · ')}
-          </p>
-          <p className="text-caption text-text-muted">{`Demande ${survey.reference}`}</p>
+        {/* Résumé de la prestation à 10 sous le titre, comme la maquette (`82:9580`). */}
+        <div className="flex items-center gap-3 rounded-2xl bg-neutral-50 p-3.5">
+          <Visual visual={survey.service.visual} sizes="48px" className="size-12 shrink-0 rounded-md" />
+          <div className="flex flex-col">
+            <p className="font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main">
+              {[survey.service.name, date].filter(Boolean).join(' · ')}
+            </p>
+            <p className="text-caption text-text-muted">{`Demande ${survey.reference}`}</p>
+          </div>
         </div>
       </div>
       <SurveyForm token={token} questions={survey.questions} />

@@ -36,7 +36,7 @@ function StarsQuestion({
   const shown = hover ?? value ?? 0;
   const label = shown ? question.options[shown - 1] : null;
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       <div className="flex gap-2" onMouseLeave={() => setHover(null)}>
         {[1, 2, 3, 4, 5].map((rating) => (
           <label
@@ -126,7 +126,7 @@ function NpsQuestion({
 }) {
   const [low, high] = question.options;
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       <div className="flex gap-1 md:gap-1.5">
         {Array.from({ length: 11 }, (_, score) => {
           const selected = value === score;
