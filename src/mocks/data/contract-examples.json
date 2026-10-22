@@ -4721,13 +4721,13 @@
           "isNew": true
         },
         {
-          "id": "job_relation_diaspora",
-          "slug": "charge-e-relation-clients-diaspora",
-          "title": "Chargé·e de relation clients diaspora",
-          "city": "France · télétravail",
-          "country": "FR",
+          "id": "job_relation_clients",
+          "slug": "charge-e-relation-clients",
+          "title": "Chargé·e de relation clients",
+          "city": "Douala · sur site",
+          "country": "CM",
           "contractType": "CDD 12 mois",
-          "summary": "Vous accompagnez nos clients de la diaspora depuis la France.",
+          "summary": "Vous accompagnez nos clients depuis l’agence de Douala.",
           "publishedAt": "2026-09-28T08:00:00.000Z",
           "isNew": false
         },
@@ -4752,6 +4752,17 @@
           "summary": "Vous réalisez des transferts et mises à disposition pour nos clients.",
           "publishedAt": "2026-09-14T08:00:00.000Z",
           "isNew": false
+        },
+        {
+          "id": "job_intervenant",
+          "slug": "intervenant-e-a-domicile",
+          "title": "Intervenant·e à domicile",
+          "city": "Douala",
+          "country": "CM",
+          "contractType": "CDI",
+          "summary": "Vous réalisez les prestations à domicile de nos clients dans les quartiers nord de Douala.",
+          "publishedAt": "2026-10-02T08:00:00.000Z",
+          "isNew": true
         }
       ]
     }
@@ -4764,19 +4775,31 @@
     "contentType": "application/json",
     "examples": {
       "default": {
-        "id": "job_coordinateur",
-        "slug": "coordinateur-rice-de-services",
-        "title": "Coordinateur·rice de services",
+        "id": "job_intervenant",
+        "slug": "intervenant-e-a-domicile",
+        "title": "Intervenant·e à domicile",
         "city": "Douala",
         "country": "CM",
         "contractType": "CDI",
-        "summary": "Vous coordonnez les prestations de nos clients et le réseau de prestataires à Douala.",
+        "summary": "Vous réalisez les prestations à domicile de nos clients dans les quartiers nord de Douala.",
         "publishedAt": "2026-10-02T08:00:00.000Z",
         "isNew": true,
         "startDate": "janvier 2027",
         "workingTime": "temps plein",
         "locationLabel": "Douala, Cameroun",
-        "description": "Au cœur de l’agence de Douala, vous coordonnez les demandes de nos clients, de la réception du besoin jusqu’au suivi de la prestation, avec notre réseau de prestataires.",
+        "sectors": [
+          "Bonamoussadi",
+          "Makèpè",
+          "Cité SIC"
+        ],
+        "salary": {
+          "min": 90000,
+          "max": 120000,
+          "currency": "XAF",
+          "period": "MONTH"
+        },
+        "schedule": "8 h par jour · 5 jours par semaine",
+        "description": "Au cœur de l’agence de Douala, vous organisez les demandes de nos clients, de la réception du besoin jusqu’au suivi de la prestation, avec notre réseau de prestataires.",
         "missions": [
           "Analyser les demandes et préparer les devis",
           "Sélectionner et briefer les prestataires",
@@ -4784,7 +4807,7 @@
           "Mettre à jour les dossiers dans l’outil de gestion"
         ],
         "profile": [
-          "Expérience en relation client ou coordination",
+          "Expérience en entretien de logement ou service à domicile",
           "Sens de l’organisation et du service",
           "Aisance à l’écrit et à l’oral en français",
           "Maîtrise des outils numériques courants"

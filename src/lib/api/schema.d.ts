@@ -2873,11 +2873,37 @@ export interface components {
             workingTime?: string | null;
             /** @example Douala, Cameroun */
             locationLabel?: string | null;
+            /**
+             * @description Quartiers d'intervention ; affichés « Secteurs : … » à la place du lieu quand la liste n'est pas vide.
+             * @example [
+             *       "Bonamoussadi",
+             *       "Makèpè",
+             *       "Cité SIC"
+             *     ]
+             */
+            sectors: string[];
+            salary?: components["schemas"]["JobSalary"] | null;
+            /** @example 8 h par jour · 5 jours par semaine */
+            schedule?: string | null;
             description?: string | null;
             missions: string[];
             profile: string[];
             benefits: string[];
             expiresAt?: components["schemas"]["DateTime"] | null;
+        };
+        /** @description Rémunération du poste (salaire proposé au candidat, sans rapport avec le prix des prestations). Affichée « 90 000 – 120 000 FCFA par mois ». */
+        JobSalary: {
+            /** @example 90000 */
+            min: number;
+            /**
+             * @description Absent pour un montant unique.
+             * @example 120000
+             */
+            max: number | null;
+            /** @enum {string} */
+            currency: "XAF" | "EUR";
+            /** @enum {string} */
+            period: "HOUR" | "DAY" | "WEEK" | "MONTH" | "YEAR";
         };
         Event: {
             id: components["schemas"]["Id"];
@@ -3658,7 +3684,11 @@ export interface components {
             startDate?: string | null;
             workingTime?: string | null;
             locationLabel?: string | null;
+            sectors?: string[];
+            salary?: components["schemas"]["JobSalary"] | null;
+            schedule?: string | null;
             summary?: string;
+            description?: string | null;
             missions?: string[];
             profile?: string[];
             benefits?: string[];
@@ -4521,6 +4551,7 @@ export type TrainingCategory = components['schemas']['TrainingCategory'];
 export type Training = components['schemas']['Training'];
 export type JobOfferSummary = components['schemas']['JobOfferSummary'];
 export type JobOfferDetail = components['schemas']['JobOfferDetail'];
+export type JobSalary = components['schemas']['JobSalary'];
 export type Event = components['schemas']['Event'];
 export type AppointmentFormat = components['schemas']['AppointmentFormat'];
 export type AppointmentReason = components['schemas']['AppointmentReason'];
