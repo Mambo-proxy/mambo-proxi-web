@@ -536,3 +536,15 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Titre du bandeau sombre en mobile** : la maquette renvoie « ? » seul en début de ligne ; l'espace insécable le garde avec « entreprise », le titre passe sur trois lignes (+28 px).
 - **Formulaire de candidature du site anglais** : reste en français, comme les autres formulaires (traduction des formulaires à faire).
 
+### Offre d'emploi : secteurs, rémunération et horaires (22 octobre 2026)
+
+- Fiche recalée sur la maquette (`82:8945`, `82:9299`) : en-tête avec secteurs d'intervention (à la place du lieu quand ils sont renseignés), rémunération, horaires, contrat, prise de poste et publication ; écarts de 24 en desktop, une information par ligne en 14/24 espacée de 12 en mobile. Version anglaise (nouvelle, `/en/careers/…`) : textes de la fiche (`job` dans les messages), offres servies en anglais par l'API, partage traduit, fil d'Ariane « Home › Careers ».
+- Contrat (API puis synchronisation) : `sectors`, `salary` (`JobSalary` : montant minimum et maximum, devise XAF ou EUR, période) et `schedule` dans le détail d'une offre et dans l'édition du back-office (avec `description`, qui y manquait). Rémunération affichée « 90 000 – 120 000 FCFA par mois » (« 90,000 – 120,000 FCFA a month ») et reprise dans le JSON-LD `JobPosting` (`baseSalary`). Il s'agit du salaire proposé au candidat, sans rapport avec le prix des prestations (toujours absent).
+- Données : 5e offre « Intervenant·e à domicile » (Bonamoussadi, Makèpè, Cité SIC ; CDI ; publiée le 2 octobre 2026), celle de la maquette du détail ; la liste affiche désormais « 5 postes ouverts ».
+- Mobile : titres des blocs 21/32, listes 15/26, marge basse de 48, « Voir toutes les offres » aligné à gauche.
+- Fidélité : en desktop, chaque section à la hauteur de la maquette (2 256 px pour 2 255) ; en mobile, en-tête identique (426), contenu 1 304 pour 1 278 (voir les décisions).
+
+### Décisions
+
+- **Offre de la maquette du détail** : « Intervenant·e à domicile » n'apparaît pas dans la liste de la maquette Recrutement (4 offres). Choix de la cliente le 22 octobre 2026 : elle est ajoutée comme 5e offre ; la page Recrutement affiche donc 5 postes (+126 px en desktop, +196 en mobile par rapport à sa maquette).
+- **« Analyser les demandes et préparer les devis » en mobile** : la ligne tient tout juste dans la maquette (314 px) et passe ici à la ligne, au rendu près des polices (+26 px).
