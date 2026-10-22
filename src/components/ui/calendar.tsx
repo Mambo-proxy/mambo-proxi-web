@@ -107,11 +107,11 @@ export function Calendar({
   return (
     <div
       className={cn(
-        'flex flex-col gap-3 rounded-[20px] border border-border-default bg-neutral-0 p-5',
+        'flex flex-col gap-3 rounded-[20px] border border-border-default bg-neutral-0 p-4 md:p-5',
         className,
       )}
     >
-      <div className="flex items-center justify-between">
+      <div className="-my-1.5 flex items-center justify-between">
         <button
           type="button"
           onClick={() => onMonthChange(addMonths(month, -1))}
@@ -141,7 +141,7 @@ export function Calendar({
         ref={gridRef}
         role="grid"
         aria-label={monthLabel}
-        className="w-full border-separate border-spacing-y-1.5"
+        className="-my-1.5 w-full border-separate border-spacing-y-1.5"
       >
         <thead>
           <tr>
@@ -150,7 +150,7 @@ export function Calendar({
                 key={toKey(day)}
                 scope="col"
                 abbr={format(day, 'EEEE', { locale: fr })}
-                className="pb-1 font-ui text-[12px] leading-4 font-medium text-text-muted"
+                className="h-6 p-0 font-ui text-[12px] leading-4 font-medium text-text-muted"
               >
                 {format(day, 'EEEEE', { locale: fr }).toUpperCase()}
               </th>

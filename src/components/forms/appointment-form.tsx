@@ -65,7 +65,7 @@ function ChoiceChips<T extends string>({
 }) {
   return (
     <fieldset>
-      <legend className="mb-3 font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main">
+      <legend className="mb-2.5 font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main">
         {legend}
       </legend>
       <div className="flex flex-wrap gap-2">
@@ -270,7 +270,7 @@ export function AppointmentForm() {
           {day ? (
             <ChoiceChips
               legend={
-                <span className="first-letter:uppercase">{`${formatWeekdayDate(`${day}T12:00:00Z`)} · créneaux disponibles`}</span>
+                <span className="inline-block first-letter:uppercase">{`${formatWeekdayDate(`${day}T12:00:00Z`)} · créneaux disponibles`}</span>
               }
               name="creneau"
               options={daySlots.map((item) => ({ value: item.startsAt, label: formatClock(item.startsAt) }))}
@@ -282,7 +282,7 @@ export function AppointmentForm() {
               Choisissez un jour pour voir les créneaux disponibles.
             </p>
           )}
-          <p className="-mt-1 flex items-center gap-1.5 text-caption text-text-muted">
+          <p className="flex items-center gap-1.5 text-caption text-text-muted">
             <Globe aria-hidden size={14} />
             {timezoneLabel}
           </p>
