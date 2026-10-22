@@ -27,4 +27,14 @@ test.describe('Suivi Mambo', () => {
     await form.getByRole('button', { name: 'Me prévenir' }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Merci' })).toBeVisible({ timeout: 15_000 });
   });
+
+  test('version anglaise : contenu et aperçu traduits', async ({ page, pageErrors }) => {
+    await page.goto('/en/mambo-tracking', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+      'Mambo tracking: your client area, online soon.',
+    );
+    await expect(page.getByText('Parcel delivery')).toBeAttached();
+    await expect(page.getByRole('heading', { name: 'All your tracking in one place' })).toBeVisible();
+    expect(pageErrors).toEqual([]);
+  });
 });
