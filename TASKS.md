@@ -115,7 +115,8 @@ Les maquettes ont été refondues mi-octobre 2026 (recentrage sur Douala et les 
 - [x] Contact (carte « Douala », champ « Ville », zones d'intervention) — `qa/fidelite/contact-*.png`
 - [x] Devis (« 4 formules », « Ville ou quartier ») — `qa/fidelite/devis-*.png`
 - [x] Confirmation du devis (traduite) — `qa/fidelite/devis-confirmation-*.png`
-- [ ] Inscription, Suivi, pages légales, questionnaire, 404
+- [x] Inscription (photo, « Valider mon inscription », « Ville ou quartier ») — `qa/fidelite/inscription-*.png`
+- [ ] Suivi, pages légales, questionnaire, 404
 - [ ] E-mails (4 modèles mis à jour)
 - [ ] Back-office : tableau de bord modifié, Magazine, Zones d'intervention, édition du Magazine ; écrans en cours sur les branches `bo/services-en-cours`, `bo/pages-textes-en-cours`, `bo/recrutement-en-cours`
 - [ ] Implémentation de l'API (phase 2) : `?lang`, zones, formules, citations d'avis, offres des fiches service, secteurs, rémunération et horaires des offres d'emploi

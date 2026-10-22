@@ -603,3 +603,18 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 
 - Contenu inchangé dans la nouvelle maquette (`70:8799`, `70:9036`) ; page traduite (`quoteConfirmation` dans les messages, `/en/free-quote/confirmation`), message WhatsApp pré-rempli dans la langue de la page, mention « nouvel onglet » ajoutée au lien WhatsApp pour les lecteurs d'écran.
 - Fidélité (`qa/fidelite/devis-confirmation-*.png`) : 1 632 px en desktop et 2 352 en mobile, identiques à la maquette.
+
+### Inscription (22 octobre 2026)
+
+- Pages recalées sur la maquette (particulier `70:10558` / `70:10903`, professionnel `70:11134` / `70:11492`) : titre « Valider mon inscription » (aussi sur le bouton du particulier), photo `inscrire` (original de Figma, commune aux deux profils) à la place de l'illustration, citation signée « Aurélie K. · Bonapriso », téléphone d'exemple en +237 ; titre, fil d'Ariane et métadonnées traduits (`registration` dans les messages, `/en/sign-up`).
+- « Ville ou quartier » (Douala par défaut, Yaoundé, Autre ville du Cameroun, Hors du Cameroun) et « Quartier » : envoyés dans `city` (« Akwa, Douala ») avec `country` = CM, ou sans pays hors du Cameroun.
+- Contrat (API puis synchronisation) : `country` facultatif dans `RegistrationInput`.
+- Espacements : 18 entre les rangées de champs (16 dans une paire en mobile), 10 sous l'intitulé des rubriques.
+- Fidélité (`qa/fidelite/inscription-*.png`, rubriques cochées comme sur la maquette) : particulier 2 057 px pour 2 055 en desktop, 3 204 pour 3 203 en mobile ; professionnel bloc 1 203 pour 1 202 en desktop, 3 328 pour 3 327 en mobile.
+
+### Décisions
+
+- **Second champ de lieu** : la maquette le nomme « Ville » avec la valeur « Akwa », juste après « Ville ou quartier » (« Douala ») ; il est libellé « Quartier » pour ne pas demander deux fois la ville.
+- **Lettre Mambo** : cochée sur la maquette, décochée par défaut sur le site (consentement explicite, règle RGPD).
+- **Rubriques cochées de la maquette** (trois en particulier, « Expérience » en professionnel) : exemple de saisie ; aucune n'est cochée à l'ouverture.
+- **Formulaire du site anglais** : reste en français, comme les autres formulaires.
