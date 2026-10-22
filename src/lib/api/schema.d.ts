@@ -2338,6 +2338,10 @@ export interface components {
                 addressLines: string[];
                 city: string;
                 country: components["schemas"]["CountryCode"];
+                /** @description Téléphone de l'agence (carte « Douala » de la page Contact) ; vide = carte masquée. */
+                phone?: components["schemas"]["PhoneE164"] | null;
+                /** @example +237 6 00 00 00 00 */
+                phoneDisplay?: string | null;
                 latitude?: number | null;
                 longitude?: number | null;
                 /** Format: uri */

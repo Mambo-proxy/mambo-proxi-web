@@ -43,10 +43,12 @@
         "agency": {
           "name": "Agence MAMBO Proxi",
           "addressLines": [
-            "Adresse de l'agence à compléter"
+            "Adresse de l’agence"
           ],
           "city": "Douala",
           "country": "CM",
+          "phone": "+237600000000",
+          "phoneDisplay": "+237 6 00 00 00 00",
           "latitude": 4.0511,
           "longitude": 9.7679,
           "mapsUrl": "https://www.google.com/maps/search/?api=1&query=4.0511,9.7679",
@@ -141,10 +143,12 @@
         "agency": {
           "name": "MAMBO Proxi agency",
           "addressLines": [
-            "Agency address to be confirmed"
+            "Agency address"
           ],
           "city": "Douala",
           "country": "CM",
+          "phone": "+237600000000",
+          "phoneDisplay": "+237 6 00 00 00 00",
           "latitude": 4.0511,
           "longitude": 9.7679,
           "mapsUrl": "https://www.google.com/maps/search/?api=1&query=4.0511,9.7679",
