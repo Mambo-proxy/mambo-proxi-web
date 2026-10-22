@@ -658,3 +658,27 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **« Maison + Linge » sous « Proximité » sur la maquette** : la formule appartient à la rubrique Services à domicile ; la liste affiche « À domicile », cohérent avec la répartition par rubrique du tableau de bord.
 - **Écarts antérieurs non repris ici** : filtres sur deux lignes (type et recherche en plus de la maquette), Agenda et Médiathèque dans le menu (écrans non maquettés), Ruth A. parmi les dernières demandes du tableau de bord.
 
+### Back-office : Magazine (22 octobre 2026)
+
+- Contrat (API puis synchronisation) : `/v1/admin/magazine` (éditions, nombre d'articles, dernière campagne), éditions (création, lecture, enregistrement, suppression, publication ou programmation, retour en brouillon, articles dans l'ordre de lecture, jeton d'aperçu, envoi de test et programmation par la newsletter), articles (liste filtrable par édition, création, modification, suppression). Textes en français et en anglais dans les mêmes objets (`title` / `titleEn`…) ; une langue est « complète » quand titre et texte sont renseignés.
+- Liste (`267:1511`) : onglets « Éditions » / « Articles » (`?onglet=articles`), tableau à 7 colonnes à partir de 1 400 px (Thèmes et Lecteurs masqués en dessous, cartes en mobile), aperçu, modification, menu (publier, repasser en brouillon, supprimer), « Dernière campagne · Édition n° 1 » et ses 4 indicateurs. « Nouvelle édition » crée un brouillon et l'ouvre.
+- Édition d'un numéro (`269:1677`) : pilules de langue qui basculent tous les champs entre français et anglais, informations, couverture (médiathèque), édito avec barre d'outils à libellés (nouvelle variante `labels` de `RichTextEditor`), signature, articles réordonnables au glisser-déposer et au clavier, ajout d'articles existants ou nouveaux ; colonne Publication (Aperçu, Publier / Mettre à jour), Envoi par la newsletter (inscrits par langue, date et heure de Douala, test, programmation), Traduction anglaise (progression, « Voir les contenus à traduire » ouvre le premier article non traduit en anglais).
+- Onglet « Articles » et modale d'article non maquettés : même langage que l'éditeur (titre, thème, photo, texte, édition, en français et en anglais).
+- Photos : couvertures et vignettes de la maquette identiques à des photos déjà exportées (`magazine-hero`, `prox-courses`, `immo-hero`, `culture-hero`, `offre-massage`, `immo-achat`, `prox-repas`, `culture-decouverte`, `formule-maison`) ; une seule nouvelle photo, `magazine-bien-manger`.
+- Fidélité (`qa/fidelite/bo-magazine-*.png`, `bo-magazine-edition-*.png`) : liste conforme à 1 440 ; édition 1 629 px pour 1 636.
+- Tests : `e2e/admin-magazine.spec.ts` (liste, onglets, enregistrement, version anglaise, contenus à traduire, nouvelle édition, axe) aux 4 largeurs.
+
+### Décisions
+
+- **Couleurs hors design system de la maquette** (#E7E2DC, #D9D3CB, #6B645C, #F1EEEA, #EAF4E5 / #2F6B22, #FFF1E5, #F7F4F0) : ramenées aux tokens les plus proches (`border/default`, `border/strong`, `text/muted`, `neutral/100`, `vert/100` / `vert/800`, `orange/50`, `neutral/50`) ; texte blanc des boutons orange remplacé par `text/on-primary`, comme les autres boutons du back-office.
+- **« Enregistrer » avec une icône « + »** sur la maquette : icône d'enregistrement.
+- **Menu « … » de la carte Publication** (non maquetté) : seul accès pour repasser en brouillon et supprimer l'édition.
+- **Thèmes d'une édition** : affichés dans la liste mais absents de l'éditeur maquetté ; non modifiables pour l'instant (une nouvelle édition affiche « — »).
+- **Pilules de langue** : la maquette les montre comme des indicateurs ; elles servent aussi à choisir la langue modifiée.
+
+### Difficultés et solutions
+
+- **Grille du tableau à 1 400 px** : les règles `lg:` sont émises après `min-[1400px]:` et l'emportaient ; la variante intermédiaire est bornée (`lg:max-[1399px]:`).
+- **Formulaires imbriqués** : les modales (lien de l'éditeur de texte, envoi de test) sont rendues dans le DOM de l'éditeur ; l'éditeur d'édition et la modale d'article ne sont donc pas des `<form>`.
+- **Test unitaire des avis** (`src/mocks/admin-reviews.test.ts`, taux de recommandation 91 au lieu de 92) : échoue déjà sans ces changements ; à reprendre.
+
