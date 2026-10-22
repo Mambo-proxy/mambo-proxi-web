@@ -14,7 +14,10 @@ const BENEFITS = [
   'Des missions utiles, au service des familles',
 ];
 
-/** Offres simulées : les 4 postes de la maquette Recrutement (`67:6899`), détail complet pour la première (`82:8945`). */
+/**
+ * Offres simulées : les 4 postes de la maquette Recrutement (`67:6899`) et l'offre de la maquette du détail
+ * (« Intervenant·e à domicile », `82:8945`), avec secteurs, rémunération et horaires.
+ */
 export const jobs: JobOfferDetail[] = [
   {
     id: 'job_coordinateur',
@@ -29,6 +32,9 @@ export const jobs: JobOfferDetail[] = [
     startDate: 'janvier 2027',
     workingTime: 'temps plein',
     locationLabel: 'Douala, Cameroun',
+    sectors: [],
+    salary: null,
+    schedule: null,
     description:
       'Au cœur de l’agence de Douala, vous coordonnez les demandes de nos clients, de la réception du besoin jusqu’au suivi de la prestation, avec notre réseau de prestataires.',
     missions: [
@@ -59,6 +65,9 @@ export const jobs: JobOfferDetail[] = [
     startDate: 'dès que possible',
     workingTime: 'temps plein',
     locationLabel: 'Douala, Cameroun, sur site',
+    sectors: [],
+    salary: null,
+    schedule: null,
     description:
       'À l’agence de Douala, vous êtes l’interlocuteur de nos clients : vous recueillez leurs besoins, les transmettez à l’équipe de coordination et les tenez informés à chaque étape.',
     missions: [
@@ -87,6 +96,9 @@ export const jobs: JobOfferDetail[] = [
     startDate: 'novembre 2026',
     workingTime: 'temps partiel',
     locationLabel: 'Yaoundé, Cameroun',
+    sectors: [],
+    salary: null,
+    schedule: null,
     description:
       'Vous assurez l’entretien régulier des logements gérés par l’agence à Yaoundé, entre deux locations ou à la demande des propriétaires.',
     missions: [
@@ -111,6 +123,9 @@ export const jobs: JobOfferDetail[] = [
     startDate: null,
     workingTime: null,
     locationLabel: 'Douala, Cameroun',
+    sectors: [],
+    salary: null,
+    schedule: null,
     description:
       'Avec votre véhicule ou un véhicule de nos partenaires, vous réalisez les transferts aéroport et les mises à disposition demandés par nos clients.',
     missions: [
@@ -119,6 +134,40 @@ export const jobs: JobOfferDetail[] = [
       'Garder un véhicule propre et entretenu',
     ],
     profile: ['Permis B depuis plus de 3 ans', 'Bonne connaissance de Douala', 'Sens du service'],
+    benefits: BENEFITS,
+    expiresAt: null,
+  },
+  {
+    id: 'job_intervenant',
+    slug: 'intervenant-e-a-domicile',
+    title: 'Intervenant·e à domicile',
+    city: 'Douala',
+    country: 'CM',
+    contractType: 'CDI',
+    summary: 'Vous réalisez les prestations à domicile de nos clients dans les quartiers nord de Douala.',
+    // Date de la maquette du détail (« Publiée le 2 octobre 2026 », `82:9091`).
+    publishedAt: '2026-10-02T08:00:00.000Z',
+    isNew: true,
+    startDate: 'janvier 2027',
+    workingTime: 'temps plein',
+    locationLabel: 'Douala, Cameroun',
+    sectors: ['Bonamoussadi', 'Makèpè', 'Cité SIC'],
+    salary: { min: 90000, max: 120000, currency: 'XAF', period: 'MONTH' },
+    schedule: '8 h par jour · 5 jours par semaine',
+    description:
+      'Au cœur de l’agence de Douala, vous organisez les demandes de nos clients, de la réception du besoin jusqu’au suivi de la prestation, avec notre réseau de prestataires.',
+    missions: [
+      'Analyser les demandes et préparer les devis',
+      'Sélectionner et briefer les prestataires',
+      'Suivre chaque prestation et informer le client',
+      'Mettre à jour les dossiers dans l’outil de gestion',
+    ],
+    profile: [
+      'Expérience en entretien de logement ou service à domicile',
+      'Sens de l’organisation et du service',
+      'Aisance à l’écrit et à l’oral en français',
+      'Maîtrise des outils numériques courants',
+    ],
     benefits: BENEFITS,
     expiresAt: null,
   },
@@ -187,6 +236,29 @@ const EN: Record<string, Partial<JobOfferDetail>> = {
       'Check inventories with the agency',
     ],
     profile: ['Experience in cleaning or hospitality', 'Thorough and discreet', 'Punctual'],
+  },
+  'intervenant-e-a-domicile': {
+    title: 'Home service provider',
+    contractType: 'Permanent',
+    summary: 'You carry out home services for our clients in the northern neighbourhoods of Douala.',
+    startDate: 'January 2027',
+    workingTime: 'full time',
+    locationLabel: 'Douala, Cameroon',
+    schedule: '8 hours a day · 5 days a week',
+    description:
+      'At the heart of the Douala agency, you organise our clients’ requests, from the first enquiry to the follow-up of the service, with our network of providers.',
+    missions: [
+      'Review requests and prepare quotes',
+      'Select and brief service providers',
+      'Follow up on each service and keep the client informed',
+      'Keep records up to date in the management tool',
+    ],
+    profile: [
+      'Experience in home cleaning or home services',
+      'Strong organisational skills and a sense of service',
+      'Good written and spoken French',
+      'Comfortable with everyday digital tools',
+    ],
   },
   'chauffeur-euse-partenaire': {
     title: 'Partner driver',
