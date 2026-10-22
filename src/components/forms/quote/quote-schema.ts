@@ -42,7 +42,7 @@ export function quoteSchema(fields: QuoteField[]) {
     fullName: fieldRules.fullName,
     email: fieldRules.email,
     phone: fieldRules.phone,
-    country: z.string().min(1, 'Merci de choisir votre pays de résidence.'),
+    city: z.string().min(1, 'Merci de choisir votre ville ou votre quartier.'),
     contactPreference: z.enum(['WHATSAPP', 'TELEPHONE', 'EMAIL']),
     consent: fieldRules.consent,
   });
@@ -55,7 +55,7 @@ export type QuoteFormOutput = z.output<ReturnType<typeof quoteSchema>>;
 export const STEP_FIELDS = {
   1: ['categorySlug', 'serviceSlug'],
   2: ['needs', 'description'],
-  3: ['fullName', 'email', 'phone', 'country', 'contactPreference', 'consent'],
+  3: ['fullName', 'email', 'phone', 'city', 'contactPreference', 'consent'],
 } as const;
 
 /** Valeurs des champs dynamiques au format du contrat : nombres convertis, champs vides à `null`. */

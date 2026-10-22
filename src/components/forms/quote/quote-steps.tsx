@@ -82,9 +82,7 @@ export function StepCard({ number, state, title, subtitle, headingRef, children 
       aria-labelledby={`etape-${number}`}
       className={cn(
         'flex scroll-mt-[calc(var(--site-header-h,85px)+16px)] flex-col gap-5 rounded-[28px] border bg-neutral-0 p-5 md:p-9',
-        state === 'active'
-          ? 'border-brand-primary shadow-[inset_0_0_0_1px_var(--mp-color-brand-primary)]'
-          : 'border-border-default',
+        state === 'active' ? 'border-2 border-brand-primary' : 'border-border-default',
       )}
     >
       <div className="flex items-center gap-3.5">

@@ -13,7 +13,6 @@ import { browserApi } from '@/lib/api/browser';
 import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
 import type { CategorySummary, QuoteField, QuoteRequestInput, ServiceSummary } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
-import { COUNTRIES } from '@/lib/countries';
 import { frenchTypography } from '@/lib/format/typography';
 import { CONSENT_TEXT } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
@@ -33,6 +32,12 @@ import { useSiteRouter } from '@/i18n/site-link';
 
 export type QuoteCategory = CategorySummary & { services: ServiceSummary[] };
 
+/** Quartiers desservis, par zone (`/v1/zones`), proposés dans « Ville ou quartier ». */
+export type QuoteArea = { name: string; quarters: string[] };
+
+/** Choix hors des quartiers listés ; un quartier est envoyé sous la forme « Akwa, Douala ». */
+const OTHER_PLACES = ['Autre quartier de Douala', 'Autre ville du Cameroun'];
+
 type QuoteFormProps = {
   categories: QuoteCategory[];
   /** Champs dynamiques de l'étape 2, par rubrique (`quoteFields`). */
@@ -40,6 +45,7 @@ type QuoteFormProps = {
   /** Pré-sélection depuis `?rubrique=` ou `?service=`. */
   initialCategory: string | null;
   initialService: string | null;
+  areas: QuoteArea[];
   whatsapp: { number: string; message: string } | null;
 };
 
@@ -51,6 +57,12 @@ type Step = 1 | 2 | 3;
 /** Champs du formulaire pouvant recevoir une erreur renvoyée par l'API. */
 const FIELD_NAMES = new Set<string>(Object.values(STEP_FIELDS).flat());
 
+/** Compteur d'une carte de rubrique : formules pour une rubrique de formules (« 4 formules »), sinon services. */
+function countLabel(category: QuoteCategory) {
+  const formulas = category.services.filter((service) => service.kind === 'formula').length;
+  return formulas > 0 ? `${formulas} formules` : `${category.serviceCount} services`;
+}
+
 /**
  * Formulaire de devis en 3 étapes (`70:8077`, cahier §7.1) : rubrique et service, besoin (champs propres à la
  * rubrique + description), coordonnées. Validation à chaque étape, brouillon en `sessionStorage`,
@@ -61,6 +73,7 @@ export function QuoteForm({
   fieldsByCategory,
   initialCategory,
   initialService,
+  areas,
   whatsapp,
 }: QuoteFormProps) {
   const router = useSiteRouter();
@@ -83,7 +96,7 @@ export function QuoteForm({
       fullName: '',
       email: '',
       phone: '',
-      country: '',
+      city: '',
       contactPreference: 'WHATSAPP',
       consent: false as unknown as true,
     },
@@ -179,7 +192,9 @@ export function QuoteForm({
             fullName: data.fullName,
             email: data.email,
             phone: data.phone,
-            country: data.country,
+            // Lieu de la prestation : toujours au Cameroun (Douala et environs).
+            country: 'CM',
+            city: data.city,
           } as QuoteRequestInput['contact'],
           contactPreference: data.contactPreference,
           consent: true,
@@ -249,7 +264,7 @@ export function QuoteForm({
                     <label
                       key={item.slug}
                       className={cn(
-                        'flex min-h-[150px] cursor-pointer flex-col gap-2.5 rounded-[18px] border p-4 transition-colors duration-150 has-[:focus-visible]:focus-ring md:min-h-[136px] md:w-[178px]',
+                        'flex min-h-[150px] cursor-pointer flex-col gap-2.5 rounded-[18px] border p-4 transition-colors duration-150 has-[:focus-visible]:focus-ring md:h-[136px] md:min-h-0 md:w-[178px]',
                         selected
                           ? 'border-brand-primary bg-orange-50 shadow-[inset_0_0_0_1px_var(--mp-color-brand-primary)]'
                           : 'border-border-default bg-neutral-0 hover:border-border-strong',
@@ -276,7 +291,7 @@ export function QuoteForm({
                         <span className="font-ui text-[14px] leading-5 font-semibold text-text-main">
                           {item.name}
                         </span>
-                        <span className="text-caption text-text-muted">{item.serviceCount} services</span>
+                        <span className="text-caption text-text-muted">{countLabel(item)}</span>
                       </span>
                     </label>
                   );
@@ -290,7 +305,7 @@ export function QuoteForm({
             </fieldset>
             {category && (
               <fieldset className="flex flex-col gap-3">
-                <legend className="mb-3 font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main">
+                <legend className="mb-5 font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main">
                   Service
                 </legend>
                 <div className="flex flex-wrap gap-2">
@@ -328,7 +343,7 @@ export function QuoteForm({
           </StepCard>
 
           <StepCard number={2} state={states[1]} title="Parlez-nous de votre besoin" headingRef={heading2}>
-            <div className="grid gap-4 md:grid-cols-2 md:gap-x-4 md:gap-y-5">
+            <div className="grid gap-4 md:grid-cols-2 md:gap-x-4 md:gap-y-5 max-md:[&>*:last-child]:mt-1 max-md:[&>*:nth-child(2n+3)]:mt-1">
               {fields.map((field) => (
                 <NeedField
                   key={`${categorySlug}-${field.name}`}
@@ -345,7 +360,9 @@ export function QuoteForm({
                 error={errors.description?.message}
                 className="md:col-span-2"
               >
-                {(control) => <Textarea rows={4} {...control} {...form.register('description')} />}
+                {(control) => (
+                  <Textarea rows={4} className="h-[120px]" {...control} {...form.register('description')} />
+                )}
               </Field>
             </div>
             <div className="flex items-center justify-between gap-4">
@@ -367,10 +384,10 @@ export function QuoteForm({
             number={3}
             state={states[2]}
             title="Vos coordonnées"
-            subtitle="Nom, e-mail, téléphone et pays."
+            subtitle="Nom, e-mail, téléphone et ville."
             headingRef={heading3}
           >
-            <div className="grid gap-4 md:grid-cols-2 md:gap-x-4 md:gap-y-5">
+            <div className="grid gap-4 md:grid-cols-2 md:gap-x-4 md:gap-y-5 max-md:[&>*:nth-child(3)]:mt-1">
               <Field label="Nom et prénom" required error={errors.fullName?.message}>
                 {(control) => (
                   <Input
@@ -397,21 +414,32 @@ export function QuoteForm({
               <Field label="Téléphone / WhatsApp" required error={errors.phone?.message}>
                 {(control) => <PhoneInput icon={Smartphone} {...control} {...form.register('phone')} />}
               </Field>
-              <Field label="Pays de résidence" required error={errors.country?.message}>
+              <Field label="Ville ou quartier" required error={errors.city?.message}>
                 {(control) => (
-                  <Select autoComplete="country" {...control} {...form.register('country')}>
+                  <Select {...control} {...form.register('city')}>
                     <option value="">Choisir</option>
-                    {COUNTRIES.map((country) => (
-                      <option key={country.code} value={country.code}>
-                        {country.name}
-                      </option>
+                    {areas.map((area) => (
+                      <optgroup key={area.name} label={area.name}>
+                        {area.quarters.map((quarter) => (
+                          <option key={quarter} value={`${quarter}, Douala`}>
+                            {quarter}
+                          </option>
+                        ))}
+                      </optgroup>
                     ))}
+                    <optgroup label="Autre lieu">
+                      {OTHER_PLACES.map((place) => (
+                        <option key={place} value={place}>
+                          {place}
+                        </option>
+                      ))}
+                    </optgroup>
                   </Select>
                 )}
               </Field>
             </div>
             <fieldset className="flex flex-col">
-              <legend className="mb-3 font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main">
+              <legend className="mb-2.5 font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main">
                 {frenchTypography('Comment préférez-vous être recontacté ?')}
               </legend>
               <div className="flex flex-wrap gap-2">
@@ -454,7 +482,8 @@ export function QuoteForm({
                 </p>
               )}
             </div>
-            <p className="flex items-center gap-2 text-caption text-text-muted">
+            {/* Une ligne en mobile, comme la maquette : la mention empiète sur la marge intérieure. */}
+            <p className="flex items-center gap-2 text-caption text-text-muted max-md:-mr-4">
               <Lock aria-hidden size={16} />
               Formulaire protégé contre les envois automatiques
             </p>
