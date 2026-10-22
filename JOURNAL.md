@@ -631,3 +631,15 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - Contenu inchangé dans la nouvelle maquette (`71:9645`, `71:9918`) ; version anglaise (nouvelle : `/en/legal-notice`, `/en/privacy-policy`, `/en/cookies`, `/en/terms`) : sommaire, fil d'Ariane et « Modifier mes choix de cookies » traduits (`legal` dans les messages), pages servies en anglais par l'API (modèles « à compléter » traduits dans les mocks, liens vers les adresses anglaises).
 - Mobile recalé : titres des articles en 20/32 (24 à partir de la tablette), texte en 15/25 ; liens du texte en graisse normale (soulignés et orange, comme avant) pour garder les retours à la ligne de la maquette.
 - Fidélité (`qa/fidelite/pages-legales-*.png`) : 1 944 px pour 1 943 en desktop, 2 850 pour 2 849 en mobile.
+
+### Questionnaire de satisfaction et page 404 (22 octobre 2026)
+
+- Questionnaire (`82:9565`, `82:9706`) : vignette de la prestation en photo (`chef-2`, exemple du contrat mis à jour dans l'API) au rayon de 12 ; résumé de la prestation à 10 sous le titre (28 auparavant) ; 12 entre les étoiles et leur libellé, et entre l'échelle de 0 à 10 et ses repères. Fidélité (`qa/fidelite/questionnaire-*.png`) : 1 411 px en desktop et 1 426 pour 1 427 en mobile, une fois rempli comme la maquette. Page « Merci » inchangée (`qa/fidelite/questionnaire-merci-*.png`).
+- Le questionnaire reste en français sur le site anglais, comme les autres formulaires.
+- Récapitulatif du devis : même correction de la vignette (`rounded-xl` vaut 24 px dans le thème : la photo de 56 paraissait ronde).
+- 404 (`83:9961`, `83:10230`) : photo `page404` (original de Figma) à la place de la scène « voiture », conservée pour l'erreur 500 et la maintenance (non maquettées) ; liens utiles à 18 sous les boutons (22 auparavant) et à 20 de haut ; textes de la 404 et de l'erreur 500 traduits (`errors` dans les messages). Fidélité (`qa/fidelite/page-404-*.png`) : 1 598 px pour 1 597 en desktop, 2 481 identique en mobile.
+
+### Difficultés et solutions
+
+- **Types générés corrompus** : après l'arrêt du serveur de développement, `.next/dev/types` peut rester incomplet ; `pnpm typecheck` échoue alors dans ces fichiers et `pnpm test:e2e` refuse de démarrer (« Failed to type check »). Supprimer `.next/dev` suffit.
+- **Avertissement « script tag »** en développement sur la 404 : React signale le script en ligne de `RootDocument` (classe `js`) quand la page introuvable est rendue côté client. Sans effet (le script s'exécute au rendu serveur) ; à reprendre avec la passe performance si besoin.
