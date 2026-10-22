@@ -4465,6 +4465,11 @@ export interface components {
     };
     parameters: {
         /**
+         * @description Quartier (nom tel que dans `GET /v1/zones`, ex. `Bonapriso`) : contacts dont la ville commence par ce quartier
+         *     (« Bonapriso, Douala »), sans tenir compte de la casse ni des accents.
+         */
+        District: string;
+        /**
          * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
          *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
          */
@@ -4702,6 +4707,7 @@ export type ResponseConflict = components['responses']['Conflict'];
 export type ResponseTooManyRequests = components['responses']['TooManyRequests'];
 export type ResponseSpamRejected = components['responses']['SpamRejected'];
 export type ResponseNoContent = components['responses']['NoContent'];
+export type ParameterDistrict = components['parameters']['District'];
 export type ParameterLang = components['parameters']['Lang'];
 export type ParameterPage = components['parameters']['Page'];
 export type ParameterPageSize = components['parameters']['PageSize'];
@@ -6391,6 +6397,11 @@ export interface operations {
                 status?: components["schemas"]["RequestStatus"];
                 category?: components["schemas"]["Slug"];
                 country?: components["schemas"]["CountryCode"];
+                /**
+                 * @description Quartier (nom tel que dans `GET /v1/zones`, ex. `Bonapriso`) : contacts dont la ville commence par ce quartier
+                 *     (« Bonapriso, Douala »), sans tenir compte de la casse ni des accents.
+                 */
+                district?: components["parameters"]["District"];
                 from?: components["parameters"]["From"];
                 to?: components["parameters"]["To"];
                 /** @description Recherche plein texte. */
@@ -6427,6 +6438,13 @@ export interface operations {
             query?: {
                 type?: components["schemas"]["RequestType"];
                 status?: components["schemas"]["RequestStatus"];
+                category?: components["schemas"]["Slug"];
+                country?: components["schemas"]["CountryCode"];
+                /**
+                 * @description Quartier (nom tel que dans `GET /v1/zones`, ex. `Bonapriso`) : contacts dont la ville commence par ce quartier
+                 *     (« Bonapriso, Douala »), sans tenir compte de la casse ni des accents.
+                 */
+                district?: components["parameters"]["District"];
                 from?: components["parameters"]["From"];
                 to?: components["parameters"]["To"];
             };
