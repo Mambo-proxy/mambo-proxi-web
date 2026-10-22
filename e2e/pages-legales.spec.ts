@@ -30,4 +30,15 @@ test.describe('pages légales', () => {
       await expect(page.getByRole('dialog')).toBeVisible({ timeout: 1500 });
     }).toPass();
   });
+
+  test('version anglaise : contenu, sommaire et bouton traduits', async ({ page, pageErrors }) => {
+    await page.goto('/en/legal-notice', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Legal notice');
+    await expect(page.getByText('Last updated: October 2026')).toBeVisible();
+    const nav = page.getByRole('navigation', { name: 'Legal pages' });
+    await expect(nav.getByRole('link', { name: /Privacy/ })).toHaveAttribute('href', '/en/privacy-policy');
+    await page.goto('/en/cookies', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('button', { name: 'Change my cookie choices' })).toBeVisible();
+    expect(pageErrors).toEqual([]);
+  });
 });
