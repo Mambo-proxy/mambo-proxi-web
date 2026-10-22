@@ -584,3 +584,17 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Valeur du champ « Ville »** : la maquette affiche « Cameroun » sous « Ville » (reste de l'ancien champ « Pays ») ; la liste s'ouvre sur « Douala ».
 - **États de la maquette** : la page s'ouvre sans jour choisi (texte « Choisissez un jour… » à la place des créneaux, 30 px de moins en desktop) et recherche de quartier vide, comme sur l'accueil et la page Zones.
 - **Formulaires du site anglais** : restent en français, comme ailleurs (traduction des formulaires à faire).
+
+### Devis gratuit (22 octobre 2026)
+
+- Page recalée sur la maquette (`70:8077`, `70:8481`) : la carte « Services à domicile » compte ses formules (« 4 formules ») ; étape 3 « Nom, e-mail, téléphone et ville. » avec le champ « Ville ou quartier » à la place de « Pays de résidence » ; en-tête traduit (`quote` dans les messages, `/en/free-quote`).
+- « Ville ou quartier » : quartiers desservis groupés par zone (`/v1/zones`), puis « Autre quartier de Douala » et « Autre ville du Cameroun » ; envoyé dans `contact.city` (« Akwa, Douala ») avec `contact.country` = CM (lieu de la prestation). Contrat inchangé.
+- Cartes de rubrique à 136 px de haut en desktop, même avec un nom sur deux lignes ; 20 entre « Service » et ses pastilles, 10 sous « Comment préférez-vous être recontacté ? » ; description à 120 px ; étape en cours bordée de 2 px (au lieu d'une ombre intérieure : le contenu se décale de 1 px, comme sur la maquette).
+- Mobile : champs groupés par paires (16 dans une paire, 20 ailleurs) aux étapes 2 et 3 ; mention anti-spam sur une ligne en empiétant sur la marge intérieure.
+- Fidélité (`qa/fidelite/devis-*.png`, Chef privé présélectionné) : chaque étape et le récapitulatif à la hauteur et à la position de la maquette, desktop 3 092 px pour 3 091, mobile 5 010 pour 5 009 ; aucun débordement à 768 et 1280.
+
+### Décisions
+
+- **Vignette du récapitulatif** : la maquette montre une photo générique (« Photo — accueil ») ; le récapitulatif affiche la photo du service choisi.
+- **Étape 2 de la maquette remplie** (« Samedi 14 novembre 2026 », « Douala », « 12 », « Anniversaire ») : exemple de saisie ; le formulaire s'ouvre vide.
+- **Formulaire du site anglais** : reste en français, comme les autres formulaires.
