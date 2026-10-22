@@ -13,6 +13,8 @@ test.describe('devis gratuit', () => {
       'step',
     );
     await expect(page.getByLabel('Nombre de personnes')).toBeVisible();
+    await expect(page.locator('label', { hasText: 'Services à domicile' })).toContainText('4 formules');
+    await expect(page.getByText('Nom, e-mail, téléphone et ville.')).toBeVisible();
     await expectNoHorizontalScroll(page);
     await expectAccessible(page);
     expect(pageErrors).toEqual([]);
@@ -42,7 +44,7 @@ test.describe('devis gratuit', () => {
     await form.getByLabel(/Nom et prénom/).fill('Sandrine Mbappe');
     await form.getByRole('textbox', { name: 'E-mail' }).fill('sandrine@exemple.fr');
     await form.getByLabel(/Téléphone \/ WhatsApp/).fill('+33 6 12 34 56 78');
-    await form.getByLabel(/Pays de résidence/).selectOption('FR');
+    await form.getByLabel(/Ville ou quartier/).selectOption('Akwa, Douala');
     await form.locator('label', { hasText: /^Téléphone$/ }).click();
     await form.getByText(/J'accepte que Mambo Proxi traite mes données/).click();
     await form.getByRole('button', { name: 'Envoyer ma demande de devis' }).click();
@@ -51,6 +53,13 @@ test.describe('devis gratuit', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Merci, votre demande est bien envoyée/);
     await expect(page.getByText(/^MP-\d{4}-\d{4}$/)).toBeVisible();
     await expect(page.getByRole('link', { name: 'Suivre sur WhatsApp' })).toHaveAttribute('href', /MP-\d{4}/);
+  });
+
+  test('version anglaise : en-tête traduit', async ({ page, pageErrors }) => {
+    await page.goto('/en/free-quote', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Your free quote in 3 minutes.');
+    await expect(page).toHaveTitle(/^Free quote/);
+    expect(pageErrors).toEqual([]);
   });
 
   test('le brouillon est conservé au rechargement', async ({ page }) => {
