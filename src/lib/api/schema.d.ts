@@ -3026,7 +3026,9 @@ export interface components {
             lastName: string;
             email: components["schemas"]["Email"];
             phone: components["schemas"]["PhoneE164"];
-            country: components["schemas"]["CountryCode"];
+            /** @description Pays de résidence ; absent ou `null` quand la personne vit hors du Cameroun sans préciser (champ « Ville ou quartier » de la maquette). */
+            country?: components["schemas"]["CountryCode"] | null;
+            /** @description Ville, avec le quartier s’il est indiqué (« Akwa, Douala »). */
             city?: string | null;
             /** @description Slugs des rubriques qui intéressent le contact (particulier) ou rubriques d'intervention (professionnel). */
             interests?: components["schemas"]["Slug"][];
