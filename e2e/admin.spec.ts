@@ -84,6 +84,15 @@ test.describe('back-office : demandes', () => {
     await expect(panel).toHaveCount(0);
   });
 
+  test('filtre par quartier conservé dans l’adresse', async ({ page }) => {
+    const district = page.getByLabel('Quartier');
+    await expect(district.locator('option', { hasText: 'Bonapriso' })).toHaveCount(1);
+    await district.selectOption('Bonapriso');
+    await expect(page).toHaveURL(/district=Bonapriso/);
+    await expect(page.getByText(/^Aurélie K\./).locator('visible=true').first()).toBeVisible();
+    await expect(page.getByText(/^Patrick E\./).locator('visible=true')).toHaveCount(0);
+  });
+
   test('détail ouvert depuis l’adresse (lien partagé)', async ({ page }) => {
     await page.goto('/admin/demandes?id=req_0142', { waitUntil: 'domcontentloaded' });
     const panel = page.getByRole('region', { name: 'Demande MP-2026-0142' });
@@ -99,4 +108,18 @@ test.describe('back-office : gabarit', () => {
     await expect(page.getByRole('link', { name: 'Retour au tableau de bord' })).toBeVisible();
     await expectAccessible(page);
   });
+});
+
+// Captures de contrôle de fidélité (`FIDELITE=1`) : `qa/fidelite/bo-tableau-de-bord-<largeur>.png`, `bo-demandes-<largeur>.png`.
+test('capture de fidélité', async ({ page }) => {
+  test.skip(!process.env.FIDELITE, 'Capture à la demande (FIDELITE=1).');
+  const width = page.viewportSize()?.width ?? 0;
+  await login(page);
+  await expect(page.getByText(/^Aurélie K\./).locator('visible=true').first()).toBeVisible();
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: `qa/fidelite/bo-tableau-de-bord-${width}.png`, fullPage: true });
+  await page.goto('/admin/demandes?id=req_0142', { waitUntil: 'domcontentloaded' });
+  await expect(page.getByRole('region', { name: 'Demande MP-2026-0142' })).toBeVisible();
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: `qa/fidelite/bo-demandes-${width}.png`, fullPage: true });
 });
