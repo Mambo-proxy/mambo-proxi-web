@@ -598,3 +598,8 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Vignette du récapitulatif** : la maquette montre une photo générique (« Photo — accueil ») ; le récapitulatif affiche la photo du service choisi.
 - **Étape 2 de la maquette remplie** (« Samedi 14 novembre 2026 », « Douala », « 12 », « Anniversaire ») : exemple de saisie ; le formulaire s'ouvre vide.
 - **Formulaire du site anglais** : reste en français, comme les autres formulaires.
+
+### Confirmation du devis (22 octobre 2026)
+
+- Contenu inchangé dans la nouvelle maquette (`70:8799`, `70:9036`) ; page traduite (`quoteConfirmation` dans les messages, `/en/free-quote/confirmation`), message WhatsApp pré-rempli dans la langue de la page, mention « nouvel onglet » ajoutée au lien WhatsApp pour les lecteurs d'écran.
+- Fidélité (`qa/fidelite/devis-confirmation-*.png`) : 1 632 px en desktop et 2 352 en mobile, identiques à la maquette.
