@@ -11,9 +11,13 @@ function inZone(date: DateInput, timeZone: string): TZDate {
   return new TZDate(new Date(date).getTime(), timeZone);
 }
 
-/** « 6 octobre 2026 ». */
-export function formatDate(date: DateInput, timeZone = DEFAULT_TIME_ZONE): string {
-  return format(inZone(date, timeZone), 'd MMMM yyyy', { locale: fr });
+/** « 6 octobre 2026 » (« 6 October 2026 » en anglais). */
+export function formatDate(
+  date: DateInput,
+  timeZone = DEFAULT_TIME_ZONE,
+  locale: 'fr' | 'en' = 'fr',
+): string {
+  return format(inZone(date, timeZone), 'd MMMM yyyy', { locale: locale === 'en' ? enGB : fr });
 }
 
 /** « 06/10/2026 ». */
@@ -89,7 +93,7 @@ export function formatPublishedAgo(
       const weeks = Math.floor(days / 7);
       return `${weeks}\u00A0week${weeks > 1 ? 's' : ''} ago`;
     }
-    return `on ${format(inZone(date, timeZone), 'd MMMM yyyy', { locale: enGB })}`;
+    return `on ${formatDate(date, timeZone, 'en')}`;
   }
   if (days <= 0) return 'aujourd’hui';
   if (days === 1) return 'hier';

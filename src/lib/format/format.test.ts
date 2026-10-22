@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { formatDate, formatDateTime, formatPublishedAgo, formatRelative, formatTime } from './date';
-import { formatFileSize, formatNumber, formatPercent, formatRating } from './number';
+import { formatFileSize, formatNumber, formatPercent, formatRating, formatSalary } from './number';
 import { frenchTypography } from './typography';
 
 const NBSP = '\u00A0';
@@ -32,6 +32,15 @@ describe('nombres', () => {
     expect(formatRating(4.8)).toBe('4,8');
     expect(formatPercent(0.92)).toBe(`92${NARROW}%`);
     expect(formatFileSize(2_400_000)).toBe(`2,3${NBSP}Mo`);
+  });
+
+  it('formate la rémunération d’une offre en français et en anglais', () => {
+    const salary = { min: 90000, max: 120000, currency: 'XAF', period: 'MONTH' } as const;
+    expect(formatSalary(salary)).toBe(`90${NARROW}000 – 120${NARROW}000${NBSP}FCFA par mois`);
+    expect(formatSalary(salary, 'en')).toBe(`90,000 – 120,000${NBSP}FCFA a month`);
+    expect(formatSalary({ min: 1500, max: null, currency: 'EUR', period: 'MONTH' })).toBe(
+      `1${NARROW}500${NBSP}€ par mois`,
+    );
   });
 });
 

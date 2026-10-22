@@ -180,6 +180,21 @@ export function jobPostingJsonLd(job: JobOfferDetail): JsonLdThing {
       '@type': 'Place',
       address: { '@type': 'PostalAddress', addressLocality: job.city, addressCountry: job.country },
     },
+    ...(job.salary
+      ? {
+          baseSalary: {
+            '@type': 'MonetaryAmount',
+            currency: job.salary.currency,
+            value: {
+              '@type': 'QuantitativeValue',
+              ...(job.salary.max
+                ? { minValue: job.salary.min, maxValue: job.salary.max }
+                : { value: job.salary.min }),
+              unitText: job.salary.period,
+            },
+          },
+        }
+      : {}),
     url: absoluteUrl(`/recrutement/${job.slug}`),
     directApply: true,
   };
