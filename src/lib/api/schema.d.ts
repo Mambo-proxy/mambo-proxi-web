@@ -1578,6 +1578,214 @@ export interface paths {
         patch: operations["adminUpdateTraining"];
         trace?: never;
     };
+    "/v1/admin/magazine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Éditions du magazine et statistiques de la dernière campagne */
+        get: operations["adminGetMagazine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/magazine/editions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Créer une édition (brouillon) */
+        post: operations["adminCreateMagazineEdition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/magazine/editions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Édition complète (édito, articles dans l'ordre de lecture, envoi par la newsletter) */
+        get: operations["adminGetMagazineEdition"];
+        put?: never;
+        post?: never;
+        /**
+         * Supprimer une édition non publiée
+         * @description Ses articles restent disponibles, détachés de l'édition. Une édition publiée doit d'abord repasser en brouillon (409).
+         */
+        delete: operations["adminDeleteMagazineEdition"];
+        options?: never;
+        head?: never;
+        /**
+         * Enregistrer une édition
+         * @description Une édition publiée est mise à jour en ligne immédiatement (tag de revalidation `page:magazine`). Un numéro déjà pris renvoie 409.
+         */
+        patch: operations["adminUpdateMagazineEdition"];
+        trace?: never;
+    };
+    "/v1/admin/magazine/editions/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Publier ou programmer la publication
+         * @description Sans date (ou avec une date passée), l'édition est publiée tout de suite ; avec une date future, elle est programmée (`SCHEDULED`).
+         */
+        post: operations["adminPublishMagazineEdition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/magazine/editions/{id}/unpublish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Repasser une édition en brouillon */
+        post: operations["adminUnpublishMagazineEdition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/magazine/editions/{id}/articles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Articles de l'édition, dans l'ordre de lecture
+         * @description Remplace la liste ; un article ajouté est retiré de son édition précédente, un article retiré reste disponible sans édition.
+         */
+        put: operations["adminSetMagazineEditionArticles"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/magazine/editions/{id}/preview-token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Jeton de prévisualisation de l'édition sur le site (30 min) */
+        get: operations["adminGetMagazineEditionPreviewToken"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/magazine/editions/{id}/newsletter/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Envoi de test de l'édition (une version par langue complète) */
+        post: operations["adminTestMagazineNewsletter"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/magazine/editions/{id}/newsletter/schedule": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Programmer l'envoi de l'édition par la newsletter
+         * @description Crée (ou reprogramme) une campagne par langue, envoyée aux seuls inscrits confirmés de cette langue ; tant que la
+         *     version anglaise est incomplète, les inscrits anglophones reçoivent la version française. L'édition doit être
+         *     publiée, ou programmée avant la date d'envoi (409 sinon).
+         */
+        post: operations["adminScheduleMagazineNewsletter"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/magazine/articles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Articles du magazine */
+        get: operations["adminListMagazineArticles"];
+        put?: never;
+        /** Créer un article */
+        post: operations["adminCreateMagazineArticle"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/magazine/articles/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Supprimer un article */
+        delete: operations["adminDeleteMagazineArticle"];
+        options?: never;
+        head?: never;
+        /** Modifier un article */
+        patch: operations["adminUpdateMagazineArticle"];
+        trace?: never;
+    };
     "/v1/admin/events": {
         parameters: {
             query?: never;
@@ -3763,6 +3971,139 @@ export interface components {
             sortOrder: number;
             requestsCount: number;
         };
+        /**
+         * @description `SCHEDULED` : publication programmée (`publishAt` dans le futur).
+         * @enum {string}
+         */
+        MagazineEditionStatus: "DRAFT" | "SCHEDULED" | "PUBLISHED" | "ARCHIVED";
+        /** @enum {string} */
+        MagazineLanguage: "fr" | "en";
+        MagazineArticleFields: {
+            title?: string;
+            titleEn?: string | null;
+            /**
+             * @description Thème affiché sous le titre.
+             * @example Santé et nutrition
+             */
+            theme?: string;
+            themeEn?: string | null;
+            excerpt?: string | null;
+            excerptEn?: string | null;
+            /** @description HTML de l'éditeur (titres, listes, citations, liens). */
+            body?: string | null;
+            bodyEn?: string | null;
+            imageId?: components["schemas"]["Id"] | null;
+            editionId?: components["schemas"]["Id"] | null;
+        };
+        MagazineArticleInput: components["schemas"]["MagazineArticleFields"] & Record<string, never>;
+        MagazineArticlePatch: components["schemas"]["MagazineArticleFields"] & Record<string, never>;
+        AdminMagazineArticle: {
+            id: components["schemas"]["Id"];
+            title: string;
+            titleEn: string | null;
+            theme: string;
+            themeEn: string | null;
+            excerpt: string | null;
+            excerptEn: string | null;
+            body: string | null;
+            bodyEn: string | null;
+            image: components["schemas"]["MediaImage"] | null;
+            /** @description Langues complètes (titre et texte renseignés) ; `en` absent = « EN à traduire ». */
+            languages: components["schemas"]["MagazineLanguage"][];
+            edition: {
+                id: components["schemas"]["Id"];
+                /** @example N° 1 */
+                label: string;
+            } | null;
+            updatedAt: components["schemas"]["DateTime"];
+        };
+        MagazineEditionFields: {
+            /** @description `null` pour un hors-série. */
+            number?: number | null;
+            title?: string;
+            titleEn?: string | null;
+            /** @example Édition spéciale */
+            subtitle?: string | null;
+            subtitleEn?: string | null;
+            /**
+             * @description Thèmes résumés dans la liste des éditions.
+             * @example Bien-être global
+             */
+            themes?: string | null;
+            /** @description Date de publication affichée (et date de programmation). */
+            publishAt?: components["schemas"]["DateTime"] | null;
+            coverId?: components["schemas"]["Id"] | null;
+            /** @description HTML de l'édito, signé, affiché en ouverture de l'édition. */
+            editorial?: string | null;
+            editorialEn?: string | null;
+            signature?: string | null;
+            signatureEn?: string | null;
+        };
+        MagazineEditionInput: components["schemas"]["MagazineEditionFields"] & Record<string, never>;
+        MagazineEditionPatch: components["schemas"]["MagazineEditionFields"] & Record<string, never>;
+        AdminMagazineEditionSummary: {
+            id: components["schemas"]["Id"];
+            number: number | null;
+            /**
+             * @description « N° 1 » ou « Hors-série ».
+             * @example N° 1
+             */
+            label: string;
+            title: string;
+            subtitle: string | null;
+            themes: string | null;
+            cover: components["schemas"]["MediaImage"] | null;
+            articlesCount: number;
+            /** @description Articles sans version anglaise complète. */
+            toTranslate: number;
+            /** @description Langues dans lesquelles l'édition est complète. */
+            languages: components["schemas"]["MagazineLanguage"][];
+            /** @description Lecteurs uniques (site et e-mail) ; `null` avant la publication. */
+            readers: number | null;
+            status: components["schemas"]["MagazineEditionStatus"];
+            publishAt: components["schemas"]["DateTime"] | null;
+            updatedAt: components["schemas"]["DateTime"];
+        };
+        AdminMagazineEdition: components["schemas"]["AdminMagazineEditionSummary"] & {
+            titleEn: string | null;
+            subtitleEn: string | null;
+            coverId: components["schemas"]["Id"] | null;
+            editorial: string | null;
+            editorialEn: string | null;
+            signature: string | null;
+            signatureEn: string | null;
+            /** @description Articles dans l'ordre de lecture. */
+            articles: components["schemas"]["AdminMagazineArticle"][];
+            newsletter: {
+                /** @description Inscrits confirmés par langue. */
+                subscribers: {
+                    fr: number;
+                    en: number;
+                };
+                scheduledAt: components["schemas"]["DateTime"] | null;
+                sentAt: components["schemas"]["DateTime"] | null;
+            };
+        };
+        MagazineCampaignStats: {
+            editionId: components["schemas"]["Id"];
+            /** @example Édition n° 1 */
+            editionLabel: string;
+            /** @description Envois aux inscrits confirmés (toutes langues). */
+            sent: number;
+            /** @description Pourcentage ; `null` si la mesure est désactivée. */
+            openRate: number | null;
+            /** @description Écart avec la moyenne des campagnes (points). */
+            openRateDelta: number | null;
+            /** @description Clics vers le site (édito et articles). */
+            clicks: number | null;
+            /** @description Nouveaux inscrits depuis la publication. */
+            newSubscribers: number;
+        };
+        AdminMagazineOverview: {
+            editions: components["schemas"]["AdminMagazineEditionSummary"][];
+            articlesCount: number;
+            lastCampaign: components["schemas"]["MagazineCampaignStats"] | null;
+        };
         EventFields: {
             title?: string;
             slug?: components["schemas"]["Slug"];
@@ -4645,6 +4986,19 @@ export type TrainingFields = components['schemas']['TrainingFields'];
 export type TrainingInput = components['schemas']['TrainingInput'];
 export type TrainingPatch = components['schemas']['TrainingPatch'];
 export type AdminTraining = components['schemas']['AdminTraining'];
+export type MagazineEditionStatus = components['schemas']['MagazineEditionStatus'];
+export type MagazineLanguage = components['schemas']['MagazineLanguage'];
+export type MagazineArticleFields = components['schemas']['MagazineArticleFields'];
+export type MagazineArticleInput = components['schemas']['MagazineArticleInput'];
+export type MagazineArticlePatch = components['schemas']['MagazineArticlePatch'];
+export type AdminMagazineArticle = components['schemas']['AdminMagazineArticle'];
+export type MagazineEditionFields = components['schemas']['MagazineEditionFields'];
+export type MagazineEditionInput = components['schemas']['MagazineEditionInput'];
+export type MagazineEditionPatch = components['schemas']['MagazineEditionPatch'];
+export type AdminMagazineEditionSummary = components['schemas']['AdminMagazineEditionSummary'];
+export type AdminMagazineEdition = components['schemas']['AdminMagazineEdition'];
+export type MagazineCampaignStats = components['schemas']['MagazineCampaignStats'];
+export type AdminMagazineOverview = components['schemas']['AdminMagazineOverview'];
 export type EventFields = components['schemas']['EventFields'];
 export type EventInput = components['schemas']['EventInput'];
 export type EventPatch = components['schemas']['EventPatch'];
@@ -8055,6 +8409,395 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminTraining"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+        };
+    };
+    adminGetMagazine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Éditions (la plus récente en premier), nombre d'articles, dernière campagne envoyée. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMagazineOverview"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    adminCreateMagazineEdition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MagazineEditionInput"];
+            };
+        };
+        responses: {
+            /** @description Édition créée. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMagazineEdition"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["ValidationError"];
+        };
+    };
+    adminGetMagazineEdition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Édition. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMagazineEdition"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    adminDeleteMagazineEdition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: components["responses"]["NoContent"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    adminUpdateMagazineEdition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MagazineEditionPatch"];
+            };
+        };
+        responses: {
+            /** @description Édition enregistrée. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMagazineEdition"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["ValidationError"];
+        };
+    };
+    adminPublishMagazineEdition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    publishAt?: components["schemas"]["DateTime"] | null;
+                };
+            };
+        };
+        responses: {
+            /** @description Édition publiée ou programmée. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMagazineEdition"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+        };
+    };
+    adminUnpublishMagazineEdition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Édition en brouillon. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMagazineEdition"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    adminSetMagazineEditionArticles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    ids: components["schemas"]["Id"][];
+                };
+            };
+        };
+        responses: {
+            /** @description Édition mise à jour. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMagazineEdition"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+        };
+    };
+    adminGetMagazineEditionPreviewToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Jeton et URL d'aperçu. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreviewToken"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    adminTestMagazineNewsletter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    email: components["schemas"]["Email"];
+                };
+            };
+        };
+        responses: {
+            /** @description Test envoyé. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    adminScheduleMagazineNewsletter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    scheduledAt: components["schemas"]["DateTime"];
+                };
+            };
+        };
+        responses: {
+            /** @description Envoi programmé. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMagazineEdition"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["ValidationError"];
+        };
+    };
+    adminListMagazineArticles: {
+        parameters: {
+            query?: {
+                /** @description Identifiant d'une édition, ou `none` pour les articles sans édition. */
+                edition?: string;
+                /** @description Recherche plein texte. */
+                q?: components["parameters"]["Q"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Articles, les plus récemment modifiés en premier. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMagazineArticle"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    adminCreateMagazineArticle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MagazineArticleInput"];
+            };
+        };
+        responses: {
+            /** @description Article créé (ajouté à la fin de son édition, le cas échéant). */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMagazineArticle"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            422: components["responses"]["ValidationError"];
+        };
+    };
+    adminDeleteMagazineArticle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: components["responses"]["NoContent"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    adminUpdateMagazineArticle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MagazineArticlePatch"];
+            };
+        };
+        responses: {
+            /** @description Article enregistré. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminMagazineArticle"];
                 };
             };
             401: components["responses"]["Unauthorized"];

@@ -6408,6 +6408,342 @@
     "examples": {}
   },
   {
+    "operationId": "adminGetMagazine",
+    "method": "GET",
+    "path": "/v1/admin/magazine",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "articlesCount": 18,
+        "editions": [
+          {
+            "id": "mag_n1",
+            "number": 1,
+            "label": "N° 1",
+            "title": "Ensemble vers un bien-être global",
+            "subtitle": "Édition spéciale",
+            "themes": "Bien-être global",
+            "cover": {
+              "id": "photo-magazine-hero",
+              "url": "/photos/magazine-hero.png",
+              "width": 1280,
+              "height": 960,
+              "alt": "Une lectrice feuillette le magazine Mambo Proxi sur une terrasse.",
+              "variants": []
+            },
+            "articlesCount": 6,
+            "toTranslate": 2,
+            "languages": [
+              "fr",
+              "en"
+            ],
+            "readers": 1248,
+            "status": "PUBLISHED",
+            "publishAt": "2026-10-02T07:00:00.000Z",
+            "updatedAt": "2026-10-04T09:00:00.000Z"
+          },
+          {
+            "id": "mag_n2",
+            "number": 2,
+            "label": "N° 2",
+            "title": "Bien manger au quotidien",
+            "subtitle": null,
+            "themes": "Santé et nutrition",
+            "cover": {
+              "id": "photo-prox-courses",
+              "url": "/photos/prox-courses.png",
+              "width": 1536,
+              "height": 1024,
+              "alt": "",
+              "variants": []
+            },
+            "articlesCount": 5,
+            "toTranslate": 0,
+            "languages": [
+              "fr",
+              "en"
+            ],
+            "readers": null,
+            "status": "SCHEDULED",
+            "publishAt": "2026-11-06T07:00:00.000Z",
+            "updatedAt": "2026-10-03T16:00:00.000Z"
+          },
+          {
+            "id": "mag_n3",
+            "number": 3,
+            "label": "N° 3",
+            "title": "Se loger à Douala",
+            "subtitle": null,
+            "themes": "Immobilier",
+            "cover": {
+              "id": "photo-immo-hero",
+              "url": "/photos/immo-hero.png",
+              "width": 1280,
+              "height": 960,
+              "alt": "",
+              "variants": []
+            },
+            "articlesCount": 4,
+            "toTranslate": 4,
+            "languages": [
+              "fr"
+            ],
+            "readers": null,
+            "status": "DRAFT",
+            "publishAt": null,
+            "updatedAt": "2026-10-04T15:20:00.000Z"
+          },
+          {
+            "id": "mag_hs1",
+            "number": null,
+            "label": "Hors-série",
+            "title": "Solidarité et culture",
+            "subtitle": null,
+            "themes": "Solidarité",
+            "cover": {
+              "id": "photo-culture-hero",
+              "url": "/photos/culture-hero.png",
+              "width": 1280,
+              "height": 960,
+              "alt": "",
+              "variants": []
+            },
+            "articlesCount": 3,
+            "toTranslate": 3,
+            "languages": [
+              "fr"
+            ],
+            "readers": null,
+            "status": "DRAFT",
+            "publishAt": null,
+            "updatedAt": "2026-09-30T10:00:00.000Z"
+          }
+        ],
+        "lastCampaign": {
+          "editionId": "mag_n1",
+          "editionLabel": "Édition n° 1",
+          "sent": 1248,
+          "openRate": 62,
+          "openRateDelta": 8,
+          "clicks": 318,
+          "newSubscribers": 56
+        }
+      }
+    }
+  },
+  {
+    "operationId": "adminCreateMagazineEdition",
+    "method": "POST",
+    "path": "/v1/admin/magazine/editions",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetMagazineEdition",
+    "method": "GET",
+    "path": "/v1/admin/magazine/editions/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "id": "mag_n1",
+        "number": 1,
+        "label": "N° 1",
+        "title": "Ensemble vers un bien-être global",
+        "titleEn": "Together towards overall well-being",
+        "subtitle": "Édition spéciale",
+        "subtitleEn": "Special issue",
+        "themes": "Bien-être global",
+        "coverId": "photo-magazine-hero",
+        "cover": {
+          "id": "photo-magazine-hero",
+          "url": "/photos/magazine-hero.png",
+          "width": 1280,
+          "height": 960,
+          "alt": "Une lectrice feuillette le magazine Mambo Proxi sur une terrasse.",
+          "variants": []
+        },
+        "articlesCount": 6,
+        "toTranslate": 2,
+        "languages": [
+          "fr",
+          "en"
+        ],
+        "readers": 1248,
+        "status": "PUBLISHED",
+        "publishAt": "2026-10-02T07:00:00.000Z",
+        "updatedAt": "2026-10-04T09:00:00.000Z",
+        "editorial": "<p>Chers lecteurs, chères lectrices,</p><p>Ce premier numéro de Mambo Proxi est bien plus qu’un magazine : c’est une histoire de vie que je partage avec vous.</p>",
+        "editorialEn": "<p>Dear readers,</p><p>This first issue of Mambo Proxi is much more than a magazine: it is a life story that I am sharing with you.</p>",
+        "signature": "Mireille Bell, fondatrice de Mambo Proxi",
+        "signatureEn": "Mireille Bell, founder of Mambo Proxi",
+        "articles": [
+          {
+            "id": "art_bien_manger",
+            "title": "Bien manger au quotidien sans se ruiner",
+            "titleEn": "Eating well every day without breaking the bank",
+            "theme": "Santé et nutrition",
+            "themeEn": "Health and nutrition",
+            "excerpt": null,
+            "excerptEn": null,
+            "body": "<p>…</p>",
+            "bodyEn": "<p>…</p>",
+            "image": {
+              "id": "photo-magazine-bien-manger",
+              "url": "/photos/magazine-bien-manger.png",
+              "width": 420,
+              "height": 285,
+              "alt": "",
+              "variants": []
+            },
+            "languages": [
+              "fr",
+              "en"
+            ],
+            "edition": {
+              "id": "mag_n1",
+              "label": "N° 1"
+            },
+            "updatedAt": "2026-09-28T10:00:00.000Z"
+          },
+          {
+            "id": "art_kribi",
+            "title": "Kribi, la nature à deux heures de Douala",
+            "titleEn": null,
+            "theme": "Culture",
+            "themeEn": null,
+            "excerpt": null,
+            "excerptEn": null,
+            "body": "<p>…</p>",
+            "bodyEn": null,
+            "image": {
+              "id": "photo-culture-decouverte",
+              "url": "/photos/culture-decouverte.png",
+              "width": 1536,
+              "height": 1024,
+              "alt": "",
+              "variants": []
+            },
+            "languages": [
+              "fr"
+            ],
+            "edition": {
+              "id": "mag_n1",
+              "label": "N° 1"
+            },
+            "updatedAt": "2026-09-29T10:00:00.000Z"
+          }
+        ],
+        "newsletter": {
+          "subscribers": {
+            "fr": 1012,
+            "en": 236
+          },
+          "scheduledAt": "2026-10-06T08:00:00.000Z",
+          "sentAt": null
+        }
+      }
+    }
+  },
+  {
+    "operationId": "adminUpdateMagazineEdition",
+    "method": "PATCH",
+    "path": "/v1/admin/magazine/editions/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminDeleteMagazineEdition",
+    "method": "DELETE",
+    "path": "/v1/admin/magazine/editions/:id",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminPublishMagazineEdition",
+    "method": "POST",
+    "path": "/v1/admin/magazine/editions/:id/publish",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminUnpublishMagazineEdition",
+    "method": "POST",
+    "path": "/v1/admin/magazine/editions/:id/unpublish",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminSetMagazineEditionArticles",
+    "method": "PUT",
+    "path": "/v1/admin/magazine/editions/:id/articles",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminGetMagazineEditionPreviewToken",
+    "method": "GET",
+    "path": "/v1/admin/magazine/editions/:id/preview-token",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminTestMagazineNewsletter",
+    "method": "POST",
+    "path": "/v1/admin/magazine/editions/:id/newsletter/test",
+    "status": 202,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminScheduleMagazineNewsletter",
+    "method": "POST",
+    "path": "/v1/admin/magazine/editions/:id/newsletter/schedule",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminListMagazineArticles",
+    "method": "GET",
+    "path": "/v1/admin/magazine/articles",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminCreateMagazineArticle",
+    "method": "POST",
+    "path": "/v1/admin/magazine/articles",
+    "status": 201,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminUpdateMagazineArticle",
+    "method": "PATCH",
+    "path": "/v1/admin/magazine/articles/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
+    "operationId": "adminDeleteMagazineArticle",
+    "method": "DELETE",
+    "path": "/v1/admin/magazine/articles/:id",
+    "status": 204,
+    "contentType": null,
+    "examples": {}
+  },
+  {
     "operationId": "adminListEvents",
     "method": "GET",
     "path": "/v1/admin/events",
