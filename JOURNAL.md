@@ -568,3 +568,19 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Navigations bloquées dans les tests de bout en bout** (Recrutement, Avis clients) : une page desktop déclenche 43 préchargements dès son chargement (liens de l'en-tête et du méga-menu) ; sur cette machine, le serveur de test sature et une navigation au clic peut dépasser 15 s. Dans le test du tri, chaque nouvelle sélection relançait la navigation et annulait la précédente : les essais attendent désormais jusqu'à 15 s chacun. Les liens des offres sont vérifiés par leur adresse, puis la page est ouverte directement. Hors charge, filtre et tri répondent en moins d'une seconde à 4 s.
 - **À traiter avec la performance** (Lighthouse, phase 1.5) : limiter les préchargements des liens des menus (`prefetch`) ; le préchargement de l'accueil (`/?_rsc=…`) renvoie aussi un 404 dans les traces, à examiner.
 
+
+### Contact (22 octobre 2026)
+
+- Page recalée sur la maquette (`69:7651`, `69:8178`) : première carte « Douala » (anciennement « France »), champ « Ville » à la place de « Pays », adresse de l'agence « Adresse de l’agence · Douala, Cameroun », nouvelle section « Nos zones d’intervention » (`290:31838`, la carte et la recherche de quartier de l'accueil, lien vers Zones d'intervention) ; version anglaise (textes de la page, de l'agence et des zones dans `contact` des messages, pays de l'agence dans la langue de la page).
+- Contrat (API puis synchronisation) : `agency.phone` et `agency.phoneDisplay`, facultatifs, pour la carte « Douala » (masquée sans numéro) ; adresse de l'exemple selon la maquette.
+- Formulaire « Écrivez-nous » : « Ville » propose Douala (par défaut), Yaoundé, Autre ville du Cameroun et Hors du Cameroun ; la ville et le pays (CM) sont envoyés dans `contact.city` et `contact.country`. En mobile, champs groupés par paires (16 dans une paire, 20 ailleurs).
+- Prendre rendez-vous : calendrier recalé (rangée du mois à 24 de haut, boutons de 36 conservés ; plus d'espacement autour de la grille ; marge intérieure de 16 en mobile), 10 sous les intitulés des choix, 20 au-dessus du fuseau horaire ; la date des créneaux prend sa majuscule (« Vendredi 23 octobre », `first-letter` sur un élément en ligne restait sans effet).
+- Héros : 40 sous les cartes en mobile ; « Notre agence » : 12 entre sur-titre et titre en mobile.
+- Fidélité (`qa/fidelite/contact-*.png`, jour choisi et « Bonamoussadi » saisi comme sur la maquette) : desktop 542 · 1 066 · 788 · 844, identique à la maquette (4 194 px pour 4 193) ; mobile 669 · 2 078 · 504 · 940 pour 669 · 2 078 · 504 · 942 (5 921 px pour 5 922).
+
+### Décisions
+
+- **Carte « Douala »** : la maquette montre deux numéros camerounais (« Douala », « Cameroun ») ; la carte « Douala » affiche le téléphone de l'agence (nouveau réglage), la carte « Cameroun » le numéro principal.
+- **Valeur du champ « Ville »** : la maquette affiche « Cameroun » sous « Ville » (reste de l'ancien champ « Pays ») ; la liste s'ouvre sur « Douala ».
+- **États de la maquette** : la page s'ouvre sans jour choisi (texte « Choisissez un jour… » à la place des créneaux, 30 px de moins en desktop) et recherche de quartier vide, comme sur l'accueil et la page Zones.
+- **Formulaires du site anglais** : restent en français, comme ailleurs (traduction des formulaires à faire).
