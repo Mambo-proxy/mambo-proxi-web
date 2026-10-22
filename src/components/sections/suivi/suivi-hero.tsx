@@ -1,15 +1,16 @@
 import { Clock } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import { AccentText } from '@/components/ui/accent-text';
 import type { HeroSection } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
 import { NotifyForm } from './notify-form';
 
-/** Demandes factices de l'aperçu « Mes demandes » (`83:9536`) : statut, couleurs et avancement. */
+/** Demandes factices de l'aperçu « Mes demandes » (`83:9536`) : textes (`suivi.preview`), couleurs et avancement. */
 const PREVIEW = [
-  { title: 'Chef privé · 14 nov.', status: 'Prestation réalisée', tone: 'done', progress: 1 },
-  { title: 'Logement temporaire · Bastos', status: 'En cours', tone: 'active', progress: 0.6 },
-  { title: 'Réception de colis', status: 'Nouvelle', tone: 'new', progress: 0.2 },
+  { title: 'chef', tone: 'done', progress: 1 },
+  { title: 'housing', tone: 'active', progress: 0.6 },
+  { title: 'parcels', tone: 'new', progress: 0.2 },
 ] as const;
 
 const BADGES = {
@@ -22,7 +23,8 @@ const BADGES = {
  * Héros de Suivi Mambo (`83:9519`) : badge « Bientôt disponible », titre dont « Suivi Mambo » est en orange, chapô,
  * « Me prévenir » ; à droite, aperçu illustratif de l'espace client (carte 520, ombre `elevation/3`).
  */
-export function SuiviHero({ section }: { section: HeroSection }) {
+export async function SuiviHero({ section }: { section: HeroSection }) {
+  const t = await getTranslations('suivi');
   return (
     <section className="bg-neutral-50">
       <div className="container-site grid items-center gap-6 pt-6 pb-12 xl:grid-cols-[minmax(0,1fr)_520px] xl:gap-16 xl:pt-16 xl:pb-24">
@@ -45,12 +47,12 @@ export function SuiviHero({ section }: { section: HeroSection }) {
           aria-hidden
           className="flex flex-col gap-3 rounded-[28px] border border-border-default bg-neutral-0 p-4 shadow-3 xl:p-6"
         >
-          <p className="font-ui text-[16px] leading-6 font-semibold text-text-main">Mes demandes</p>
+          <p className="font-ui text-[16px] leading-6 font-semibold text-text-main">{t('previewTitle')}</p>
           {PREVIEW.map((item) => (
             <div key={item.title} className="flex flex-col gap-2.5 rounded-2xl bg-neutral-50 p-4">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center justify-between gap-1.5">
                 <span className="font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main">
-                  {item.title}
+                  {t(`preview.${item.title}`)}
                 </span>
                 <span
                   className={cn(
@@ -58,7 +60,7 @@ export function SuiviHero({ section }: { section: HeroSection }) {
                     BADGES[item.tone],
                   )}
                 >
-                  {item.status}
+                  {t(`preview.${item.tone}`)}
                 </span>
               </div>
               <span className="h-1.5 overflow-hidden rounded-full bg-neutral-100">

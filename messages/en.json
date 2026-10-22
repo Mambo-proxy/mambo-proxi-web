@@ -265,5 +265,17 @@
     "metaDescription": "Save your details once for faster requests, or join our network of partners in Douala.",
     "breadcrumb": "Sign up",
     "title": "Complete my sign-up"
+  },
+  "suivi": {
+    "breadcrumb": "Mambo tracking",
+    "previewTitle": "My requests",
+    "preview": {
+      "chef": "Private chef · 14 Nov",
+      "housing": "Temporary housing · Bastos",
+      "parcels": "Parcel delivery",
+      "done": "Service completed",
+      "active": "In progress",
+      "new": "New"
+    }
   }
 }

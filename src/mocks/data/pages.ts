@@ -1481,6 +1481,71 @@ const suiviMambo: Page = {
   ],
 };
 
+const suiviMamboEn: Page = {
+  ...suiviMambo,
+  title: 'Mambo tracking',
+  seo: {
+    title: 'Mambo tracking: your client area, coming soon',
+    description:
+      'Follow your requests, find your quotes and talk to your adviser from a single space: be told when it opens.',
+    ogImageUrl: null,
+    noindex: false,
+  },
+  sections: [
+    {
+      id: 'hero',
+      type: 'hero',
+      enabled: true,
+      variant: 'page',
+      badge: { tag: null, text: 'Coming soon' },
+      title: '==Mambo tracking==: your client area, online soon.',
+      lead: 'Follow your requests, find your quotes and talk to your adviser from a single space. In the meantime, our team keeps you informed by email and WhatsApp.',
+      showWhatsapp: false,
+    },
+    {
+      id: 'fonctionnalites',
+      type: 'cardGrid',
+      enabled: true,
+      tone: 'light',
+      layout: 'cards',
+      columns: 4,
+      eyebrow: 'What’s coming',
+      title: 'All your tracking in one place',
+      items: [
+        {
+          icon: 'FileText',
+          title: 'Your requests and quotes',
+          text: 'Real-time status, from request to service.',
+        },
+        {
+          icon: 'MessageSquare',
+          title: 'Messages',
+          text: 'Talk to your adviser without losing track.',
+        },
+        {
+          icon: 'Package',
+          title: 'Parcels and mail',
+          text: 'Be notified each time something arrives at the agency.',
+        },
+        {
+          icon: 'Wallet',
+          title: 'Online payment',
+          text: 'Bank card and Mobile Money, in a later step.',
+        },
+      ],
+    },
+    {
+      id: 'cta',
+      type: 'ctaBand',
+      enabled: true,
+      title: 'Something to ask\nin the meantime?',
+      text: 'Our team replies within 24 hours, by email or WhatsApp.',
+      primaryCta: { label: 'Request a free quote', href: '/devis', external: false },
+      showWhatsapp: true,
+    },
+  ],
+};
+
 /** Magazine, édition n° 1 (`254:26265`, `254:26493`). */
 const magazine: Page = {
   key: 'magazine',
@@ -1829,6 +1894,7 @@ export const pagesEn: Partial<Record<Page['key'], Page>> = {
   formation: formationEn,
   recrutement: recrutementEn,
   'avis-clients': avisClientsEn,
+  'suivi-mambo': suiviMamboEn,
   magazine: magazineEn,
   'zones-d-intervention': zonesEn,
 };

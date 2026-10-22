@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { PageSections } from '@/components/sections/content/page-sections';
 import { SuiviHero } from '@/components/sections/suivi/suivi-hero';
 import { getPage, pageMetadata } from '@/lib/pages';
@@ -16,12 +17,17 @@ export function generateMetadata(): Promise<Metadata> {
  * (cahier §9). Inscription pour être prévenu de l'ouverture, fonctionnalités à venir, bandeau CTA.
  */
 export default async function SuiviPage() {
-  const [page, settings] = await Promise.all([getPage('suivi-mambo'), getSiteSettings()]);
+  const [page, settings, t, tRubrique] = await Promise.all([
+    getPage('suivi-mambo'),
+    getSiteSettings(),
+    getTranslations('suivi'),
+    getTranslations('rubrique'),
+  ]);
   if (!page) notFound();
   return (
     <PageSections
       page={page}
-      breadcrumb={[{ label: 'Accueil', href: routes.home }, { label: 'Suivi Mambo' }]}
+      breadcrumb={[{ label: tRubrique('home'), href: routes.home }, { label: t('breadcrumb') }]}
       whatsappHref={
         settings.whatsapp.enabled ? whatsappUrl(settings.whatsapp.number, settings.whatsapp.message) : null
       }

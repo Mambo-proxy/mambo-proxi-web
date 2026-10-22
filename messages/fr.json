@@ -265,5 +265,17 @@
     "metaDescription": "Enregistrez vos informations une fois pour des demandes plus rapides, ou rejoignez notre réseau de partenaires à Douala.",
     "breadcrumb": "S'inscrire",
     "title": "Valider mon inscription"
+  },
+  "suivi": {
+    "breadcrumb": "Suivi Mambo",
+    "previewTitle": "Mes demandes",
+    "preview": {
+      "chef": "Chef privé · 14 nov.",
+      "housing": "Logement temporaire · Bastos",
+      "parcels": "Livraison de colis",
+      "done": "Prestation réalisée",
+      "active": "En cours",
+      "new": "Nouvelle"
+    }
   }
 }
