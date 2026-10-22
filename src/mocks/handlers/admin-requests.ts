@@ -24,6 +24,7 @@ function filtered(params: URLSearchParams) {
   const type = params.get('type') as RequestType | null;
   const category = params.get('category');
   const country = params.get('country');
+  const district = params.get('district') ? normalize(params.get('district') ?? '') : null;
   const from = params.get('from');
   const to = params.get('to');
   const q = params.get('q') ? normalize(params.get('q') ?? '') : null;
@@ -33,6 +34,7 @@ function filtered(params: URLSearchParams) {
         (!type || request.type === type) &&
         (!category || request.category?.slug === category) &&
         (!country || request.contact.country === country) &&
+        (!district || normalize(request.contact.city ?? '').startsWith(district)) &&
         (!from || request.createdAt >= from) &&
         (!to || request.createdAt <= to) &&
         (!q ||

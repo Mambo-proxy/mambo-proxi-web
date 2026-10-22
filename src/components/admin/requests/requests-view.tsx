@@ -43,21 +43,17 @@ export const REQUEST_TYPE_LABELS: Record<RequestType, string> = {
 
 /** Libellés courts des rubriques dans la liste (maquette : « Culture », « Proximité »). */
 const SHORT_CATEGORY: Record<string, string> = {
+  'services-a-domicile': 'À domicile',
   'culture-evenementiel': 'Culture',
   'services-de-proximite': 'Proximité',
 };
 
 const CATEGORIES = [
+  { value: 'services-a-domicile', label: 'Services à domicile' },
   { value: 'experience', label: 'Expérience' },
   { value: 'immobilier', label: 'Immobilier' },
   { value: 'services-de-proximite', label: 'Services de proximité' },
   { value: 'culture-evenementiel', label: 'Culture & événementiel' },
-];
-
-const COUNTRIES = [
-  { value: 'FR', label: 'France' },
-  { value: 'CM', label: 'Cameroun' },
-  { value: 'BE', label: 'Belgique' },
 ];
 
 const PERIODS = [
@@ -78,7 +74,7 @@ const TABS: { value: Status; label: string }[] = [
   { value: 'CLOTUREE', label: 'Clôturées' },
 ];
 
-/** Filtres lus dans l'adresse (`?status=&type=&category=&country=&period=&q=&page=&id=`). */
+/** Filtres lus dans l'adresse (`?status=&type=&category=&district=&period=&q=&page=&id=`). */
 function useFilters() {
   const params = useSearchParams();
   const router = useRouter();
@@ -87,7 +83,7 @@ function useFilters() {
     status: (params.get('status') ?? 'ALL') as Status,
     type: params.get('type') ?? '',
     category: params.get('category') ?? '',
-    country: params.get('country') ?? '',
+    district: params.get('district') ?? '',
     period: params.get('period') ?? '30',
     q: params.get('q') ?? '',
     page: Math.max(1, Number(params.get('page') ?? 1) || 1),
@@ -203,7 +199,7 @@ export function RequestsView() {
     status: filters.status === 'ALL' ? undefined : filters.status,
     type: (filters.type || undefined) as RequestType | undefined,
     category: filters.category || undefined,
-    country: filters.country || undefined,
+    district: filters.district || undefined,
     from: fromDate(filters.period),
     q: filters.q || undefined,
     page: filters.page,
@@ -216,6 +212,12 @@ export function RequestsView() {
     placeholderData: keepPreviousData,
   });
   const counts = list.data?.counts;
+  // Quartiers desservis, groupés par zone, pour le filtre « Tous les quartiers ».
+  const zones = useQuery({
+    queryKey: ['zones'],
+    queryFn: () => data(browserApi.GET('/v1/zones')),
+    staleTime: Infinity,
+  });
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
@@ -253,15 +255,19 @@ export function RequestsView() {
             ))}
           </FilterSelect>
           <FilterSelect
-            label="Pays"
-            value={filters.country}
-            onChange={(event) => update({ country: event.target.value })}
+            label="Quartier"
+            value={filters.district}
+            onChange={(event) => update({ district: event.target.value })}
           >
-            <option value="">Tous les pays</option>
-            {COUNTRIES.map((country) => (
-              <option key={country.value} value={country.value}>
-                {country.label}
-              </option>
+            <option value="">Tous les quartiers</option>
+            {zones.data?.zones.map((zone) => (
+              <optgroup key={zone.key} label={zone.name}>
+                {zone.quarters.map((quarter) => (
+                  <option key={quarter.name} value={quarter.name}>
+                    {quarter.name}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </FilterSelect>
           <FilterSelect
@@ -400,6 +406,8 @@ export function useExportQuery() {
   return {
     status: (status || undefined) as RequestStatus | undefined,
     type: (type || undefined) as RequestType | undefined,
+    category: params.get('category') || undefined,
+    district: params.get('district') || undefined,
     from: fromDate(period),
   };
 }

@@ -13,6 +13,8 @@ export const adminRoutes = {
   reviews: '/admin/avis' as Route,
   partners: '/admin/partenaires' as Route,
   trainings: '/admin/formations' as Route,
+  magazine: '/admin/magazine' as Route,
+  zones: '/admin/zones' as Route,
   jobs: '/admin/recrutement' as Route,
   events: '/admin/agenda' as Route,
   contacts: '/admin/contacts' as Route,

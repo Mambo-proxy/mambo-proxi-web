@@ -1,4 +1,5 @@
 import {
+  BookOpen,
   Briefcase,
   Calendar,
   CalendarRange,
@@ -9,6 +10,7 @@ import {
   Images,
   LayoutGrid,
   Mail,
+  MapPin,
   PanelsTopLeft,
   Settings,
   Sparkles,
@@ -51,6 +53,8 @@ export const ADMIN_NAV: AdminNavGroup[] = [
       { label: 'Avis clients', href: adminRoutes.reviews, icon: Star, count: 'reviews' },
       { label: 'Partenaires', href: adminRoutes.partners, icon: Handshake },
       { label: 'Formations', href: adminRoutes.trainings, icon: GraduationCap },
+      { label: 'Magazine', href: adminRoutes.magazine, icon: BookOpen },
+      { label: 'Zones d’intervention', href: adminRoutes.zones, icon: MapPin },
       { label: 'Recrutement', href: adminRoutes.jobs, icon: Briefcase, count: 'applications' },
       { label: 'Agenda', href: adminRoutes.events, icon: CalendarRange },
       { label: 'Médiathèque', href: adminRoutes.media, icon: Images },

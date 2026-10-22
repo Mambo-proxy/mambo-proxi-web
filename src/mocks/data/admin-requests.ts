@@ -25,7 +25,7 @@ type Seed = {
   country: 'FR' | 'CM' | 'BE';
   service: string;
   serviceSlug: string;
-  category: 'experience' | 'immobilier' | 'services-de-proximite' | 'culture-evenementiel';
+  category: 'services-a-domicile' | 'experience' | 'immobilier' | 'services-de-proximite' | 'culture-evenementiel';
   status: RequestStatus;
   createdAt: string;
   type?: RequestType;
@@ -35,6 +35,7 @@ type Seed = {
 };
 
 const CATEGORY_NAMES = {
+  'services-a-domicile': 'Services à domicile',
   experience: 'Expérience',
   immobilier: 'Immobilier',
   'services-de-proximite': 'Services de proximité',
@@ -46,8 +47,8 @@ const SEEDS: Seed[] = [
   {
     firstName: 'Aurélie',
     lastName: 'Kamga',
-    city: 'Paris',
-    country: 'FR',
+    city: 'Bonapriso, Douala',
+    country: 'CM',
     service: 'Chef privé',
     serviceSlug: 'chef-prive',
     category: 'experience',
@@ -65,8 +66,8 @@ const SEEDS: Seed[] = [
   {
     firstName: 'Patrick',
     lastName: 'Essomba',
-    city: 'Marseille',
-    country: 'FR',
+    city: 'Akwa, Douala',
+    country: 'CM',
     service: 'Découverte du Cameroun',
     serviceSlug: 'decouverte-du-cameroun',
     category: 'culture-evenementiel',
@@ -100,8 +101,8 @@ const SEEDS: Seed[] = [
   {
     firstName: 'Sandrine',
     lastName: 'Mballa',
-    city: 'Lyon',
-    country: 'FR',
+    city: 'Kotto, Douala',
+    country: 'CM',
     service: 'Gestion locative',
     serviceSlug: 'gestion-locative',
     category: 'immobilier',
@@ -119,26 +120,26 @@ const SEEDS: Seed[] = [
     lastName: 'Din',
     city: 'Douala',
     country: 'CM',
-    service: 'Réception de colis',
-    serviceSlug: 'reception-de-colis',
+    service: 'Livraison de colis',
+    serviceSlug: 'collecte-livraison-colis-courrier',
     category: 'services-de-proximite',
     status: 'PRESTATION_REALISEE',
     createdAt: at(1, 9, 2),
     preference: 'WHATSAPP',
-    message: 'Réception de deux colis envoyés depuis Paris, à garder jusqu’à mon passage.',
+    message: 'Deux colis à récupérer à Akwa et à livrer chez ma mère à Makèpè.',
   },
   {
     firstName: 'Clarisse',
     lastName: 'Ngo',
-    city: 'Paris',
-    country: 'FR',
-    service: 'Portage de repas',
-    serviceSlug: 'portage-de-repas',
-    category: 'services-de-proximite',
+    city: 'Bonapriso, Douala',
+    country: 'CM',
+    service: 'Maison + Linge',
+    serviceSlug: 'maison-linge',
+    category: 'services-a-domicile',
     status: 'EN_COURS',
     createdAt: at(2, 15, 44),
     preference: 'TELEPHONE',
-    message: 'Repas du midi pour mon père à Bonamoussadi, du lundi au vendredi.',
+    message: 'Entretien de l’appartement et collecte du linge chaque semaine, le mardi matin.',
   },
   {
     firstName: 'Jean-Marc',
@@ -191,14 +192,15 @@ const LAST_NAMES = [
   'Nana',
 ];
 const PLACES: [string, Seed['country']][] = [
+  ['Akwa, Douala', 'CM'],
+  ['Bonamoussadi, Douala', 'CM'],
   ['Paris', 'FR'],
-  ['Douala', 'CM'],
-  ['Lille', 'FR'],
+  ['Makèpè, Douala', 'CM'],
   ['Yaoundé', 'CM'],
-  ['Bordeaux', 'FR'],
-  ['Kribi', 'CM'],
+  ['Deïdo, Douala', 'CM'],
 ];
 const SERVICES: [string, string, Seed['category']][] = [
+  ['Maison Essentiel', 'maison-essentiel', 'services-a-domicile'],
   ['Chef privé', 'chef-prive', 'experience'],
   ['Location de voiture avec chauffeur', 'location-voiture-chauffeur', 'experience'],
   ['Gestion locative', 'gestion-locative', 'immobilier'],

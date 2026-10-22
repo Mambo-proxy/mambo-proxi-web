@@ -104,10 +104,11 @@ const KPIS: Record<Dashboard['range'], Dashboard['kpis']> = {
 };
 
 const BY_CATEGORY: Dashboard['byCategory'] = [
-  { slug: 'immobilier', name: 'Immobilier', count: 21, percent: 39.6 },
-  { slug: 'experience', name: 'Expérience', count: 17, percent: 32.1 },
-  { slug: 'services-de-proximite', name: 'Services de proximité', count: 9, percent: 17 },
-  { slug: 'culture-evenementiel', name: 'Culture & événementiel', count: 6, percent: 11.3 },
+  { slug: 'services-a-domicile', name: 'Services à domicile', count: 24, percent: 31.2 },
+  { slug: 'immobilier', name: 'Immobilier', count: 21, percent: 27.3 },
+  { slug: 'experience', name: 'Expérience', count: 17, percent: 22.1 },
+  { slug: 'services-de-proximite', name: 'Services de proximité', count: 9, percent: 11.7 },
+  { slug: 'culture-evenementiel', name: 'Culture & événementiel', count: 6, percent: 7.8 },
 ];
 
 function notifications(): Notification[] {

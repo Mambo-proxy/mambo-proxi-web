@@ -80,7 +80,7 @@ Fichier Figma source : `lsun63JexZYvgYUVpmSYyg` (lecture seule). Captures à l'�
 
 | Fichier | Nœud | Taille (px) | Remarque |
 |---|---|---|---|
-| `backoffice/bo-tableau-de-bord.png` | `85:10235` | 1440 × 1372 |  |
+| `backoffice/bo-tableau-de-bord.png` | `85:10235` | 1440 × 1406 | refonte d’octobre 2026 |
 | `backoffice/bo-demandes.png` | `87:10782` | 1440 × 1173 |  |
 | `backoffice/bo-services.png` | `88:10421` | 1440 × 1045 |  |
 | `backoffice/bo-ajouter-un-service.png` | `91:10598` | 1440 × 3397 |  |
