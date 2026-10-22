@@ -48,9 +48,13 @@ test.describe('référencement', () => {
   });
 
   test('offre d’emploi : JobPosting', async ({ page }) => {
-    await page.goto('/recrutement/coordinateur-rice-de-services');
+    await page.goto('/recrutement/intervenant-e-a-domicile');
     const job = (await jsonLd(page)).find((thing) => thing['@type'] === 'JobPosting');
-    expect(job).toMatchObject({ title: 'Coordinateur·rice de services', employmentType: 'FULL_TIME' });
+    expect(job).toMatchObject({
+      title: 'Intervenant·e à domicile',
+      employmentType: 'FULL_TIME',
+      baseSalary: { currency: 'XAF', value: { minValue: 90000, maxValue: 120000, unitText: 'MONTH' } },
+    });
   });
 
   test('robots.txt bloque tout hors production, pages marquées noindex', async ({ page, request }) => {
