@@ -1,28 +1,29 @@
 import { Mail, Smartphone, type LucideIcon } from 'lucide-react';
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import type { ComponentType } from 'react';
 import { WhatsappIcon } from '@/components/brand/social-icons';
 import { AppointmentForm } from '@/components/forms/appointment-form';
 import { ContactForm, type ContactTab } from '@/components/forms/contact-form';
 import { Agency } from '@/components/sections/contact/agency';
+import { ZonesSection } from '@/components/sections/zones/zones-section';
 import { AccentText } from '@/components/ui/accent-text';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
-import { unwrap } from '@/lib/api/result';
+import { unwrap, unwrapOrNull } from '@/lib/api/result';
 import { api, cached } from '@/lib/api/server';
 import { cacheTags } from '@/lib/api/tags';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
+import type { DynamicSection } from '@/lib/api/schema';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
 import { seoMetadata } from '@/lib/seo/metadata';
 
-export const metadata: Metadata = seoMetadata({
-  title: 'Contact',
-  description:
-    'Par téléphone, WhatsApp, e-mail ou lors d’un rendez-vous à l’agence de Douala : choisissez ce qui vous convient, nous vous répondons rapidement.',
-  path: '/contact',
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('contact');
+  return seoMetadata({ title: t('metaTitle'), description: t('metaDescription'), path: '/contact' });
+}
 
 type SearchParams = { searchParams: Promise<{ onglet?: string }> };
 
@@ -35,10 +36,13 @@ type ContactMethod = {
   whatsapp?: boolean;
 };
 
-/** Contact (desktop `69:7651`, mobile `69:8178`) : moyens de contact, formulaires, rendez-vous, agence. Pas de bandeau CTA. */
+/**
+ * Contact (desktop `69:7651`, mobile `69:8178`) : moyens de contact, formulaires, rendez-vous, agence, carte des zones
+ * d'intervention (`290:31838`). Pas de bandeau CTA.
+ */
 export default async function ContactPage({ searchParams }: SearchParams) {
   const { onglet } = await searchParams;
-  const [settings, categories] = await Promise.all([
+  const [settings, categories, zones, t, tRubrique] = await Promise.all([
     getSiteSettings(),
     unwrap(
       api.GET('/v1/categories', {
@@ -46,22 +50,25 @@ export default async function ContactPage({ searchParams }: SearchParams) {
         ...cached([cacheTags.categories, cacheTags.services]),
       }),
     ),
+    unwrapOrNull(api.GET('/v1/zones', cached([cacheTags.zones]))),
+    getTranslations('contact'),
+    getTranslations('rubrique'),
   ]);
-  const { contact } = settings;
+  const { contact, agency } = settings;
   const methods: ContactMethod[] = [
-    ...(contact.phoneFrance
+    ...(agency.phone
       ? [
           {
             icon: Smartphone,
-            label: 'France',
-            value: contact.phoneFranceDisplay ?? contact.phoneFrance,
-            href: `tel:${contact.phoneFrance}`,
+            label: agency.city,
+            value: agency.phoneDisplay ?? agency.phone,
+            href: `tel:${agency.phone}`,
           },
         ]
       : []),
     {
       icon: Smartphone,
-      label: 'Cameroun',
+      label: t('methods.cameroon'),
       value: contact.phoneCameroonDisplay ?? contact.phoneCameroon,
       href: `tel:${contact.phoneCameroon}`,
     },
@@ -69,37 +76,42 @@ export default async function ContactPage({ searchParams }: SearchParams) {
       ? [
           {
             icon: WhatsappIcon,
-            label: 'WhatsApp',
-            value: 'Réponse rapide, 7j/7',
+            label: t('methods.whatsapp'),
+            value: t('methods.whatsappValue'),
             href: whatsappUrl(settings.whatsapp.number, settings.whatsapp.message),
             external: true,
             whatsapp: true,
           },
         ]
       : []),
-    { icon: Mail, label: 'E-mail', value: contact.email, href: `mailto:${contact.email}` },
+    { icon: Mail, label: t('methods.email'), value: contact.email, href: `mailto:${contact.email}` },
   ];
   const serviceGroups = categories.map((category) => ({
     name: category.name,
     services: (category.services ?? []).map((service) => ({ slug: service.slug, name: service.name })),
   }));
   const initialTab: ContactTab = onglet === 'information' ? 'INFORMATION' : 'CONTACT';
+  const zonesSection: DynamicSection = {
+    id: 'zones',
+    type: 'dynamic',
+    enabled: true,
+    source: 'zones-map',
+    eyebrow: t('zones.eyebrow'),
+    title: t('zones.title'),
+    link: { label: t('zones.link'), href: '/zones-d-intervention', external: false },
+  };
 
   return (
     <>
       <section className="bg-neutral-50">
-        <div className="container-site flex flex-col gap-5 pt-5 pb-14 xl:gap-10 xl:pt-12 xl:pb-[72px]">
-          <Breadcrumb items={[{ label: 'Accueil', href: routes.home }, { label: 'Contact' }]} />
+        <div className="container-site flex flex-col gap-5 pt-5 pb-10 md:pb-14 xl:gap-10 xl:pt-12 xl:pb-[72px]">
+          <Breadcrumb items={[{ label: tRubrique('home'), href: routes.home }, { label: t('eyebrow') }]} />
           <div className="flex flex-col gap-4 xl:max-w-[820px]">
-            <p className="text-web-eyebrow">Contact</p>
+            <p className="text-web-eyebrow">{t('eyebrow')}</p>
             <h1 className="font-brand text-[34px] leading-10 font-semibold tracking-[-0.025em] text-text-main md:text-[44px] md:leading-[50px] xl:text-[56px] xl:leading-[62px]">
-              <AccentText text="Parlons de ==votre projet.==" />
+              <AccentText text={t('title')} />
             </h1>
-            <p className="text-web-lead text-text-muted">
-              {frenchTypography(
-                'Par téléphone, WhatsApp, e-mail ou lors d’un rendez-vous : choisissez ce qui vous convient, nous vous répondons rapidement.',
-              )}
-            </p>
+            <p className="text-web-lead text-text-muted">{frenchTypography(t('lead'))}</p>
           </div>
           <ul className="grid gap-2.5 md:grid-cols-2 md:gap-4 xl:grid-cols-4">
             {methods.map(({ icon: MethodIcon, label, value, href, external, whatsapp }) => (
@@ -124,7 +136,7 @@ export default async function ContactPage({ searchParams }: SearchParams) {
                     </span>
                     <span className="font-ui text-[16px] leading-6 font-semibold break-words text-text-main">
                       {value}
-                      {external && <span className="sr-only"> (nouvel onglet)</span>}
+                      {external && <span className="sr-only"> {t('methods.newTab')}</span>}
                     </span>
                   </span>
                 </a>
@@ -142,6 +154,8 @@ export default async function ContactPage({ searchParams }: SearchParams) {
       </section>
 
       <Agency settings={settings} />
+
+      {zones && <ZonesSection section={zonesSection} areas={zones} />}
     </>
   );
 }

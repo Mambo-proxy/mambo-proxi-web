@@ -216,5 +216,31 @@
     "recent": "Most recent",
     "best": "Highest rated",
     "verified": "Verified after the service"
+  },
+  "contact": {
+    "metaTitle": "Contact",
+    "metaDescription": "By phone, WhatsApp, email or at an appointment at our Douala agency: choose what suits you, we reply quickly.",
+    "eyebrow": "Contact",
+    "title": "Let’s talk about ==your project.==",
+    "lead": "By phone, WhatsApp, email or at an appointment: choose what suits you, we’ll get back to you quickly.",
+    "methods": {
+      "cameroon": "Cameroon",
+      "whatsapp": "WhatsApp",
+      "whatsappValue": "Quick reply, 7 days a week",
+      "email": "Email",
+      "newTab": "(new tab)"
+    },
+    "agency": {
+      "eyebrow": "Our agency",
+      "title": "Come and meet us",
+      "parcels": "Parcels and mail received",
+      "route": "Directions",
+      "newTab": "(new tab)"
+    },
+    "zones": {
+      "eyebrow": "Where we work",
+      "title": "Check that your neighbourhood is covered.",
+      "link": "See all areas and neighbourhoods"
+    }
   }
 }

@@ -216,5 +216,31 @@
     "recent": "Plus récents",
     "best": "Mieux notés",
     "verified": "Avis vérifié après prestation"
+  },
+  "contact": {
+    "metaTitle": "Contact",
+    "metaDescription": "Par téléphone, WhatsApp, e-mail ou lors d’un rendez-vous à l’agence de Douala : choisissez ce qui vous convient, nous vous répondons rapidement.",
+    "eyebrow": "Contact",
+    "title": "Parlons de ==votre projet.==",
+    "lead": "Par téléphone, WhatsApp, e-mail ou lors d’un rendez-vous : choisissez ce qui vous convient, nous vous répondons rapidement.",
+    "methods": {
+      "cameroon": "Cameroun",
+      "whatsapp": "WhatsApp",
+      "whatsappValue": "Réponse rapide, 7j/7",
+      "email": "E-mail",
+      "newTab": "(nouvel onglet)"
+    },
+    "agency": {
+      "eyebrow": "Notre agence",
+      "title": "Venez nous rencontrer",
+      "parcels": "Réception des colis et courriers",
+      "route": "Itinéraire",
+      "newTab": "(nouvel onglet)"
+    },
+    "zones": {
+      "eyebrow": "Nos zones d’intervention",
+      "title": "Vérifiez que votre quartier est desservi.",
+      "link": "Voir toutes les zones et les quartiers"
+    }
   }
 }
