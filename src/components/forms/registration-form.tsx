@@ -14,7 +14,6 @@ import { toast } from '@/components/ui/toaster';
 import { browserApi } from '@/lib/api/browser';
 import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
 import { cn } from '@/lib/cn';
-import { COUNTRIES } from '@/lib/countries';
 import { frenchTypography } from '@/lib/format/typography';
 import { CONSENT_TEXT, fieldRules } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
@@ -37,6 +36,10 @@ const ACTIVITIES = [
   'Autre',
 ];
 
+/** Villes proposées dans « Ville ou quartier » (Douala par défaut) ; « Hors du Cameroun » n'envoie pas de pays. */
+const CITIES = ['Douala', 'Yaoundé', 'Autre ville du Cameroun'];
+const ABROAD = 'Hors du Cameroun';
+
 const NEWSLETTER_TEXT = 'Je souhaite recevoir la lettre Mambo (une fois par mois).';
 
 const required = (message: string) => z.string().trim().min(1, message).max(60, 'Ce champ est trop long.');
@@ -58,8 +61,8 @@ function schemaFor(profile: Profile) {
     lastName: required('Merci d’indiquer votre nom.'),
     email: fieldRules.email,
     phone: fieldRules.phone,
-    country: z.string().min(1, 'Merci de choisir votre pays de résidence.'),
-    city: z.string().trim().max(80, 'Ce nom de ville est trop long.'),
+    city: z.string().min(1, 'Merci de choisir votre ville.'),
+    quarter: z.string().trim().max(60, 'Ce nom de quartier est trop long.'),
     interests: z.array(z.string()),
     newsletter: z.boolean(),
     consent: fieldRules.consent,
@@ -73,7 +76,7 @@ const COPY: Record<Profile, { lead: string; interests: string; submit: string }>
   PARTICULIER: {
     lead: 'Enregistrez vos informations une fois : vos prochaines demandes seront plus rapides et mieux suivies.',
     interests: 'Les services qui vous intéressent',
-    submit: 'Créer mon compte',
+    submit: 'Valider mon inscription',
   },
   PROFESSIONNEL: {
     lead: 'Proposez vos services, recevez des demandes et rejoignez notre réseau de partenaires.',
@@ -108,8 +111,8 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
       lastName: '',
       email: '',
       phone: '',
-      country: '',
-      city: '',
+      city: 'Douala',
+      quarter: '',
       interests: [],
       newsletter: false,
       consent: false as unknown as true,
@@ -148,8 +151,11 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
           lastName: values.lastName,
           email: values.email,
           phone: values.phone,
-          country: values.country,
-          city: values.city || null,
+          country: values.city === ABROAD ? null : 'CM',
+          city:
+            values.city === ABROAD
+              ? values.quarter || null
+              : [values.quarter, values.city].filter(Boolean).join(', '),
           interests: values.interests,
           organization: professional ? values.organization : null,
           activity: professional ? values.activity : null,
@@ -209,7 +215,7 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
             className="flex flex-col gap-[18px]"
           >
             <input {...antiSpam.honeypotProps} />
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2 md:gap-y-[18px] max-md:[&>*:nth-child(2n+3)]:mt-0.5">
               {profile === 'PROFESSIONNEL' && (
                 <>
                   <Field label="Nom de la structure" required error={errors.organization?.message}>
@@ -272,37 +278,36 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
                 {(control) => (
                   <PhoneInput
                     icon={Smartphone}
-                    placeholder="+33 6 00 00 00 00"
+                    placeholder="+237 6 00 00 00 00"
                     {...control}
                     {...form.register('phone')}
                   />
                 )}
               </Field>
-              <Field label="Pays de résidence" required error={errors.country?.message}>
+              <Field label="Ville ou quartier" required error={errors.city?.message}>
                 {(control) => (
-                  <Select autoComplete="country" {...control} {...form.register('country')}>
-                    <option value="">Choisir</option>
-                    {COUNTRIES.map((country) => (
-                      <option key={country.code} value={country.code}>
-                        {country.name}
+                  <Select autoComplete="address-level2" {...control} {...form.register('city')}>
+                    {[...CITIES, ABROAD].map((city) => (
+                      <option key={city} value={city}>
+                        {city}
                       </option>
                     ))}
                   </Select>
                 )}
               </Field>
-              <Field label="Ville" error={errors.city?.message}>
+              <Field label="Quartier" error={errors.quarter?.message}>
                 {(control) => (
                   <Input
-                    autoComplete="address-level2"
-                    placeholder="Votre ville"
+                    autoComplete="address-level3"
+                    placeholder="Votre quartier"
                     {...control}
-                    {...form.register('city')}
+                    {...form.register('quarter')}
                   />
                 )}
               </Field>
             </div>
             <fieldset>
-              <legend className="mb-3 font-ui text-[14px] leading-5 font-semibold text-text-main">
+              <legend className="mb-2.5 font-ui text-[14px] leading-5 font-semibold text-text-main">
                 {copy.interests}
               </legend>
               <div className="flex flex-wrap gap-2">
