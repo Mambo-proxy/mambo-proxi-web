@@ -183,5 +183,25 @@
     "view": "Voir l’offre",
     "viewLabel": "Voir l’offre : {title}",
     "empty": "Aucune offre ne correspond à votre recherche. Vous pouvez envoyer une candidature spontanée."
+  },
+  "job": {
+    "careers": "Recrutement",
+    "sectors": "Secteurs : {sectors}",
+    "salary": "Rémunération : {salary}",
+    "start": "Prise de poste : {date}",
+    "published": "Publiée le {date}",
+    "position": "Le poste",
+    "missions": "Vos missions",
+    "profile": "Votre profil",
+    "benefits": "Ce que nous offrons",
+    "apply": "Postuler",
+    "interested": "Intéressé·e ?",
+    "interestedText": "Envoyez votre CV en 2 minutes. Réponse sous 15 jours.",
+    "applyCta": "Postuler à cette offre",
+    "allJobs": "Voir toutes les offres",
+    "share": "Partager :",
+    "shareWhatsapp": "Partager sur WhatsApp",
+    "shareLinkedin": "Partager sur LinkedIn",
+    "shareEmail": "Partager par e-mail"
   }
 }

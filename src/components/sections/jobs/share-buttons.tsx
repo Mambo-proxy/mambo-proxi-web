@@ -1,8 +1,10 @@
 'use client';
 
 import { Mail } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useSyncExternalStore } from 'react';
 import { LinkedinIcon, WhatsappIcon } from '@/components/brand/social-icons';
+import { frenchTypography } from '@/lib/format/typography';
 
 const subscribe = () => () => {};
 
@@ -11,6 +13,8 @@ const subscribe = () => () => {};
  * L'adresse de la page est lue dans le navigateur (l'adresse publique du site n'est pas encore définie).
  */
 export function ShareButtons({ title }: { title: string }) {
+  const t = useTranslations('job');
+  const ts = useTranslations('site');
   const url = useSyncExternalStore(
     subscribe,
     () => window.location.href.split('#')[0] ?? '',
@@ -18,24 +22,24 @@ export function ShareButtons({ title }: { title: string }) {
   );
   const links = [
     {
-      label: 'Partager sur WhatsApp',
+      label: t('shareWhatsapp'),
       href: `https://wa.me/?text=${encodeURIComponent(`${title} — ${url}`)}`,
       icon: <WhatsappIcon size={16} />,
     },
     {
-      label: 'Partager sur LinkedIn',
+      label: t('shareLinkedin'),
       href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
       icon: <LinkedinIcon size={16} />,
     },
     {
-      label: 'Partager par e-mail',
+      label: t('shareEmail'),
       href: `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(url)}`,
       icon: <Mail aria-hidden size={16} />,
     },
   ];
   return (
     <div className="flex items-center justify-center gap-2">
-      <span className="text-caption text-text-muted">Partager :</span>
+      <span className="text-caption text-text-muted">{frenchTypography(t('share'))}</span>
       <ul className="flex gap-2">
         {links.map((link) => (
           <li key={link.label}>
@@ -43,7 +47,7 @@ export function ShareButtons({ title }: { title: string }) {
               href={link.href}
               target={link.href.startsWith('mailto:') ? undefined : '_blank'}
               rel="noopener noreferrer"
-              aria-label={link.href.startsWith('mailto:') ? link.label : `${link.label} (nouvel onglet)`}
+              aria-label={link.href.startsWith('mailto:') ? link.label : ts('newTab', { label: link.label })}
               className="flex size-[34px] items-center justify-center rounded-full border border-border-default text-text-main hover:bg-neutral-100"
             >
               {link.icon}

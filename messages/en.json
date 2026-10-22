@@ -183,5 +183,25 @@
     "view": "See the opening",
     "viewLabel": "See the opening: {title}",
     "empty": "No opening matches your search. You can send an open application."
+  },
+  "job": {
+    "careers": "Careers",
+    "sectors": "Areas: {sectors}",
+    "salary": "Pay: {salary}",
+    "start": "Start date: {date}",
+    "published": "Posted on {date}",
+    "position": "The role",
+    "missions": "What you will do",
+    "profile": "About you",
+    "benefits": "What we offer",
+    "apply": "Apply",
+    "interested": "Interested?",
+    "interestedText": "Send your CV in 2 minutes. We reply within 15 days.",
+    "applyCta": "Apply for this position",
+    "allJobs": "See all openings",
+    "share": "Share:",
+    "shareWhatsapp": "Share on WhatsApp",
+    "shareLinkedin": "Share on LinkedIn",
+    "shareEmail": "Share by e-mail"
   }
 }
