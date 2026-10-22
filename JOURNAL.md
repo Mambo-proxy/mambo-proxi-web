@@ -562,3 +562,9 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Filtre « Services à domicile »** : la maquette montre 4 rubriques ; les filtres viennent des rubriques publiées (5), d'où une ligne de pastilles de plus en mobile (+48 px).
 - **Pourcentages de la répartition** : la maquette affiche 86 / 10 / 3 / 1 / 0 %, incohérents avec la note de 4,9 ; le site calcule les pourcentages à partir des données (87 / 11 / 2 / 1 / 0 % avec l'exemple du contrat).
 - **Avis sur le site anglais** : les textes restent dans la langue de leurs auteurs (paroles de clients) ; seuls le service, la rubrique et la date sont traduits.
+
+### Difficultés et solutions
+
+- **Navigations bloquées dans les tests de bout en bout** (Recrutement, Avis clients) : une page desktop déclenche 43 préchargements dès son chargement (liens de l'en-tête et du méga-menu) ; sur cette machine, le serveur de test sature et une navigation au clic peut dépasser 15 s. Dans le test du tri, chaque nouvelle sélection relançait la navigation et annulait la précédente : les essais attendent désormais jusqu'à 15 s chacun. Les liens des offres sont vérifiés par leur adresse, puis la page est ouverte directement. Hors charge, filtre et tri répondent en moins d'une seconde à 4 s.
+- **À traiter avec la performance** (Lighthouse, phase 1.5) : limiter les préchargements des liens des menus (`prefetch`) ; le préchargement de l'accueil (`/?_rsc=…`) renvoie aussi un 404 dans les traces, à examiner.
+
