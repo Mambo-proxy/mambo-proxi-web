@@ -300,5 +300,25 @@
         "short": "Terms"
       }
     }
+  },
+  "errors": {
+    "links": {
+      "quote": "Free quote",
+      "contact": "Contact",
+      "reviews": "Client reviews"
+    },
+    "home": "Back to home",
+    "notFound": {
+      "eyebrow": "Error 404",
+      "title": "Oops, this page took another road.",
+      "text": "It may have moved or no longer exists. Here are a few ways to get back on track.",
+      "services": "See our services"
+    },
+    "error": {
+      "eyebrow": "Error 500",
+      "title": "An unexpected bump in the road.",
+      "text": "Something went wrong on our side. Try again in a few moments; if the problem continues, contact us.",
+      "retry": "Try again"
+    }
   }
 }

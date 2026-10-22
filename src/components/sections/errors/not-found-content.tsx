@@ -1,4 +1,5 @@
 import type { Route } from 'next';
+import { useTranslations } from 'next-intl';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { buttonVariants } from '@/components/ui/button';
 import { routes } from '@/lib/routes';
@@ -6,18 +7,20 @@ import { ErrorPanel } from './error-panel';
 
 /** Contenu de la page 404, partagé par les pages introuvables du site et les adresses inconnues. */
 export function NotFoundContent() {
+  const t = useTranslations('errors');
   return (
     <ErrorPanel
-      eyebrow="Erreur 404"
-      title="Oups, cette page a pris un autre chemin."
-      text="Elle a peut-être été déplacée ou n’existe plus. Voici quelques pistes pour retrouver votre route."
+      eyebrow={t('notFound.eyebrow')}
+      title={t('notFound.title')}
+      text={t('notFound.text')}
+      photo="/photos/page404.png"
       actions={
         <>
           <Link href={routes.home} className={buttonVariants()}>
-            Retour à l’accueil
+            {t('home')}
           </Link>
           <Link href={'/services' as Route} className={buttonVariants({ variant: 'outline' })}>
-            Voir nos services
+            {t('notFound.services')}
           </Link>
         </>
       }

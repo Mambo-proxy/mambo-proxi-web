@@ -300,5 +300,25 @@
         "short": "CGU"
       }
     }
+  },
+  "errors": {
+    "links": {
+      "quote": "Devis gratuit",
+      "contact": "Contact",
+      "reviews": "Avis clients"
+    },
+    "home": "Retour à l’accueil",
+    "notFound": {
+      "eyebrow": "Erreur 404",
+      "title": "Oups, cette page a pris un autre chemin.",
+      "text": "Elle a peut-être été déplacée ou n’existe plus. Voici quelques pistes pour retrouver votre route.",
+      "services": "Voir nos services"
+    },
+    "error": {
+      "eyebrow": "Erreur 500",
+      "title": "Un imprévu sur la route.",
+      "text": "Une erreur est survenue de notre côté. Réessayez dans quelques instants ; si le problème continue, contactez-nous.",
+      "retry": "Réessayer"
+    }
   }
 }

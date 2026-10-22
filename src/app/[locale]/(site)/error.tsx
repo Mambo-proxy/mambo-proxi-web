@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { useEffect } from 'react';
 import { ErrorPanel } from '@/components/sections/errors/error-panel';
@@ -14,20 +15,21 @@ export default function SiteError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations('errors');
   useEffect(() => {
     console.error(error);
   }, [error]);
 
   return (
     <ErrorPanel
-      eyebrow="Erreur 500"
-      title="Un imprévu sur la route."
-      text="Une erreur est survenue de notre côté. Réessayez dans quelques instants ; si le problème continue, contactez-nous."
+      eyebrow={t('error.eyebrow')}
+      title={t('error.title')}
+      text={t('error.text')}
       actions={
         <>
-          <Button onClick={() => reset()}>Réessayer</Button>
+          <Button onClick={() => reset()}>{t('error.retry')}</Button>
           <Link href={routes.home} className={buttonVariants({ variant: 'outline' })}>
-            Retour à l’accueil
+            {t('home')}
           </Link>
         </>
       }
