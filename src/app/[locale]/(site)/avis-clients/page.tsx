@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { PageSections } from '@/components/sections/content/page-sections';
 import { ReviewsHero } from '@/components/sections/reviews/reviews-hero';
 import { ReviewsList } from '@/components/sections/reviews/reviews-list';
@@ -25,11 +26,12 @@ type SearchParams = { searchParams: Promise<{ page?: string; categorie?: string;
 /** Avis clients (desktop `68:7186`, mobile `68:7686`) : note globale, avis filtrables et paginés, collecte, CTA. */
 export default async function ReviewsPage({ searchParams }: SearchParams) {
   const query = await searchParams;
-  const [page, settings, categories, summary] = await Promise.all([
+  const [page, settings, categories, summary, t] = await Promise.all([
     getPage('avis-clients'),
     getSiteSettings(),
     unwrap(api.GET('/v1/categories', cached([cacheTags.categories]))),
     unwrap(api.GET('/v1/reviews/summary', cached([cacheTags.reviews]))),
+    getTranslations('rubrique'),
   ]);
   if (!page) notFound();
   const category = categories.find((item) => item.slug === query.categorie)?.slug ?? null;
@@ -43,7 +45,7 @@ export default async function ReviewsPage({ searchParams }: SearchParams) {
       ...cached([cacheTags.reviews]),
     }),
   );
-  const breadcrumb = [{ label: 'Accueil', href: routes.home }, { label: 'Avis clients' }];
+  const breadcrumb = [{ label: t('home'), href: routes.home }, { label: page.title }];
 
   return (
     <>

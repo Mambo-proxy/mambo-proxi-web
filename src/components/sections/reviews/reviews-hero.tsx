@@ -1,3 +1,4 @@
+import { useLocale, useTranslations } from 'next-intl';
 import { AccentText } from '@/components/ui/accent-text';
 import { Breadcrumb, type BreadcrumbItem } from '@/components/ui/breadcrumb';
 import { Stars } from '@/components/ui/stars';
@@ -19,10 +20,13 @@ export function ReviewsHero({
   summary: ReviewSummary;
   breadcrumb: BreadcrumbItem[];
 }) {
+  const t = useTranslations('reviews');
+  const locale = useLocale() === 'en' ? 'en' : 'fr';
+  const average = formatRating(summary.average, locale);
   const total = Object.values(summary.distribution).reduce((sum, count) => sum + count, 0) || 1;
   return (
     <section className="bg-neutral-50">
-      <div className="container-site grid items-center gap-6 pt-5 pb-14 xl:grid-cols-[minmax(0,1fr)_520px] xl:gap-16 xl:pt-12 xl:pb-20">
+      <div className="container-site grid items-center gap-6 pt-5 pb-10 xl:grid-cols-[minmax(0,1fr)_520px] xl:gap-16 xl:pt-12 xl:pb-20">
         <div className="flex flex-col gap-4 xl:gap-[22px]">
           <Breadcrumb items={breadcrumb} />
           {section.eyebrow && <p className="text-web-eyebrow">{frenchTypography(section.eyebrow)}</p>}
@@ -36,12 +40,18 @@ export function ReviewsHero({
         <div className="flex flex-col gap-4 rounded-[28px] border border-border-default bg-neutral-0 p-5 md:flex-row md:items-center md:gap-8 xl:p-8">
           <div className="flex shrink-0 flex-col gap-1.5">
             <p className="font-brand text-[48px] leading-[52px] font-semibold tracking-[-0.02em] text-text-main xl:text-[64px] xl:leading-[68px]">
-              {formatRating(summary.average)}
-              <span className="sr-only"> sur 5</span>
+              {average}
+              <span className="sr-only"> {t('outOf')}</span>
             </p>
-            <Stars rating={summary.average} size={18} />
+            {/* Rangée de 18 comme la maquette (les étoiles agrandies de 20 % débordent de 2 px). */}
+            <Stars
+              rating={summary.average}
+              size={18}
+              className="-my-0.5"
+              label={t('rating', { rating: average })}
+            />
             <p className="font-ui text-[14px] leading-5 text-text-muted">
-              {`${formatNumber(summary.total)}\u00A0avis vérifiés`}
+              {t('verifiedCount', { count: formatNumber(summary.total) })}
             </p>
           </div>
           <dl className="flex flex-1 flex-col gap-2">
@@ -51,7 +61,7 @@ export function ReviewsHero({
                 <div key={stars} className="flex items-center gap-2.5">
                   <dt className="w-2 font-ui text-[14px] leading-5 font-medium text-text-main">
                     {stars}
-                    <span className="sr-only"> étoile{stars === '1' ? '' : 's'}</span>
+                    <span className="sr-only"> {t('stars', { count: Number(stars) })}</span>
                   </dt>
                   <dd className="flex flex-1 items-center gap-2.5">
                     <span aria-hidden className="h-2 flex-1 overflow-hidden rounded-full bg-neutral-100">
@@ -61,7 +71,7 @@ export function ReviewsHero({
                       />
                     </span>
                     <span className="w-9 text-right font-ui text-[12px] leading-4 tracking-[0.01em] text-text-muted">
-                      {formatPercent(ratio)}
+                      {formatPercent(ratio, locale)}
                     </span>
                   </dd>
                 </div>

@@ -386,7 +386,9 @@ function QuarterSearch({
             <p className="text-[15px] leading-[1.2] font-semibold text-text-main">
               {frenchTypography(t('result', { quarter: selected.name, zone: selected.zone.name }))}
             </p>
-            <p className="text-[14px] leading-[1.2] text-neutral-700">{frenchTypography(selected.zone.result)}</p>
+            <p className="text-[14px] leading-[1.2] text-neutral-700">
+              {frenchTypography(selected.zone.result)}
+            </p>
           </div>
         )}
         {notFound && (
@@ -394,7 +396,9 @@ function QuarterSearch({
             <p className="text-[15px] leading-[1.2] font-semibold text-text-main">
               {frenchTypography(t('notFoundTitle', { query: query.trim() }))}
             </p>
-            <p className="text-[14px] leading-[1.2] text-neutral-700">{frenchTypography(t('notFoundText'))}</p>
+            <p className="text-[14px] leading-[1.2] text-neutral-700">
+              {frenchTypography(t('notFoundText'))}
+            </p>
           </div>
         )}
       </div>

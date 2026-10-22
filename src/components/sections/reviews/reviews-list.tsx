@@ -1,4 +1,5 @@
 import { Check } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 import type { Route } from 'next';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { chipVariants } from '@/components/ui/chip';
@@ -17,14 +18,16 @@ type ReviewsListProps = {
   totalPages: number;
 };
 
-/** Libellé court des rubriques dans les filtres (maquette : « Proximité »). */
+/** Libellé court des rubriques françaises dans les filtres (maquette : « Proximité »). */
 const SHORT_NAMES: Record<string, string> = { 'services-de-proximite': 'Proximité' };
 
 /**
- * Avis publiés (`68:7342`) : filtres par rubrique (liens `?categorie=`), tri à droite (sous les filtres en mobile),
+ * Avis publiés (`68:7342`) : filtres par rubrique (liens `?categorie=`), tri à droite (collé sous les filtres en mobile),
  * maçonnerie 3 colonnes remplie ligne par ligne (une colonne en dessous de 1 280 px, 4 avis en mobile), pagination.
  */
 export function ReviewsList({ reviews, categories, category, sort, page, totalPages }: ReviewsListProps) {
+  const t = useTranslations('reviews');
+  const shortNames = useLocale() === 'en' ? {} : SHORT_NAMES;
   const query = (changes: Record<string, string | null>) => {
     const params = new URLSearchParams();
     if (category) params.set('categorie', category);
@@ -43,10 +46,10 @@ export function ReviewsList({ reviews, categories, category, sort, page, totalPa
 
   return (
     <SectionShell section={{ anchor: 'avis', tone: 'light' }} innerClassName="flex flex-col gap-7 xl:gap-12">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        <nav aria-label="Filtrer par rubrique">
+      <div className="flex flex-col md:gap-4 xl:flex-row xl:items-center xl:justify-between">
+        <nav aria-label={t('filter')}>
           <ul className="flex flex-wrap gap-2">
-            {[{ slug: null, name: 'Tous' }, ...categories].map((item) => {
+            {[{ slug: null, name: t('all') }, ...categories].map((item) => {
               const selected = item.slug === category;
               return (
                 <li key={item.slug ?? 'tous'}>
@@ -57,7 +60,7 @@ export function ReviewsList({ reviews, categories, category, sort, page, totalPa
                     className={chipVariants({ selected })}
                   >
                     {selected && <Check aria-hidden strokeWidth={2.5} />}
-                    {(item.slug && SHORT_NAMES[item.slug]) ?? item.name}
+                    {(item.slug && shortNames[item.slug]) ?? item.name}
                   </Link>
                 </li>
               );
@@ -69,7 +72,7 @@ export function ReviewsList({ reviews, categories, category, sort, page, totalPa
 
       {reviews.length === 0 ? (
         <p className="rounded-3xl border border-dashed border-border-strong p-7 text-center font-ui text-[15px] leading-6 text-text-muted">
-          Aucun avis publié pour cette rubrique pour l’instant.
+          {t('empty')}
         </p>
       ) : (
         <>

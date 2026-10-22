@@ -548,3 +548,17 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 
 - **Offre de la maquette du détail** : « Intervenant·e à domicile » n'apparaît pas dans la liste de la maquette Recrutement (4 offres). Choix de la cliente le 22 octobre 2026 : elle est ajoutée comme 5e offre ; la page Recrutement affiche donc 5 postes (+126 px en desktop, +196 en mobile par rapport à sa maquette).
 - **« Analyser les demandes et préparer les devis » en mobile** : la ligne tient tout juste dans la maquette (314 px) et passe ici à la ligne, au rendu près des polices (+26 px).
+
+### Avis clients (22 octobre 2026)
+
+- Page recalée sur la maquette (`68:7186`, `68:7686`), mise en page inchangée : avis de Jean-Marc T. (« Service impeccable du début à la fin. »), Clarisse N. (Akwa, sans Paris) et Hervé D. (4 étoiles) mis à jour ; version anglaise (nouvelle, `/en/reviews`) : textes de la page, note « 4.9 », répartition « 87% », filtres, tri, badges de service et « Verified after the service » (`reviews` dans les messages), dates « 12 Sept 2026 », fil d'Ariane « Home ».
+- Mobile : carte de note suivie de 40 (56 auparavant), tri collé sous les filtres, cartes d'avis à p 22 (le texte retrouve la largeur de 304 de la maquette), bloc « Votre avis compte » à p 24 et 20 avant les étapes ; rangées d'étoiles ramenées à la hauteur de la maquette (18 et 16 : les étoiles lucide agrandies de 20 % débordaient de 2 px), aussi sur l'en-tête desktop.
+- `Stars` accepte une alternative textuelle (`label`), `formatRating` et `formatPercent` une langue.
+- Fidélité : en desktop, en-tête, déroulé et bandeau final à la hauteur de la maquette, liste des avis 936 pour 878 ; en mobile, en-tête (607), déroulé (732) et bandeau identiques, liste 1 442 pour 1 298 (voir les décisions).
+
+### Décisions
+
+- **Badge « Avis vérifié après prestation »** : toujours affiché sur chaque avis vérifié (décision du 8 octobre), la maquette ne le montre que sur le premier (+32 px par carte).
+- **Filtre « Services à domicile »** : la maquette montre 4 rubriques ; les filtres viennent des rubriques publiées (5), d'où une ligne de pastilles de plus en mobile (+48 px).
+- **Pourcentages de la répartition** : la maquette affiche 86 / 10 / 3 / 1 / 0 %, incohérents avec la note de 4,9 ; le site calcule les pourcentages à partir des données (87 / 11 / 2 / 1 / 0 % avec l'exemple du contrat).
+- **Avis sur le site anglais** : les textes restent dans la langue de leurs auteurs (paroles de clients) ; seuls le service, la rubrique et la date sont traduits.

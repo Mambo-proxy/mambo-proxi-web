@@ -203,5 +203,18 @@
     "shareWhatsapp": "Partager sur WhatsApp",
     "shareLinkedin": "Partager sur LinkedIn",
     "shareEmail": "Partager par e-mail"
+  },
+  "reviews": {
+    "verifiedCount": "{count} avis vérifiés",
+    "outOf": "sur 5",
+    "rating": "Note : {rating} sur 5",
+    "stars": "{count, plural, one {étoile} other {étoiles}}",
+    "filter": "Filtrer par rubrique",
+    "all": "Tous",
+    "empty": "Aucun avis publié pour cette rubrique pour l’instant.",
+    "sort": "Trier les avis",
+    "recent": "Plus récents",
+    "best": "Mieux notés",
+    "verified": "Avis vérifié après prestation"
   }
 }

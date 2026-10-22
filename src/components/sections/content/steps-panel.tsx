@@ -12,7 +12,8 @@ import { SectionShell } from './section-shell';
 export function StepsPanel({ section }: { section: StepsSection }) {
   return (
     <SectionShell section={section}>
-      <div className="flex flex-col gap-6 rounded-3xl border border-border-default bg-neutral-0 p-[25px] xl:flex-row xl:items-center xl:gap-14 xl:rounded-[32px] xl:p-12">
+      {/* Mobile (`68:7887`) : p 24 et bordure, 20 avant les étapes. */}
+      <div className="flex flex-col gap-5 rounded-3xl border border-border-default bg-neutral-0 p-6 xl:flex-row xl:items-center xl:gap-14 xl:rounded-[32px] xl:p-12">
         <div className="flex flex-1 flex-col gap-3.5">
           {section.eyebrow && (
             <p className="font-ui text-[12px] leading-4 font-semibold tracking-[0.08em] text-text-brand uppercase">

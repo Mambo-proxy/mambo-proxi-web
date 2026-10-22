@@ -3,19 +3,24 @@ import type { JobSalary } from '@/lib/api/schema';
 const integer = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
 const oneDecimal = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const percent = new Intl.NumberFormat('fr-FR', { style: 'percent', maximumFractionDigits: 0 });
+const englishOneDecimal = new Intl.NumberFormat('en-GB', {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
 
 /** 1200 → « 1 200 » (espace fine insécable comme séparateur des milliers). */
 export function formatNumber(value: number): string {
   return integer.format(value);
 }
 
-/** Note moyenne : 4.8 → « 4,8 ». */
-export function formatRating(value: number): string {
-  return oneDecimal.format(value);
+/** Note moyenne : 4.8 → « 4,8 » (« 4.8 » en anglais). */
+export function formatRating(value: number, locale: 'fr' | 'en' = 'fr'): string {
+  return locale === 'en' ? englishOneDecimal.format(value) : oneDecimal.format(value);
 }
 
 /** 0.92 → « 92 % » (espace fine insécable avant %, comme frenchTypography). */
-export function formatPercent(ratio: number): string {
+export function formatPercent(ratio: number, locale: 'fr' | 'en' = 'fr'): string {
+  if (locale === 'en') return `${Math.round(ratio * 100)}%`;
   return percent.format(ratio).replace(/\s%/, '\u202F%');
 }
 

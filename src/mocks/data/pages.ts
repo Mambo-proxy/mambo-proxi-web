@@ -1363,6 +1363,57 @@ const avisClients: Page = {
   ],
 };
 
+/** Avis clients en anglais (`?lang=en`) : textes rédigés pour le site ; les avis restent dans la langue de leurs auteurs. */
+const avisClientsEn: Page = {
+  ...avisClients,
+  title: 'Client reviews',
+  seo: {
+    title: 'MAMBO Proxi client reviews: what our clients say about us',
+    description:
+      'Every review is collected after a completed service, then approved by the agency before it is published.',
+    ogImageUrl: null,
+    noindex: false,
+  },
+  sections: [
+    {
+      id: 'hero',
+      type: 'hero',
+      enabled: true,
+      variant: 'page',
+      eyebrow: 'Client reviews',
+      title: 'What ==our clients== say about us.',
+      lead: 'Every review is collected after a completed service, then approved by the agency before it is published.',
+      showWhatsapp: false,
+    },
+    { id: 'avis', type: 'dynamic', enabled: true, tone: 'light', source: 'reviews-list', limit: 6 },
+    {
+      id: 'votre-avis',
+      type: 'steps',
+      enabled: true,
+      tone: 'muted',
+      layout: 'timeline',
+      eyebrow: 'Your opinion matters',
+      title: 'After every service, a short questionnaire',
+      lead: 'You automatically receive an e-mail with a link: 5 questions at most, 2 minutes. With your consent, your review can be published on the site.',
+      items: [
+        { icon: 'CalendarCheck', title: 'Service completed' },
+        { icon: 'Mail', title: 'E-mail with the questionnaire' },
+        { icon: 'Star', title: 'You rate and comment' },
+        { icon: 'Check', title: 'Review published after approval' },
+      ],
+    },
+    {
+      id: 'cta',
+      type: 'ctaBand',
+      enabled: true,
+      title: 'Your turn to enjoy\nthe Mambo experience.',
+      text: 'Request your free quote: we reply within 24 hours.',
+      primaryCta: { label: 'Request a free quote', href: '/devis', external: false },
+      showWhatsapp: true,
+    },
+  ],
+};
+
 const suiviMambo: Page = {
   key: 'suivi-mambo',
   title: 'Suivi Mambo',
@@ -1777,6 +1828,7 @@ export const pagesEn: Partial<Record<Page['key'], Page>> = {
   partenaires: partenairesEn,
   formation: formationEn,
   recrutement: recrutementEn,
+  'avis-clients': avisClientsEn,
   magazine: magazineEn,
   'zones-d-intervention': zonesEn,
 };

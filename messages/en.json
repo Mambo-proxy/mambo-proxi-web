@@ -203,5 +203,18 @@
     "shareWhatsapp": "Share on WhatsApp",
     "shareLinkedin": "Share on LinkedIn",
     "shareEmail": "Share by e-mail"
+  },
+  "reviews": {
+    "verifiedCount": "{count} verified reviews",
+    "outOf": "out of 5",
+    "rating": "Rated {rating} out of 5",
+    "stars": "{count, plural, one {star} other {stars}}",
+    "filter": "Filter by category",
+    "all": "All",
+    "empty": "No reviews published for this category yet.",
+    "sort": "Sort reviews",
+    "recent": "Most recent",
+    "best": "Highest rated",
+    "verified": "Verified after the service"
   }
 }

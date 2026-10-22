@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import type { Review } from '@/lib/api/schema';
-import { services } from '../data/catalogue';
+import { getServices, langOf, services } from '../data/catalogue';
 
 type Seed = {
   author: string;
@@ -30,7 +30,7 @@ const MAQUETTE: Seed[] = [
     city: 'Yaoundé',
     service: 'chef-prive',
     label: 'Chef privé',
-    text: "Le chef privé a régalé nos invités pour l'anniversaire de ma mère. Service impeccable, équipe aux petits soins du début à la fin.",
+    text: "Le chef privé a régalé nos invités pour l'anniversaire de ma mère. Service impeccable du début à la fin.",
     excerpt: 'Le chef privé a régalé nos invités. Service impeccable du début à la fin.',
   },
   {
@@ -42,10 +42,10 @@ const MAQUETTE: Seed[] = [
   },
   {
     author: 'Clarisse N.',
-    city: 'Paris',
+    city: 'Akwa',
     service: 'portage-livraison-repas',
     label: 'Portage de repas',
-    text: 'Ma mère reçoit ses repas chaque midi. Depuis Paris, je suis rassurée et toujours informée.',
+    text: 'Ma mère reçoit ses repas chaque midi. Je suis rassurée et toujours informée.',
   },
   {
     author: 'Patrick E.',
@@ -60,6 +60,7 @@ const MAQUETTE: Seed[] = [
     service: 'collecte-livraison-colis-courrier',
     label: 'Livraison de colis',
     text: 'Colis reçu à l’agence, on m’a appelé le jour même et livré le lendemain. Très pro.',
+    rating: 4,
   },
 ];
 
@@ -138,6 +139,32 @@ export const reviews: Review[] = [
   ),
 ];
 
+/** Libellés anglais des badges de la maquette ; les autres avis prennent le nom anglais du service. */
+const LABELS_EN: Record<string, string> = {
+  'Logement temporaire': 'Temporary housing',
+  'Chef privé': 'Private chef',
+  'Gestion locative': 'Property management',
+  'Portage de repas': 'Meal delivery',
+  'Découverte du Cameroun': 'Discover Cameroon',
+  'Livraison de colis': 'Parcel delivery',
+};
+
+const servicesEn = getServices('en');
+
+/** Avis en anglais (`?lang=en`) : service et rubrique traduits, texte dans la langue de l'auteur. */
+const reviewsEn: Review[] = reviews.map((item) => {
+  if (!item.service) return item;
+  const service = servicesEn.find((entry) => entry.slug === item.service?.slug);
+  return {
+    ...item,
+    service: {
+      ...item.service,
+      name: LABELS_EN[item.service.name] ?? service?.shortName ?? service?.name ?? item.service.name,
+      categoryName: service?.category.name ?? item.service.categoryName,
+    },
+  };
+});
+
 /** `GET /v1/reviews` : filtre par rubrique, service ou mise en avant, tri récent / mieux notés, pagination. */
 export const reviewHandlers = [
   http.get('*/v1/reviews', ({ request }) => {
@@ -148,7 +175,7 @@ export const reviewHandlers = [
     const sort = query.get('sort') ?? 'recent';
     const page = Math.max(1, Number(query.get('page') ?? 1));
     const pageSize = Math.min(50, Math.max(1, Number(query.get('pageSize') ?? 12)));
-    const list = reviews
+    const list = (langOf(request) === 'en' ? reviewsEn : reviews)
       .filter(
         (item) =>
           (!category || item.service?.categorySlug === category) &&
