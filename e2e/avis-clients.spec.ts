@@ -26,10 +26,11 @@ test.describe('avis clients', () => {
         .getByRole('link', { name: 'Immobilier' }),
     ).toHaveAttribute('aria-current', 'page');
 
+    // Une nouvelle sélection relance la navigation et annule la précédente : chaque essai attend jusqu'à 15 s.
     await expect(async () => {
       await page.getByRole('combobox', { name: 'Trier les avis' }).selectOption('rating');
-      await expect(page).toHaveURL(/tri=notes/, { timeout: 2000 });
-    }).toPass();
+      await expect(page).toHaveURL(/tri=notes/, { timeout: 15_000 });
+    }).toPass({ timeout: 45_000 });
     await expect(page).toHaveURL(/categorie=immobilier/);
 
     const pagination = page.getByRole('navigation', { name: 'Pagination' });
@@ -48,7 +49,10 @@ test.describe('avis clients', () => {
     const filters = page.getByRole('navigation', { name: 'Filter by category' });
     await expect(filters.getByRole('link', { name: 'All' })).toHaveAttribute('aria-current', 'page');
     await expect(page.getByRole('combobox', { name: 'Sort reviews' })).toHaveValue('recent');
-    await expect(page.getByText('Temporary housing').first()).toBeVisible();
-    await expect(page.getByText('Verified after the service').first()).toBeVisible();
+    // Liste mobile et grille desktop : seul l'un des deux exemplaires est affiché.
+    await expect(page.getByText('Temporary housing').filter({ visible: true }).first()).toBeVisible();
+    await expect(
+      page.getByText('Verified after the service').filter({ visible: true }).first(),
+    ).toBeVisible();
   });
 });
