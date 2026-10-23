@@ -682,3 +682,17 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Formulaires imbriqués** : les modales (lien de l'éditeur de texte, envoi de test) sont rendues dans le DOM de l'éditeur ; l'éditeur d'édition et la modale d'article ne sont donc pas des `<form>`.
 - **Test unitaire des avis** (`src/mocks/admin-reviews.test.ts`, taux de recommandation 91 au lieu de 92) : échoue déjà sans ces changements ; à reprendre.
 
+### Back-office : Zones d’intervention (23 octobre 2026)
+
+- Contrat (API puis synchronisation) : `GET/POST /v1/admin/zones`, `PATCH /v1/admin/zones/reorder`, `PATCH/DELETE /v1/admin/zones/{id}` ; une zone porte ses textes en français et en anglais, son délai moyen (`null` = « Sur devis »), son tarif indicatif (`ZoneFee`, montant minimal « Dès »), son activation et ses quartiers (un quartier n’appartient qu’à une zone) ; `showFees` reflète l’option « Afficher les tarifs ».
+- Écran (`267:1934`) : onglets « Zones » / « Quartiers » (`?onglet=quartiers`), tableau (pastille de couleur, quartiers résumés, délai, tarif « · masqué », demandes, statut ; Thèmes et tarifs masqués sous 1 400 px, cartes en mobile), menu (monter, descendre, activer / désactiver, supprimer une zone vide), encart d’information, aperçu de la carte : carte de Douala du site réutilisée (`DoualaMap`, exportée, pleine largeur, non interactive) avec la légende « Carte indicative… ».
+- Modale de zone et onglet « Quartiers » non maquettés : nom, couleur, description, réponse à la recherche (français / anglais), délai, tarif, activation, quartiers ajoutés ou retirés ; déplacement d’un quartier vers une autre zone depuis la liste.
+- Mocks initialisés depuis l’exemple public du contrat (`getServiceAreas`) : mêmes zones et quartiers que le site.
+- Tests : `e2e/admin-zones.spec.ts` aux 4 largeurs ; helper `login` rendu plus tolérant (machine chargée : l’envoi automatique du code peut déjà être en cours quand le bouton est cherché).
+
+### Décisions
+
+- **22 quartiers et 4 dans la zone spéciale sur la maquette** : le site en a 20 (Bonabéri et « Autres quartiers hors zone ») ; les données du site sont conservées. La ligne « Bonabéri et hors zone · sur devis » est reproduite par règle (quartiers hors carte résumés en « hors zone », zone sans délai « sur devis »).
+- **Tarifs indicatifs** : enregistrés et affichés dans le back-office avec « · masqué » ; l’option « Afficher les tarifs » citée par la maquette n’existe pas encore dans les Paramètres et entrerait en conflit avec la règle « aucun prix affiché » du cahier (§9) : à trancher avec la cliente.
+- **Import GeoJSON** cité par l’encart : non disponible ; les nouveaux quartiers n’ont pas de position sur la carte.
+
