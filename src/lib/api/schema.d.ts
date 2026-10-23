@@ -1786,6 +1786,66 @@ export interface paths {
         patch: operations["adminUpdateMagazineArticle"];
         trace?: never;
     };
+    "/v1/admin/zones": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Zones d'intervention, quartiers, délais et tarifs indicatifs */
+        get: operations["adminListZones"];
+        put?: never;
+        /** Créer une zone */
+        post: operations["adminCreateZone"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/zones/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Ordre des zones (légende, liste et recherche du site) */
+        patch: operations["adminReorderZones"];
+        trace?: never;
+    };
+    "/v1/admin/zones/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Supprimer une zone
+         * @description Une zone qui contient encore des quartiers ne peut pas être supprimée (409).
+         */
+        delete: operations["adminDeleteZone"];
+        options?: never;
+        head?: never;
+        /**
+         * Modifier une zone et ses quartiers
+         * @description `quarters` remplace la liste des quartiers de la zone ; un quartier déjà présent dans une autre zone y est retiré
+         *     (un quartier n'appartient qu'à une zone). Revalide le tag `zones`.
+         */
+        patch: operations["adminUpdateZone"];
+        trace?: never;
+    };
     "/v1/admin/events": {
         parameters: {
             query?: never;
@@ -4104,6 +4164,64 @@ export interface components {
             articlesCount: number;
             lastCampaign: components["schemas"]["MagazineCampaignStats"] | null;
         };
+        /** @description Tarif indicatif de déplacement ; masqué sur le site tant que l'option « Afficher les tarifs » est désactivée (cahier §9 : devis uniquement). */
+        ZoneFee: {
+            /** @example 1500 */
+            amount: number;
+            /**
+             * @default XAF
+             * @enum {string}
+             */
+            currency: "XAF";
+            /** @description « Dès 3 500 FCFA » : montant minimal. */
+            from: boolean;
+        };
+        ZoneFields: {
+            name?: string;
+            nameEn?: string | null;
+            tone?: components["schemas"]["ZoneTone"];
+            description?: string;
+            descriptionEn?: string | null;
+            /** @description Réponse affichée quand un quartier de la zone est recherché. */
+            result?: string;
+            resultEn?: string | null;
+            /**
+             * @description Délai moyen d'intervention ; `null` = « Sur devis ».
+             * @example 30–45 min
+             */
+            delay?: string | null;
+            fee?: components["schemas"]["ZoneFee"] | null;
+            /** @description Zone affichée sur le site (carte, légende, recherche, formulaires). */
+            active?: boolean;
+            quarters?: components["schemas"]["ZoneQuarter"][];
+        };
+        ZoneInput: components["schemas"]["ZoneFields"] & Record<string, never>;
+        ZonePatch: components["schemas"]["ZoneFields"] & Record<string, never>;
+        AdminZone: {
+            id: components["schemas"]["Id"];
+            key: components["schemas"]["Slug"];
+            /** @example Zone 1 — Proximité */
+            name: string;
+            nameEn: string | null;
+            tone: components["schemas"]["ZoneTone"];
+            description: string;
+            descriptionEn: string | null;
+            result: string;
+            resultEn: string | null;
+            delay: string | null;
+            fee: components["schemas"]["ZoneFee"] | null;
+            active: boolean;
+            quarters: components["schemas"]["ZoneQuarter"][];
+            /** @description Demandes des 12 derniers mois dont la ville commence par un quartier de la zone. */
+            requestsCount: number;
+            sortOrder: number;
+            updatedAt: components["schemas"]["DateTime"];
+        };
+        AdminZones: {
+            zones: components["schemas"]["AdminZone"][];
+            /** @description Option « Afficher les tarifs » des paramètres ; désactivée, les tarifs indicatifs restent masqués sur le site. */
+            showFees: boolean;
+        };
         EventFields: {
             title?: string;
             slug?: components["schemas"]["Slug"];
@@ -4999,6 +5117,12 @@ export type AdminMagazineEditionSummary = components['schemas']['AdminMagazineEd
 export type AdminMagazineEdition = components['schemas']['AdminMagazineEdition'];
 export type MagazineCampaignStats = components['schemas']['MagazineCampaignStats'];
 export type AdminMagazineOverview = components['schemas']['AdminMagazineOverview'];
+export type ZoneFee = components['schemas']['ZoneFee'];
+export type ZoneFields = components['schemas']['ZoneFields'];
+export type ZoneInput = components['schemas']['ZoneInput'];
+export type ZonePatch = components['schemas']['ZonePatch'];
+export type AdminZone = components['schemas']['AdminZone'];
+export type AdminZones = components['schemas']['AdminZones'];
 export type EventFields = components['schemas']['EventFields'];
 export type EventInput = components['schemas']['EventInput'];
 export type EventPatch = components['schemas']['EventPatch'];
@@ -8798,6 +8922,116 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminMagazineArticle"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+        };
+    };
+    adminListZones: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Zones dans l'ordre d'affichage du site. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminZones"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    adminCreateZone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ZoneInput"];
+            };
+        };
+        responses: {
+            /** @description Zone créée (à la fin de la liste, inactive tant qu'elle n'est pas activée). */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminZone"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            422: components["responses"]["ValidationError"];
+        };
+    };
+    adminReorderZones: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderInput"];
+            };
+        };
+        responses: {
+            204: components["responses"]["NoContent"];
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    adminDeleteZone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: components["responses"]["NoContent"];
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    adminUpdateZone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ZonePatch"];
+            };
+        };
+        responses: {
+            /** @description Zone enregistrée. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminZone"];
                 };
             };
             401: components["responses"]["Unauthorized"];
