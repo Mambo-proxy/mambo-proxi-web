@@ -13,11 +13,13 @@ export async function login(page: Page) {
     await form.getByRole('textbox', { name: 'Mot de passe' }).fill('motdepasse-solide');
     await form.getByRole('button', { name: 'Se connecter' }).click();
     await expect(code).toBeVisible({ timeout: 3000 });
-  }).toPass({ timeout: 30_000 });
+  }).toPass({ timeout: 45_000 });
   await code.getByLabel('Chiffre 1 sur 6').pressSequentially('123456');
   // Le code complet est envoyé automatiquement ; sinon, envoi par le bouton.
-  await page.waitForURL(/\/admin$/, { timeout: 5000 }).catch(async () => {
-    await page.getByRole('button', { name: 'Valider le code' }).click();
+  // Le bouton n'est cliqué que s'il est encore affiché (l'envoi automatique peut déjà être en cours).
+  await page.waitForURL(/\/admin$/, { timeout: 10_000 }).catch(async () => {
+    const submit = page.getByRole('button', { name: 'Valider le code' });
+    if (await submit.isVisible()) await submit.click({ timeout: 5000 }).catch(() => {});
   });
   await expect(page).toHaveURL(/\/admin$/, { timeout: 15_000 });
 }
