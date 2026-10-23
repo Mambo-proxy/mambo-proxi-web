@@ -2,6 +2,7 @@ import { http, HttpResponse, type HttpHandler } from 'msw';
 import type { AdminService, PublishStatus, ServicePatch } from '@/lib/api/schema';
 import { jsonBody, mockId, slugify } from '../admin-utils';
 import { adminCategories, adminServices, completenessOf } from '../data/admin-services';
+import { adminMedia } from './admin-media';
 import { problem } from '../problem';
 
 const NOT_FOUND = 'Ce service n’existe pas ou a été supprimé.';
@@ -43,12 +44,29 @@ function validate(body: ServicePatch, partial: boolean) {
 
 /** Applique les champs reçus et recalcule la complétude (comme l'API). */
 function apply(service: AdminService, body: ServicePatch) {
-  const { categoryId, ...fields } = body;
+  const { categoryId, coverImageId, galleryImageIds, ...fields } = body;
   const category = categoryRef(categoryId);
   Object.assign(service, fields);
   if (category) service.category = category;
   if (fields.slug) service.slug = slugify(fields.slug);
   if (fields.illustration) service.visual = { ...service.visual, illustration: fields.illustration };
+  if (coverImageId !== undefined) {
+    const media = coverImageId ? adminMedia.find((item) => item.id === coverImageId) : undefined;
+    service.coverImage = media
+      ? {
+          id: media.id,
+          url: media.url,
+          width: media.width,
+          height: media.height,
+          alt: media.alt,
+          focalPoint: media.focalPoint,
+          blurDataUrl: media.blurDataUrl,
+          variants: media.variants,
+        }
+      : null;
+    service.visual = { ...service.visual, image: service.coverImage, alt: media?.alt ?? '' };
+  }
+  if (galleryImageIds) service.galleryImageIds = galleryImageIds;
   service.path = `/services/${service.category.slug}/${service.slug}`;
   service.completenessDetail = completenessOf(service);
   service.completeness = service.completenessDetail.percent;

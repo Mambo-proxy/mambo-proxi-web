@@ -70,6 +70,19 @@ describe('services simulés du back-office', () => {
     });
   });
 
+  it('photo principale en haute définition : complétude à 100 %', async () => {
+    const updated = await call<AdminService>('/v1/admin/services/svc_visites_douala', {
+      method: 'PATCH',
+      body: JSON.stringify({ coverImageId: 'med_marche' }),
+    });
+    expect(updated.body.coverImage?.width).toBe(1600);
+    expect(updated.body.completenessDetail.percent).toBe(100);
+    await call('/v1/admin/services/svc_visites_douala', {
+      method: 'PATCH',
+      body: JSON.stringify({ coverImageId: null }),
+    });
+  });
+
   it('publication puis retour en brouillon', async () => {
     const published = await call<AdminService>('/v1/admin/services/svc_visites_douala/publish', {
       method: 'POST',
