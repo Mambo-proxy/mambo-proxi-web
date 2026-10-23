@@ -14,7 +14,14 @@ const MAP_HEIGHT = 540;
 const MIN_SCALE = 1;
 const MAX_SCALE = 3;
 
-type Located = ZoneQuarter & { zone: Zone; position: { x: number; y: number } };
+export type Located = ZoneQuarter & { zone: Zone; position: { x: number; y: number } };
+
+/** Quartiers placés sur la carte, avec leur zone. */
+export function locatedQuarters(zones: Zone[]): Located[] {
+  return zones
+    .flatMap((zone) => zone.quarters.map((quarter) => ({ ...quarter, zone })))
+    .filter((quarter): quarter is Located => quarter.position != null);
+}
 
 /** Recherche insensible à la casse, aux accents et aux tirets. */
 function normalize(value: string) {
@@ -35,7 +42,19 @@ function clampOffset(offset: number, scale: number, size: number) {
  * déplacement (glisser, flèches du clavier). Les libellés de tous les quartiers s'affichent à partir de 768 px ;
  * sur la carte réduite (mobile), seuls ceux marqués `labelOnSmallMap`, puis tous en zoomant.
  */
-function DoualaMap({ quarters, selected }: { quarters: Located[]; selected: string | null }) {
+export function DoualaMap({
+  quarters,
+  selected,
+  className,
+  interactive = true,
+}: {
+  quarters: Located[];
+  selected: string | null;
+  /** Largeur du cadre (760 px en desktop par défaut ; aperçu du back-office : pleine largeur). */
+  className?: string;
+  /** `false` : aperçu du back-office (sans zoom ni déplacement). */
+  interactive?: boolean;
+}) {
   const t = useTranslations('zones');
   const frameRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ x: number; y: number; originX: number; originY: number } | null>(null);
@@ -108,31 +127,43 @@ function DoualaMap({ quarters, selected }: { quarters: Located[]; selected: stri
     'flex size-8 cursor-pointer items-center justify-center rounded-full bg-neutral-0 text-text-main shadow-1 transition-colors hover:bg-neutral-100 disabled:cursor-default disabled:opacity-40';
 
   return (
-    <div className="relative w-full shrink-0 xl:w-[760px]">
+    <div className={cn('relative w-full shrink-0 xl:w-[760px]', className)}>
       <div
         ref={frameRef}
-        role="group"
-        aria-roledescription={t('mapLabel')}
-        aria-label={t('mapHint')}
-        tabIndex={0}
-        onKeyDown={onKeyDown}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={() => (drag.current = null)}
-        onPointerCancel={() => (drag.current = null)}
-        onDoubleClick={(event) => {
-          const box = event.currentTarget.getBoundingClientRect();
-          zoom(1.6, { x: event.clientX - box.left, y: event.clientY - box.top });
-        }}
-        onWheel={(event) => {
-          if (!event.ctrlKey) return;
-          event.preventDefault();
-          const box = event.currentTarget.getBoundingClientRect();
-          zoom(event.deltaY < 0 ? 1.2 : 1 / 1.2, { x: event.clientX - box.left, y: event.clientY - box.top });
-        }}
+        role={interactive ? 'group' : 'img'}
+        aria-roledescription={interactive ? t('mapLabel') : undefined}
+        aria-label={interactive ? t('mapHint') : t('mapLabel')}
+        tabIndex={interactive ? 0 : undefined}
+        onKeyDown={interactive ? onKeyDown : undefined}
+        onPointerDown={interactive ? onPointerDown : undefined}
+        onPointerMove={interactive ? onPointerMove : undefined}
+        onPointerUp={interactive ? () => (drag.current = null) : undefined}
+        onPointerCancel={interactive ? () => (drag.current = null) : undefined}
+        onDoubleClick={
+          interactive
+            ? (event) => {
+                const box = event.currentTarget.getBoundingClientRect();
+                zoom(1.6, { x: event.clientX - box.left, y: event.clientY - box.top });
+              }
+            : undefined
+        }
+        onWheel={
+          interactive
+            ? (event) => {
+                if (!event.ctrlKey) return;
+                event.preventDefault();
+                const box = event.currentTarget.getBoundingClientRect();
+                zoom(event.deltaY < 0 ? 1.2 : 1 / 1.2, {
+                  x: event.clientX - box.left,
+                  y: event.clientY - box.top,
+                });
+              }
+            : undefined
+        }
         className={cn(
-          'relative aspect-[760/540] w-full touch-pan-y overflow-hidden rounded-[11px] bg-map-land select-none focus-visible:focus-ring md:rounded-xl',
-          view.scale > 1 && 'cursor-grab touch-none active:cursor-grabbing',
+          'relative aspect-[760/540] w-full overflow-hidden rounded-[11px] bg-map-land select-none md:rounded-xl',
+          interactive && 'touch-pan-y focus-visible:focus-ring',
+          interactive && view.scale > 1 && 'cursor-grab touch-none active:cursor-grabbing',
         )}
       >
         <div
@@ -205,7 +236,8 @@ function DoualaMap({ quarters, selected }: { quarters: Located[]; selected: stri
           </span>
           {quarters.map((quarter) => {
             const isSelected = quarter.name === selected;
-            const visibleOnSmall = quarter.labelOnSmallMap || quarter.isBase || isSelected || zoomed;
+            const visibleOnSmall =
+              !interactive || quarter.labelOnSmallMap || quarter.isBase || isSelected || zoomed;
             return (
               <span
                 key={`libelle-${quarter.name}`}
@@ -223,36 +255,38 @@ function DoualaMap({ quarters, selected }: { quarters: Located[]; selected: stri
           })}
         </div>
       </div>
-      <div className="absolute top-3 right-3 flex flex-col gap-1.5 md:top-4 md:right-4">
-        <button
-          type="button"
-          onClick={() => zoom(1.4)}
-          disabled={view.scale >= MAX_SCALE}
-          aria-label={t('zoomIn')}
-          className={control}
-        >
-          <Plus aria-hidden size={16} />
-        </button>
-        <button
-          type="button"
-          onClick={() => zoom(1 / 1.4)}
-          disabled={view.scale <= MIN_SCALE}
-          aria-label={t('zoomOut')}
-          className={control}
-        >
-          <Minus aria-hidden size={16} />
-        </button>
-        {view.scale > 1 && (
+      {interactive && (
+        <div className="absolute top-3 right-3 flex flex-col gap-1.5 md:top-4 md:right-4">
           <button
             type="button"
-            onClick={() => setView({ scale: 1, x: 0, y: 0 })}
-            aria-label={t('reset')}
+            onClick={() => zoom(1.4)}
+            disabled={view.scale >= MAX_SCALE}
+            aria-label={t('zoomIn')}
             className={control}
           >
-            <Undo2 aria-hidden size={15} />
+            <Plus aria-hidden size={16} />
           </button>
-        )}
-      </div>
+          <button
+            type="button"
+            onClick={() => zoom(1 / 1.4)}
+            disabled={view.scale <= MIN_SCALE}
+            aria-label={t('zoomOut')}
+            className={control}
+          >
+            <Minus aria-hidden size={16} />
+          </button>
+          {view.scale > 1 && (
+            <button
+              type="button"
+              onClick={() => setView({ scale: 1, x: 0, y: 0 })}
+              aria-label={t('reset')}
+              className={control}
+            >
+              <Undo2 aria-hidden size={15} />
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

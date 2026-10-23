@@ -10,6 +10,7 @@ import { adminJobHandlers } from './admin-jobs';
 import { adminPartnerHandlers } from './admin-partners';
 import { adminTrainingHandlers } from './admin-trainings';
 import { adminMagazineHandlers } from './admin-magazine';
+import { adminZoneHandlers } from './admin-zones';
 import { adminEventHandlers } from './admin-events';
 import { adminContactHandlers } from './admin-contacts';
 import { adminNewsletterHandlers } from './admin-newsletter';
@@ -48,6 +49,7 @@ export const handlers = [
   ...adminPartnerHandlers,
   ...adminTrainingHandlers,
   ...adminMagazineHandlers,
+  ...adminZoneHandlers,
   ...adminEventHandlers,
   ...adminContactHandlers,
   ...adminNewsletterHandlers,
