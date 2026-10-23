@@ -434,3 +434,64 @@ export function MediaPickerDialog({ open, onClose, onSelect, initialFile }: Medi
     </Modal>
   );
 }
+
+/**
+ * Galerie de visuels d'un contenu (`91:10794`) : vignettes 200 × 130 (130 × 130 à partir de la deuxième),
+ * bouton « Retirer » au survol et zone d'ajout qui ouvre la médiathèque.
+ */
+export function GalleryField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: MediaImage[];
+  onChange: (images: MediaImage[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="font-ui text-[14px] leading-5 font-semibold text-text-main">{label}</span>
+      <div className="flex flex-wrap items-start gap-3">
+        {value.map((image, index) => (
+          <div key={image.id} className="relative">
+            <MediaThumb
+              image={image}
+              sizes="200px"
+              className={cn('rounded-md bg-orange-100', index === 0 ? 'h-[130px] w-[200px]' : 'size-[130px]')}
+            />
+            <button
+              type="button"
+              aria-label={`Retirer ${image.alt || `le visuel ${index + 1}`}`}
+              onClick={() => onChange(value.filter((item) => item.id !== image.id))}
+              className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-full bg-neutral-900/80 text-neutral-0 hover:bg-neutral-900"
+            >
+              <Trash2 aria-hidden size={14} />
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="flex h-[130px] w-[200px] flex-col items-center justify-center gap-1.5 rounded-md border border-dashed border-border-strong bg-neutral-50 px-4 text-center hover:bg-neutral-100"
+        >
+          <ImagePlus aria-hidden size={22} className="text-icon-default" />
+          <span className="font-ui text-[14px] leading-5 font-semibold text-text-main">
+            Ajouter un visuel
+          </span>
+          <span className="font-ui text-[12px] leading-4 text-text-muted">
+            JPG ou PNG · 1600 px conseillé
+          </span>
+        </button>
+      </div>
+      <MediaPickerDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        onSelect={(image) => {
+          onChange([...value, image]);
+          setOpen(false);
+        }}
+      />
+    </div>
+  );
+}

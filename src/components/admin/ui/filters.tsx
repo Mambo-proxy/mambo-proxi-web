@@ -158,6 +158,7 @@ export function ListPagination({
   totalPages,
   noun,
   onPage,
+  summary,
 }: {
   page: number;
   pageSize: number;
@@ -166,6 +167,8 @@ export function ListPagination({
   /** Nom au pluriel, ex. « demandes ». */
   noun: string;
   onPage: (page: number) => void;
+  /** Résumé personnalisé (maquette Services : « Affichage de 9 sur 19 services · 1 brouillon »). */
+  summary?: ReactNode;
 }) {
   const from = total === 0 ? 0 : (page - 1) * pageSize + 1;
   const to = Math.min(total, page * pageSize);
@@ -174,8 +177,13 @@ export function ListPagination({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border-default px-5 py-3">
       <p className="font-ui text-[12px] leading-4 text-text-muted" aria-live="polite">
-        Affichage de {formatNumber(from)} à {formatNumber(to)} sur {formatNumber(total)} {noun}
+        {summary ?? (
+          <>
+            Affichage de {formatNumber(from)} à {formatNumber(to)} sur {formatNumber(total)} {noun}
+          </>
+        )}
       </p>
+
       {totalPages > 1 && (
         <nav aria-label="Pagination" className="flex items-center gap-1.5">
           <button

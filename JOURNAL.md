@@ -658,3 +658,23 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **« Maison + Linge » sous « Proximité » sur la maquette** : la formule appartient à la rubrique Services à domicile ; la liste affiche « À domicile », cohérent avec la répartition par rubrique du tableau de bord.
 - **Écarts antérieurs non repris ici** : filtres sur deux lignes (type et recherche en plus de la maquette), Agenda et Médiathèque dans le menu (écrans non maquettés), Ruth A. parmi les dernières demandes du tableau de bord.
 
+### Back-office : Services, liste et éditeur (23 octobre 2026)
+
+- Écran Services (`88:10421`) : encart d'information, onglets par rubrique avec compteurs, bouton « Gérer les rubriques », tableau réordonnable (poignée, vignette, nom et URL, rubrique, demandes sur 30 jours, statut, interrupteur « Dans le menu », aperçu, modification, menu dupliquer / publier / supprimer) et pagination à 9 lignes. En mobile, chaque service devient une carte ; le glisser-déposer reste disponible au clavier (`Espace`, flèches).
+- Éditeur de service (`91:10598`) : sept cartes-sections (Informations générales, Public, Étapes, Avantages, Questions fréquentes, Services liés et témoignages, Référencement) et colonne latérale (Publication, Aperçu de la carte, Complétude). Les listes répétables se réordonnent au glisser-déposer ; les visuels passent par la médiathèque (photo principale et galerie, textes alternatifs) ; l'adresse de page et le SEO ont des compteurs (60 / 160). Sauvegarde automatique après 1,5 s d'inactivité, bouton Enregistrer, publication / dépublication, jeton d'aperçu et complétude recalculée à chaque saisie.
+- Mocks : 22 services à page du catalogue (les 4 formules n'ont pas de fiche) et le service de démonstration « Visites guidées de Douala » (`isDemo`, brouillon, contenu de la maquette, complétude 86 %), soit 23 services et 5 rubriques ; gestionnaires dédiés pour liste filtrée, détail, création, enregistrement, réordonnancement, publication, duplication, suppression, aperçu, complétude et rubriques (liste, renommage, ordre). Le service de démonstration n'est pas publié sur le site ; il sert à la fidélité de l'éditeur et aux tests.
+- Tests : 8 tests de gestionnaires (`src/mocks/admin-services.test.ts`, 23 services, compteurs, complétude 86 %, publication, duplication, création et rubriques) et 5 parcours de bout en bout (`e2e/admin-services.spec.ts`, liste, filtre, interrupteur, éditeur avec sauvegarde automatique puis publication, création). `pnpm typecheck`, `pnpm lint` et le build de production passent.
+
+### Décisions
+
+- **Pagination de la liste** : le contrat de `GET /v1/admin/services` ne déclare ni `page` / `pageSize` ni `meta` ; la liste complète et les compteurs sont donc reçus en une fois, puis découpés par l'écran (9 par page, comme la maquette). Aucune évolution du contrat n'a été faite ici.
+- **Cinq rubriques et 23 services** : la maquette des Services date d'avant la refonte (4 rubriques, 19 services). L'écran suit le catalogue actuel (Services à domicile en tête, 23 services avec la démo) ; les compteurs sont calculés à partir des données, jamais écrits en dur.
+- **« Visites guidées de Douala »** : ce service n'existe plus dans le catalogue de la refonte. Il est conservé comme service de démonstration, marqué « Démo » dans la liste et non publié, pour reproduire l'éditeur de la maquette et vérifier la complétude à 86 %.
+- **« Gérer les rubriques »** n'est pas maquetté : le bouton ouvre un dialogue qui permet de réordonner les rubriques et de renommer leur libellé ; les autres champs de rubrique (héros, publics, SEO) restent hors de cet écran.
+
+### Difficultés et solutions
+
+- **Installation pnpm dans l'environnement de contrôle** : pnpm 12 échoue sur la vérification TLS du registre (`invalid peer certificate: UnknownIssuer`) et n'accepte ni `strict-ssl=false` ni `cafile` pour son résolveur natif. Les dépendances ont été installées avec npm pour les vérifications locales ; aucun fichier de verrouillage npm n'est conservé et les commandes du dépôt restent `pnpm`.
+- **Navigateur des tests de bout en bout** : Chromium ne démarre pas dans cet environnement (bibliothèques système `libglib` absentes, pas d'accès root pour `playwright install-deps`). Les tests E2E sont écrits et le build de production est vérifié ; ils s'exécutent dans l'image de CI qui fournit ces bibliothèques.
+
+
