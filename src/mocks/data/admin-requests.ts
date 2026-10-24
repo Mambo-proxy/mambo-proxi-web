@@ -359,6 +359,39 @@ const TRAINING_REQUESTS: Record<
   },
 };
 
+/** Inscription à un événement de l'agenda (formulaire « S’inscrire » de la rubrique Culture). */
+function eventRegistration(eventSlug: string, title: string, seats: number, daysAgo: number): Partial<Seed> {
+  return {
+    type: 'EVENEMENT',
+    subject: title,
+    service: title,
+    serviceSlug: eventSlug,
+    category: 'culture-evenementiel',
+    createdAt: at(daysAgo, 18, 40),
+    message: seats > 1 ? `Inscription pour ${seats} personnes.` : 'Inscription pour une personne.',
+    payload: { eventSlug, seats },
+    fields: [
+      ['Événement', title],
+      ['Places', String(seats)],
+    ],
+  };
+}
+
+/**
+ * Inscriptions aux événements (Agenda) : elles remplacent huit demandes de démonstration (statuts conservés), pour
+ * garder les totaux de la maquette Demandes.
+ */
+const EVENT_REGISTRATIONS: Record<number, Partial<Seed>> = {
+  3: eventRegistration('nuit-des-saveurs-camerounaises', 'Nuit des saveurs camerounaises', 2, 6),
+  6: eventRegistration('nuit-des-saveurs-camerounaises', 'Nuit des saveurs camerounaises', 4, 7),
+  14: eventRegistration('randonnee-cascades-lobe', 'Randonnée et cascades de la Lobé', 2, 9),
+  20: eventRegistration('visite-ateliers-artisans', 'Visite des ateliers d’artisans', 3, 11),
+  26: eventRegistration('soiree-contes-akwa', 'Soirée contes et musique à Akwa', 2, 30),
+  32: eventRegistration('soiree-contes-akwa', 'Soirée contes et musique à Akwa', 1, 33),
+  41: eventRegistration('atelier-cuisine-ndole', 'Atelier cuisine : le ndolé', 2, 48),
+  47: eventRegistration('atelier-cuisine-ndole', 'Atelier cuisine : le ndolé', 1, 52),
+};
+
 const generated: Seed[] = REMAINING.map((status, index) => {
   const [city, country] = PLACES[index % PLACES.length]!;
   const [service, serviceSlug, category] = SERVICES[index % SERVICES.length]!;
@@ -377,6 +410,7 @@ const generated: Seed[] = REMAINING.map((status, index) => {
     preference: (['WHATSAPP', 'EMAIL', 'TELEPHONE'] as const)[index % 3],
     ...PARTNERSHIPS[index],
     ...TRAINING_REQUESTS[index],
+    ...EVENT_REGISTRATIONS[index],
   };
 });
 

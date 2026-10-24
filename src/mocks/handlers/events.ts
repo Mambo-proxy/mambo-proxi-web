@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import type { Event } from '@/lib/api/schema';
+import type { Event, PublishStatus } from '@/lib/api/schema';
 import operations from '../data/contract-examples.json';
 
 type EventsPage = { data: Event[] };
@@ -22,7 +22,7 @@ const contractEvents = (
   return { ...event, visual: { ...event.visual, image } };
 });
 
-export const events: Event[] = [
+const events: Event[] = [
   ...contractEvents,
   {
     id: 'evt_jazz',
@@ -56,14 +56,86 @@ export const events: Event[] = [
   },
 ];
 
+/** Événement de l'agenda avec son statut de publication (partagé avec le back-office). */
+export type StoredEvent = Event & { status: PublishStatus };
+
+/**
+ * Agenda du back-office : les 5 sorties du site (publiées), deux sorties passées et un brouillon. Le site ne
+ * montre que les événements publiés à venir.
+ */
+export const agendaEvents: StoredEvent[] = [
+  ...events.map((event): StoredEvent => ({ ...event, status: 'PUBLISHED' })),
+  {
+    id: 'evt_contes',
+    slug: 'soiree-contes-akwa',
+    title: 'Soirée contes et musique à Akwa',
+    startsAt: '2026-10-10T17:30:00.000Z',
+    endsAt: '2026-10-10T20:30:00.000Z',
+    city: 'Douala',
+    place: 'Akwa',
+    tag: 'Culture',
+    visual: { illustration: 'culture', image: null, alt: '' },
+    description: 'Contes du Littoral et musique traditionnelle, en famille.',
+    capacity: 30,
+    remainingPlaces: null,
+    limited: false,
+    status: 'PUBLISHED',
+  },
+  {
+    id: 'evt_ndole',
+    slug: 'atelier-cuisine-ndole',
+    title: 'Atelier cuisine : le ndolé',
+    startsAt: '2026-09-12T09:00:00.000Z',
+    endsAt: '2026-09-12T13:00:00.000Z',
+    city: 'Douala',
+    place: 'Bonapriso',
+    tag: 'Gastronomie',
+    visual: { illustration: 'chef', image: null, alt: '' },
+    description: 'Préparer le ndolé avec une cheffe, puis le déguster ensemble.',
+    capacity: 12,
+    remainingPlaces: null,
+    limited: true,
+    status: 'PUBLISHED',
+  },
+  {
+    id: 'evt_festival',
+    slug: 'festival-arts-douala',
+    title: 'Festival des arts de Douala',
+    startsAt: '2027-01-16T15:00:00.000Z',
+    endsAt: null,
+    city: 'Douala',
+    place: 'Bonanjo',
+    tag: 'Festival',
+    visual: { illustration: 'evenement', image: null, alt: '' },
+    description: null,
+    capacity: 200,
+    remainingPlaces: null,
+    limited: false,
+    status: 'DRAFT',
+  },
+];
+
+/** Événements publiés à venir, du plus proche au plus lointain (agenda du site). */
+export function publishedEvents(now = Date.now()): Event[] {
+  return agendaEvents
+    .filter((event) => event.status === 'PUBLISHED' && Date.parse(event.startsAt) >= now)
+    .sort((a, b) => a.startsAt.localeCompare(b.startsAt))
+    .map((event): Event => {
+      const copy: Partial<StoredEvent> = { ...event };
+      delete copy.status;
+      return copy as Event;
+    });
+}
+
 export const eventHandlers = [
   http.get('*/v1/events', ({ request }) => {
     const query = new URL(request.url).searchParams;
-    const limit = Number(query.get('limit') ?? query.get('pageSize') ?? events.length);
-    const data = events.slice(0, limit);
+    const limit = Number(query.get('limit') ?? query.get('pageSize') ?? agendaEvents.length);
+    const list = publishedEvents();
+    const data = list.slice(0, limit);
     return HttpResponse.json({
       data,
-      meta: { page: 1, pageSize: limit, total: events.length, totalPages: Math.ceil(events.length / limit) },
+      meta: { page: 1, pageSize: limit, total: list.length, totalPages: Math.ceil(list.length / limit) },
     });
   }),
 ];
