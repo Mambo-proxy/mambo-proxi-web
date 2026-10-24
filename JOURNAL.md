@@ -900,3 +900,14 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 
 - **Pas de carte rendue seulement côté client sans texte** : une première version chargée au défilement retirait du HTML le lien vers la page Zones et l'ancre de recherche (liens internes, référencement) ; la colonne de droite est donc rendue avec la page.
 - **Reste pour 170 Ko** : la précompilation des messages (plugin next-intl, −12 Ko) et tailwind-merge (9 Ko, utilisé par `cn` partout).
+
+### Performance : messages précompilés (24 octobre 2026)
+
+- Les messages de `messages/*.json` sont précompilés au build (format compact d'`icu-minify`) et formatés par le formateur réduit de `use-intl` (`format-only`) : l'analyseur de messages ICU (12 Ko) ne part plus vers le navigateur. Accueil 195 → 186 Ko, rubrique 196 → 187 Ko, contact 265 → 256 Ko, devis 252 → 244 Ko.
+- Réglages repris de `next-intl/plugin` dans `next.config.ts` (règle Turbopack `next-intl/extractor/catalogLoader` sur `./messages`, alias `use-intl/format-message`) : le plugin lui-même charge au démarrage le binaire natif de SWC, refusé sur ce poste Windows (droits du dossier de cache).
+- Seul message non textuel : `jobs.contracts` (tableau des filtres de contrat du Recrutement), devenu un objet à clés (`cdi`, `cdd`, `freelance`, `stage`, `alternance`) ; la précompilation n'accepte que des textes.
+
+### Décisions
+
+- **Chemin de la règle écrit `./messages`** : sans le `./`, Turbopack n'appliquait pas le chargeur, les messages restaient bruts et le formateur réduit affichait les variables telles quelles (`{ref}`) ; les e2e l'ont signalé.
+- **Arrêt à ~186 Ko, sans retirer tailwind-merge** : `cn` charge toute la configuration de tailwind-merge (`extendTailwindMerge`, non élagable), embarquée partout via l'en-tête. Le remplacer par une simple concaténation (`cx`) dans le code client public gagnerait ~9 Ko (≈ 177 Ko, toujours au-dessus de 170) pour ~38 fichiers, une dizaine de conflits de classes côté site et 17 surcharges côté back-office sur des primitives partagées, où la classe gagnante dépendrait de l'ordre du CSS. Le critère retenu est Lighthouse ≥ 90 en CI ; la conversion (avec un contrôle en dev comparant `cx` et tailwind-merge) ne sera faite que si la mesure le demande.

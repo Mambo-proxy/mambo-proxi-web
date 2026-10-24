@@ -1,13 +1,42 @@
+import path from 'node:path';
 import type { NextConfig } from 'next';
 import { publicCsp, securityHeaders } from './src/lib/security/headers';
+
+/** Formateur de messages précompilés de `use-intl` (dépendance de next-intl, non installée à la racine par pnpm). */
+const formatOnly = `./${path
+  .relative(
+    process.cwd(),
+    require.resolve('use-intl/format-message/format-only', {
+      paths: [path.dirname(require.resolve('next-intl/plugin'))],
+    }),
+  )
+  .split(path.sep)
+  .join('/')}`;
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
   poweredByHeader: false,
   typedRoutes: true,
-  // Configuration des langues de next-intl (équivalent de son plugin, qui dépend d'un binaire natif superflu ici).
+  // Configuration de next-intl, sans son plugin (il charge au démarrage le binaire natif de SWC, refusé sur certains
+  // postes Windows) : fichier de configuration des langues, et messages précompilés au build (`messages/*.json`) pour
+  // que le navigateur ne reçoive pas l'analyseur de messages ICU (réglages repris de `next-intl/plugin`).
   turbopack: {
-    resolveAlias: { 'next-intl/config': './src/i18n/request.ts' },
+    resolveAlias: {
+      'next-intl/config': './src/i18n/request.ts',
+      'use-intl/format-message': formatOnly,
+    },
+    rules: {
+      '*.json': {
+        loaders: [
+          {
+            loader: 'next-intl/extractor/catalogLoader',
+            options: { messages: { format: 'json', precompile: true } },
+          },
+        ],
+        condition: { path: '{./messages}/**/*' },
+        as: '*.js',
+      },
+    },
   },
   images: {
     formats: ['image/avif', 'image/webp'],

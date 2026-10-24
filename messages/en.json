@@ -178,7 +178,13 @@
     "search": "Search for a position",
     "filter": "Filter openings",
     "all": "All",
-    "contracts": ["Permanent", "Fixed-term", "Freelance", "Internship", "Apprenticeship"],
+    "contracts": {
+      "cdi": "Permanent",
+      "cdd": "Fixed-term",
+      "freelance": "Freelance",
+      "stage": "Internship",
+      "alternance": "Apprenticeship"
+    },
     "new": "New",
     "published": "Posted {ago}",
     "view": "See the opening",

@@ -94,7 +94,8 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [ ] Accessibilité (axe, clavier), performance (Lighthouse ≥ 90 mobile, JS initial < 170 Ko)
   - [x] JS initial réduit (24/10) : modale d'inscription aux événements chargée au premier clic, formulaires publics sur `zod/mini` — rubrique 363 → 249 Ko, contact 372 → 308 Ko, devis 355 → 292 Ko (gzip)
   - [x] Code commun allégé (24/10) : carte des zones, envoi de la newsletter, préférences cookies et notifications chargés hors du JavaScript initial — accueil 212 → 195 Ko (polyfills `noModule` exclus, non téléchargés par les navigateurs récents)
-  - [ ] Viser 170 Ko : précompilation des messages next-intl (−12 Ko, plugin à évaluer), tailwind-merge en dernier recours ; Lighthouse à mesurer en CI (impossible sur ce poste)
+  - [x] Messages next-intl précompilés au build (24/10) : accueil 195 → 186 Ko
+  - [ ] Lighthouse ≥ 90 mobile à mesurer en CI (impossible sur ce poste) ; objectif 170 Ko non retenu en l'état (~186 Ko, dont ~135 Ko de socle React/Next) : tailwind-merge (−9 Ko, `cx` sans fusion côté client public) seulement si Lighthouse le demande
 
 ## Phase 1 bis — Refonte des maquettes (octobre 2026)
 

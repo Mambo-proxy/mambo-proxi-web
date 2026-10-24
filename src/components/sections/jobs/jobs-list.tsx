@@ -24,6 +24,9 @@ const normalize = (value: string) =>
 /** Lieu de base d'une offre (« Douala · sur site » → « Douala »). */
 const baseCity = (city: string) => city.split(' · ')[0] ?? city;
 
+/** Types de contrat proposés en filtre, dans l'ordre d'affichage (libellés dans `jobs.contracts`). */
+const CONTRACT_KEYS = ['cdi', 'cdd', 'freelance', 'stage', 'alternance'] as const;
+
 /**
  * « Nos offres » (Recrutement `67:6874`, mobile `67:7263`) : nombre de postes ouverts en titre, recherche (pilule 360
  * à droite, pleine largeur collée au titre en mobile), filtres lieu et contrat, liste d'offres (titre 20/28, 17/28 en
@@ -49,7 +52,7 @@ export function JobsList({
   );
   const hasContract = (job: JobOfferSummary, contract: string) =>
     normalize(job.contractType).includes(normalize(contract));
-  const contracts = (t.raw('contracts') as string[]).filter((contract) =>
+  const contracts = CONTRACT_KEYS.map((key) => t(`contracts.${key}`)).filter((contract) =>
     jobs.some((job) => hasContract(job, contract)),
   );
   const search = normalize(query.trim());

@@ -178,7 +178,13 @@
     "search": "Rechercher un poste",
     "filter": "Filtrer les offres",
     "all": "Tous",
-    "contracts": ["CDI", "CDD", "Freelance", "Stage", "Alternance"],
+    "contracts": {
+      "cdi": "CDI",
+      "cdd": "CDD",
+      "freelance": "Freelance",
+      "stage": "Stage",
+      "alternance": "Alternance"
+    },
     "new": "Nouveau",
     "published": "Publiée {ago}",
     "view": "Voir l’offre",
