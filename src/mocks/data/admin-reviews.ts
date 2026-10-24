@@ -97,7 +97,7 @@ const TO_VALIDATE: Seed[] = [
     id: 'rev_aurelie_k',
     author: 'Aurélie K.',
     initials: 'AK',
-    city: 'Paris',
+    city: 'Bonapriso',
     service: 'logement-temporaire',
     serviceName: 'Logement temporaire',
     rating: 5,
@@ -114,8 +114,8 @@ const TO_VALIDATE: Seed[] = [
     author: 'Hervé D.',
     initials: 'HD',
     city: 'Douala',
-    service: 'reception-colis-courrier',
-    serviceName: 'Réception de colis',
+    service: 'collecte-livraison-colis-courrier',
+    serviceName: 'Livraison de colis',
     rating: 4,
     text: 'Colis reçu à l’agence, on m’a appelé le jour même et livré le lendemain. Très pro.',
     consent: true,
@@ -128,7 +128,7 @@ const TO_VALIDATE: Seed[] = [
     id: 'rev_marc_o',
     author: 'Marc O.',
     initials: 'MO',
-    city: 'Lyon',
+    city: 'Kotto',
     service: 'location-voiture',
     rating: 3,
     text: 'Bon chauffeur mais 20 minutes de retard à l’aéroport. Le reste était parfait.',
@@ -142,7 +142,7 @@ const TO_VALIDATE: Seed[] = [
     id: 'rev_nadia_f',
     author: 'Nadia F.',
     initials: 'NF',
-    city: 'Bruxelles',
+    city: 'Akwa',
     service: 'chef-prive',
     rating: 5,
     text: 'Un dîner d’anniversaire inoubliable : le chef a tout préparé chez nous et ma famille en parle encore.',
@@ -165,7 +165,7 @@ const HIDDEN: Seed[] = [
   ],
   [
     'Inès B.',
-    'Paris',
+    'Bonanjo',
     'photographe',
     5,
     false,
@@ -173,7 +173,7 @@ const HIDDEN: Seed[] = [
   ],
   [
     'Boris N.',
-    'Douala',
+    'Bonamoussadi',
     'gestion-locative',
     5,
     false,
@@ -181,7 +181,7 @@ const HIDDEN: Seed[] = [
   ],
   [
     'Grâce E.',
-    'Lille',
+    'Makepe',
     'livraison-courses-commandes',
     5,
     true,
@@ -197,7 +197,7 @@ const HIDDEN: Seed[] = [
   ],
   [
     'Esther O.',
-    'Bordeaux',
+    'Logpom',
     'recherche-logement',
     4,
     false,
@@ -205,15 +205,15 @@ const HIDDEN: Seed[] = [
   ],
   [
     'Paul K.',
-    'Douala',
-    'entretien-logements',
+    'Deïdo',
+    'entretien-du-logement',
     3,
     true,
     'Ménage correct mais le prestataire est arrivé en retard deux fois.',
   ],
   [
     'Yannick T.',
-    'Montréal',
+    'Bali',
     'massage-bien-etre',
     3,
     false,
@@ -221,7 +221,7 @@ const HIDDEN: Seed[] = [
   ],
   [
     'Laure M.',
-    'Paris',
+    'Bonapriso',
     'location-voiture',
     2,
     true,
@@ -271,7 +271,10 @@ const recommendationOf = (review: AdminReview) => {
   return Number.isFinite(value) ? value : null;
 };
 
-/** Indicateurs calculés sur l'ensemble des avis reçus (tous statuts). */
+/**
+ * Indicateurs calculés sur l'ensemble des avis reçus (tous statuts). Les évolutions sur 30 jours sont celles de la
+ * maquette (« +0,1 », « +3 pts ») : les mocks n'ont pas d'historique.
+ */
 export function reviewStats(): ReviewStats {
   const distribution = { '1': 0, '2': 0, '3': 0, '4': 0, '5': 0 };
   for (const review of adminReviews) distribution[String(review.rating) as keyof typeof distribution] += 1;
@@ -280,6 +283,7 @@ export function reviewStats(): ReviewStats {
   const verified = adminReviews.filter((review) => review.verified).length;
   return {
     average: total ? adminReviews.reduce((sum, review) => sum + review.rating, 0) / total : 0,
+    averageDelta: 0.1,
     published: adminReviews.filter((review) => review.status === 'PUBLIE').length,
     toValidate: reviewsToValidate(),
     hidden: adminReviews.filter((review) => review.status === 'MASQUE').length,
@@ -288,6 +292,7 @@ export function reviewStats(): ReviewStats {
     recommendationRate: scores.length
       ? Math.round((scores.filter((value) => value >= 9).length / scores.length) * 100)
       : null,
+    recommendationDelta: 3,
     npsAverage: scores.length ? scores.reduce((sum, value) => sum + value, 0) / scores.length : null,
     distribution,
   };

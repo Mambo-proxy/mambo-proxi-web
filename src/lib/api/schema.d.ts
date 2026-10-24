@@ -3836,6 +3836,8 @@ export interface components {
         };
         ReviewStats: {
             average: number;
+            /** @description Évolution de la note moyenne sur 30 jours (écart avec les 30 jours précédents, en points de note). */
+            averageDelta?: number | null;
             published: number;
             toValidate: number;
             hidden?: number;
@@ -3844,6 +3846,8 @@ export interface components {
             surveysSent?: number;
             /** @description Part des notes de recommandation 9 ou 10 (%). */
             recommendationRate?: number | null;
+            /** @description Évolution de la part des notes 9 ou 10 sur 30 jours (en points de pourcentage). */
+            recommendationDelta?: number | null;
             npsAverage?: number | null;
             distribution: components["schemas"]["ReviewSummary"]["distribution"];
         };

@@ -18,10 +18,15 @@ test.describe('back-office : avis clients', () => {
     await openReviews(page);
     await expect(page.getByRole('tab', { name: /^À valider/ })).toHaveAttribute('aria-selected', 'true');
     await expect(page.getByRole('tab', { name: /^À valider/ })).toContainText('4', { timeout: 15_000 });
-    await expect(card(page, /^Aurélie K\. · Paris/)).toContainText('Publication acceptée par le client');
-    await expect(card(page, /^Marc O\. · Lyon/)).toContainText('Publication non autorisée');
+    await expect(card(page, /^Aurélie K\. · Bonapriso/)).toContainText('Publication acceptée par le client');
+    await expect(card(page, /^Marc O\. · Kotto/)).toContainText('Publication non autorisée');
     await expect(card(page, /^Marc O\./).getByRole('button', { name: 'Suivi interne' })).toBeVisible();
     await expect(page.getByText('Note moyenne')).toBeVisible();
+    // Évolutions sur 30 jours : masquées en mobile, comme sur la maquette.
+    if ((page.viewportSize()?.width ?? 0) >= 768) {
+      await expect(page.getByText('+0,1')).toBeVisible();
+      await expect(page.getByText('+3\u00A0pts')).toBeVisible();
+    }
     await expect(page.getByText('Recommandation (0 à 10)')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Répartition des notes' })).toBeVisible();
     await expectNoHorizontalScroll(page);
@@ -67,7 +72,7 @@ test.describe('back-office : avis clients', () => {
     await expect(page.getByRole('tab', { name: /^À valider/ })).toContainText('3');
     if (withSidebar) await expect(sidebarLink).toContainText('3');
     await page.getByRole('tab', { name: /^Publiés/ }).click();
-    await expect(card(page, /^Aurélie K\. · Paris$/)).toBeVisible();
+    await expect(card(page, /^Aurélie K\. · Bonapriso$/)).toBeVisible();
   });
 
   test('masquer (refuser) un avis après confirmation', async ({ page }) => {
