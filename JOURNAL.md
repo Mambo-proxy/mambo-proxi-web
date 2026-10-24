@@ -783,3 +783,17 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Route dédiée aux demandes de formation** : les colonnes de la maquette (structure, participants, période) ne figurent pas dans la liste générique des demandes ; une route de lecture évite d'y ajouter des champs propres à un formulaire.
 - **Nombre de demandes par formation** : celui de la maquette (3, 2, 1, 0, 4, 1), indépendant des 4 demandes simulées.
 - **« Formation souhaitée »** : titre complet du catalogue (la maquette abrège « Accompagner un proche âgé »).
+
+### Back-office : Contacts & inscrits (24 octobre 2026)
+
+- Contrat (API puis synchronisation) : filtre par quartier (`district`) de la liste et de l'export CSV des contacts, filtre par rubrique de l'export, `ContactStats.locations` (contacts à Douala, dans les environs, ailleurs) pour l'indicateur « Douala et environs ».
+- Écran (`93:23268`) : indicateurs (contacts et évolution du mois, particuliers, professionnels / partenaires, « 58 % / 39 % » lu « 58 % à Douala, 39 % dans les environs »), onglets par profil, filtres « Tous les quartiers » (quartiers des zones) et « Toutes les rubriques », état dans l'adresse (`?profil=&district=&interest=&page=&id=`), tableau paginé par 6 (Intérêts et Demandes masqués sous 1 400 px, Profil et Localisation sous 1 024 px, cartes en mobile), menu par contact (fiche, export des données, effacement), « Exporter (CSV) » des contacts filtrés.
+- Fiche contact non maquettée : panneau superposé (même gabarit que le détail d'une demande) avec coordonnées, structure, intérêts, origine, abonnement, demandes (ouvertes dans les Demandes), export RGPD (JSON) et droit à l'effacement confirmé (contact supprimé, demandes anonymisées).
+- Carte d'indicateur partagée avec Avis clients (`admin/ui/kpi-card.tsx`).
+- Mocks : les 6 contacts de la maquette et 1 480 contacts générés aux totaux de la maquette (1 486, 174 professionnels, 64 sur 30 jours, 58 % / 39 %) ; tests `admin-contacts.test.ts` et `e2e/admin-contacts.spec.ts`.
+
+### Décisions
+
+- **« Douala et environs »** : « environs » compris comme le reste du Cameroun ; les contacts hors du Cameroun (3 %) ne figurent pas dans l'indicateur.
+- **Fiche superposée à toutes les largeurs** : le tableau occupe toute la largeur sur la maquette ; un panneau à côté le réduirait trop.
+- **Nombre de demandes** : celui de la maquette pour les 6 contacts (3, 0, 1, 2, 0, 4) ; la fiche liste les demandes simulées réellement rattachées au contact.
