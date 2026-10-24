@@ -49,6 +49,8 @@ type SortableListProps<T> = {
   /** Élément conteneur (`ul` par défaut). */
   as?: 'ul' | 'ol' | 'tbody';
   renderItem: (item: T, index: number) => ReactNode;
+  /** Élément fixe placé après les éléments, dans le même conteneur (tuile « Ajouter un logo »). */
+  after?: ReactNode;
 };
 
 /**
@@ -65,6 +67,7 @@ export function SortableList<T>({
   className,
   as: Tag = 'ul',
   renderItem,
+  after,
 }: SortableListProps<T>) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -124,7 +127,10 @@ export function SortableList<T>({
         items={ids}
         strategy={layout === 'grid' ? rectSortingStrategy : verticalListSortingStrategy}
       >
-        <Tag className={className}>{items.map((item, index) => renderItem(item, index))}</Tag>
+        <Tag className={className}>
+          {items.map((item, index) => renderItem(item, index))}
+          {after}
+        </Tag>
       </SortableContext>
     </DndContext>
   );

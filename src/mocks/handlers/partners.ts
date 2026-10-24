@@ -1,48 +1,68 @@
 import { http, HttpResponse } from 'msw';
-import type { Partner } from '@/lib/api/schema';
+import type { AdminPartner, Partner, PartnerCategory } from '@/lib/api/schema';
 import { langOf } from '../data/catalogue';
 
-const LABELS = {
+export const PARTNER_LABELS: Record<PartnerCategory, string> = {
   EXPERIENCE: 'Prestataires Expérience',
   IMMOBILIER: 'Immobilier',
   ENTREPRISES: 'Entreprises & prestataires',
-} as const;
+};
 
 /** Libellés des catégories servis en anglais (`?lang=en`). */
-const LABELS_EN: Record<keyof typeof LABELS, string> = {
+const LABELS_EN: Record<PartnerCategory, string> = {
   EXPERIENCE: 'Experience providers',
   IMMOBILIER: 'Real estate',
   ENTREPRISES: 'Businesses & providers',
 };
 
-/** Partenaires simulés : les 8 tuiles de la maquette Partenaires (logos à fournir). */
-const ORDER = [
-  'EXPERIENCE',
-  'IMMOBILIER',
-  'ENTREPRISES',
-  'EXPERIENCE',
-  'IMMOBILIER',
-  'ENTREPRISES',
-  'EXPERIENCE',
-  'ENTREPRISES',
-] as const;
+/** Les 8 partenaires de la maquette « BO — Partenaires » (`93:22315`) ; DLA Transports y est masqué. */
+const SEEDS: [string, PartnerCategory, boolean][] = [
+  ['Saveurs de Douala', 'EXPERIENCE', true],
+  ['Immo Bonapriso', 'IMMOBILIER', true],
+  ['Kribi Évasion', 'ENTREPRISES', true],
+  ['Studio Lumière', 'EXPERIENCE', true],
+  ['Résidences Akwa', 'IMMOBILIER', true],
+  ['DLA Transports', 'ENTREPRISES', false],
+  ['Atelier Bamoun', 'EXPERIENCE', true],
+  ['Cabinet Ndoumbe', 'IMMOBILIER', true],
+];
 
-export const partners: Partner[] = ORDER.map((category, index) => ({
+/**
+ * Partenaires du back-office (logos à fournir) : le site lit les partenaires visibles, dans l'ordre enregistré.
+ * Ajouter, masquer ou réordonner un logo dans le back-office met donc à jour `GET /v1/partners`.
+ */
+export const adminPartners: AdminPartner[] = SEEDS.map(([name, category, visible], index) => ({
   id: `prt_${index + 1}`,
-  name: `Logo partenaire ${index + 1}`,
+  name,
   category,
-  categoryLabel: LABELS[category],
+  categoryLabel: PARTNER_LABELS[category],
   logo: null,
   url: null,
+  visible,
+  sortOrder: index,
 }));
+
+export const sortedPartners = () => [...adminPartners].sort((a, b) => a.sortOrder - b.sortOrder);
+
+const toPartner = ({ id, name, category, categoryLabel, logo, url }: AdminPartner): Partner => ({
+  id,
+  name,
+  category,
+  categoryLabel,
+  logo,
+  url,
+});
 
 export const partnerHandlers = [
   http.get('*/v1/partners', ({ request }) => {
     const category = new URL(request.url).searchParams.get('category');
+    const visible = sortedPartners()
+      .filter((partner) => partner.visible)
+      .map(toPartner);
     const localized =
       langOf(request) === 'en'
-        ? partners.map((partner) => ({ ...partner, categoryLabel: LABELS_EN[partner.category] }))
-        : partners;
+        ? visible.map((partner) => ({ ...partner, categoryLabel: LABELS_EN[partner.category] }))
+        : visible;
     return HttpResponse.json(
       category ? localized.filter((partner) => partner.category === category) : localized,
     );

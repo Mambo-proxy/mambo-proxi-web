@@ -16,16 +16,17 @@ test.describe('partenaires', () => {
     await page.goto('/partenaires', { waitUntil: 'domcontentloaded' });
     const filters = page.getByRole('group', { name: 'Filtrer les partenaires' });
     const tiles = page.locator('#partenaires li');
-    await expect(tiles).toHaveCount(8);
+    // Logos visibles du back-office (8 partenaires, DLA Transports masqué).
+    await expect(tiles).toHaveCount(7);
     await expect(async () => {
       await filters.getByRole('button', { name: 'Immobilier' }).click();
-      await expect(tiles).toHaveCount(2, { timeout: 1500 });
+      await expect(tiles).toHaveCount(3, { timeout: 1500 });
     }).toPass();
     await expect(page).toHaveURL(/categorie=IMMOBILIER/);
     await filters.getByRole('button', { name: 'Tous' }).click();
-    await expect(tiles).toHaveCount(8);
+    await expect(tiles).toHaveCount(7);
     // En mobile, seuls les 6 premiers logos sont affichés.
-    const shown = (viewport?.width ?? 0) < 768 ? 6 : 8;
+    const shown = (viewport?.width ?? 0) < 768 ? 6 : 7;
     await expect(tiles.filter({ visible: true })).toHaveCount(shown);
   });
 

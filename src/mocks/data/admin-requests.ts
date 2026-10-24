@@ -25,10 +25,13 @@ type Seed = {
   country: 'FR' | 'CM' | 'BE';
   service: string;
   serviceSlug: string;
-  category: 'services-a-domicile' | 'experience' | 'immobilier' | 'services-de-proximite' | 'culture-evenementiel';
+  category:
+    'services-a-domicile' | 'experience' | 'immobilier' | 'services-de-proximite' | 'culture-evenementiel';
   status: RequestStatus;
   createdAt: string;
   type?: RequestType;
+  /** Objet affiché dans la liste (demandes de partenariat : nom de la structure). */
+  subject?: string;
   preference?: ContactPreference;
   message?: string;
   fields?: [string, string][];
@@ -220,6 +223,44 @@ const REMAINING: RequestStatus[] = [
 
 const OTHER_TYPES: RequestType[] = ['CONTACT', 'INFORMATION', 'RENDEZ_VOUS'];
 
+/**
+ * Demandes « Devenir partenaire » (onglet « Demandes de partenariat » de Partenaires, `93:22302`) : elles remplacent
+ * trois demandes de démonstration, pour garder les totaux de la maquette Demandes.
+ */
+const PARTNERSHIPS: Record<number, Partial<Seed>> = {
+  5: {
+    type: 'PARTENARIAT',
+    subject: 'Saveurs du Wouri',
+    message:
+      'Traiteur à Bonapriso, nous aimerions proposer nos repas aux clients de Mambo pour leurs réceptions.',
+    fields: [
+      ['Type de partenariat', 'Prestataire Expérience'],
+      ['Structure', 'Saveurs du Wouri'],
+      ['Activité', 'Traiteur, cuisine camerounaise'],
+    ],
+  },
+  11: {
+    type: 'PARTENARIAT',
+    subject: 'Agence Bonanjo Habitat',
+    message: 'Agence immobilière : nous gérons une quarantaine d’appartements meublés à Bonanjo et Akwa.',
+    fields: [
+      ['Type de partenariat', 'Immobilier'],
+      ['Structure', 'Agence Bonanjo Habitat'],
+      ['Activité', 'Location et gestion d’appartements meublés'],
+    ],
+  },
+  17: {
+    type: 'PARTENARIAT',
+    subject: 'Express Logistique Douala',
+    message: 'Coursiers à moto dans tout Douala, disponibles 7 jours sur 7 pour les livraisons de colis.',
+    fields: [
+      ['Type de partenariat', 'Entreprise & prestataire'],
+      ['Structure', 'Express Logistique Douala'],
+      ['Activité', 'Livraison de colis et de courrier'],
+    ],
+  },
+};
+
 const generated: Seed[] = REMAINING.map((status, index) => {
   const [city, country] = PLACES[index % PLACES.length]!;
   const [service, serviceSlug, category] = SERVICES[index % SERVICES.length]!;
@@ -236,6 +277,7 @@ const generated: Seed[] = REMAINING.map((status, index) => {
     createdAt: at(status === 'NOUVELLE' ? 5 + (index % 3) : 5 + index, 8 + (index % 10), (index * 7) % 60),
     type: index % 6 === 5 ? OTHER_TYPES[index % OTHER_TYPES.length] : 'DEVIS',
     preference: (['WHATSAPP', 'EMAIL', 'TELEPHONE'] as const)[index % 3],
+    ...PARTNERSHIPS[index],
   };
 });
 
@@ -301,11 +343,12 @@ function toDetail(seed: Seed, index: number): RequestDetail {
       type === 'DEVIS' ? { id: `svc_${seed.serviceSlug}`, name: seed.service, slug: seed.serviceSlug } : null,
     category: { slug: seed.category, name: categoryName },
     subject:
-      type === 'DEVIS'
+      seed.subject ??
+      (type === 'DEVIS'
         ? seed.service
         : type === 'RENDEZ_VOUS'
           ? 'Rendez-vous à l’agence'
-          : 'Demande d’information',
+          : 'Demande d’information'),
     assignedTo: null,
     createdAt: received,
     contactPreference: seed.preference ?? 'EMAIL',
