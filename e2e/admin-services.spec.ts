@@ -21,8 +21,8 @@ test.describe('back-office : services', () => {
     await page.goto('/admin/services', { waitUntil: 'load' });
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Services');
     await expect(page.getByRole('tab', { name: /^Tous/ })).toHaveAttribute('aria-selected', 'true');
-    await expect(page.getByRole('tab', { name: /^Tous/ })).toContainText('20');
-    await expect(page.getByText('Affichage de 9 sur 20 services · 1 brouillon')).toBeVisible();
+    await expect(page.getByRole('tab', { name: /^Tous/ })).toContainText('27');
+    await expect(page.getByText('Affichage de 9 sur 27 services · 1 brouillon')).toBeVisible();
     await expect(
       page.getByRole('link', { name: 'Chef privé', exact: true }).locator('visible=true'),
     ).toBeVisible();
@@ -66,7 +66,7 @@ test.describe('back-office : services', () => {
       await expect(page).not.toHaveURL(/category=/, { timeout: 3000 });
     }).toPass({ timeout: 30_000 });
     await expect(
-      page.getByRole('link', { name: 'Gestion locative', exact: true }).locator('visible=true'),
+      page.getByRole('link', { name: 'Photographe', exact: true }).locator('visible=true'),
     ).toBeVisible();
     expect(await top(page, 'Location de voiture')).toBeLessThan(await top(page, 'Chef privé'));
     expect(await top(page, 'Chef privé')).toBeLessThan(await top(page, 'Photographe'));
@@ -197,7 +197,7 @@ test.describe('back-office : services', () => {
       await page.getByRole('button', { name: 'Gérer les rubriques' }).click();
       await expect(dialog).toBeVisible({ timeout: 3000 });
     }).toPass({ timeout: 30_000 });
-    await expect(dialog.getByRole('button', { name: /^Déplacer/ })).toHaveCount(4);
+    await expect(dialog.getByRole('button', { name: /^Déplacer/ })).toHaveCount(5);
     await expectAccessible(page);
 
     await dialog.getByRole('button', { name: 'Modifier la rubrique « Immobilier »' }).click();
@@ -235,7 +235,7 @@ test.describe('back-office : services (fidélité)', () => {
     await login(page);
     const width = page.viewportSize()?.width ?? 0;
     await page.goto('/admin/services', { waitUntil: 'load' });
-    await expect(page.getByText('Affichage de 9 sur 20 services · 1 brouillon')).toBeVisible();
+    await expect(page.getByText('Affichage de 9 sur 27 services · 1 brouillon')).toBeVisible();
     await page.screenshot({ path: `qa/fidelite/bo-services-${width}.png`, fullPage: true });
     await page.goto('/admin/services/svc_visites_douala', { waitUntil: 'load' });
     await expect(page.getByRole('region', { name: 'Complétude' })).toBeVisible();

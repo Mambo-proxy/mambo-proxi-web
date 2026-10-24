@@ -72,8 +72,8 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [~] Gabarit : barre latérale (compteurs), barre supérieure, recherche ⌘K, notifications, responsive (icônes, navigation basse mobile), 404 — reste la 404 du back-office
 - [x] Tableau de bord (desktop + mobile)
 - [x] Demandes (liste, filtres, panneau de détail, statuts, notes, export)
-- [ ] Services (liste, réordonnancement, menu) + gestion des rubriques
-- [ ] Ajouter / modifier un service (7 sections, sauvegarde auto, aperçu, complétude, publication)
+- [x] Services (liste, réordonnancement, menu) + gestion des rubriques
+- [x] Ajouter / modifier un service (7 sections, sauvegarde auto, aperçu, complétude, publication)
 - [ ] Pages & textes (sections, éditeurs par type, Tiptap pour les pages légales, aperçu, publication)
 - [ ] Avis clients (validation, réponse, mise en avant, questions du questionnaire)
 - [ ] Rendez-vous (calendrier jour/semaine/mois, détail, à confirmer, saisie manuelle) + réglage des disponibilités
@@ -120,7 +120,7 @@ Les maquettes ont été refondues mi-octobre 2026 (recentrage sur Douala et les 
 - [x] Pages légales (version anglaise, mobile recalé) — `qa/fidelite/pages-legales-*.png`
 - [x] Questionnaire (vignette photo, en-tête recalé) et 404 (photo, textes traduits) — `qa/fidelite/questionnaire-*.png`, `qa/fidelite/page-404-*.png`
 - [ ] E-mails (4 modèles mis à jour) — produits par l'API (module mail, React Email) : à intégrer avec la phase 2 de l'API ; captures `qa/reference/emails/` à jour
-- [~] Back-office : tableau de bord et Demandes recalés (5 rubriques, quartiers de Douala, filtre « Tous les quartiers », Magazine et Zones dans le menu — `qa/fidelite/bo-tableau-de-bord-*.png`, `bo-demandes-*.png`) ; Magazine et édition d'un numéro (`qa/fidelite/bo-magazine-*.png`, `bo-magazine-edition-*.png`), Zones d'intervention (`qa/fidelite/bo-zones-*.png`) faits ; reste écrans en cours sur les branches `bo/services-en-cours`, `bo/pages-textes-en-cours`, `bo/recrutement-en-cours`
+- [~] Back-office : tableau de bord et Demandes recalés (5 rubriques, quartiers de Douala, filtre « Tous les quartiers », Magazine et Zones dans le menu — `qa/fidelite/bo-tableau-de-bord-*.png`, `bo-demandes-*.png`) ; Magazine et édition d'un numéro (`qa/fidelite/bo-magazine-*.png`, `bo-magazine-edition-*.png`), Zones d'intervention (`qa/fidelite/bo-zones-*.png`), Services (`qa/fidelite/bo-services-*.png`, `bo-ajouter-un-service-*.png`, éditeur à 70 px de la maquette) faits ; reste écrans en cours sur les branches `bo/pages-textes-en-cours`, `bo/recrutement-en-cours`
 - [ ] Implémentation de l'API (phase 2) : `?lang`, zones, formules, citations d'avis, offres des fiches service, secteurs, rémunération et horaires des offres d'emploi
 
 ## Phase 3 — Intégration

@@ -696,3 +696,17 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Tarifs indicatifs** : enregistrés et affichés dans le back-office avec « · masqué » ; l’option « Afficher les tarifs » citée par la maquette n’existe pas encore dans les Paramètres et entrerait en conflit avec la règle « aucun prix affiché » du cahier (§9) : à trancher avec la cliente.
 - **Import GeoJSON** cité par l’encart : non disponible ; les nouveaux quartiers n’ont pas de position sur la carte.
 
+### Back-office : Services (24 octobre 2026)
+
+- Liste et éditeur repris d'après la refonte, sur le catalogue du site : 5 rubriques et 27 services, dont les formules (Maison Essentiel, Maison + Auto…) qui n'ont pas de fiche propre ; photos des fiches à la place des illustrations, onglet « À domicile », demandes sur 30 jours de la maquette.
+- « Services liés » n'affiche plus que les services choisis ; « + Ajouter un service lié » ouvre un sélecteur groupé par rubrique (6 au plus). Témoignage mis en avant : celui de Patrick E. (maquette).
+- Fidélité : liste 1 046 px pour 1 045 ; éditeur 3 327 px pour 3 397 en desktop, écart de 70 px non résorbé (référence Figma inaccessible pour le moment). Captures dans `qa/fidelite/bo-services-*.png` et `bo-ajouter-un-service-*.png`.
+
+### Décisions
+
+- **Ordre de l'onglet « Tous »** : la maquette mélange les rubriques (sélection éditoriale) ; ici, ordre des rubriques puis ordre d'affichage enregistré, seul ordre que le réordonnancement peut garantir.
+- **Sélecteur de services liés** : non maquetté, construit sur le modèle du choix d'un avis publié.
+
+### Difficultés et solutions
+
+- **Listes réordonnables dans un tableau** : dnd-kit insérait ses zones d'annonce (`div`) dans `<table>` (HTML invalide signalé par React) ; elles sont placées dans `body` pour les listes `tbody`.
