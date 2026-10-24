@@ -852,3 +852,16 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 
 - **Pas de filtre « Automatique »** : le contrat ne filtre que par identifiant d'utilisateur (`actor`) ; les actions du système restent visibles sans filtre d'utilisateur.
 - **État des filtres par `history.replaceState`** (comme la Médiathèque) : filtres purement client, sans nouvelle requête au serveur à chaque changement.
+
+### Back-office : Agenda (24 octobre 2026)
+
+- Écran non maquetté (`/admin/agenda`), sur le modèle de Formations : onglets « À venir », « Passés », « Tous » avec compteurs (`?periode=`), tableau (pastille de date, titre, jour, horaires, lieu, type ; places réservées avec jauge ; inscriptions ; statut ; voir l'agenda du site, modifier, menu : inscriptions, publier / dépublier, supprimer), cartes en mobile ; « Nouvel événement » dans la barre supérieure.
+- Modale d'événement : titre, type (suggestions), date, début et fin, ville et lieu, illustration (6 scènes) ou photo de la médiathèque, description, nombre de places (vide : sans limite), « Places limitées », publication dans l'agenda de la rubrique Culture & événementiel.
+- Inscriptions : demandes « Événement » (formulaire « S’inscrire » du site), listées dans une modale et ouvertes dans les Demandes.
+- Mocks : les 5 sorties du site, deux sorties passées et un brouillon ; le site ne reçoit que les événements publiés à venir. Huit demandes de démonstration deviennent des inscriptions (statuts conservés, totaux de la maquette Demandes inchangés) ; places réservées et places restantes calculées depuis ces inscriptions ; capacité inférieure aux places réservées refusée. Tests `admin-events.test.ts`, `event-model.test.ts`, `e2e/admin-events.spec.ts`.
+
+### Décisions
+
+- **Suppression d'un événement avec inscriptions** : permise (le contrat ne prévoit pas de refus) ; les inscriptions restent dans les Demandes, la confirmation le rappelle.
+- **Places par inscription** : le contrat liste les inscriptions comme des demandes (`RequestListItem`) sans le nombre de places ; seul le total de l'événement est affiché.
+- **Heures saisies dans le fuseau de l'appareil** (comme la programmation de la Newsletter), affichées à l'heure de Douala.

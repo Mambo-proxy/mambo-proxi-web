@@ -80,7 +80,7 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [x] Recrutement (offres, éditeur d'offre, candidatures, détail, CV)
 - [x] Partenaires (logos réordonnables, éditeur, demandes de partenariat)
 - [x] Formations (catalogue, éditeur, demandes)
-- [ ] Agenda (événements, éditeur, inscriptions) — non maquetté
+- [x] Agenda (événements à venir / passés, places, éditeur, publication, inscriptions) — non maquetté
 - [x] Contacts & inscrits (liste, fiche contact, export, RGPD)
 - [x] Newsletter (campagnes, éditeur, aperçu, test, programmation, inscrits)
 - [x] Paramètres (coordonnées, WhatsApp, réseaux, e-mails automatiques + éditeur de modèle, référencement, utilisateurs, sécurité & sauvegardes)
