@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import type { Route } from 'next';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
 import { data } from '@/lib/admin/query';
 import { browserApi } from '@/lib/api/browser';
 import type { Notification } from '@/lib/api/schema';
@@ -32,6 +32,8 @@ const ICONS: Record<Notification['kind'], LucideIcon> = {
 };
 
 const notificationsKey = ['notifications'] as const;
+
+const noSubscription = () => () => {};
 
 /**
  * Cloche de notifications (`85:10369`, panneau non maquetté) : bouton 40 × 40, pastille orange s'il reste des
@@ -52,7 +54,13 @@ export function NotificationsButton({ size = 40 }: { size?: 38 | 40 }) {
       data(browserApi.PATCH('/v1/admin/notifications/read', { body: ids ? { ids } : {} })),
     onSettled: () => client.invalidateQueries({ queryKey: notificationsKey }),
   });
-  const unread = query.data?.unreadCount ?? 0;
+  // Rendu serveur sans pastille : un écran hydraté en différé (`Suspense`) trouverait sinon le compteur déjà chargé.
+  const hydrated = useSyncExternalStore(
+    noSubscription,
+    () => true,
+    () => false,
+  );
+  const unread = hydrated ? (query.data?.unreadCount ?? 0) : 0;
 
   useEffect(() => {
     if (!open) return;
