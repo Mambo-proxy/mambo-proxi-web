@@ -24,7 +24,9 @@ export function ZonesAside({
       id="trouver-votre-quartier"
       className="flex min-w-0 flex-1 scroll-mt-(--site-header-h,0px) flex-col gap-5"
     >
-      <h3 className="font-brand text-[22px] leading-[1.5] font-semibold text-text-main">{t('searchTitle')}</h3>
+      <h3 className="font-brand text-[22px] leading-[1.5] font-semibold text-text-main">
+        {t('searchTitle')}
+      </h3>
       {children}
       <p className="font-ui text-[14px] leading-[1.2] font-semibold text-text-main">{t('legend')}</p>
       <ul className="flex flex-col gap-5">

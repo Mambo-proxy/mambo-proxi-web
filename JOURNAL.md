@@ -568,7 +568,6 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Navigations bloquées dans les tests de bout en bout** (Recrutement, Avis clients) : une page desktop déclenche 43 préchargements dès son chargement (liens de l'en-tête et du méga-menu) ; sur cette machine, le serveur de test sature et une navigation au clic peut dépasser 15 s. Dans le test du tri, chaque nouvelle sélection relançait la navigation et annulait la précédente : les essais attendent désormais jusqu'à 15 s chacun. Les liens des offres sont vérifiés par leur adresse, puis la page est ouverte directement. Hors charge, filtre et tri répondent en moins d'une seconde à 4 s.
 - **À traiter avec la performance** (Lighthouse, phase 1.5) : limiter les préchargements des liens des menus (`prefetch`) ; le préchargement de l'accueil (`/?_rsc=…`) renvoie aussi un 404 dans les traces, à examiner.
 
-
 ### Contact (22 octobre 2026)
 
 - Page recalée sur la maquette (`69:7651`, `69:8178`) : première carte « Douala » (anciennement « France »), champ « Ville » à la place de « Pays », adresse de l'agence « Adresse de l’agence · Douala, Cameroun », nouvelle section « Nos zones d’intervention » (`290:31838`, la carte et la recherche de quartier de l'accueil, lien vers Zones d'intervention) ; version anglaise (textes de la page, de l'agence et des zones dans `contact` des messages, pays de l'agence dans la langue de la page).
@@ -934,4 +933,3 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 ### Décisions
 
 - **Performance du contact et du devis en avertissement seulement** : ces pages importent le client de l'API, qui démarre les mocks MSW dans le navigateur (~175 Ko de gestionnaires et de données, absents en production). Le seuil deviendra bloquant quand la CI tournera sur l'API réelle.
-

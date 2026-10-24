@@ -89,7 +89,9 @@ test.describe('devis gratuit', () => {
 
   test('confirmation en anglais : textes et message WhatsApp traduits', async ({ page, pageErrors }) => {
     await page.goto('/en/free-quote/confirmation?ref=MP-2026-0142', { waitUntil: 'domcontentloaded' });
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Thank you, your request has been sent!');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+      'Thank you, your request has been sent!',
+    );
     await expect(page.getByText('Your request reference')).toBeVisible();
     await expect(page.getByRole('link', { name: /Follow up on WhatsApp/ })).toHaveAttribute(
       'href',

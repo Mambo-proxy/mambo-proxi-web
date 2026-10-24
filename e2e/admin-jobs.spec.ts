@@ -19,7 +19,9 @@ test.describe('back-office : recrutement', () => {
     ).toBeVisible();
     await expect(offers.getByText('Non publiée').locator('visible=true')).toBeVisible();
     const latest = page.getByRole('region', { name: 'Dernières candidatures' });
-    await expect(latest.getByRole('button', { name: 'Grace Nkoulou', exact: true }).locator('visible=true')).toBeVisible();
+    await expect(
+      latest.getByRole('button', { name: 'Grace Nkoulou', exact: true }).locator('visible=true'),
+    ).toBeVisible();
     await expect(
       latest.getByRole('button', { name: /^Télécharger le CV de/ }).locator('visible=true'),
     ).toHaveCount(4);
@@ -32,9 +34,13 @@ test.describe('back-office : recrutement', () => {
     await page.goto('/admin/recrutement', { waitUntil: 'load' });
     await expect(async () => {
       await page.getByRole('button', { name: 'Toutes les candidatures' }).click({ timeout: 3000 });
-      await expect(page.getByRole('tab', { name: /^Candidatures/ })).toHaveAttribute('aria-selected', 'true', {
-        timeout: 3000,
-      });
+      await expect(page.getByRole('tab', { name: /^Candidatures/ })).toHaveAttribute(
+        'aria-selected',
+        'true',
+        {
+          timeout: 3000,
+        },
+      );
     }).toPass({ timeout: 30_000 });
     await expect(page).toHaveURL(/onglet=candidatures/);
     await expect(page.getByText('Affichage de 1 à 10 sur 14 candidatures')).toBeVisible();
@@ -86,7 +92,9 @@ test.describe('back-office : recrutement', () => {
     await page.getByRole('button', { name: 'Publier l’offre' }).click();
     await expect(page.getByText('Ajoutez au moins une mission avant de publier l’offre.')).toBeVisible();
     await page.getByRole('button', { name: 'Ajouter une mission' }).click();
-    await page.getByRole('textbox', { name: 'Mission 1', exact: true }).fill('Préparer les repas de la semaine');
+    await page
+      .getByRole('textbox', { name: 'Mission 1', exact: true })
+      .fill('Préparer les repas de la semaine');
     await page.getByRole('button', { name: 'Publier l’offre' }).click();
     await expect(page.getByText('« Cuisinier·ère à domicile » est publiée sur le site.')).toBeVisible();
     await expect(page.getByRole('link', { name: 'Voir l’offre' }).locator('visible=true')).toHaveAttribute(

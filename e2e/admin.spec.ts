@@ -89,7 +89,12 @@ test.describe('back-office : demandes', () => {
     await expect(district.locator('option', { hasText: 'Bonapriso' })).toHaveCount(1);
     await district.selectOption('Bonapriso');
     await expect(page).toHaveURL(/district=Bonapriso/);
-    await expect(page.getByText(/^Aurélie K\./).locator('visible=true').first()).toBeVisible();
+    await expect(
+      page
+        .getByText(/^Aurélie K\./)
+        .locator('visible=true')
+        .first(),
+    ).toBeVisible();
     await expect(page.getByText(/^Patrick E\./).locator('visible=true')).toHaveCount(0);
   });
 
@@ -115,7 +120,12 @@ test('capture de fidélité', async ({ page }) => {
   test.skip(!process.env.FIDELITE, 'Capture à la demande (FIDELITE=1).');
   const width = page.viewportSize()?.width ?? 0;
   await login(page);
-  await expect(page.getByText(/^Aurélie K\./).locator('visible=true').first()).toBeVisible();
+  await expect(
+    page
+      .getByText(/^Aurélie K\./)
+      .locator('visible=true')
+      .first(),
+  ).toBeVisible();
   await page.waitForTimeout(800);
   await page.screenshot({ path: `qa/fidelite/bo-tableau-de-bord-${width}.png`, fullPage: true });
   await page.goto('/admin/demandes?id=req_0142', { waitUntil: 'domcontentloaded' });
