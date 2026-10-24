@@ -542,7 +542,7 @@ function requireAdmin(request: Request) {
     : problem(403, 'Cette action est réservée aux administrateurs.');
 }
 
-/** Back-office — Paramètres, modèles d’e-mails, utilisateurs, journal (`/v1/admin/settings*`, `/v1/admin/email-templates*`, `/v1/admin/users*`, `/v1/admin/audit-log`, `/v1/admin/system-status`). */
+/** Back-office — Paramètres, modèles d’e-mails, utilisateurs (`/v1/admin/settings*`, `/v1/admin/email-templates*`, `/v1/admin/users*`, `/v1/admin/system-status`). */
 export const adminSettingsHandlers = [
   http.get('*/v1/admin/settings/:group', ({ params }) => {
     const group = params.group as SettingsGroup;

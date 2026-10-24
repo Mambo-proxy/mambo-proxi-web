@@ -14,6 +14,7 @@ import { adminZoneHandlers } from './admin-zones';
 import { adminEventHandlers } from './admin-events';
 import { adminContactHandlers } from './admin-contacts';
 import { adminNewsletterHandlers } from './admin-newsletter';
+import { adminAuditHandlers } from './admin-audit';
 import { adminSettingsHandlers } from './admin-settings';
 import { adminMediaHandlers } from './admin-media';
 import { appointmentHandlers } from './appointments';
@@ -54,6 +55,7 @@ export const handlers = [
   ...adminContactHandlers,
   ...adminNewsletterHandlers,
   ...adminSettingsHandlers,
+  ...adminAuditHandlers,
   ...adminMediaHandlers,
   ...appointmentHandlers,
   ...formHandlers,
