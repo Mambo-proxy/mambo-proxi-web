@@ -876,7 +876,7 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 
 ### Performance : JavaScript initial des pages publiques (24 octobre 2026)
 
-- Mesure : scripts référencés par le HTML de chaque page, compressés en gzip (sans les préchargements de liens). Accueil 251 Ko ; pages à formulaire 354 à 372 Ko ; rubriques 363 Ko.
+- Mesure : scripts référencés par le HTML de chaque page, compressés en gzip (sans les préchargements de liens). Accueil 251 Ko ; pages à formulaire 354 à 372 Ko ; rubriques 363 Ko. Ces totaux comptent 39 Ko de polyfills chargés en `noModule`, que les navigateurs récents ne téléchargent pas (voir la section suivante) ; les écarts restent justes.
 - Modale d'inscription aux événements (Agenda des rubriques) séparée de son bouton et chargée au premier clic (`next/dynamic`, sans rendu serveur) : rubrique 363 → 249 Ko.
 - Formulaires publics validés avec `zod/mini` et importés en espace de noms (`import * as z from 'zod/mini'`) : l'import `{ z }` empêchait l'élagage et embarquait tout le cœur de zod avec ses ~40 langues de messages (78 Ko) ; il reste 24 Ko. Contact 372 → 308 Ko, devis 355 → 292 Ko, inscription 354 → 291 Ko. Messages d'erreur inchangés.
 - Le back-office (connexion, mot de passe) et la route de revalidation gardent `zod` classique : hors du site public.
@@ -885,3 +885,18 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 ### Décisions
 
 - **Objectif 170 Ko non atteint** : le socle commun à toutes les pages (React, Next, code de l'app) pèse déjà ~250 Ko ; il fera l'objet d'une analyse séparée (animations, notifications, icônes, messages de traduction).
+
+### Performance : code commun des pages publiques (24 octobre 2026)
+
+- Mesure corrigée : les polyfills (39 Ko, `noModule`) ne sont pas téléchargés par les navigateurs récents ; ils sont exclus des chiffres suivants. Socle du framework (React DOM, routeur Next, chargeur) : ~135 Ko, incompressible.
+- Sortis du JavaScript initial, sans changement visible :
+  - carte des zones (accueil, contact, page Zones) : la carte et la recherche se chargent dès que la page est au repos, ou plus tôt à l'approche de l'écran ; le titre, la légende, le lien « Voir toutes les zones » et l'ancre `#trouver-votre-quartier` restent dans le HTML (`ZonesAside`), avec un cadre d'attente aux proportions de la carte ;
+  - envoi de la lettre d'information (pied de page) : le client de l'API est chargé au premier envoi ; le formulaire et ses vérifications restent immédiats ;
+  - modale « Personnaliser » du bandeau cookies : chargée à sa première ouverture ;
+  - notifications (sonner) : montées une fois la page au repos ; sonner rejoue celles émises avant.
+- Résultat : accueil 212 → 195 Ko, rubrique 210 → 196 Ko, contact 269 → 265 Ko, devis 253 → 252 Ko (les pages à formulaire utilisent déjà le client de l'API et les notifications).
+
+### Décisions
+
+- **Pas de carte rendue seulement côté client sans texte** : une première version chargée au défilement retirait du HTML le lien vers la page Zones et l'ancre de recherche (liens internes, référencement) ; la colonne de droite est donc rendue avec la page.
+- **Reste pour 170 Ko** : la précompilation des messages (plugin next-intl, −12 Ko) et tailwind-merge (9 Ko, utilisé par `cn` partout).

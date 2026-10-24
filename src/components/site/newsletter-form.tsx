@@ -4,8 +4,6 @@ import { CircleCheck, Mail, Smartphone, User } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRef, useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
-import { browserApi } from '@/lib/api/browser';
-import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
 import { cn } from '@/lib/cn';
 import { toE164 } from '@/lib/phone';
 
@@ -46,39 +44,19 @@ export function NewsletterForm() {
       return;
     }
     setStatus({ kind: 'sending' });
-    try {
-      const {
-        data: result,
-        error,
-        response,
-      } = await browserApi.POST('/v1/newsletter/subscriptions', {
-        body: {
-          name: String(data.get('name') ?? '').trim() || null,
-          email,
-          phone,
-          source: 'footer',
-          consent: true,
-          antiSpam: {
-            turnstileToken: '',
-            honeypot: String(data.get('website') ?? ''),
-            startedAt: startedAt.current,
-          },
-        },
-      });
-      if (!response.ok || !result) throw toApiError(error, response);
-      setStatus({
-        kind: 'success',
-        message: result.alreadySubscribed ? t('alreadySubscribed') : result.message,
-      });
-    } catch (caught) {
-      const field = caught instanceof ApiError && caught.fieldErrors.email ? 'email' : undefined;
-      setStatus({
-        kind: 'error',
-        field,
-        message:
-          field && caught instanceof ApiError ? (caught.fieldErrors.email ?? '') : errorMessage(caught),
-      });
-    }
+    const { subscribeToNewsletter } = await import('./newsletter-submit');
+    const result = await subscribeToNewsletter({
+      name: String(data.get('name') ?? '').trim() || null,
+      email,
+      phone,
+      honeypot: String(data.get('website') ?? ''),
+      startedAt: startedAt.current,
+    });
+    setStatus(
+      result.ok
+        ? { kind: 'success', message: result.alreadySubscribed ? t('alreadySubscribed') : result.message }
+        : { kind: 'error', field: result.field, message: result.message },
+    );
   }
 
   if (status.kind === 'success') {

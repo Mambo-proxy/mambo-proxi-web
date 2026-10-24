@@ -6,6 +6,7 @@ import { useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent
 import type { ServiceAreas, Zone, ZoneQuarter } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
+import { ZonesAside } from './zones-aside';
 import { TONES } from './zone-tones';
 
 /** Dimensions de la carte de la maquette (`290:31639`) : les positions des quartiers y sont exprimées de 0 à 1. */
@@ -446,7 +447,6 @@ function QuarterSearch({
  * (carte réduite 350 px, rayon 11, gap 24).
  */
 export function ZonesMap({ areas, link }: { areas: ServiceAreas; link?: React.ReactNode }) {
-  const t = useTranslations('zones');
   const [selectedName, setSelectedName] = useState<string | null>(null);
 
   const quarters = useMemo(
@@ -459,28 +459,9 @@ export function ZonesMap({ areas, link }: { areas: ServiceAreas; link?: React.Re
   return (
     <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:gap-10">
       <DoualaMap quarters={located} selected={selectedName} />
-      <div
-        id="trouver-votre-quartier"
-        className="flex min-w-0 flex-1 scroll-mt-(--site-header-h,0px) flex-col gap-5"
-      >
-        <h3 className="font-brand text-[22px] leading-[1.5] font-semibold text-text-main">
-          {t('searchTitle')}
-        </h3>
+      <ZonesAside areas={areas} link={link}>
         <QuarterSearch quarters={quarters} selected={selected} onSelect={setSelectedName} />
-        <p className="font-ui text-[14px] leading-[1.2] font-semibold text-text-main">{t('legend')}</p>
-        <ul className="flex flex-col gap-5">
-          {areas.zones.map((zone) => (
-            <li
-              key={zone.key}
-              className="flex items-center gap-2.5 font-ui text-[14px] leading-[1.2] font-medium text-text-main"
-            >
-              <span aria-hidden className={cn('size-3 shrink-0 rounded-full', TONES[zone.tone].dot)} />
-              {zone.name}
-            </li>
-          ))}
-        </ul>
-        {link}
-      </div>
+      </ZonesAside>
     </div>
   );
 }

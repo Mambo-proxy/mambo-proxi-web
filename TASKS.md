@@ -93,7 +93,8 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [x] Revalidation `/api/revalidate` (tags), `/health`, `middleware` (protection `/admin`, en-têtes de sécurité, CSP avec nonce) — faits et testés (`e2e/seo.spec.ts`), case cochée le 24/10
 - [ ] Accessibilité (axe, clavier), performance (Lighthouse ≥ 90 mobile, JS initial < 170 Ko)
   - [x] JS initial réduit (24/10) : modale d'inscription aux événements chargée au premier clic, formulaires publics sur `zod/mini` — rubrique 363 → 249 Ko, contact 372 → 308 Ko, devis 355 → 292 Ko (gzip)
-  - [ ] Code commun (~250 Ko sur l'accueil : React, Next, app) à alléger pour viser 170 Ko ; Lighthouse à mesurer en CI (impossible sur ce poste)
+  - [x] Code commun allégé (24/10) : carte des zones, envoi de la newsletter, préférences cookies et notifications chargés hors du JavaScript initial — accueil 212 → 195 Ko (polyfills `noModule` exclus, non téléchargés par les navigateurs récents)
+  - [ ] Viser 170 Ko : précompilation des messages next-intl (−12 Ko, plugin à évaluer), tailwind-merge en dernier recours ; Lighthouse à mesurer en CI (impossible sur ce poste)
 
 ## Phase 1 bis — Refonte des maquettes (octobre 2026)
 

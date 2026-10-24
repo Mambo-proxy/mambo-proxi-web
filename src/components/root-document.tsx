@@ -1,6 +1,6 @@
 import { Inter, Poppins } from 'next/font/google';
 import type { ReactNode } from 'react';
-import { Toaster } from '@/components/ui/toaster';
+import { DeferredToaster } from '@/components/ui/deferred-toaster';
 import { JS_CLASS_SCRIPT } from '@/lib/security/inline-scripts';
 import '@/app/globals.css';
 
@@ -33,7 +33,7 @@ export function RootDocument({ lang, children }: { lang: string; children: React
       </head>
       <body>
         {children}
-        <Toaster />
+        <DeferredToaster />
       </body>
     </html>
   );

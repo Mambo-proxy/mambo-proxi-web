@@ -1,13 +1,18 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import Script from 'next/script';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Modal } from '@/components/ui/modal';
-import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/cn';
 import { onOpenCookiePreferences, saveConsent, useConsent } from '@/lib/consent';
+
+// Modale « Personnaliser » chargée à sa première ouverture, hors du JavaScript initial des pages.
+const CookiePreferences = dynamic(
+  () => import('./cookie-preferences').then((module) => module.CookiePreferences),
+  { ssr: false },
+);
 
 const outlineOnDark =
   'cursor-pointer rounded-md border border-neutral-600 px-4 py-3 font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-neutral-0 transition-colors hover:bg-neutral-800 focus-visible:focus-ring-inverse';
@@ -21,12 +26,15 @@ export function CookieBanner({ ga4MeasurementId }: { ga4MeasurementId: string | 
   const t = useTranslations('site.cookies');
   const consent = useConsent();
   const [preferencesOpen, setPreferencesOpen] = useState(false);
+  // Gardée montée après la première ouverture (animation de fermeture, retour du focus).
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const [analytics, setAnalytics] = useState(false);
 
   useEffect(
     () =>
       onOpenCookiePreferences(() => {
         setAnalytics(consent?.analytics ?? false);
+        setPreferencesLoaded(true);
         setPreferencesOpen(true);
       }),
     [consent],
@@ -71,6 +79,7 @@ export function CookieBanner({ ga4MeasurementId }: { ga4MeasurementId: string | 
               type="button"
               onClick={() => {
                 setAnalytics(false);
+                setPreferencesLoaded(true);
                 setPreferencesOpen(true);
               }}
               className={outlineOnDark}
@@ -84,36 +93,15 @@ export function CookieBanner({ ga4MeasurementId }: { ga4MeasurementId: string | 
         </section>
       )}
 
-      <Modal
-        open={preferencesOpen}
-        onClose={() => setPreferencesOpen(false)}
-        title={t('modalTitle')}
-        description={t('modalText')}
-        footer={
-          <>
-            <Button variant="outline" onClick={() => decide(false)}>
-              {t('refuseAll')}
-            </Button>
-            <Button onClick={() => decide(analytics)}>{t('save')}</Button>
-          </>
-        }
-      >
-        <ul className="flex flex-col divide-y divide-border-default">
-          <li className="flex flex-col gap-2 pb-4">
-            <Switch id="cookies-necessaires" label={t('necessary')} checked disabled readOnly />
-            <p className="font-ui text-[14px] leading-5 text-text-muted">{t('necessaryText')}</p>
-          </li>
-          <li className="flex flex-col gap-2 pt-4">
-            <Switch
-              id="cookies-mesure"
-              label={t('analytics')}
-              checked={analytics}
-              onChange={(event) => setAnalytics(event.target.checked)}
-            />
-            <p className="font-ui text-[14px] leading-5 text-text-muted">{t('analyticsText')}</p>
-          </li>
-        </ul>
-      </Modal>
+      {preferencesLoaded && (
+        <CookiePreferences
+          open={preferencesOpen}
+          onClose={() => setPreferencesOpen(false)}
+          analytics={analytics}
+          onAnalyticsChange={setAnalytics}
+          onDecide={decide}
+        />
+      )}
 
       {consent?.analytics && ga4MeasurementId && <GoogleAnalytics measurementId={ga4MeasurementId} />}
     </>

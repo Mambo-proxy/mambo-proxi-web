@@ -2,7 +2,7 @@ import type { DynamicSection, ServiceAreas } from '@/lib/api/schema';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { frenchTypography } from '@/lib/format/typography';
 import { QuarterList } from './quarter-list';
-import { ZonesMap } from './zones-map';
+import { LazyZonesMap } from './lazy-zones-map';
 
 /**
  * Carte des zones d'intervention : accueil (Figma `290:31634`, mobile `290:31736`) et page Zones d'intervention
@@ -36,7 +36,7 @@ export function ZonesSection({
             </h2>
           )}
         </div>
-        <ZonesMap
+        <LazyZonesMap
           areas={areas}
           link={
             section.link && (
