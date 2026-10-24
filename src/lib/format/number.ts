@@ -3,6 +3,7 @@ import type { JobSalary } from '@/lib/api/schema';
 const integer = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
 const oneDecimal = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const percent = new Intl.NumberFormat('fr-FR', { style: 'percent', maximumFractionDigits: 0 });
+const smallPercent = new Intl.NumberFormat('fr-FR', { style: 'percent', maximumFractionDigits: 1 });
 const englishOneDecimal = new Intl.NumberFormat('en-GB', {
   minimumFractionDigits: 1,
   maximumFractionDigits: 1,
@@ -22,6 +23,11 @@ export function formatRating(value: number, locale: 'fr' | 'en' = 'fr'): string 
 export function formatPercent(ratio: number, locale: 'fr' | 'en' = 'fr'): string {
   if (locale === 'en') return `${Math.round(ratio * 100)}%`;
   return percent.format(ratio).replace(/\s%/, '\u202F%');
+}
+
+/** Petit taux à une décimale : 0.004 → « 0,4 % » (taux de désinscription), 0.09 → « 9 % ». */
+export function formatSmallPercent(ratio: number): string {
+  return smallPercent.format(ratio).replace(/\s%/, '\u202F%');
 }
 
 /** Taille de fichier : 2_400_000 → « 2,3 Mo ». */

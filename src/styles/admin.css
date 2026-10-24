@@ -65,3 +65,24 @@
   height: 0;
   pointer-events: none;
 }
+
+/* E-mails de la newsletter : image de la médiathèque et bouton d'appel à l'action (`EmailHtml`). */
+.rich-text-editor img {
+  border-radius: 12px;
+  max-width: 100%;
+}
+
+.rich-text-editor a[data-button] {
+  background: var(--mp-color-brand-primary);
+  border-radius: 10px;
+  color: var(--mp-color-text-on-primary);
+  display: inline-block;
+  font-weight: 600;
+  padding: 10px 18px;
+  text-decoration: none;
+}
+
+.rich-text-editor .ProseMirror-selectednode {
+  outline: 2px solid var(--mp-color-brand-primary);
+  outline-offset: 2px;
+}

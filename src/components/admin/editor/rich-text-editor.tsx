@@ -21,6 +21,13 @@ import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/field';
 import { Modal } from '@/components/ui/modal';
 import { cn } from '@/lib/cn';
+import { EmailButton, EmailImage } from './email-nodes';
+import { MediaPickerDialog } from './media-picker';
+
+/** Outils de la barre à libellés ; `image` et `button` (e-mails) ajoutent les nœuds `EmailHtml`. */
+export type LabelTool = 'bold' | 'italic' | 'heading' | 'bullet' | 'quote' | 'link' | 'image' | 'button';
+
+const DEFAULT_LABEL_TOOLS: LabelTool[] = ['bold', 'italic', 'heading', 'bullet', 'quote', 'link'];
 
 type RichTextEditorProps = {
   /** Libellé du champ (associé à la zone d'édition). */
@@ -40,6 +47,8 @@ type RichTextEditorProps = {
    * de la zone de saisie (édito du Magazine `269:2044`), libellé du champ masqué visuellement.
    */
   variant?: 'icons' | 'labels';
+  /** Outils de la barre à libellés (newsletter `94:11800` : gras, italique, lien, image, bouton). */
+  tools?: LabelTool[];
 };
 
 /**
@@ -57,9 +66,11 @@ export function RichTextEditor({
   help,
   error,
   variant = 'icons',
+  tools = DEFAULT_LABEL_TOOLS,
 }: RichTextEditorProps) {
   const id = useId();
   const labelled = variant === 'labels';
+  const email = labelled && (tools.includes('image') || tools.includes('button'));
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -78,6 +89,7 @@ export function RichTextEditor({
           HTMLAttributes: { rel: 'noopener noreferrer', target: null },
         },
       }),
+      ...(email ? [EmailImage, EmailButton] : []),
     ],
     content: value,
     editorProps: {
@@ -110,7 +122,7 @@ export function RichTextEditor({
         <span id={`${id}-label`} className="sr-only">
           {label}
         </span>
-        {editor && <LabelToolbar editor={editor} label={label} />}
+        {editor && <LabelToolbar editor={editor} label={label} tools={tools} />}
         <div
           style={{ ['--rte-min' as string]: `${minHeight}px` }}
           className={cn(
@@ -281,8 +293,18 @@ function applyLink(editor: Editor, href: string) {
 }
 
 /** Barre d'outils à libellés (`269:2044`) : fond `neutral/50`, rayon 10, padding 6/8 ; boutons Inter 13, padding 5/10. */
-function LabelToolbar({ editor, label }: { editor: Editor; label: string }) {
+function LabelToolbar({
+  editor,
+  label,
+  tools: enabled,
+}: {
+  editor: Editor;
+  label: string;
+  tools: LabelTool[];
+}) {
   const [linkOpen, setLinkOpen] = useState(false);
+  const [imageOpen, setImageOpen] = useState(false);
+  const [buttonOpen, setButtonOpen] = useState(false);
   const state = useEditorState({
     editor,
     selector: ({ editor: instance }) => ({
@@ -296,6 +318,7 @@ function LabelToolbar({ editor, label }: { editor: Editor; label: string }) {
   });
   const chain = () => editor.chain().focus();
   const tools: {
+    key: LabelTool;
     text: string;
     name: string;
     active: boolean;
@@ -303,8 +326,16 @@ function LabelToolbar({ editor, label }: { editor: Editor; label: string }) {
     italic?: boolean;
     run: () => void;
   }[] = [
-    { text: 'B', name: 'Gras', active: state.bold, bold: true, run: () => chain().toggleBold().run() },
     {
+      key: 'bold',
+      text: 'B',
+      name: 'Gras',
+      active: state.bold,
+      bold: true,
+      run: () => chain().toggleBold().run(),
+    },
+    {
+      key: 'italic',
       text: 'I',
       name: 'Italique',
       active: state.italic,
@@ -312,14 +343,29 @@ function LabelToolbar({ editor, label }: { editor: Editor; label: string }) {
       run: () => chain().toggleItalic().run(),
     },
     {
+      key: 'heading',
       text: 'Titre',
       name: 'Titre',
       active: state.heading,
       run: () => chain().toggleHeading({ level: 3 }).run(),
     },
-    { text: 'Liste', name: 'Liste', active: state.bullet, run: () => chain().toggleBulletList().run() },
-    { text: 'Citation', name: 'Citation', active: state.quote, run: () => chain().toggleBlockquote().run() },
-    { text: 'Lien', name: 'Lien', active: state.link, run: () => setLinkOpen(true) },
+    {
+      key: 'bullet',
+      text: 'Liste',
+      name: 'Liste',
+      active: state.bullet,
+      run: () => chain().toggleBulletList().run(),
+    },
+    {
+      key: 'quote',
+      text: 'Citation',
+      name: 'Citation',
+      active: state.quote,
+      run: () => chain().toggleBlockquote().run(),
+    },
+    { key: 'link', text: 'Lien', name: 'Lien', active: state.link, run: () => setLinkOpen(true) },
+    { key: 'image', text: 'Image', name: 'Image', active: false, run: () => setImageOpen(true) },
+    { key: 'button', text: 'Bouton', name: 'Bouton', active: false, run: () => setButtonOpen(true) },
   ];
   return (
     <div
@@ -327,24 +373,26 @@ function LabelToolbar({ editor, label }: { editor: Editor; label: string }) {
       aria-label={`Mise en forme : ${label}`}
       className="flex flex-wrap gap-1 rounded-[10px] bg-neutral-50 px-2 py-1.5"
     >
-      {tools.map((tool) => (
-        <button
-          key={tool.name}
-          type="button"
-          aria-label={tool.name}
-          aria-pressed={tool.active}
-          onMouseDown={(event) => event.preventDefault()}
-          onClick={tool.run}
-          className={cn(
-            'rounded-[6px] px-2.5 py-[5px] font-ui text-[13px] leading-4 text-neutral-700 transition-colors hover:bg-neutral-100',
-            tool.bold ? 'font-semibold' : 'font-medium',
-            tool.italic && 'italic',
-            tool.active && 'bg-neutral-900 text-neutral-0 hover:bg-neutral-800',
-          )}
-        >
-          {tool.text}
-        </button>
-      ))}
+      {tools
+        .filter((tool) => enabled.includes(tool.key))
+        .map((tool) => (
+          <button
+            key={tool.name}
+            type="button"
+            aria-label={tool.name}
+            aria-pressed={tool.active}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={tool.run}
+            className={cn(
+              'rounded-[6px] px-2.5 py-[5px] font-ui text-[13px] leading-4 text-neutral-700 transition-colors hover:bg-neutral-100',
+              tool.bold ? 'font-semibold' : 'font-medium',
+              tool.italic && 'italic',
+              tool.active && 'bg-neutral-900 text-neutral-0 hover:bg-neutral-800',
+            )}
+          >
+            {tool.text}
+          </button>
+        ))}
       <LinkDialog
         open={linkOpen}
         initial={(editor.getAttributes('link').href as string | undefined) ?? ''}
@@ -354,7 +402,114 @@ function LabelToolbar({ editor, label }: { editor: Editor; label: string }) {
           applyLink(editor, href);
         }}
       />
+      {enabled.includes('image') && (
+        <MediaPickerDialog
+          open={imageOpen}
+          onClose={() => setImageOpen(false)}
+          onSelect={(image) => {
+            setImageOpen(false);
+            editor
+              .chain()
+              .focus()
+              .insertContent({ type: 'emailImage', attrs: { src: image.url, alt: image.alt ?? '' } })
+              .run();
+          }}
+        />
+      )}
+      {enabled.includes('button') && (
+        <ButtonDialog
+          open={buttonOpen}
+          onClose={() => setButtonOpen(false)}
+          onSubmit={(attrs) => {
+            setButtonOpen(false);
+            editor.chain().focus().insertContent({ type: 'emailButton', attrs }).run();
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+/** Bouton d'appel à l'action d'un e-mail : libellé et adresse (page du site ou adresse externe). */
+function ButtonDialog({
+  open,
+  onClose,
+  onSubmit,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (attrs: { label: string; href: string }) => void;
+}) {
+  const [label, setLabel] = useState('');
+  const [href, setHref] = useState('');
+  const [errors, setErrors] = useState<{ label?: string; href?: string }>({});
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setLabel('');
+      setHref('');
+      setErrors({});
+    }
+  }
+
+  function submit() {
+    const next: typeof errors = {};
+    if (!label.trim()) next.label = 'Saisissez le texte du bouton.';
+    if (!/^(https?:\/\/|\/)/i.test(href.trim()))
+      next.href = 'Saisissez une adresse commençant par https:// ou / (page du site).';
+    setErrors(next);
+    if (!next.label && !next.href) onSubmit({ label: label.trim(), href: href.trim() });
+  }
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Bouton"
+      description="Un bouton orange qui renvoie vers une page du site ou une adresse externe."
+      maxWidth={460}
+      footer={
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={onClose}>
+            Annuler
+          </Button>
+          <Button size="sm" onClick={submit}>
+            Insérer le bouton
+          </Button>
+        </div>
+      }
+    >
+      <form
+        className="flex flex-col gap-4"
+        onSubmit={(event) => {
+          event.preventDefault();
+          submit();
+        }}
+      >
+        <Field label="Texte du bouton" error={errors.label}>
+          {(control) => (
+            <Input
+              {...control}
+              value={label}
+              maxLength={40}
+              placeholder="Découvrir les sorties"
+              onChange={(event) => setLabel(event.target.value)}
+            />
+          )}
+        </Field>
+        <Field label="Adresse" error={errors.href} help="Exemples : /services, https://exemple.fr">
+          {(control) => (
+            <Input
+              {...control}
+              value={href}
+              autoComplete="off"
+              onChange={(event) => setHref(event.target.value)}
+            />
+          )}
+        </Field>
+      </form>
+    </Modal>
   );
 }
 

@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { formatDate, formatDateTime, formatPublishedAgo, formatRelative, formatTime } from './date';
-import { formatFileSize, formatNumber, formatPercent, formatRating, formatSalary } from './number';
+import {
+  formatFileSize,
+  formatNumber,
+  formatPercent,
+  formatRating,
+  formatSalary,
+  formatSmallPercent,
+} from './number';
 import { frenchTypography } from './typography';
 
 const NBSP = '\u00A0';
@@ -31,6 +38,8 @@ describe('nombres', () => {
     expect(formatNumber(1200)).toBe(`1${NARROW}200`);
     expect(formatRating(4.8)).toBe('4,8');
     expect(formatPercent(0.92)).toBe(`92${NARROW}%`);
+    expect(formatSmallPercent(0.004)).toBe(`0,4${NARROW}%`);
+    expect(formatSmallPercent(0.09)).toBe(`9${NARROW}%`);
     expect(formatFileSize(2_400_000)).toBe(`2,3${NBSP}Mo`);
   });
 

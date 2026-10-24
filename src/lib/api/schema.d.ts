@@ -2438,6 +2438,8 @@ export interface components {
         DateTime: string;
         /** @description HTML assaini côté serveur (balises autorisées : p, h2, h3, h4, strong, em, a, ul, ol, li, br, blockquote). */
         Html: string;
+        /** @description Corps d'un e-mail, assaini côté serveur : balises de `Html`, plus `img` (`src` d'une image de la médiathèque, `alt`) et les boutons d'appel à l'action `<a data-button href="…">`. Variable disponible `{prénom}`. */
+        EmailHtml: string;
         /** @description Erreur au format RFC 9457 (Problem Details). */
         Problem: {
             /** Format: uri */
@@ -4350,10 +4352,7 @@ export interface components {
         CampaignFields: {
             subject?: string;
             preheader?: string | null;
-            /** @description Document de l'éditeur (JSON Tiptap). Variable disponible `{prénom}`. */
-            content?: {
-                [key: string]: unknown;
-            };
+            html?: components["schemas"]["EmailHtml"];
             segment?: components["schemas"]["CampaignSegment"];
         };
         CampaignInput: components["schemas"]["CampaignFields"] & Record<string, never>;
@@ -4371,6 +4370,7 @@ export interface components {
             clicks: number | null;
             unsubscribes: number;
             createdAt: components["schemas"]["DateTime"];
+            updatedAt?: components["schemas"]["DateTime"];
         };
         NewsletterStats: {
             subscribers: number;
@@ -5020,6 +5020,7 @@ export type IconName = components['schemas']['IconName'];
 export type PublishStatus = components['schemas']['PublishStatus'];
 export type DateTime = components['schemas']['DateTime'];
 export type Html = components['schemas']['Html'];
+export type EmailHtml = components['schemas']['EmailHtml'];
 export type Problem = components['schemas']['Problem'];
 export type PaginationMeta = components['schemas']['PaginationMeta'];
 export type Visual = components['schemas']['Visual'];
