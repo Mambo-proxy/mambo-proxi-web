@@ -89,8 +89,8 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 
 ### 1.5 Transverse
 
-- [ ] SEO : `generateMetadata`, `sitemap.ts`, `robots.ts`, `opengraph-image`, JSON-LD (Organization/LocalBusiness, WebSite, BreadcrumbList, Service, FAQPage, JobPosting, AggregateRating)
-- [ ] Revalidation `/api/revalidate` (tags), `/health`, `middleware` (protection `/admin`, en-têtes de sécurité, CSP avec nonce)
+- [x] SEO : `generateMetadata`, `sitemap.ts`, `robots.ts`, `opengraph-image`, JSON-LD (Organization/LocalBusiness, WebSite, BreadcrumbList, Service, FAQPage, JobPosting, AggregateRating) ; bilingue : canonical de la langue, `hreflang` (fr, en, x-default), `og:locale`, plan du site dans les deux langues
+- [x] Revalidation `/api/revalidate` (tags), `/health`, `middleware` (protection `/admin`, en-têtes de sécurité, CSP avec nonce) — faits et testés (`e2e/seo.spec.ts`), case cochée le 24/10
 - [ ] Accessibilité (axe, clavier), performance (Lighthouse ≥ 90 mobile, JS initial < 170 Ko)
 
 ## Phase 1 bis — Refonte des maquettes (octobre 2026)

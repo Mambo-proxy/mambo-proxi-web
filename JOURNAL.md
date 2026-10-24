@@ -865,3 +865,11 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Suppression d'un événement avec inscriptions** : permise (le contrat ne prévoit pas de refus) ; les inscriptions restent dans les Demandes, la confirmation le rappelle.
 - **Places par inscription** : le contrat liste les inscriptions comme des demandes (`RequestListItem`) sans le nombre de places ; seul le total de l'événement est affiché.
 - **Heures saisies dans le fuseau de l'appareil** (comme la programmation de la Newsletter), affichées à l'heure de Douala.
+
+### Référencement bilingue (24 octobre 2026)
+
+- État des lieux : métadonnées de toutes les pages, `sitemap.ts`, `robots.ts`, image de partage, JSON-LD, revalidation, `/health`, protection du back-office et en-têtes de sécurité étaient déjà faits et testés ; les cases du suivi sont cochées.
+- Manque corrigé : les pages anglaises (`/en/…`) déclaraient la canonical de la page française (chemin interne passé à `seoMetadata`) ; Google les aurait écartées comme doublons. `seoMetadata` lit désormais la langue de la requête (`getLocale`) : canonical de la langue affichée, `hreflang` fr / en / x-default (français), `og:locale` (`fr_FR` / `en_GB`) avec la langue alternative, `og:url` traduite. Les 24 pages ne changent pas (appel inchangé dans leur `generateMetadata`).
+- Plan du site : chaque page dans les deux langues (`/qui-sommes-nous`, `/en/about-us`), avec ses adresses `hreflang`.
+- Titre de « Nos services » traduit (« Our services ») : c'était le seul titre écrit en dur.
+- Tests : `e2e/seo.spec.ts` (canonical, hreflang, og:locale d'une page anglaise ; plan du site bilingue).
