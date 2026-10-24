@@ -871,6 +871,7 @@ const MANAGE_ROUTES: Record<string, string> = {
   jobs: adminRoutes.jobs,
   settings: adminRoutes.settings,
   appointments: adminRoutes.appointments,
+  zones: adminRoutes.zones,
 };
 
 /** Contenu calculé (avis, rubriques, partenaires…) : seuls l'en-tête, le lien et les réglages sont modifiables. */

@@ -955,19 +955,22 @@ function FigureBlock({
         aria-invalid={invalid || undefined}
         aria-describedby={invalid ? `${id}-error` : undefined}
         value={raw}
-        maxLength={16}
+        maxLength={24}
         placeholder="150+"
         onChange={(event) => {
           setRaw(event.target.value);
-          const parsed = parseFigure(event.target.value);
-          setInvalid(!parsed);
-          if (parsed) onChange({ ...figure, ...parsed });
+          const value = event.target.value;
+          const parsed = parseFigure(value);
+          // Sans nombre, le texte s'affiche tel quel (« Douala ») au lieu d'un compteur animé.
+          setInvalid(!value.trim());
+          if (parsed) onChange({ ...figure, ...parsed, valueText: null });
+          else if (value.trim()) onChange({ ...figure, valueText: value.trim().slice(0, 24) });
         }}
         className="pr-9 text-[16px] leading-6 font-semibold"
       />
       {invalid && (
         <p id={`${id}-error`} className="text-[12px] leading-4 text-feedback-error">
-          Saisissez un nombre, ex. 150+ ou 4,8.
+          Saisissez un nombre (150+, 4,8) ou un mot (Douala).
         </p>
       )}
       <SubInput

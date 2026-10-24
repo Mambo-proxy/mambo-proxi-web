@@ -43,9 +43,11 @@ const contractPages = ((operations as { operationId: string; examples: Record<st
 const HOME_LABELS: Record<string, string> = {
   hero: 'Section principale',
   'bandeau-services': 'Bandeau des services',
+  formules: 'Formules à domicile',
   univers: 'Rubriques de services',
   'comment-ca-marche': 'Comment ça marche',
   engagements: 'Nos engagements',
+  zones: 'Zones d’intervention',
   avis: 'Témoignages',
   partenaires: 'Partenaires et newsletter',
   cta: 'Appel à l’action final',
@@ -90,10 +92,16 @@ const contactPage: Page = {
   ],
 };
 
-/** Ordre de la liste « Pages du site » (maquette), complété des CGU. */
+/** Ordre de la liste « Pages du site » (maquette), complété des pages ajoutées depuis (Zones, Magazine) et des CGU. */
 const ORDER: { key: PageKey; path: string; group: Group; source: () => Page | undefined }[] = [
   { key: 'accueil', path: '/', group: 'principales', source: () => contractPages.accueil },
   { key: 'services', path: '/services', group: 'principales', source: () => contractPages.services },
+  {
+    key: 'zones-d-intervention',
+    path: '/zones-d-intervention',
+    group: 'principales',
+    source: () => sitePages['zones-d-intervention'],
+  },
   {
     key: 'qui-sommes-nous',
     path: '/qui-sommes-nous',
@@ -112,6 +120,7 @@ const ORDER: { key: PageKey; path: string; group: Group; source: () => Page | un
   },
   { key: 'contact', path: '/contact', group: 'principales', source: () => contactPage },
   { key: 'suivi-mambo', path: '/suivi-mambo', group: 'principales', source: () => sitePages['suivi-mambo'] },
+  { key: 'magazine', path: '/magazine', group: 'principales', source: () => sitePages.magazine },
   {
     key: 'mentions-legales',
     path: '/mentions-legales',

@@ -22,7 +22,7 @@ describe('pages & textes simulées', () => {
     expect(body.map((page) => page.title).slice(0, 3)).toEqual([
       'Accueil',
       'Nos services',
-      'Qui sommes-nous ?',
+      'Zones d’intervention',
     ]);
     expect(body.find((page) => page.key === 'mentions-legales')).toMatchObject({
       hasDraft: true,

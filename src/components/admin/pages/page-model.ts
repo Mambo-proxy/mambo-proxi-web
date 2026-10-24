@@ -21,6 +21,7 @@ import type {
  * contrat : leur contenu est composé à partir de la rubrique et de ses services (écran Services).
  */
 export const CATEGORY_PAGES = [
+  { key: 'services-a-domicile', title: 'Services à domicile', path: '/services/services-a-domicile' },
   { key: 'experience', title: 'Expérience', path: '/services/experience' },
   { key: 'immobilier', title: 'Immobilier', path: '/services/immobilier' },
   { key: 'services-de-proximite', title: 'Services de proximité', path: '/services/services-de-proximite' },
@@ -138,6 +139,16 @@ export const DYNAMIC_SOURCES: Record<
   'suivi-preview': {
     label: 'Aperçu du suivi',
     description: 'Exemple de suivi Mambo, généré automatiquement',
+  },
+  formulas: {
+    label: 'Formules',
+    description: 'Formules de la rubrique, gérées dans Services',
+    manage: { label: 'Services', screen: 'services' },
+  },
+  'zones-map': {
+    label: 'Carte des zones',
+    description: 'Quartiers et délais, gérés dans Zones d’intervention',
+    manage: { label: 'Zones d’intervention', screen: 'zones' },
   },
 };
 
@@ -354,10 +365,13 @@ export function createSection(type: Exclude<PageSectionType, 'dynamic'>, existin
 
 // ───────────────────────────── Chiffres clés ─────────────────────────────
 
-/** « 150+ » à partir d'un `KeyFigure` (virgule décimale française). */
-export function formatFigure(figure: Pick<KeyFigure, 'value' | 'prefix' | 'suffix' | 'decimals'>): string {
+/** « 150+ » à partir d'un `KeyFigure` (virgule décimale française) ; texte affiché tel quel (« Douala »). */
+export function formatFigure(
+  figure: Pick<KeyFigure, 'value' | 'valueText' | 'prefix' | 'suffix' | 'decimals'>,
+): string {
+  if (figure.valueText) return figure.valueText;
   const decimals = figure.decimals ?? 0;
-  const number = figure.value.toFixed(decimals).replace('.', ',');
+  const number = (figure.value ?? 0).toFixed(decimals).replace('.', ',');
   return `${figure.prefix ?? ''}${number}${figure.suffix ?? ''}`;
 }
 

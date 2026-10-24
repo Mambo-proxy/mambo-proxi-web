@@ -14,7 +14,7 @@ async function openPages(page: Page, query = '') {
   });
 }
 
-async function choosePage(page: Page, title: string, key: string) {
+async function choosePage(page: Page, title: string, key: string, heading = true) {
   await expect(async () => {
     if (hasPageColumn(page))
       await page
@@ -24,7 +24,7 @@ async function choosePage(page: Page, title: string, key: string) {
     else await page.getByLabel('Page à modifier').selectOption(key);
     await expect(page).toHaveURL(new RegExp(`page=${key}`), { timeout: 2000 });
   }).toPass();
-  await expect(page.getByRole('heading', { level: 2, name: title, exact: true })).toBeVisible();
+  if (heading) await expect(page.getByRole('heading', { level: 2, name: title, exact: true })).toBeVisible();
 }
 
 const savedNote = (page: Page) => page.getByText(/^Dernière sauvegarde automatique/);
@@ -38,7 +38,7 @@ test.describe('back-office : pages & textes', () => {
     await openPages(page, '?section=hero');
     await expect(page.getByRole('heading', { level: 2, name: 'Accueil', exact: true })).toBeVisible();
     await expect(
-      page.getByText(/^8 sections · glissez pour réordonner, cliquez pour modifier$/),
+      page.getByText(/^10 sections · glissez pour réordonner, cliquez pour modifier$/),
     ).toBeVisible();
     await expect(page.getByRole('button', { name: 'Section principale', exact: true })).toHaveAttribute(
       'aria-expanded',
@@ -59,7 +59,7 @@ test.describe('back-office : pages & textes', () => {
     ).toBeChecked();
     if (hasPageColumn(page)) {
       const list = page.getByRole('navigation', { name: 'Pages du site' });
-      await expect(list.getByRole('link')).toHaveCount(18);
+      await expect(list.getByRole('link')).toHaveCount(21);
       await expect(list.getByRole('link', { name: 'Accueil' })).toHaveAttribute('aria-current', 'page');
       await expect(list.getByRole('link', { name: /^Mentions légales Modifié hier$/ })).toBeVisible();
     }
@@ -85,11 +85,15 @@ test.describe('back-office : pages & textes', () => {
       'aria-expanded',
       'true',
     );
-    await page.getByRole('button', { name: 'Équipe', exact: true }).click();
-    await expect(page).not.toHaveURL(/section=/);
+    // Clic répété tant que la page rechargée n'est pas hydratée.
+    await expect(async () => {
+      await page.getByRole('button', { name: 'Équipe', exact: true }).click();
+      await expect(page).not.toHaveURL(/section=/, { timeout: 2000 });
+    }).toPass({ timeout: 30_000 });
 
     // Page de rubrique : composée dans l'écran Services.
-    await choosePage(page, 'Immobilier', 'immobilier');
+    await choosePage(page, 'Immobilier', 'immobilier', false);
+    await expect(page.getByText('Page « Immobilier »')).toBeVisible();
     await expect(page.getByRole('link', { name: 'Modifier dans Services' })).toBeVisible();
     await expectNoHorizontalScroll(page);
     expect(pageErrors).toEqual([]);
