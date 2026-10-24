@@ -4317,6 +4317,12 @@ export interface components {
             byCountry?: {
                 [key: string]: number;
             };
+            /** @description Répartition des contacts (indicateur « Douala et environs ») : à Douala (quartier d'une zone d'intervention), dans les environs (reste du Cameroun) et ailleurs. */
+            locations?: {
+                douala: number;
+                surroundings: number;
+                elsewhere: number;
+            };
         };
         Subscriber: {
             id: components["schemas"]["Id"];
@@ -9236,6 +9242,12 @@ export interface operations {
             query?: {
                 profile?: components["schemas"]["ContactProfile"];
                 country?: components["schemas"]["CountryCode"];
+                /**
+                 * @description Quartier (nom tel que dans `GET /v1/zones`, ex. `Bonapriso`) : contacts dont la ville commence par ce quartier
+                 *     (« Bonapriso, Douala »), sans tenir compte de la casse ni des accents.
+                 */
+                district?: components["parameters"]["District"];
+                /** @description Rubrique d'intérêt (slug). */
                 interest?: components["schemas"]["Slug"];
                 /** @description Recherche plein texte. */
                 q?: components["parameters"]["Q"];
@@ -9271,6 +9283,12 @@ export interface operations {
             query?: {
                 profile?: components["schemas"]["ContactProfile"];
                 country?: components["schemas"]["CountryCode"];
+                /**
+                 * @description Quartier (nom tel que dans `GET /v1/zones`, ex. `Bonapriso`) : contacts dont la ville commence par ce quartier
+                 *     (« Bonapriso, Douala »), sans tenir compte de la casse ni des accents.
+                 */
+                district?: components["parameters"]["District"];
+                interest?: components["schemas"]["Slug"];
             };
             header?: never;
             path?: never;
