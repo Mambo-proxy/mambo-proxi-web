@@ -925,3 +925,13 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Défi interactif en panneau fixe en bas de l'écran** (non maquetté) : le conteneur, caché, est en tête de formulaire ; sur un long formulaire (devis), un défi affiché sur place resterait hors de la vue.
 - **Questionnaire de satisfaction non protégé** : son contrat ne prévoit pas `antiSpam`, l'accès passe déjà par un jeton personnel.
 - **Clé tirée d'une variable d'environnement**, pas encore de `SiteSettings.turnstileSiteKey` (fourni par l'API) : à reconsidérer si la clé doit changer sans nouveau build.
+
+### Lighthouse en CI (24 octobre 2026)
+
+- Job `lighthouse` (après `quality`) : build sur les mocks, puis `@lhci/cli` (profil mobile par défaut, 3 passages, médiane) sur l'accueil, une rubrique, une fiche service, le contact, le devis et `/en`. Rapports conservés en artefact (`rapport-lighthouse`, 14 jours), pas d'envoi vers un stockage public.
+- Bloquant partout : accessibilité et SEO ≥ 95 ; bonnes pratiques ≥ 90 en avertissement. Accueil, rubrique, fiche et `/en` : performance ≥ 90 et budget de JavaScript téléchargé ≤ 225 000 octets (205 Ko mesurés, carte et notifications chargées au repos comprises), pour qu'un import ne ramène pas de poids sans qu'on le voie.
+
+### Décisions
+
+- **Performance du contact et du devis en avertissement seulement** : ces pages importent le client de l'API, qui démarre les mocks MSW dans le navigateur (~175 Ko de gestionnaires et de données, absents en production). Le seuil deviendra bloquant quand la CI tournera sur l'API réelle.
+
