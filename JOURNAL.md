@@ -769,3 +769,17 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 ### Difficultés et solutions
 
 - **Mocks du navigateur et du serveur séparés** : masquer un logo dans le back-office ne change pas la page du site rendue par le serveur Node pendant les tests ; la synchronisation se vérifie avec l'API réelle (phase 3).
+
+### Back-office : Formations (24 octobre 2026)
+
+- Contrat (API puis synchronisation) : `GET /v1/admin/training-requests` (`AdminTrainingRequest` : structure, contact, formation du catalogue ou « Autre », participants, période, statut de la demande), paginée, filtre par statut ; le détail et le statut restent ceux des demandes.
+- Écran (`93:22873`) : onglets « Catalogue » / « Demandes de formation » (`?onglet=demandes`), tableau du catalogue (section de la page Formation en sous-titre, catégorie, durée, format et lieu, demandes, statut ; Catégorie et Demandes masquées sous 1 400 px, Durée et Format sous 1 024 px, cartes en mobile), actions « Voir sur le site », « Modifier », menu (monter, descendre, publier / dépublier, supprimer confirmé), « Demandes de formation récentes » (3 dernières) avec « Tout voir ».
+- Modale de formation non maquettée : titre, catégorie, public (suit la catégorie tant qu'il n'est pas personnalisé), durée, format (suggestions), lieu, icône (icônes connues du site, avec aperçu), description, publication.
+- Mocks : les formations du back-office alimentent `GET /v1/trainings` (formations publiées, dans l'ordre enregistré) ; 4 demandes de formation (Hôtel La Falaise, Association Femmes d’Akwa, Résidences Bastos, Cuisines du Littoral) remplacent 4 demandes générées, reçues après les 8 demandes de la maquette Demandes.
+- Tests : `e2e/admin-trainings.spec.ts` aux 4 largeurs, `training-labels.test.ts`.
+
+### Décisions
+
+- **Route dédiée aux demandes de formation** : les colonnes de la maquette (structure, participants, période) ne figurent pas dans la liste générique des demandes ; une route de lecture évite d'y ajouter des champs propres à un formulaire.
+- **Nombre de demandes par formation** : celui de la maquette (3, 2, 1, 0, 4, 1), indépendant des 4 demandes simulées.
+- **« Formation souhaitée »** : titre complet du catalogue (la maquette abrège « Accompagner un proche âgé »).
