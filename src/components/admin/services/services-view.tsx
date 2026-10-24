@@ -261,7 +261,7 @@ export function ServicesView() {
     { value: 'ALL', label: 'Tous', count: list.data ? total : undefined },
     ...(categories.data ?? []).map((item) => ({
       value: item.slug,
-      label: categoryLabel(item),
+      label: categoryLabel(item, 'tab'),
       count: list.data ? (counts[item.slug] ?? 0) : undefined,
     })),
   ];

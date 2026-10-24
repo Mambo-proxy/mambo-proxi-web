@@ -33,6 +33,7 @@ import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
 import { siteUrl } from '@/lib/seo/site';
 import { serviceCompleteness } from './completeness';
+import { RelatedPickerDialog } from './related-picker';
 import { MAX_REVIEWS, ReviewChipLabel, ReviewPickerDialog, usePublishedReviews } from './review-picker';
 import { openServicePreview } from './service-actions';
 import {
@@ -169,6 +170,7 @@ function EditorForm({ initial, categories }: EditorFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<'save' | 'publish' | 'unpublish' | 'preview' | null>(null);
   const [reviewPicker, setReviewPicker] = useState(false);
+  const [relatedPicker, setRelatedPicker] = useState(false);
   /** Images choisies pendant la session (médiathèque ou envoi). */
   const [picked, setPicked] = useState<Record<string, MediaImage>>(() =>
     initial?.coverImage ? { [initial.coverImage.id]: initial.coverImage } : {},
@@ -715,8 +717,27 @@ function EditorForm({ initial, categories }: EditorFormProps) {
                 }
                 update({ relatedServiceIds });
               }}
+              addLabel="Ajouter un service lié"
+              onAdd={() => {
+                if (form.relatedServiceIds.length >= MAX_RELATED)
+                  toast.error(
+                    `${MAX_RELATED} services liés au maximum : retirez-en un pour en ajouter un autre.`,
+                  );
+                else setRelatedPicker(true);
+              }}
             />
           )}
+          <RelatedPickerDialog
+            open={relatedPicker}
+            onClose={() => setRelatedPicker(false)}
+            services={(services.data?.data ?? []).filter((service) => service.id !== serviceId)}
+            selected={form.relatedServiceIds}
+            max={MAX_RELATED}
+            onConfirm={(ids) => {
+              update({ relatedServiceIds: [...form.relatedServiceIds, ...ids].slice(0, MAX_RELATED) });
+              setRelatedPicker(false);
+            }}
+          />
           {relatedError && (
             <p role="alert" className="-mt-2 font-ui text-[13px] leading-4 text-feedback-error">
               {relatedError}

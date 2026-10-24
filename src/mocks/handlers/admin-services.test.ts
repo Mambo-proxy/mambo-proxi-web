@@ -17,18 +17,19 @@ async function call<T>(method: string, path: string, body?: unknown) {
 type List = { data: AdminServiceListItem[]; countsByCategory: Record<string, number> };
 
 describe('services du back-office simulés', () => {
-  it('liste les 20 services triés par rubrique, avec les compteurs', async () => {
+  it('liste les 27 services triés par rubrique (formules comprises), avec les compteurs', async () => {
     const { status, body } = await call<List>('GET', '/v1/admin/services');
     expect(status).toBe(200);
-    expect(body.data).toHaveLength(20);
+    expect(body.data).toHaveLength(27);
     expect(body.data.slice(0, 2).map((service) => service.name)).toEqual([
-      'Chef privé',
-      'Location de voiture',
+      'Maison Essentiel',
+      'Maison + Auto',
     ]);
     expect(body.countsByCategory).toEqual({
+      'services-a-domicile': 6,
       experience: 5,
       immobilier: 7,
-      'services-de-proximite': 3,
+      'services-de-proximite': 4,
       'culture-evenementiel': 5,
     });
     const draft = body.data.find((service) => service.id === 'svc_visites_douala');
@@ -89,12 +90,13 @@ describe('services du back-office simulés', () => {
   it('rubriques : liste ordonnée, suppression refusée si non vide', async () => {
     const { body } = await call<AdminCategory[]>('GET', '/v1/admin/categories');
     expect(body.map((category) => category.slug)).toEqual([
+      'services-a-domicile',
       'experience',
       'immobilier',
       'services-de-proximite',
       'culture-evenementiel',
     ]);
-    expect(body[0]!.serviceCount).toBe(5);
+    expect(body[0]!.serviceCount).toBe(6);
     expect((await call('DELETE', '/v1/admin/categories/cat_experience')).status).toBe(409);
   });
 });

@@ -1,23 +1,19 @@
-import type { AdminService, Media, MediaImage } from '@/lib/api/schema';
+import type { AdminService, ServiceDetail } from '@/lib/api/schema';
 import type { Category } from '@/components/admin/services/service-utils';
 import { serviceCompleteness } from '@/components/admin/services/completeness';
 import { adminMedia } from '../handlers/admin-media';
 import { daysAgo } from '../admin-utils';
-import catalogue from './catalogue-services.json';
-import { categorySummaries } from './catalogue';
+import { adminReviews } from './admin-reviews';
+import { categorySummaries, services as catalogueServices } from './catalogue';
+import { catalogueSeed } from './catalogue-services';
 import { categoryDetails } from './category-details';
 import { serviceDetails } from './service-details';
 
 /**
  * Services et rubriques du back-office (« BO — Services » `88:10421`, « Ajouter un service » `91:10598`) :
- * le catalogue validé (4 rubriques, 19 services, cahier §5) et le brouillon « Visites guidées de Douala » de la
- * maquette (5e service de « Culture & événementiel », comme l'exemple `AdminServices` du contrat).
+ * le catalogue des nouvelles maquettes (5 rubriques, formules comprises) et le brouillon « Visites guidées de
+ * Douala » de la maquette (dernier service de « Culture & événementiel », comme l'exemple `AdminServices` du contrat).
  */
-
-const toImage = (media: Media): MediaImage => {
-  const { id, url, width, height, alt, focalPoint, blurDataUrl, variants } = media;
-  return { id, url, width, height, alt, focalPoint, blurDataUrl, variants };
-};
 
 // Deuxième visuel de la maquette (scène « culture ») : ajouté à la médiathèque simulée s'il n'y figure pas.
 if (!adminMedia.some((media) => media.id === 'med_culture'))
@@ -38,11 +34,6 @@ if (!adminMedia.some((media) => media.id === 'med_culture'))
     createdAt: daysAgo(12),
   });
 
-const mediaImage = (id: string) => {
-  const media = adminMedia.find((item) => item.id === id);
-  return media ? toImage(media) : null;
-};
-
 /** Ordre de la maquette dans « Expérience » ; ordre du catalogue ailleurs. */
 const EXPERIENCE_ORDER = [
   'chef-prive',
@@ -54,6 +45,11 @@ const EXPERIENCE_ORDER = [
 
 /** Demandes des 30 derniers jours (maquette pour les 9 lignes affichées, valeurs plausibles ailleurs). */
 const REQUESTS_30D: Record<string, number> = {
+  'maison-essentiel': 18,
+  'entretien-du-logement': 12,
+  'pressing-laverie': 9,
+  'achat-vente-biens': 8,
+  'collecte-livraison-colis-courrier': 4,
   'chef-prive': 14,
   'location-voiture': 6,
   photographe: 3,
@@ -68,14 +64,11 @@ const REQUESTS_30D: Record<string, number> = {
   'logement-temporaire': 6,
   'portage-livraison-repas': 3,
   'livraison-courses-commandes': 5,
-  'reception-colis-courrier': 4,
   'decouverte-cameroun': 6,
   'activites-culturelles-loisirs-sorties': 4,
   'organisation-activites-evenements': 3,
   'decouverte-integration-locale': 2,
 };
-
-const COVERS: Record<string, string> = { 'chef-prive': 'med_chef' };
 
 const serviceId = (slug: string) => `svc_${slug.replaceAll('-', '_')}`;
 
@@ -96,9 +89,37 @@ export function withCompleteness(service: AdminService): AdminService {
   return { ...service, completeness: detail.percent, completenessDetail: detail };
 }
 
+/**
+ * Fiche d'un service, ou, pour une formule (sans fiche sur le site : sa carte mène à la prise de rendez-vous), son
+ * résumé du catalogue complété de sections vides.
+ */
+function detailOf(slug: string): ServiceDetail {
+  const detail = serviceDetails.fr[slug];
+  if (detail) return detail;
+  const summary = catalogueServices.find((service) => service.slug === slug)!;
+  return {
+    ...summary,
+    tagline: summary.summary,
+    cities: ['Douala'],
+    audiences: [],
+    steps: [],
+    advantages: [],
+    faq: [],
+    quoteBullets: [],
+    related: [],
+    showWhatsapp: true,
+    toComplete: false,
+    seo: { title: summary.name, description: summary.summary, noindex: false },
+    gallery: [],
+    reviews: [],
+    updatedAt: daysAgo(30),
+  };
+}
+
 function fromCatalogue(slug: string, sortOrder: number): AdminService {
-  const detail = serviceDetails[slug]!;
-  const cover = COVERS[slug] ? mediaImage(COVERS[slug]) : null;
+  const detail = detailOf(slug);
+  // Photo de la fiche (maquettes refondues), servie comme média.
+  const cover = detail.visual.image ?? null;
   return withCompleteness({
     id: detail.id,
     slug,
@@ -195,7 +216,11 @@ function visitesDouala(sortOrder: number): AdminService {
       serviceId('activites-culturelles-loisirs-sorties'),
       serviceId('location-voiture'),
     ],
-    featuredReviewIds: ['rev_patrick'],
+    // Témoignage de la maquette : avis publié de Patrick E. (« Découverte du Cameroun »).
+    featuredReviewIds: adminReviews
+      .filter((review) => review.authorName === 'Patrick E.' && review.status === 'PUBLIE')
+      .slice(0, 1)
+      .map((review) => review.id),
     showWhatsapp: true,
     seoTitle: 'Visites guidées de Douala | MAMBO Proxi',
     seoDescription:
@@ -207,14 +232,14 @@ function visitesDouala(sortOrder: number): AdminService {
 }
 
 function seedServices(): AdminService[] {
-  return catalogue.rubriques.flatMap((category) => {
-    const slugs = category.services.map((service) => service.slug);
+  return Object.entries(catalogueSeed).flatMap(([categorySlug, seeds]) => {
+    const slugs = seeds.map((service) => service.slug);
     const ordered =
-      category.slug === 'experience'
+      categorySlug === 'experience'
         ? [...EXPERIENCE_ORDER, ...slugs.filter((slug) => !EXPERIENCE_ORDER.includes(slug))]
         : slugs;
     const list = ordered.map((slug, index) => fromCatalogue(slug, index + 1));
-    if (category.slug === 'culture-evenementiel') list.push(visitesDouala(list.length + 1));
+    if (categorySlug === 'culture-evenementiel') list.push(visitesDouala(list.length + 1));
     return list;
   });
 }

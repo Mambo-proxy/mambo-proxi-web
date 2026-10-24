@@ -30,8 +30,18 @@ export const serviceBody = (fields: ServiceFields) => fields as ServicePatch;
 /** Libellés courts des rubriques dans les onglets et le tableau (maquette : « Proximité »). */
 const SHORT_CATEGORY: Record<string, string> = { 'services-de-proximite': 'Proximité' };
 
-export function categoryLabel(category: Pick<CategoryRef, 'slug' | 'name'>): string {
-  return SHORT_CATEGORY[category.slug] ?? category.name;
+/** Onglets seulement (maquette refondue : « À domicile », mais « Services à domicile » dans le tableau). */
+const SHORT_TAB: Record<string, string> = { 'services-a-domicile': 'À domicile' };
+
+export function categoryLabel(
+  category: Pick<CategoryRef, 'slug' | 'name'>,
+  context: 'tab' | 'cell' = 'cell',
+): string {
+  return (
+    (context === 'tab' ? SHORT_TAB[category.slug] : undefined) ??
+    SHORT_CATEGORY[category.slug] ??
+    category.name
+  );
 }
 
 /** Suffixe du titre pour Google proposé par défaut (« Visites guidées de Douala | MAMBO Proxi »). */

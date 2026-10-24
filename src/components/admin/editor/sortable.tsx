@@ -111,6 +111,9 @@ export function SortableList<T>({
       onDragEnd={onDragEnd}
       accessibility={{
         announcements,
+        // Dans un tableau, les zones d'annonce (`div`) ne peuvent pas être enfants de `<table>` : elles sont placées
+        // dans `body` (listes chargées côté navigateur, jamais rendues au serveur).
+        container: Tag === 'tbody' && typeof document !== 'undefined' ? document.body : undefined,
         screenReaderInstructions: {
           draggable:
             'Pour réordonner, appuyez sur Espace, déplacez avec les flèches, puis appuyez de nouveau sur Espace pour déposer, ou sur Échap pour annuler.',
