@@ -741,3 +741,31 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 ### Difficultés et solutions
 
 - **Champs obligatoires des schémas `allOf`** : le générateur de types les laisse facultatifs ; type `JobOffer` côté back-office qui reprend la liste `required` du contrat.
+
+### Back-office : Avis clients et Rendez-vous sur la refonte (24 octobre 2026)
+
+- Avis clients (`93:11363`) : avis à valider et masqués recentrés sur les quartiers de Douala (Bonapriso, Kotto, Akwa…), « Livraison de colis » pour Hervé D., services des avis rattachés au catalogue refondu (`collecte-livraison-colis-courrier`, `entretien-du-logement`).
+- Contrat (API puis synchronisation) : `ReviewStats.averageDelta` et `recommendationDelta`, évolutions sur 30 jours affichées sous la note moyenne (« +0,1 sur 30 jours ») et la recommandation (« +3 pts notes de 9 ou 10 »), avec le badge des indicateurs du tableau de bord ; valeurs de la maquette dans les mocks (pas d'historique).
+- Rendez-vous (`93:11708`) : identique à la maquette refondue, seule la barre latérale avait changé (déjà à jour).
+
+### Décisions
+
+- **Compteurs des avis** : 72 avis publiés (ceux du site) et 85 avis au total, au lieu de 112 et 120 sur la maquette ; les avis publiés restent ceux de la page Avis du site.
+
+### Back-office : Partenaires (24 octobre 2026)
+
+- Écran (`93:22449`) : onglets « Logos affichés » / « Demandes de partenariat » (`?onglet=demandes`), filtre par catégorie, grille de cartes réordonnable au glisser-déposer et au clavier (poignée, interrupteur d'affichage, zone du logo, nom, catégorie ; 4 colonnes en desktop, 3 en tablette, 2 en mobile), tuile « Ajouter un logo » dans la grille (`SortableList` accepte un élément fixe `after`).
+- Modale de partenaire non maquettée : nom, catégorie, logo (médiathèque, « PNG ou SVG, fond transparent »), site du partenaire, affichage sur le site, suppression confirmée.
+- Demandes de partenariat : demandes de type `PARTENARIAT` (`GET /v1/admin/requests?type=PARTENARIAT`), ouvertes dans le panneau de détail des Demandes ; trois demandes de démonstration remplacent trois demandes générées (totaux de la maquette Demandes conservés).
+- Mocks : les partenaires du back-office (les 8 de la maquette) alimentent `GET /v1/partners`, qui ne sert que les logos visibles, dans l'ordre enregistré.
+- Tests : `e2e/admin-partners.spec.ts` aux 4 largeurs, `partner-order.test.ts` (réordonnancement dans un filtre).
+
+### Décisions
+
+- **8 logos au lieu de 12** : la maquette annonce 12 logos mais en montre 8 ; les 8 noms de la maquette sont repris, DLA Transports masqué. Le site affiche donc 7 noms à la place des 8 tuiles « Logo partenaire ».
+- **Réordonnancement dans un filtre** : seuls les logos de la catégorie changent de place, sur les emplacements qu'ils occupaient dans l'ordre complet.
+- **Demandes de partenariat** : pas d'écran dédié ni de route d'API propre ; la liste renvoie au détail des Demandes, où le statut et les notes se gèrent déjà.
+
+### Difficultés et solutions
+
+- **Mocks du navigateur et du serveur séparés** : masquer un logo dans le back-office ne change pas la page du site rendue par le serveur Node pendant les tests ; la synchronisation se vérifie avec l'API réelle (phase 3).
