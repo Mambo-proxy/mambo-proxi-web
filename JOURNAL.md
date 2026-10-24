@@ -832,3 +832,11 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Familles d'e-mails** : l'interrupteur « Accusé de réception » active ou désactive les 8 accusés de réception (devis, contact, inscription, candidature, formation, partenariat, événement, rendez-vous) ; « Modèle » ouvre le principal (devis). Les e-mails de sécurité, la confirmation d'inscription à la newsletter et le gabarit des envois ne peuvent pas être désactivés (cadenas).
 - **Utilisateurs** : onglet de Paramètres comme sur la maquette ; l'entrée « Utilisateurs » de la barre latérale (écran non maquetté) est retirée.
 - **Adresse de l'agence** : un seul champ (première ligne d'adresse), « Adresse à compléter · Douala, Cameroun » en texte indicatif tant qu'elle n'est pas connue.
+
+### Back-office : Médiathèque (24 octobre 2026)
+
+- Écran non maquetté (`/admin/mediatheque`), dans le langage des listes du back-office : grille de vignettes (2 à 6 colonnes), recherche et pagination dans l'adresse (`?q=&page=&id=`), pastille « Utilisée · n » ou « Non utilisée » ; « Ajouter une image » dans la barre supérieure (fichier et texte alternatif obligatoire).
+- Détail en modale : texte alternatif, point focal (clic sur l'image ou flèches du clavier, aperçus des recadrages carré, 16:9 et portrait), informations (format, dimensions, poids, date d'ajout), usages avec liens vers les écrans concernés ; « Supprimer » désactivé tant que l'image est utilisée (l'API répond 409), confirmation sinon.
+- Zone d'envoi partagée avec le sélecteur d'images des éditeurs (`MediaUploadFields`, `imageFileError`).
+- Mocks : les 15 illustrations du site, usages calculés depuis le catalogue actuel (les libellés dataient de l'ancien catalogue) et les pages ; texte alternatif obligatoire à la modification ; tests `admin-media.test.ts` et `e2e/admin-media.spec.ts`.
+- La 404 du back-office existait déjà (adresse inconnue et contenu supprimé, dans la coque) : tâche cochée.

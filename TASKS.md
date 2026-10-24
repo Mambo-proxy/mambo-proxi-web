@@ -69,7 +69,7 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 ### 1.4 Back-office `/admin`
 
 - [x] Connexion + vérification du code (OTP) + mot de passe oublié / réinitialisation / acceptation d'invitation
-- [~] Gabarit : barre latérale (compteurs), barre supérieure, recherche ⌘K, notifications, responsive (icônes, navigation basse mobile), 404 — reste la 404 du back-office
+- [x] Gabarit : barre latérale (compteurs), barre supérieure, recherche ⌘K, notifications, responsive (icônes, navigation basse mobile), 404 dans la coque
 - [x] Tableau de bord (desktop + mobile)
 - [x] Demandes (liste, filtres, panneau de détail, statuts, notes, export)
 - [x] Services (liste, réordonnancement, menu) + gestion des rubriques
@@ -84,7 +84,8 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [x] Contacts & inscrits (liste, fiche contact, export, RGPD)
 - [x] Newsletter (campagnes, éditeur, aperçu, test, programmation, inscrits)
 - [x] Paramètres (coordonnées, WhatsApp, réseaux, e-mails automatiques + éditeur de modèle, référencement, utilisateurs, sécurité & sauvegardes)
-- [ ] Médiathèque, journal d'activité (utilisateurs : onglet de Paramètres)
+- [x] Médiathèque (grille, recherche, texte alternatif, point focal, usages, envoi, suppression) — non maquettée
+- [ ] Journal d'activité — non maquetté (utilisateurs : onglet de Paramètres)
 
 ### 1.5 Transverse
 
