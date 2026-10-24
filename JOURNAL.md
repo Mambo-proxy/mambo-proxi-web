@@ -797,3 +797,22 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **« Douala et environs »** : « environs » compris comme le reste du Cameroun ; les contacts hors du Cameroun (3 %) ne figurent pas dans l'indicateur.
 - **Fiche superposée à toutes les largeurs** : le tableau occupe toute la largeur sur la maquette ; un panneau à côté le réduirait trop.
 - **Nombre de demandes** : celui de la maquette pour les 6 contacts (3, 0, 1, 2, 0, 4) ; la fiche liste les demandes simulées réellement rattachées au contact.
+
+### Back-office : Newsletter (24 octobre 2026)
+
+- Contrat (API puis synchronisation) : le corps d'un envoi passe du document Tiptap (JSON) au HTML assaini `EmailHtml` (balises de `Html`, images de la médiathèque, boutons `<a data-button>`), comme l'édito du Magazine ; `Campaign.updatedAt` (« Modifié hier »).
+- Écran (`94:11838`) : indicateurs (inscrits et évolution du mois, taux d'ouverture et évolution du dernier envoi, taux de clic, désinscriptions), tableau des envois (objet et date, destinataires, ouverture, statut ; cartes en mobile), compositeur à droite (sous le tableau sous 1 280 px) : objet, destinataires (segments), corps avec la barre « B, I, Lien, Image, Bouton », sauvegarde automatique, « Aperçu » (rendu réel dans un cadre isolé), « Test » (adresse de l'utilisateur par défaut), « Programmer » (date et heure), « Annuler la programmation », suppression d'un brouillon ; « Exporter les inscrits » et « Nouvel envoi » dans la barre supérieure.
+- Par défaut, le compositeur ouvre le prochain envoi programmé (comme la maquette) ; un envoi parti s'ouvre en aperçu. L'envoi ouvert est dans l'adresse (`?envoi=`).
+- Éditeur de texte riche : la barre à libellés accepte une liste d'outils (`tools`) ; « Image » (médiathèque) et « Bouton » (texte et adresse) insèrent des nœuds propres aux e-mails (`email-nodes.ts`), sans nouvelle dépendance.
+- Mocks : les 4 envois de la maquette et ses indicateurs (46 %, +4 pts, 9 %, 0,4 %), segments, création, modification, aperçu, test, programmation, annulation, envoi immédiat, suppression d'un brouillon, export CSV des 1 248 inscrits ; tests `admin-newsletter.test.ts`, `campaign-labels.test.ts`, `e2e/admin-newsletter.spec.ts`.
+
+### Décisions
+
+- **Segments « Cameroun » en double sur la maquette** : vraisemblablement « France / Cameroun » remplacés lors de la refonte ; les segments du contrat sont gardés (Tous les inscrits, Cameroun, France, Professionnels). À confirmer avec la cliente.
+- **Corps en HTML** plutôt qu'en JSON Tiptap : même format que les autres contenus riches, rendu direct par le gabarit d'e-mail de l'API.
+- **Programmation** : date et heure de l'appareil ; l'envoi immédiat (`send-now`) reste dans le contrat mais n'est pas proposé (absent de la maquette).
+
+### Difficultés et solutions
+
+- **Aperçu de l'e-mail** : dans un cadre `sandbox=""`, la console relevait des « Blocked script execution in about:srcdoc » alors que le HTML de l'aperçu ne contient aucun script (injection extérieure au contenu, source non identifiée). Le cadre est rendu seulement quand l'aperçu est ouvert et chargé, avec `sandbox="allow-scripts"` sans `allow-same-origin` (origine opaque, aucun accès au back-office).
+- **Brouillon créé depuis « Nouvel envoi »** : l'adresse passait à `?envoi=<id>`, la clé du compositeur changeait et la saisie était perdue (un second brouillon était alors créé). Chaque « Nouvel envoi » porte un jeton (`?envoi=nouveau-<jeton>`) qui reste la clé du compositeur après la création du brouillon.
