@@ -61,7 +61,7 @@ export function EventRegistrationModal({
           seats: values.seats,
           contact: { fullName: values.fullName, email: values.email, phone: values.phone },
           consent: true,
-          antiSpam: antiSpam.build(),
+          antiSpam: await antiSpam.build(),
         },
       });
       if (!response.ok || !data) throw toApiError(error, response);
@@ -105,6 +105,7 @@ export function EventRegistrationModal({
       ) : (
         <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4 pb-2">
           <input {...antiSpam.honeypotProps} />
+          <div {...antiSpam.widgetProps} />
           <Field label="Nom et prénom" required error={errors.fullName?.message}>
             {(control) => (
               <Input icon={User} autoComplete="name" {...control} {...form.register('fullName')} />

@@ -186,7 +186,7 @@ export function AppointmentForm() {
           contact: { fullName: values.fullName, email: values.email, phone: values.phone },
           message: values.message || null,
           consent: true,
-          antiSpam: antiSpam.build(),
+          antiSpam: await antiSpam.build(),
         },
       });
       if (!response.ok || !data) throw toApiError(error, response);
@@ -329,6 +329,7 @@ export function AppointmentForm() {
           className="flex flex-col gap-5"
         >
           <input {...antiSpam.honeypotProps} />
+          <div {...antiSpam.widgetProps} />
           <p className="font-ui text-[14px] leading-5 font-semibold text-text-main">Vos coordonnées</p>
           <Field label="Nom et prénom" required error={errors.fullName?.message}>
             {(control) => (

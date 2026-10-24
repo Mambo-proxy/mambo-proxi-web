@@ -99,7 +99,7 @@ export function TrainingForm({ trainings }: { trainings: Training[] }) {
           contact: { fullName: values.fullName, email: values.email, phone: values.phone },
           message: values.message || null,
           consent: true,
-          antiSpam: antiSpam.build(),
+          antiSpam: await antiSpam.build(),
         },
       });
       if (!response.ok || !data) throw toApiError(error, response);
@@ -139,6 +139,7 @@ export function TrainingForm({ trainings }: { trainings: Training[] }) {
           className="flex flex-col gap-5"
         >
           <input {...antiSpam.honeypotProps} />
+          <div {...antiSpam.widgetProps} />
           {/* En mobile, champs groupés comme les rangées du desktop : 16 dans une paire, 20 entre deux (`66:6993`). */}
           <div className="grid gap-4 md:grid-cols-2 md:gap-y-5 max-md:[&>*:nth-child(2n+2)]:mt-1">
             <Field

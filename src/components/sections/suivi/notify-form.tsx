@@ -38,7 +38,7 @@ export function NotifyForm() {
           source: 'suivi-mambo',
           tags: ['suivi-mambo'],
           consent: true,
-          antiSpam: antiSpam.build(),
+          antiSpam: await antiSpam.build(),
         },
       });
       if (!response.ok || !data) throw toApiError(error, response);
@@ -70,6 +70,7 @@ export function NotifyForm() {
       className="flex flex-col gap-2"
     >
       <input {...antiSpam.honeypotProps} />
+      <div {...antiSpam.widgetProps} />
       <div className="flex flex-col gap-2.5 md:flex-row">
         <label className="relative flex-1">
           <span className="sr-only">Votre adresse e-mail</span>

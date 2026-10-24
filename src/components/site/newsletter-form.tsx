@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useRef, useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/cn';
+import { useTurnstile } from '@/lib/forms/use-turnstile';
 import { toE164 } from '@/lib/phone';
 
 type Status =
@@ -19,11 +20,13 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  * Inscription à la lettre Mambo (pied de page, Figma `46:90`) : nom, e-mail, téléphone (WhatsApp) en pilules
  * sombres, bouton « S'abonner ». Double opt-in : l'envoi déclenche l'e-mail de confirmation (le clic vaut
  * consentement, confirmé par l'e-mail). États : envoi, succès, déjà inscrit, erreur (annoncés aux lecteurs d'écran).
+ * Le jeton Turnstile est obtenu pendant le chargement du module d'envoi (client de l'API hors du JavaScript initial).
  */
 export function NewsletterForm() {
   const t = useTranslations('site.newsletter');
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
   const startedAt = useRef(new Date().toISOString());
+  const turnstile = useTurnstile({ theme: 'dark' });
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -44,13 +47,17 @@ export function NewsletterForm() {
       return;
     }
     setStatus({ kind: 'sending' });
-    const { subscribeToNewsletter } = await import('./newsletter-submit');
+    const [{ subscribeToNewsletter }, turnstileToken] = await Promise.all([
+      import('./newsletter-submit'),
+      turnstile.token(),
+    ]);
     const result = await subscribeToNewsletter({
       name: String(data.get('name') ?? '').trim() || null,
       email,
       phone,
       honeypot: String(data.get('website') ?? ''),
       startedAt: startedAt.current,
+      turnstileToken,
     });
     setStatus(
       result.ok
@@ -104,6 +111,7 @@ export function NewsletterForm() {
         />
         {/* Champ piège anti-spam : invisible, doit rester vide. */}
         <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden className="hidden" />
+        <div {...turnstile.widgetProps} />
         <Button
           type="submit"
           loading={status.kind === 'sending'}

@@ -198,7 +198,7 @@ export function QuoteForm({
           } as QuoteRequestInput['contact'],
           contactPreference: data.contactPreference,
           consent: true,
-          antiSpam: antiSpam.build(),
+          antiSpam: await antiSpam.build(),
         },
       });
       if (!response.ok || !accepted) throw toApiError(error, response);
@@ -247,6 +247,7 @@ export function QuoteForm({
           aria-label="Demande de devis gratuit"
         >
           <input {...antiSpam.honeypotProps} />
+          <div {...antiSpam.widgetProps} />
 
           <StepCard
             number={1}

@@ -163,7 +163,7 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
           activity: professional ? values.activity : null,
           newsletter: values.newsletter,
           consent: true,
-          antiSpam: antiSpam.build(),
+          antiSpam: await antiSpam.build(),
         },
       });
       if (!response.ok || !data) throw toApiError(error, response);
@@ -217,6 +217,7 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
             className="flex flex-col gap-[18px]"
           >
             <input {...antiSpam.honeypotProps} />
+            <div {...antiSpam.widgetProps} />
             <div className="grid gap-4 md:grid-cols-2 md:gap-y-[18px] max-md:[&>*:nth-child(2n+3)]:mt-0.5">
               {profile === 'PROFESSIONNEL' && (
                 <>

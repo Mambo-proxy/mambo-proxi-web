@@ -108,7 +108,7 @@ export function ContactForm({ initialTab, serviceGroups }: ContactFormProps) {
           serviceSlug: tab === 'INFORMATION' ? values.serviceSlug || null : null,
           message: values.message,
           consent: true,
-          antiSpam: antiSpam.build(),
+          antiSpam: await antiSpam.build(),
         },
       });
       if (!response.ok || !data) throw toApiError(error, response);
@@ -164,6 +164,7 @@ export function ContactForm({ initialTab, serviceGroups }: ContactFormProps) {
           className="flex flex-col gap-5"
         >
           <input {...antiSpam.honeypotProps} />
+          <div {...antiSpam.widgetProps} />
           <div className="grid gap-4 md:grid-cols-2 md:gap-y-5 max-md:[&>*:nth-child(3)]:mt-1 max-md:[&>*:nth-child(n+5)]:mt-1">
             <Field label="Nom et prénom" required error={errors.fullName?.message}>
               {(control) => (

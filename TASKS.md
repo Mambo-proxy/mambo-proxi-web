@@ -37,7 +37,7 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [x] Bouton WhatsApp flottant (apparition, pulsation, étiquette, décalage cookies)
 - [x] Bandeau cookies + modale « Personnaliser » + chargement GA4 après consentement
 - [~] Bandeau CTA (variantes par page), fil d'Ariane, transitions de page — bandeau et fil d'Ariane faits ; reste : transitions de page (View Transitions)
-- [ ] Protection Turnstile (widget invisible) sur tous les formulaires publics, newsletter comprise (jeton vide pour l'instant)
+- [x] Protection Turnstile (widget invisible) sur tous les formulaires publics, newsletter comprise — fait le 24/10 ; reste à essayer avec une vraie clé (`NEXT_PUBLIC_TURNSTILE_SITE_KEY`, clé de test Cloudflare) sur l'environnement de recette, et à vérifier que l'API refuse un jeton vide en production
 
 ### 1.3 Pages publiques (desktop 1440, tablette, mobile 390)
 

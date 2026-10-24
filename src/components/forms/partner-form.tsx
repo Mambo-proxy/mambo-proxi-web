@@ -123,7 +123,7 @@ export function PartnerForm({ initialType }: { initialType: string | null }) {
           } as PartnerRequestInput['contact'],
           presentation: values.presentation || null,
           consent: true,
-          antiSpam: antiSpam.build(),
+          antiSpam: await antiSpam.build(),
         },
       });
       if (!response.ok || !data) throw toApiError(error, response);
@@ -163,6 +163,7 @@ export function PartnerForm({ initialType }: { initialType: string | null }) {
           className="flex flex-col gap-5"
         >
           <input {...antiSpam.honeypotProps} />
+          <div {...antiSpam.widgetProps} />
           <fieldset>
             <legend className="mb-2.5 font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main">
               Type de partenariat<span className="text-text-brand"> *</span>

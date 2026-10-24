@@ -911,3 +911,17 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 
 - **Chemin de la règle écrit `./messages`** : sans le `./`, Turbopack n'appliquait pas le chargeur, les messages restaient bruts et le formateur réduit affichait les variables telles quelles (`{ref}`) ; les e2e l'ont signalé.
 - **Arrêt à ~186 Ko, sans retirer tailwind-merge** : `cn` charge toute la configuration de tailwind-merge (`extendTailwindMerge`, non élagable), embarquée partout via l'en-tête. Le remplacer par une simple concaténation (`cx`) dans le code client public gagnerait ~9 Ko (≈ 177 Ko, toujours au-dessus de 170) pour ~38 fichiers, une dizaine de conflits de classes côté site et 17 surcharges côté back-office sur des primitives partagées, où la classe gagnante dépendrait de l'ordre du CSS. Le critère retenu est Lighthouse ≥ 90 en CI ; la conversion (avec un contrôle en dev comparant `cx` et tailwind-merge) ne sera faite que si la mesure le demande.
+
+### Protection Turnstile des formulaires publics (24 octobre 2026)
+
+- Cloudflare Turnstile en mode invisible (`interaction-only`) sur les 8 formulaires publics, le « Me prévenir » du Suivi Mambo et la lettre d'information du pied de page : `useAntiSpam().build()` attend désormais le jeton (`antiSpam.turnstileToken`).
+- Script chargé au premier focus dans un formulaire (jamais au chargement de la page, +2 Ko de code sur les pages) ; un jeton par envoi (usage unique, le suivant est préparé aussitôt), attente de 30 s au plus si l'envoi précède la vérification. La newsletter obtient le jeton pendant le chargement de son module d'envoi.
+- Clé publique : `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (fixée au build, documentée dans `.env.example`). Sans clé (développement, mocks, e2e, CI), rien n'est chargé et le jeton reste vide, comme avant. La CSP publique autorisait déjà `challenges.cloudflare.com`.
+- Tests : `turnstile.test.ts` (clé absente, chargement unique, jeton puis renouvellement, attente au premier envoi, échecs du script ou du défi, délai, défi affiché, retrait).
+
+### Décisions
+
+- **Échec de Turnstile = jeton vide, sans message côté site** (script bloqué, défi en erreur, délai dépassé, navigateur non pris en charge) : l'API tranche et renvoie son propre message d'erreur.
+- **Défi interactif en panneau fixe en bas de l'écran** (non maquetté) : le conteneur, caché, est en tête de formulaire ; sur un long formulaire (devis), un défi affiché sur place resterait hors de la vue.
+- **Questionnaire de satisfaction non protégé** : son contrat ne prévoit pas `antiSpam`, l'accès passe déjà par un jeton personnel.
+- **Clé tirée d'une variable d'environnement**, pas encore de `SiteSettings.turnstileSiteKey` (fourni par l'API) : à reconsidérer si la clé doit changer sans nouveau build.
