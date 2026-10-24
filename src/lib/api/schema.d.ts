@@ -4395,7 +4395,8 @@ export interface components {
         SettingsCoordonnees: {
             /** @constant */
             group: "coordonnees";
-            phoneFrance: components["schemas"]["PhoneE164"];
+            /** @description Facultatif depuis le recentrage sur Douala (n'est plus affiché par le site). Le numéro WhatsApp des coordonnées est celui du groupe `whatsapp`. */
+            phoneFrance?: components["schemas"]["PhoneE164"] | null;
             phoneCameroon: components["schemas"]["PhoneE164"];
             email: components["schemas"]["Email"];
             hoursLabel: string;
@@ -4441,6 +4442,8 @@ export interface components {
             defaultTitle: string;
             defaultDescription: string;
             ogImageId?: components["schemas"]["Id"] | null;
+            /** @description Image de partage correspondant à `ogImageId` (lecture seule, ignorée à l'enregistrement). */
+            readonly ogImage?: components["schemas"]["MediaImage"] | null;
             searchConsoleVerification?: string | null;
         };
         /** analytics */

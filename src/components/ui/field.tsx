@@ -1,5 +1,5 @@
 import { ChevronDown, CircleAlert, Phone, type LucideIcon } from 'lucide-react';
-import { useId, type ComponentProps, type ReactNode } from 'react';
+import { useId, type ComponentProps, type ComponentType, type ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
 /** Attributs à transmettre au contrôle d'un `Field` (id, description, état invalide). */
@@ -78,9 +78,12 @@ const controlBase = [
   'disabled:cursor-not-allowed disabled:bg-neutral-50 disabled:text-text-disabled',
 ];
 
+/** Icône lucide ou logo de réseau social (`SOCIAL_ICONS`). */
+type FieldIcon = LucideIcon | ComponentType<{ size?: number; className?: string; 'aria-hidden'?: boolean }>;
+
 type InputProps = ComponentProps<'input'> & {
-  /** Icône 18 px à gauche (maquettes : `Mail`, `Phone`, `User`, `MapPin`…). */
-  icon?: LucideIcon;
+  /** Icône 18 px à gauche (maquettes : `Mail`, `Phone`, `User`, `MapPin`, logos des réseaux…). */
+  icon?: FieldIcon;
 };
 
 /** Saisie : hauteur 54 (py 14 + 24 + bordure), px 16, rayon 12 ; focus = bordure 2 px orange. */

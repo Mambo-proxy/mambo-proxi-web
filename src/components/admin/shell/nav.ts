@@ -15,7 +15,6 @@ import {
   Settings,
   Sparkles,
   Star,
-  UserCog,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -35,7 +34,7 @@ export type AdminNavItem = {
 
 export type AdminNavGroup = { label: string; items: AdminNavItem[] };
 
-/** Navigation de la barre latérale (coque `85:10236`) ; Agenda, Médiathèque, Utilisateurs et Journal non maquettés. */
+/** Navigation de la barre latérale (coque `85:10236`) ; Agenda, Médiathèque et Journal non maquettés (utilisateurs : onglet de Paramètres). */
 export const ADMIN_NAV: AdminNavGroup[] = [
   {
     label: 'Pilotage',
@@ -71,7 +70,6 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     label: 'Réglages',
     items: [
       { label: 'Paramètres', href: adminRoutes.settings, icon: Settings },
-      { label: 'Utilisateurs', href: adminRoutes.users, icon: UserCog, adminOnly: true },
       { label: 'Journal d’activité', href: adminRoutes.activity, icon: History, adminOnly: true },
     ],
   },

@@ -1,6 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import type { Campaign, CampaignFields, CampaignSegment, NewsletterStats } from '@/lib/api/schema';
 import { csvResponse, daysAgo, jsonBody, mockId } from '../admin-utils';
+import { emailDocument } from '../email-layout';
 import { problem } from '../problem';
 
 /** Inscrits confirmés par segment (maquette « BO — Newsletter » : 1 248 inscrits). */
@@ -130,7 +131,11 @@ function apply(item: Campaign, body: CampaignFields) {
 /** Rendu de l'e-mail (gabarit simplifié de l'API : en-tête, corps, pied avec lien de désinscription). */
 function render(item: Campaign) {
   const body = (item.html || '<p>Bonjour {prénom},</p>').replaceAll('{prénom}', 'Aurélie');
-  const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${item.subject}</title><style>body{margin:0;background:#f6f4f1;font-family:Inter,Arial,sans-serif;color:#1d1b19}main{max-width:600px;margin:0 auto;background:#fff;padding:32px}header{font-weight:700;color:#f57c00;font-size:20px;margin-bottom:24px}img{max-width:100%;border-radius:12px}a[data-button]{display:inline-block;background:#f57c00;color:#1d1b19;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:600}footer{max-width:600px;margin:0 auto;padding:16px 32px;font-size:12px;color:#6b6560}</style></head><body><main><header>Mambo Proxi</header>${body}</main><footer>Vous recevez cet e-mail car vous êtes inscrit·e à la newsletter de Mambo Proxi. <a href="#">Se désinscrire</a></footer></body></html>`;
+  const html = emailDocument(
+    item.subject ?? '',
+    body,
+    'Vous recevez cet e-mail car vous êtes inscrit·e à la newsletter de Mambo Proxi. <a href="#">Se désinscrire</a>',
+  );
   const text = body
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')

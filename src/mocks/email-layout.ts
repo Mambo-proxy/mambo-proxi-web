@@ -1,0 +1,4 @@
+/** Gabarit simplifié des e-mails de l'API (en-tête Mambo Proxi, corps, pied) pour les aperçus simulés. */
+export function emailDocument(subject: string, body: string, footer: string): string {
+  return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${subject}</title><style>body{margin:0;background:#f6f4f1;font-family:Inter,Arial,sans-serif;color:#1d1b19}main{max-width:600px;margin:0 auto;background:#fff;padding:32px}header{font-weight:700;color:#f57c00;font-size:20px;margin-bottom:24px}h1{font-size:22px;line-height:1.3}img{max-width:100%;border-radius:12px}a[data-button]{display:inline-block;background:#f57c00;color:#1d1b19;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:600}footer{max-width:600px;margin:0 auto;padding:16px 32px;font-size:12px;color:#6b6560}</style></head><body><main><header>Mambo Proxi</header>${body}</main><footer>${footer}</footer></body></html>`;
+}

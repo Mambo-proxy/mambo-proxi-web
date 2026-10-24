@@ -20,7 +20,7 @@ export const adminRoutes = {
   contacts: '/admin/contacts' as Route,
   newsletter: '/admin/newsletter' as Route,
   settings: '/admin/parametres' as Route,
-  users: '/admin/utilisateurs' as Route,
+  users: '/admin/parametres?onglet=utilisateurs' as Route,
   media: '/admin/mediatheque' as Route,
   activity: '/admin/journal' as Route,
 } as const;
