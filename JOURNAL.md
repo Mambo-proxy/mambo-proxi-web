@@ -840,3 +840,15 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - Zone d'envoi partagée avec le sélecteur d'images des éditeurs (`MediaUploadFields`, `imageFileError`).
 - Mocks : les 15 illustrations du site, usages calculés depuis le catalogue actuel (les libellés dataient de l'ancien catalogue) et les pages ; texte alternatif obligatoire à la modification ; tests `admin-media.test.ts` et `e2e/admin-media.spec.ts`.
 - La 404 du back-office existait déjà (adresse inconnue et contenu supprimé, dans la coque) : tâche cochée.
+
+### Back-office : Journal d'activité (24 octobre 2026)
+
+- Écran non maquetté (`/admin/journal`, administrateurs), dans le langage des listes du back-office : actions regroupées par jour (« Aujourd’hui », « Hier », « lundi 20 octobre »), heure, auteur (avatar, ou « Automatique » pour les tâches du système), libellé, type de contenu ; « Détails » déplie les modifications (« statut : Nouvelle → Devis envoyé ») et l'adresse IP. Pagination par 25.
+- Filtres du contrat dans l'adresse (`?actor=&entity=&periode=&page=`) : utilisateur, type de contenu, période (7, 30 ou 90 jours, depuis le début ; 30 jours par défaut). Le début de période est le début d'une journée : la requête reste la même toute la journée.
+- Un éditeur qui ouvre l'adresse voit « Réservé aux administrateurs » (l'entrée n'est pas dans son menu ; l'API répond 403).
+- Mocks : 72 actions sur 45 jours (demandes, rendez-vous, contenus, réglages, connexions, sauvegardes et questionnaires automatiques) ; tests `admin-audit.test.ts`, `activity-model.test.ts`, `e2e/admin-activity.spec.ts`.
+
+### Décisions
+
+- **Pas de filtre « Automatique »** : le contrat ne filtre que par identifiant d'utilisateur (`actor`) ; les actions du système restent visibles sans filtre d'utilisateur.
+- **État des filtres par `history.replaceState`** (comme la Médiathèque) : filtres purement client, sans nouvelle requête au serveur à chaque changement.

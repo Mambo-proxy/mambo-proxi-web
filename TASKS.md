@@ -85,7 +85,7 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [x] Newsletter (campagnes, éditeur, aperçu, test, programmation, inscrits)
 - [x] Paramètres (coordonnées, WhatsApp, réseaux, e-mails automatiques + éditeur de modèle, référencement, utilisateurs, sécurité & sauvegardes)
 - [x] Médiathèque (grille, recherche, texte alternatif, point focal, usages, envoi, suppression) — non maquettée
-- [ ] Journal d'activité — non maquetté (utilisateurs : onglet de Paramètres)
+- [x] Journal d'activité (par jour, filtres utilisateur / contenu / période, détail des modifications) — non maquetté
 
 ### 1.5 Transverse
 
