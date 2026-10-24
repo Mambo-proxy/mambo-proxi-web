@@ -92,6 +92,8 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [x] SEO : `generateMetadata`, `sitemap.ts`, `robots.ts`, `opengraph-image`, JSON-LD (Organization/LocalBusiness, WebSite, BreadcrumbList, Service, FAQPage, JobPosting, AggregateRating) ; bilingue : canonical de la langue, `hreflang` (fr, en, x-default), `og:locale`, plan du site dans les deux langues
 - [x] Revalidation `/api/revalidate` (tags), `/health`, `middleware` (protection `/admin`, en-têtes de sécurité, CSP avec nonce) — faits et testés (`e2e/seo.spec.ts`), case cochée le 24/10
 - [ ] Accessibilité (axe, clavier), performance (Lighthouse ≥ 90 mobile, JS initial < 170 Ko)
+  - [x] JS initial réduit (24/10) : modale d'inscription aux événements chargée au premier clic, formulaires publics sur `zod/mini` — rubrique 363 → 249 Ko, contact 372 → 308 Ko, devis 355 → 292 Ko (gzip)
+  - [ ] Code commun (~250 Ko sur l'accueil : React, Next, app) à alléger pour viser 170 Ko ; Lighthouse à mesurer en CI (impossible sur ce poste)
 
 ## Phase 1 bis — Refonte des maquettes (octobre 2026)
 

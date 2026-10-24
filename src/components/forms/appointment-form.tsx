@@ -5,7 +5,7 @@ import { addMonths, endOfMonth, format, max as latest, startOfMonth } from 'date
 import { ArrowLeft, CalendarCheck, Check, CircleCheck, Globe, Mail, Smartphone, User } from 'lucide-react';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import * as z from 'zod/mini';
 import { Button } from '@/components/ui/button';
 import { Calendar, type DateKey } from '@/components/ui/calendar';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -16,7 +16,7 @@ import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
 import type { AppointmentFormat, AppointmentReason, Availability } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { formatClock, formatDateTime, formatWeekdayDate } from '@/lib/format/date';
-import { CONSENT_TEXT, fieldRules } from '@/lib/forms/schemas';
+import { CONSENT_TEXT, fieldRules, trimmed } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
 
 const REASONS: ReadonlyArray<{ value: AppointmentReason; label: string }> = [
@@ -40,7 +40,7 @@ const schema = z.object({
   fullName: fieldRules.fullName,
   email: fieldRules.email,
   phone: fieldRules.phone,
-  message: z.string().trim().max(1000, 'Ce message est trop long (1 000 caractères au plus).'),
+  message: trimmed(z.maxLength(1000, 'Ce message est trop long (1 000 caractères au plus).')),
   consent: fieldRules.consent,
 });
 

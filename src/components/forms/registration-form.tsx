@@ -5,7 +5,7 @@ import { ArrowRight, Check, CircleCheck, Mail, Smartphone } from 'lucide-react';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import { z } from 'zod';
+import * as z from 'zod/mini';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field, Input, PhoneInput, Select } from '@/components/ui/field';
@@ -15,7 +15,7 @@ import { browserApi } from '@/lib/api/browser';
 import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
-import { CONSENT_TEXT, fieldRules } from '@/lib/forms/schemas';
+import { CONSENT_TEXT, fieldRules, trimmed } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
 import { routes } from '@/lib/routes';
 
@@ -42,7 +42,8 @@ const ABROAD = 'Hors du Cameroun';
 
 const NEWSLETTER_TEXT = 'Je souhaite recevoir la lettre Mambo (une fois par mois).';
 
-const required = (message: string) => z.string().trim().min(1, message).max(60, 'Ce champ est trop long.');
+const required = (message: string) =>
+  trimmed(z.minLength(1, message), z.maxLength(60, 'Ce champ est trop long.'));
 
 /** Schéma selon le profil : la structure et l'activité sont obligatoires pour un professionnel. */
 function schemaFor(profile: Profile) {
@@ -50,19 +51,20 @@ function schemaFor(profile: Profile) {
   return z.object({
     profile: z.enum(['PARTICULIER', 'PROFESSIONNEL']),
     organization: professional
-      ? z
-          .string()
-          .trim()
-          .min(1, 'Merci d’indiquer le nom de votre structure.')
-          .max(120, 'Ce nom est trop long (120 caractères au plus).')
+      ? trimmed(
+          z.minLength(1, 'Merci d’indiquer le nom de votre structure.'),
+          z.maxLength(120, 'Ce nom est trop long (120 caractères au plus).'),
+        )
       : z.string(),
-    activity: professional ? z.string().min(1, 'Merci de choisir votre activité principale.') : z.string(),
+    activity: professional
+      ? z.string().check(z.minLength(1, 'Merci de choisir votre activité principale.'))
+      : z.string(),
     firstName: required('Merci d’indiquer votre prénom.'),
     lastName: required('Merci d’indiquer votre nom.'),
     email: fieldRules.email,
     phone: fieldRules.phone,
-    city: z.string().min(1, 'Merci de choisir votre ville.'),
-    quarter: z.string().trim().max(60, 'Ce nom de quartier est trop long.'),
+    city: z.string().check(z.minLength(1, 'Merci de choisir votre ville.')),
+    quarter: trimmed(z.maxLength(60, 'Ce nom de quartier est trop long.')),
     interests: z.array(z.string()),
     newsletter: z.boolean(),
     consent: fieldRules.consent,

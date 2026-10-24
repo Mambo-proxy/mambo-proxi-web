@@ -873,3 +873,15 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - Plan du site : chaque page dans les deux langues (`/qui-sommes-nous`, `/en/about-us`), avec ses adresses `hreflang`.
 - Titre de « Nos services » traduit (« Our services ») : c'était le seul titre écrit en dur.
 - Tests : `e2e/seo.spec.ts` (canonical, hreflang, og:locale d'une page anglaise ; plan du site bilingue).
+
+### Performance : JavaScript initial des pages publiques (24 octobre 2026)
+
+- Mesure : scripts référencés par le HTML de chaque page, compressés en gzip (sans les préchargements de liens). Accueil 251 Ko ; pages à formulaire 354 à 372 Ko ; rubriques 363 Ko.
+- Modale d'inscription aux événements (Agenda des rubriques) séparée de son bouton et chargée au premier clic (`next/dynamic`, sans rendu serveur) : rubrique 363 → 249 Ko.
+- Formulaires publics validés avec `zod/mini` et importés en espace de noms (`import * as z from 'zod/mini'`) : l'import `{ z }` empêchait l'élagage et embarquait tout le cœur de zod avec ses ~40 langues de messages (78 Ko) ; il reste 24 Ko. Contact 372 → 308 Ko, devis 355 → 292 Ko, inscription 354 → 291 Ko. Messages d'erreur inchangés.
+- Le back-office (connexion, mot de passe) et la route de revalidation gardent `zod` classique : hors du site public.
+- Test `rubriques.spec.ts` : la modale se charge au premier clic ; le test ne reclique plus quand elle est déjà ouverte.
+
+### Décisions
+
+- **Objectif 170 Ko non atteint** : le socle commun à toutes les pages (React, Next, code de l'app) pèse déjà ~250 Ko ; il fera l'objet d'une analyse séparée (animations, notifications, icônes, messages de traduction).

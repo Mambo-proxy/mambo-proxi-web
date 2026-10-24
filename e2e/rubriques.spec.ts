@@ -109,10 +109,11 @@ test.describe('agenda Culture & événementiel', () => {
   test('inscription à un événement : validation puis confirmation', async ({ page }) => {
     const trigger = page.getByRole('button', { name: /Je participe : Nuit des saveurs camerounaises/ });
     const dialog = page.getByRole('dialog');
+    // La modale est chargée au premier clic : on ne reclique (hydratation) que si elle n'est pas déjà ouverte.
     await expect(async () => {
-      await trigger.click();
-      await expect(dialog).toBeVisible({ timeout: 1500 });
-    }).toPass();
+      if (!(await dialog.isVisible())) await trigger.click({ timeout: 3000 });
+      await expect(dialog).toBeVisible({ timeout: 5000 });
+    }).toPass({ timeout: 30_000 });
     await dialog.getByRole('button', { name: 'Confirmer ma participation' }).click();
     await expect(dialog.getByText('Merci d’indiquer votre nom et votre prénom.')).toBeVisible();
     await expect(dialog.getByText('Merci d’accepter le traitement de vos données')).toBeVisible();

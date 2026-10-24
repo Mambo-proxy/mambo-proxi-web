@@ -1,6 +1,6 @@
-import { z } from 'zod';
+import * as z from 'zod/mini';
 import type { ContactPreference, QuoteField } from '@/lib/api/schema';
-import { fieldRules } from '@/lib/forms/schemas';
+import { fieldRules, trimmed } from '@/lib/forms/schemas';
 
 export const CONTACT_PREFERENCES: ReadonlyArray<{ value: ContactPreference; label: string }> = [
   { value: 'WHATSAPP', label: 'WhatsApp' },
@@ -11,38 +11,39 @@ export const CONTACT_PREFERENCES: ReadonlyArray<{ value: ContactPreference; labe
 /** Règle d'un champ dynamique : valeurs saisies en texte, converties à l'envoi (voir `toNeeds`). */
 function needRule(field: QuoteField) {
   const base = field.required
-    ? z.string().trim().min(1, `Merci de renseigner « ${field.label} ».`)
-    : z.string().trim();
+    ? trimmed(z.minLength(1, `Merci de renseigner « ${field.label} ».`))
+    : trimmed();
   if (field.type !== 'number') return base;
-  return base.refine(
-    (value) => {
-      if (!value) return true;
-      const number = Number(value);
-      return (
-        Number.isInteger(number) &&
-        (field.min == null || number >= field.min) &&
-        (field.max == null || number <= field.max)
-      );
-    },
-    `Merci d’indiquer un nombre entre ${field.min ?? 1} et ${field.max ?? 999}.`,
+  return base.check(
+    z.refine(
+      (value) => {
+        if (!value) return true;
+        const number = Number(value);
+        return (
+          Number.isInteger(number) &&
+          (field.min == null || number >= field.min) &&
+          (field.max == null || number <= field.max)
+        );
+      },
+      `Merci d’indiquer un nombre entre ${field.min ?? 1} et ${field.max ?? 999}.`,
+    ),
   );
 }
 
 /** Schéma du formulaire de devis pour les champs dynamiques de la rubrique choisie. */
 export function quoteSchema(fields: QuoteField[]) {
   return z.object({
-    categorySlug: z.string().min(1, 'Merci de choisir une rubrique.'),
-    serviceSlug: z.string().min(1, 'Merci de choisir un service.'),
+    categorySlug: z.string().check(z.minLength(1, 'Merci de choisir une rubrique.')),
+    serviceSlug: z.string().check(z.minLength(1, 'Merci de choisir un service.')),
     needs: z.object(Object.fromEntries(fields.map((field) => [field.name, needRule(field)]))),
-    description: z
-      .string()
-      .trim()
-      .min(20, 'Merci de décrire votre besoin en quelques phrases (20 caractères au moins).')
-      .max(3000, 'Cette description est trop longue (3 000 caractères au plus).'),
+    description: trimmed(
+      z.minLength(20, 'Merci de décrire votre besoin en quelques phrases (20 caractères au moins).'),
+      z.maxLength(3000, 'Cette description est trop longue (3 000 caractères au plus).'),
+    ),
     fullName: fieldRules.fullName,
     email: fieldRules.email,
     phone: fieldRules.phone,
-    city: z.string().min(1, 'Merci de choisir votre ville ou votre quartier.'),
+    city: z.string().check(z.minLength(1, 'Merci de choisir votre ville ou votre quartier.')),
     contactPreference: z.enum(['WHATSAPP', 'TELEPHONE', 'EMAIL']),
     consent: fieldRules.consent,
   });

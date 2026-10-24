@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Check, CircleCheck, Lock, Mail, Smartphone, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import { z } from 'zod';
+import * as z from 'zod/mini';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field, Input, PhoneInput, Select, Textarea } from '@/components/ui/field';
@@ -13,7 +13,7 @@ import { browserApi } from '@/lib/api/browser';
 import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
 import type { PartnerRequestInput, PartnershipType } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
-import { CONSENT_TEXT, fieldRules } from '@/lib/forms/schemas';
+import { CONSENT_TEXT, fieldRules, trimmed } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
 
 export const PARTNERSHIP_TYPES: ReadonlyArray<{ value: PartnershipType; label: string }> = [
@@ -37,21 +37,19 @@ const schema = z.object({
   partnershipType: z.enum(['PRESTATAIRE_EXPERIENCE', 'IMMOBILIER', 'ENTREPRISE_PRESTATAIRE', 'AUTRE'], {
     error: 'Merci de choisir un type de partenariat.',
   }),
-  organization: z
-    .string()
-    .trim()
-    .min(1, 'Merci d’indiquer le nom de votre structure.')
-    .max(120, 'Ce nom est trop long (120 caractères au plus).'),
-  activity: z
-    .string()
-    .trim()
-    .min(1, 'Merci d’indiquer votre activité.')
-    .max(120, 'Ce texte est trop long (120 caractères au plus).'),
+  organization: trimmed(
+    z.minLength(1, 'Merci d’indiquer le nom de votre structure.'),
+    z.maxLength(120, 'Ce nom est trop long (120 caractères au plus).'),
+  ),
+  activity: trimmed(
+    z.minLength(1, 'Merci d’indiquer votre activité.'),
+    z.maxLength(120, 'Ce texte est trop long (120 caractères au plus).'),
+  ),
   fullName: fieldRules.fullName,
   email: fieldRules.email,
   phone: fieldRules.phone,
-  location: z.string().min(1, 'Merci de choisir votre ville.'),
-  presentation: z.string().trim().max(3000, 'Ce texte est trop long (3 000 caractères au plus).'),
+  location: z.string().check(z.minLength(1, 'Merci de choisir votre ville.')),
+  presentation: trimmed(z.maxLength(3000, 'Ce texte est trop long (3 000 caractères au plus).')),
   consent: fieldRules.consent,
 });
 

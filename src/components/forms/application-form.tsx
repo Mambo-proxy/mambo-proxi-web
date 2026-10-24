@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { CircleCheck, Mail, MapPin, Smartphone, User } from 'lucide-react';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { z } from 'zod';
+import * as z from 'zod/mini';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dropzone } from '@/components/ui/dropzone';
@@ -13,7 +13,7 @@ import { toast } from '@/components/ui/toaster';
 import { browserApi } from '@/lib/api/browser';
 import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
 import type { JobApplicationInput } from '@/lib/api/schema';
-import { CONSENT_TEXT, fieldRules } from '@/lib/forms/schemas';
+import { CONSENT_TEXT, fieldRules, trimmed } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
 
 /** CV : PDF ou Word, 5 Mo au plus (contrat `JobApplicationInput.cv`). */
@@ -24,13 +24,13 @@ const CV_MAX_SIZE = 5 * 1024 * 1024;
 const SPONTANEOUS = 'spontanee';
 
 const schema = z.object({
-  jobSlug: z.string().min(1, 'Merci de choisir le poste visé.'),
+  jobSlug: z.string().check(z.minLength(1, 'Merci de choisir le poste visé.')),
   fullName: fieldRules.fullName,
   email: fieldRules.email,
   phone: fieldRules.phone,
-  city: z.string().trim().max(80, 'Ce nom de ville est trop long.'),
+  city: trimmed(z.maxLength(80, 'Ce nom de ville est trop long.')),
   cv: z.custom<File>((value) => value instanceof File, { message: 'Merci de joindre votre CV.' }),
-  message: z.string().trim().max(3000, 'Ce message est trop long (3 000 caractères au plus).'),
+  message: trimmed(z.maxLength(3000, 'Ce message est trop long (3 000 caractères au plus).')),
   consent: fieldRules.consent,
 });
 

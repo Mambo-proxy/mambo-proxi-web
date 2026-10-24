@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Calendar, CircleCheck, Mail, Smartphone, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import { z } from 'zod';
+import * as z from 'zod/mini';
 import { TRAINING_REQUEST_EVENT } from '@/components/sections/training/trainings-catalog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -13,7 +13,7 @@ import { toast } from '@/components/ui/toaster';
 import { browserApi } from '@/lib/api/browser';
 import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
 import type { Training } from '@/lib/api/schema';
-import { CONSENT_TEXT, fieldRules } from '@/lib/forms/schemas';
+import { CONSENT_TEXT, fieldRules, trimmed } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
 
 /** Valeur de la liste pour une formation hors catalogue (contrat : `trainingSlug: autre`). */
@@ -21,31 +21,31 @@ const OTHER = 'autre';
 
 const schema = z
   .object({
-    trainingSlug: z.string().min(1, 'Merci de choisir une formation.'),
-    otherTraining: z.string().trim().max(200, 'Ce texte est trop long (200 caractères au plus).'),
-    organization: z
-      .string()
-      .trim()
-      .min(1, 'Merci d’indiquer votre structure.')
-      .max(120, 'Ce nom est trop long (120 caractères au plus).'),
-    participants: z
-      .string()
-      .trim()
-      .min(1, 'Merci d’indiquer le nombre de participants.')
-      .refine((value) => /^\d+$/.test(value) && Number(value) >= 1 && Number(value) <= 500, {
+    trainingSlug: z.string().check(z.minLength(1, 'Merci de choisir une formation.')),
+    otherTraining: trimmed(z.maxLength(200, 'Ce texte est trop long (200 caractères au plus).')),
+    organization: trimmed(
+      z.minLength(1, 'Merci d’indiquer votre structure.'),
+      z.maxLength(120, 'Ce nom est trop long (120 caractères au plus).'),
+    ),
+    participants: trimmed(
+      z.minLength(1, 'Merci d’indiquer le nombre de participants.'),
+      z.refine((value) => /^\d+$/.test(value) && Number(value) >= 1 && Number(value) <= 500, {
         message: 'Merci d’indiquer un nombre entre 1 et 500.',
       }),
+    ),
     fullName: fieldRules.fullName,
     email: fieldRules.email,
     phone: fieldRules.phone,
-    period: z.string().trim().max(120, 'Ce texte est trop long.'),
-    message: z.string().trim().max(3000, 'Ce texte est trop long (3 000 caractères au plus).'),
+    period: trimmed(z.maxLength(120, 'Ce texte est trop long.')),
+    message: trimmed(z.maxLength(3000, 'Ce texte est trop long (3 000 caractères au plus).')),
     consent: fieldRules.consent,
   })
-  .refine((values) => values.trainingSlug !== OTHER || values.otherTraining.length > 0, {
-    path: ['otherTraining'],
-    message: 'Merci de préciser la formation souhaitée.',
-  });
+  .check(
+    z.refine((values) => values.trainingSlug !== OTHER || values.otherTraining.length > 0, {
+      path: ['otherTraining'],
+      message: 'Merci de préciser la formation souhaitée.',
+    }),
+  );
 
 type FormInput = z.input<typeof schema>;
 type FormOutput = z.output<typeof schema>;

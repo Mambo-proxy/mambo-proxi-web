@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { CircleCheck, Mail, Smartphone, User } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
+import * as z from 'zod/mini';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field, Input, PhoneInput, Select, Textarea } from '@/components/ui/field';
@@ -12,7 +12,7 @@ import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { toast } from '@/components/ui/toaster';
 import { browserApi } from '@/lib/api/browser';
 import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
-import { CONSENT_TEXT, fieldRules } from '@/lib/forms/schemas';
+import { CONSENT_TEXT, fieldRules, trimmed } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
 
 export type ContactTab = 'CONTACT' | 'INFORMATION';
@@ -39,11 +39,10 @@ const schema = z.object({
   city: z.string(),
   subject: z.string(),
   serviceSlug: z.string(),
-  message: z
-    .string()
-    .trim()
-    .min(10, 'Merci d’écrire votre message (10 caractères au moins).')
-    .max(3000, 'Ce message est trop long (3 000 caractères au plus).'),
+  message: trimmed(
+    z.minLength(10, 'Merci d’écrire votre message (10 caractères au moins).'),
+    z.maxLength(3000, 'Ce message est trop long (3 000 caractères au plus).'),
+  ),
   consent: fieldRules.consent,
 });
 
