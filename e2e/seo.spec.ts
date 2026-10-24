@@ -76,6 +76,33 @@ test.describe('référencement', () => {
     ])
       expect(xml).toContain(path);
     expect(xml.match(/<url>/g)?.length).toBeGreaterThan(40);
+    // Chaque page dans les deux langues, avec ses adresses hreflang.
+    expect(xml).toContain('<loc>http://localhost:3100/en/about-us</loc>');
+    expect(xml).toMatch(/hreflang="en" href="http:\/\/localhost:3100\/en\/careers\//);
+  });
+
+  test('pages bilingues : canonical de la langue, hreflang et og:locale', async ({ page }) => {
+    await page.goto('/en/about-us');
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /\/en\/about-us$/);
+    await expect(page.locator('link[rel="alternate"][hreflang="fr"]')).toHaveAttribute(
+      'href',
+      /\/qui-sommes-nous$/,
+    );
+    await expect(page.locator('link[rel="alternate"][hreflang="x-default"]')).toHaveAttribute(
+      'href',
+      /\/qui-sommes-nous$/,
+    );
+    await expect(page.locator('meta[property="og:locale"]')).toHaveAttribute('content', 'en_GB');
+    await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', /\/en\/about-us$/);
+
+    await page.goto('/services');
+    await expect(page).toHaveTitle(/^Nos services/);
+    await expect(page.locator('link[rel="alternate"][hreflang="en"]')).toHaveAttribute(
+      'href',
+      /\/en\/services$/,
+    );
+    await page.goto('/en/services');
+    await expect(page).toHaveTitle(/^Our services/);
   });
 
   test('image de partage générée', async ({ request }) => {

@@ -1,5 +1,6 @@
 import type { Metadata, Route } from 'next';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { PageHero } from '@/components/sections/page-hero';
 import { CategoryNav } from '@/components/sections/services/category-nav';
 import { CategoryServices } from '@/components/sections/services/category-services';
@@ -33,8 +34,8 @@ async function getServicesData() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { page } = await getServicesData();
-  return seoMetadata({ title: 'Nos services', path: '/services', seo: page?.seo });
+  const [{ page }, t] = await Promise.all([getServicesData(), getTranslations('services')]);
+  return seoMetadata({ title: t('metaTitle'), path: '/services', seo: page?.seo });
 }
 
 /** « Nos services » (Figma `58:828`, mobile `58:1543`) : héros, rubriques avec leurs services, bandeau CTA. */
