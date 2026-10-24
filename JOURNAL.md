@@ -710,3 +710,18 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 ### Difficultés et solutions
 
 - **Listes réordonnables dans un tableau** : dnd-kit insérait ses zones d'annonce (`div`) dans `<table>` (HTML invalide signalé par React) ; elles sont placées dans `body` pour les listes `tbody`.
+
+### Back-office : Pages & textes (24 octobre 2026)
+
+- Écran repris de la branche en cours et recalé sur la refonte (`92:10771`, seuls le menu et le libellé « univers de services » ont changé) : l'accueil compte désormais 10 sections (« Formules à domicile » et « Zones d’intervention » ajoutées, contenus calculés renvoyant vers Services et Zones d’intervention).
+- Liste « Pages du site » complétée : rubrique Services à domicile (composée dans Services), Zones d’intervention après les rubriques, Magazine après Suivi Mambo.
+- Chiffres clés : une valeur sans nombre (« Douala ») est acceptée et affichée telle quelle (`valueText` du contrat).
+- Fidélité : liste des pages et cartes de section conformes ; capture plus haute que la maquette (2 781 px pour 1 419) car la section principale de l’accueil refondu a plus de champs (visuel secondaire, badge, preuve sociale, cartes flottantes) et l’accueil 10 sections. Captures `qa/fidelite/bo-pages-textes-*.png`.
+
+### Décisions
+
+- **Place de Zones d’intervention et Magazine dans la liste** : absents de la maquette (cadre antérieur à ces pages) ; placés près des pages auxquelles ils se rattachent.
+
+### Difficultés et solutions
+
+- **Erreur d’hydratation sur Pages & textes** : l’en-tête de l’écran est rendu sous `Suspense` (paramètres d’adresse) et s’hydrate après le chargement du compteur de notifications ; la pastille de la cloche n’est plus rendue qu’après l’hydratation.
