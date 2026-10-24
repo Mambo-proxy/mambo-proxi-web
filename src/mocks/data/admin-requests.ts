@@ -33,6 +33,8 @@ type Seed = {
   /** Objet affiché dans la liste (demandes de partenariat : nom de la structure). */
   subject?: string;
   preference?: ContactPreference;
+  /** Données propres au formulaire (demandes de formation : structure, formation, participants, période). */
+  payload?: Record<string, unknown>;
   message?: string;
   fields?: [string, string][];
 };
@@ -261,6 +263,102 @@ const PARTNERSHIPS: Record<number, Partial<Seed>> = {
   },
 };
 
+/** Demande de formation (`93:22827`) : structure, formation souhaitée, participants et période. */
+function trainingRequest(
+  organization: string,
+  trainingSlug: string,
+  title: string,
+  participants: number,
+  period: string,
+  daysAgo: number,
+  message: string,
+): Partial<Seed> {
+  return {
+    type: 'FORMATION',
+    subject: title,
+    createdAt: at(daysAgo, 10, 15),
+    message,
+    payload: { organization, trainingSlug, participants, period },
+    fields: [
+      ['Structure', organization],
+      ['Formation souhaitée', title],
+      ['Participants', String(participants)],
+      ['Période souhaitée', period],
+    ],
+  };
+}
+
+/**
+ * Demandes de formation (Formations, `93:22812`) : elles remplacent quatre demandes de démonstration (statuts
+ * conservés), pour garder les totaux de la maquette Demandes ; reçues il y a plus de 5 jours, elles restent après
+ * les 8 demandes de la maquette.
+ */
+const TRAINING_REQUESTS: Record<
+  number,
+  Partial<Seed> & Pick<Seed, 'firstName' | 'lastName' | 'city' | 'country'>
+> = {
+  2: {
+    firstName: 'Mme',
+    lastName: 'Ekambi',
+    city: 'Douala',
+    country: 'CM',
+    ...trainingRequest(
+      'Hôtel La Falaise',
+      'accueil-relation-client',
+      'Accueil et relation client',
+      12,
+      'Janvier 2027',
+      6,
+      'Formation de notre équipe de réception avant la haute saison.',
+    ),
+  },
+  23: {
+    firstName: 'M.',
+    lastName: 'Tchakounté',
+    city: 'Douala',
+    country: 'CM',
+    ...trainingRequest(
+      'Association Femmes d’Akwa',
+      'accompagner-proche-age',
+      'Accompagner un proche âgé à domicile',
+      20,
+      'Décembre 2026',
+      8,
+      'Séance de sensibilisation pour les membres de l’association.',
+    ),
+  },
+  8: {
+    firstName: 'Mme',
+    lastName: 'Owona',
+    city: 'Yaoundé',
+    country: 'CM',
+    ...trainingRequest(
+      'Résidences Bastos',
+      'entretien-logements',
+      'Entretien professionnel des logements',
+      6,
+      'Novembre 2026',
+      9,
+      'Formation de nos agents d’entretien pour nos appartements meublés.',
+    ),
+  },
+  29: {
+    firstName: 'Paul',
+    lastName: 'Ngando',
+    city: 'Bonanjo, Douala',
+    country: 'CM',
+    ...trainingRequest(
+      'Cuisines du Littoral',
+      'hygiene-securite-cuisine',
+      'Hygiène et sécurité en cuisine',
+      8,
+      'Octobre 2026',
+      14,
+      'Mise à niveau hygiène pour nos cuisiniers et commis.',
+    ),
+  },
+};
+
 const generated: Seed[] = REMAINING.map((status, index) => {
   const [city, country] = PLACES[index % PLACES.length]!;
   const [service, serviceSlug, category] = SERVICES[index % SERVICES.length]!;
@@ -278,6 +376,7 @@ const generated: Seed[] = REMAINING.map((status, index) => {
     type: index % 6 === 5 ? OTHER_TYPES[index % OTHER_TYPES.length] : 'DEVIS',
     preference: (['WHATSAPP', 'EMAIL', 'TELEPHONE'] as const)[index % 3],
     ...PARTNERSHIPS[index],
+    ...TRAINING_REQUESTS[index],
   };
 });
 
@@ -356,7 +455,7 @@ function toDetail(seed: Seed, index: number): RequestDetail {
     fields: [['Rubrique', categoryName] as [string, string], ...(seed.fields ?? [['Ville', seed.city]])].map(
       ([label, value]) => ({ key: slugify(label), label, value }),
     ),
-    payload: {},
+    payload: seed.payload ?? {},
     notes: [],
     history,
     attachments: [],

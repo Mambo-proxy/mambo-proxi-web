@@ -1,8 +1,8 @@
 import { http, HttpResponse } from 'msw';
-import type { Training, TrainingCategory } from '@/lib/api/schema';
+import type { AdminTraining, Training, TrainingCategory } from '@/lib/api/schema';
 import { langOf } from '../data/catalogue';
 
-const LABELS: Record<TrainingCategory, { label: string; audience: string }> = {
+export const TRAINING_LABELS: Record<TrainingCategory, { label: string; audience: string }> = {
   PROFESSIONNELS: { label: 'Professionnels', audience: 'Prestataires et entreprises' },
   ATELIERS: { label: 'Ateliers', audience: 'Particuliers et familles' },
   SENSIBILISATION: { label: 'Sensibilisation', audience: 'Familles et associations' },
@@ -22,8 +22,8 @@ function training(
     slug,
     title,
     category,
-    categoryLabel: LABELS[category].label,
-    audienceLabel: LABELS[category].audience,
+    categoryLabel: TRAINING_LABELS[category].label,
+    audienceLabel: TRAINING_LABELS[category].audience,
     icon,
     duration,
     format,
@@ -33,7 +33,7 @@ function training(
 }
 
 /** Catalogue simulé : les 6 formations de la maquette Formation (`66:6370`), dans le même ordre. */
-export const trainings: Training[] = [
+const seeds: Training[] = [
   training(
     'accueil-relation-client',
     'Accueil et relation client',
@@ -90,6 +90,62 @@ export const trainings: Training[] = [
   ),
 ];
 
+/** Demandes reçues par formation (maquette « BO — Formations », `93:22608`). */
+const REQUESTS: Record<string, number> = {
+  'accueil-relation-client': 3,
+  'hygiene-securite-cuisine': 2,
+  'entretien-logements': 1,
+  'gestion-locative-fondamentaux': 0,
+  'preparer-installation-cameroun': 4,
+  'accompagner-proche-age': 1,
+};
+
+/**
+ * Formations du back-office : le site lit les formations publiées, dans l'ordre enregistré. Créer, modifier,
+ * dépublier ou réordonner une formation dans le back-office met donc à jour `GET /v1/trainings`.
+ */
+export const adminTrainings: AdminTraining[] = seeds.map((item, index) => ({
+  ...item,
+  status: 'PUBLISHED',
+  sortOrder: index,
+  requestsCount: REQUESTS[item.slug] ?? 0,
+}));
+
+export const sortedTrainings = () => [...adminTrainings].sort((a, b) => a.sortOrder - b.sortOrder);
+
+/** Formations publiées, sans les champs du back-office. */
+function published(): Training[] {
+  return sortedTrainings()
+    .filter((item) => item.status === 'PUBLISHED')
+    .map(
+      ({
+        id,
+        slug,
+        title,
+        category,
+        categoryLabel,
+        audienceLabel,
+        icon,
+        duration,
+        format,
+        location,
+        description,
+      }) => ({
+        id,
+        slug,
+        title,
+        category,
+        categoryLabel,
+        audienceLabel,
+        icon,
+        duration,
+        format,
+        location,
+        description,
+      }),
+    );
+}
+
 /** Textes anglais du catalogue (`?lang=en`), par formation. */
 const LABELS_EN: Record<TrainingCategory, { label: string; audience: string }> = {
   PROFESSIONNELS: { label: 'Professionals', audience: 'Service providers and businesses' },
@@ -108,18 +164,18 @@ const EN: Record<string, { title: string; duration: string }> = {
 
 const FORMATS_EN: Record<string, string> = { Présentiel: 'In person', 'En ligne': 'Online' };
 
-const trainingsEn: Training[] = trainings.map((item) => ({
+const inEnglish = (item: Training): Training => ({
   ...item,
   ...EN[item.slug],
   categoryLabel: LABELS_EN[item.category].label,
   audienceLabel: LABELS_EN[item.category].audience,
   format: FORMATS_EN[item.format] ?? item.format,
-}));
+});
 
 export const trainingHandlers = [
   http.get('*/v1/trainings', ({ request }) => {
     const category = new URL(request.url).searchParams.get('category');
-    const list = langOf(request) === 'en' ? trainingsEn : trainings;
+    const list = langOf(request) === 'en' ? published().map(inEnglish) : published();
     return HttpResponse.json(category ? list.filter((item) => item.category === category) : list);
   }),
 ];

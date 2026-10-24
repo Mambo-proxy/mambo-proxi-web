@@ -6408,6 +6408,14 @@
     "examples": {}
   },
   {
+    "operationId": "adminListTrainingRequests",
+    "method": "GET",
+    "path": "/v1/admin/training-requests",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
     "operationId": "adminGetMagazine",
     "method": "GET",
     "path": "/v1/admin/magazine",

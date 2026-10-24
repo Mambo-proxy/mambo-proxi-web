@@ -1578,6 +1578,26 @@ export interface paths {
         patch: operations["adminUpdateTraining"];
         trace?: never;
     };
+    "/v1/admin/training-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Demandes de formation
+         * @description Demandes « Demande de formation » du site (type `FORMATION` des demandes), avec la structure, la formation souhaitée, le nombre de participants et la période. Le détail et le statut se gèrent dans les demandes (`/v1/admin/requests/{id}`).
+         */
+        get: operations["adminListTrainingRequests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/admin/magazine": {
         parameters: {
             query?: never;
@@ -4035,6 +4055,25 @@ export interface components {
             sortOrder: number;
             requestsCount: number;
         };
+        AdminTrainingRequest: {
+            id: components["schemas"]["Id"];
+            reference: components["schemas"]["Reference"];
+            status: components["schemas"]["RequestStatus"];
+            /** @example Hôtel La Falaise */
+            organization?: string | null;
+            contact: components["schemas"]["ContactSummary"];
+            /** @description Formation du catalogue ; `null` pour une demande « Autre » (`otherTraining`). */
+            training?: {
+                id: components["schemas"]["Id"];
+                slug: components["schemas"]["Slug"];
+                title: string;
+            } | null;
+            otherTraining?: string | null;
+            participants: number;
+            /** @example Janvier 2027 */
+            period?: string | null;
+            createdAt: components["schemas"]["DateTime"];
+        };
         /**
          * @description `SCHEDULED` : publication programmée (`publishAt` dans le futur).
          * @enum {string}
@@ -5108,6 +5147,7 @@ export type TrainingFields = components['schemas']['TrainingFields'];
 export type TrainingInput = components['schemas']['TrainingInput'];
 export type TrainingPatch = components['schemas']['TrainingPatch'];
 export type AdminTraining = components['schemas']['AdminTraining'];
+export type AdminTrainingRequest = components['schemas']['AdminTrainingRequest'];
 export type MagazineEditionStatus = components['schemas']['MagazineEditionStatus'];
 export type MagazineLanguage = components['schemas']['MagazineLanguage'];
 export type MagazineArticleFields = components['schemas']['MagazineArticleFields'];
@@ -8542,6 +8582,34 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             404: components["responses"]["NotFound"];
             422: components["responses"]["ValidationError"];
+        };
+    };
+    adminListTrainingRequests: {
+        parameters: {
+            query?: {
+                status?: components["schemas"]["RequestStatus"];
+                page?: components["parameters"]["Page"];
+                pageSize?: components["parameters"]["PageSize"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Page de demandes de formation, la plus récente en premier. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        data: components["schemas"]["AdminTrainingRequest"][];
+                        meta: components["schemas"]["PaginationMeta"];
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
         };
     };
     adminGetMagazine: {
