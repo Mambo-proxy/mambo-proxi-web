@@ -1,7 +1,28 @@
 import { differenceInCalendarDays } from 'date-fns';
 import { TZDate } from '@date-fns/tz';
-import type { ApplicationStatus } from '@/lib/api/schema';
+import type { AdminJobOffer, ApplicationStatus } from '@/lib/api/schema';
 import { DEFAULT_TIME_ZONE, formatDayMonth } from '@/lib/format/date';
+
+/**
+ * Offre du back-office : champs obligatoires du contrat (`AdminJobOffer.required`), que le générateur de types laisse
+ * facultatifs dans un `allOf`.
+ */
+export type JobOffer = AdminJobOffer &
+  Required<
+    Pick<
+      AdminJobOffer,
+      | 'title'
+      | 'slug'
+      | 'city'
+      | 'country'
+      | 'contractType'
+      | 'summary'
+      | 'missions'
+      | 'profile'
+      | 'benefits'
+      | 'status'
+    >
+  >;
 
 export const APPLICATION_STATUS_LABELS: Record<ApplicationStatus, string> = {
   NOUVEAU: 'Nouveau',
@@ -31,7 +52,10 @@ export const COUNTRIES = [
 export const SPONTANEOUS = 'spontaneous';
 
 /** Date de réception courte : « Aujourd’hui », « Hier », puis « 2 oct. » (maquette `93:22046`). */
-export function receivedLabel(date: string | number | Date, now: string | number | Date = Date.now()): string {
+export function receivedLabel(
+  date: string | number | Date,
+  now: string | number | Date = Date.now(),
+): string {
   const days = differenceInCalendarDays(
     new TZDate(new Date(now).getTime(), DEFAULT_TIME_ZONE),
     new TZDate(new Date(date).getTime(), DEFAULT_TIME_ZONE),
@@ -43,9 +67,9 @@ export function receivedLabel(date: string | number | Date, now: string | number
 
 /** Taille d'un fichier : « 186 Ko », « 1,2 Mo ». */
 export function fileSizeLabel(bytes: number): string {
-  if (bytes < 1000) return `${bytes} o`;
-  if (bytes < 1_000_000) return `${Math.round(bytes / 1000)} Ko`;
-  return `${(bytes / 1_000_000).toFixed(1).replace('.', ',')} Mo`;
+  if (bytes < 1000) return `${bytes}\u00A0o`;
+  if (bytes < 1_000_000) return `${Math.round(bytes / 1000)}\u00A0Ko`;
+  return `${(bytes / 1_000_000).toFixed(1).replace('.', ',')}\u00A0Mo`;
 }
 
 /** Libellé court du bouton de téléchargement (« CV.pdf », « CV.docx »), comme la maquette. */

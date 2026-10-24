@@ -5,7 +5,7 @@ import { toast } from '@/components/ui/toaster';
 import { data } from '@/lib/admin/query';
 import { browserApi } from '@/lib/api/browser';
 import { ApiError, errorMessage } from '@/lib/api/errors';
-import type { AdminJobOffer, PublishStatus } from '@/lib/api/schema';
+import type { PublishStatus } from '@/lib/api/schema';
 
 export const jobsKey = ['jobs'] as const;
 export const jobKey = (id: string) => ['job', id] as const;
@@ -22,11 +22,11 @@ export function useOfferActions() {
 
   const setStatus = useMutation({
     mutationFn: ({ id, status }: { id: string; status: PublishStatus }) =>
-      data(browserApi.PATCH('/v1/admin/jobs/{id}', { params: { path: { id } }, body: { status } })),
-    onSuccess: (offer: AdminJobOffer) => {
+      data(browserApi.PATCH('/v1/admin/jobs/{id}', { params: { path: { id } }, body: { status } as never })),
+    onSuccess: (offer, { status }) => {
       client.setQueryData(jobKey(offer.id), offer);
       void client.invalidateQueries({ queryKey: jobsKey });
-      toast.success(STATUS_MESSAGES[offer.status]);
+      toast.success(STATUS_MESSAGES[status]);
     },
     // Publication refusée (offre incomplète) : premier motif précis plutôt que le message générique.
     onError: (error) =>

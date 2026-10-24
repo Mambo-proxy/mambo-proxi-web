@@ -7,9 +7,8 @@ import { useState } from 'react';
 import { ConfirmDialog, PublishStatusBadge } from '@/components/admin/editor/editor-ui';
 import { ActionMenu, type ActionMenuItem } from '@/components/admin/ui/action-menu';
 import { adminRoutes } from '@/lib/admin/routes';
-import type { AdminJobOffer } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
-import { applicationsCountLabel, offerMeta } from './labels';
+import { applicationsCountLabel, offerMeta, type JobOffer } from './labels';
 import { useOfferActions } from './use-offer-actions';
 
 /** Adresse de l'éditeur d'une offre. */
@@ -26,7 +25,7 @@ function OfferActions({
   onApplications,
   onDelete,
 }: {
-  offer: AdminJobOffer;
+  offer: JobOffer;
   onApplications: () => void;
   onDelete: () => void;
 }) {
@@ -79,7 +78,11 @@ function OfferActions({
           <Eye aria-hidden size={16} />
         </button>
       )}
-      <Link href={offerEditorHref(offer.id)} aria-label={`Modifier l’offre « ${offer.title} »`} className={iconButton}>
+      <Link
+        href={offerEditorHref(offer.id)}
+        aria-label={`Modifier l’offre « ${offer.title} »`}
+        className={iconButton}
+      >
         <Pencil aria-hidden size={16} />
       </Link>
       <ActionMenu label={`Autres actions pour l’offre « ${offer.title} »`} items={items} />
@@ -95,11 +98,11 @@ export function OffersTable({
   offers,
   onApplications,
 }: {
-  offers: AdminJobOffer[];
+  offers: JobOffer[];
   onApplications: (id: string) => void;
 }) {
   const { remove } = useOfferActions();
-  const [deleting, setDeleting] = useState<AdminJobOffer | null>(null);
+  const [deleting, setDeleting] = useState<JobOffer | null>(null);
 
   return (
     <>
@@ -125,7 +128,9 @@ export function OffersTable({
                 <span className="text-text-muted">
                   {' '}
                   · {offer.applicationsCount} candidature{offer.applicationsCount > 1 ? 's' : ''}
-                  {offer.newApplicationsCount ? ` dont ${offer.newApplicationsCount} nouvelle${offer.newApplicationsCount > 1 ? 's' : ''}` : ''}
+                  {offer.newApplicationsCount
+                    ? ` dont ${offer.newApplicationsCount} nouvelle${offer.newApplicationsCount > 1 ? 's' : ''}`
+                    : ''}
                 </span>
               </p>
               <OfferActions
@@ -200,9 +205,7 @@ export function OffersTable({
       <ConfirmDialog
         open={deleting !== null}
         onClose={() => setDeleting(null)}
-        onConfirm={() =>
-          deleting && remove.mutate(deleting.id, { onSuccess: () => setDeleting(null) })
-        }
+        onConfirm={() => deleting && remove.mutate(deleting.id, { onSuccess: () => setDeleting(null) })}
         title="Supprimer cette offre ?"
         description={
           deleting

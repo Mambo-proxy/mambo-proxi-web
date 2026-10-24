@@ -27,6 +27,9 @@ function fromSite(job: JobOfferDetail, index: number): StoredJobOffer {
     startDate: job.startDate ?? null,
     workingTime: job.workingTime ?? null,
     locationLabel: job.locationLabel ?? null,
+    sectors: [...job.sectors],
+    salary: job.salary ?? null,
+    schedule: job.schedule ?? null,
     // Le contrat d'administration n'a qu'un texte de présentation (`summary`) : celui affiché sous « Le poste ».
     summary: job.description ?? job.summary,
     missions: [...job.missions],
@@ -80,6 +83,9 @@ function toSite(offer: StoredJobOffer): JobOfferDetail {
     startDate: offer.startDate ?? null,
     workingTime: offer.workingTime ?? null,
     locationLabel: offer.locationLabel ?? null,
+    sectors: offer.sectors ?? [],
+    salary: offer.salary ?? null,
+    schedule: offer.schedule ?? null,
     missions: offer.missions ?? [],
     profile: offer.profile ?? [],
     benefits: offer.benefits ?? [],
@@ -163,15 +169,14 @@ const SEEDS: Seed[] = [
   },
   {
     name: 'Amélie Moreau',
-    city: 'Paris',
-    country: 'FR',
-    phone: '+33612457890',
-    email: 'amelie.moreau@email.fr',
+    city: 'Akwa',
+    phone: '+237699112233',
+    email: 'amelie.moreau@email.cm',
     job: null,
     status: 'LU',
     days: 3,
     message:
-      'Chargée de projets événementiels à Paris, je m’installe à Douala au printemps et aimerais rejoindre votre équipe, quel que soit le poste.',
+      'Chargée de projets événementiels à Akwa, j’aimerais rejoindre votre équipe, quel que soit le poste.',
     size: 312_000,
   },
   {
@@ -191,7 +196,7 @@ const SEEDS: Seed[] = [
     country: 'FR',
     phone: '+33645127788',
     email: 'nadege.kamdem@email.fr',
-    job: 'job_relation_diaspora',
+    job: 'job_relation_clients',
     status: 'LU',
     days: 7,
     size: 205_000,
@@ -212,7 +217,7 @@ const SEEDS: Seed[] = [
     country: 'FR',
     phone: '+33678451230',
     email: 'olivier.mballa@email.fr',
-    job: 'job_relation_diaspora',
+    job: 'job_relation_clients',
     status: 'LU',
     days: 9,
     size: 228_000,
@@ -265,7 +270,7 @@ const SEEDS: Seed[] = [
     country: 'BE',
     phone: '+32470123456',
     email: 'laure.dikoume@email.be',
-    job: 'job_relation_diaspora',
+    job: 'job_relation_clients',
     status: 'REFUSE',
     days: 13,
     size: 233_000,
@@ -292,11 +297,7 @@ const SEEDS: Seed[] = [
   },
 ];
 
-const slug = (name: string) =>
-  name
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/\s+/g, '-');
+const slug = (name: string) => name.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, '-');
 
 function fromSeed(seed: Seed, index: number): AdminApplication {
   const id = `app_${String(index + 1).padStart(2, '0')}`;

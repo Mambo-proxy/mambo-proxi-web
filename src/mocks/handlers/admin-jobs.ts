@@ -56,7 +56,15 @@ function compareOffers(a: StoredJobOffer, b: StoredJobOffer) {
   return (b.publishedAt ?? b.createdAt).localeCompare(a.publishedAt ?? a.createdAt);
 }
 
-const LIMITS = { title: 120, city: 80, contractType: 40, startDate: 60, workingTime: 60, locationLabel: 120 };
+const LIMITS = {
+  title: 120,
+  city: 80,
+  contractType: 40,
+  startDate: 60,
+  workingTime: 60,
+  locationLabel: 120,
+  schedule: 120,
+};
 const LIST_FIELDS = ['missions', 'profile', 'benefits'] as const;
 
 /** Validation de l'offre complète (après fusion d'une modification), dont les exigences de publication. */
@@ -75,11 +83,13 @@ function validate(offer: StoredJobOffer, others: StoredJobOffer[]): Problem['err
   }
   if ((offer.summary ?? '').length > 1000)
     errors.push({ path: 'summary', message: '1 000 caractères au maximum.' });
-  if (!/^[A-Z]{2}$/.test(offer.country ?? '')) errors.push({ path: 'country', message: 'Choisissez le pays.' });
+  if (!/^[A-Z]{2}$/.test(offer.country ?? ''))
+    errors.push({ path: 'country', message: 'Choisissez le pays.' });
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(offer.slug ?? ''))
     errors.push({
       path: 'slug',
-      message: 'L’adresse ne peut contenir que des lettres minuscules sans accents, des chiffres et des tirets.',
+      message:
+        'L’adresse ne peut contenir que des lettres minuscules sans accents, des chiffres et des tirets.',
     });
   else if (others.some((item) => item.slug === offer.slug))
     errors.push({ path: 'slug', message: 'Cette adresse est déjà utilisée par une autre offre.' });
@@ -87,10 +97,14 @@ function validate(offer: StoredJobOffer, others: StoredJobOffer[]): Problem['err
     const list = offer[path] ?? [];
     if (list.length > 20) errors.push({ path, message: '20 éléments au maximum.' });
     list.forEach((item, index) => {
-      if (!item.trim()) errors.push({ path: `${path}.${index}`, message: 'Complétez ou supprimez cette ligne.' });
-      else if (item.length > 300) errors.push({ path: `${path}.${index}`, message: '300 caractères au maximum.' });
+      if (!item.trim())
+        errors.push({ path: `${path}.${index}`, message: 'Complétez ou supprimez cette ligne.' });
+      else if (item.length > 300)
+        errors.push({ path: `${path}.${index}`, message: '300 caractères au maximum.' });
     });
   }
+  if (offer.salary && offer.salary.max !== null && offer.salary.max < offer.salary.min)
+    errors.push({ path: 'salary.max', message: 'Le maximum doit être supérieur au minimum.' });
   if (offer.status === 'PUBLISHED' && !(offer.missions ?? []).length)
     errors.push({ path: 'missions', message: 'Ajoutez au moins une mission avant de publier l’offre.' });
   return errors;
@@ -107,6 +121,9 @@ function pickFields(body: JobOfferPatch): Partial<StoredJobOffer> {
     'startDate',
     'workingTime',
     'locationLabel',
+    'sectors',
+    'salary',
+    'schedule',
     'summary',
     'missions',
     'profile',
@@ -160,6 +177,9 @@ export const adminJobHandlers: HttpHandler[] = [
       startDate: body.startDate?.trim() || null,
       workingTime: body.workingTime?.trim() || null,
       locationLabel: body.locationLabel?.trim() || null,
+      sectors: body.sectors ?? [],
+      salary: body.salary ?? null,
+      schedule: body.schedule?.trim() || null,
       summary: body.summary?.trim() ?? '',
       missions: body.missions ?? [],
       profile: body.profile ?? [],
