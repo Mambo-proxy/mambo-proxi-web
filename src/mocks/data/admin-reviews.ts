@@ -29,7 +29,7 @@ function serviceRef(slug: string, name?: string): AdminReview['service'] {
 /** Avis publié du site → avis du back-office (réponses au questionnaire reconstituées). */
 function fromSite(review: Review, index: number): AdminReview {
   // Recommandation : 10 ou 9 pour les 5 étoiles ; 8 ou 9 pour les 4 étoiles (92 % de notes 9–10 au total).
-  const recommendation = review.rating === 5 ? (index % 3 === 1 ? 9 : 10) : index < 30 ? 8 : 9;
+  const recommendation = review.rating === 5 ? (index % 3 === 1 ? 9 : 10) : index < 25 ? 8 : 9;
   const date = new Date(review.date).getTime();
   return {
     id: review.id,
