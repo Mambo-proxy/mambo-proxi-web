@@ -725,3 +725,19 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 ### Difficultés et solutions
 
 - **Erreur d’hydratation sur Pages & textes** : l’en-tête de l’écran est rendu sous `Suspense` (paramètres d’adresse) et s’hydrate après le chargement du compteur de notifications ; la pastille de la cloche n’est plus rendue qu’après l’hydratation.
+
+### Back-office : Recrutement (24 octobre 2026)
+
+- Écran terminé à partir de la branche en cours (données, tableau des offres, CV) : onglets « Offres » / « Candidatures » (filtres par offre et par statut, pagination, état conservé dans l’adresse), « Dernières candidatures », détail d’une candidature (coordonnées, message, CV à ouvrir ou télécharger, statut ; l’ouverture passe « Nouveau » à « Lu »), éditeur d’offre (création, enregistrement, publication, dépublication, suppression).
+- Contrat refondu pris en compte : secteurs (quartiers), rémunération en FCFA et horaires des offres ; candidate « Amélie Moreau » recentrée sur Akwa comme la maquette.
+- Fidélité : tableau des offres et des dernières candidatures aux mêmes colonnes que la maquette (`93:21723`) ; captures `qa/fidelite/bo-recrutement-*.png`.
+
+### Décisions
+
+- **6 offres au lieu de 5** : le site publie aussi « Intervenant·e à domicile » (page Recrutement refondue) ; les offres du back-office sont celles du site.
+- **Éditeur d’offre et détail d’une candidature** : non maquettés, construits sur le modèle de l’éditeur de service et du détail d’une demande.
+- **Secteurs** saisis en une ligne séparée par des virgules, en attendant un choix parmi les quartiers des Zones d’intervention.
+
+### Difficultés et solutions
+
+- **Champs obligatoires des schémas `allOf`** : le générateur de types les laisse facultatifs ; type `JobOffer` côté back-office qui reprend la liste `required` du contrat.

@@ -77,7 +77,7 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [x] Pages & textes (sections, éditeurs par type, Tiptap pour les pages légales, aperçu, publication)
 - [ ] Avis clients (validation, réponse, mise en avant, questions du questionnaire)
 - [ ] Rendez-vous (calendrier jour/semaine/mois, détail, à confirmer, saisie manuelle) + réglage des disponibilités
-- [ ] Recrutement (offres, éditeur d'offre, candidatures, détail, CV)
+- [x] Recrutement (offres, éditeur d'offre, candidatures, détail, CV)
 - [ ] Partenaires (logos réordonnables, éditeur, demandes de partenariat)
 - [ ] Formations (catalogue, éditeur, demandes)
 - [ ] Agenda (événements, éditeur, inscriptions) — non maquetté
@@ -120,7 +120,7 @@ Les maquettes ont été refondues mi-octobre 2026 (recentrage sur Douala et les 
 - [x] Pages légales (version anglaise, mobile recalé) — `qa/fidelite/pages-legales-*.png`
 - [x] Questionnaire (vignette photo, en-tête recalé) et 404 (photo, textes traduits) — `qa/fidelite/questionnaire-*.png`, `qa/fidelite/page-404-*.png`
 - [ ] E-mails (4 modèles mis à jour) — produits par l'API (module mail, React Email) : à intégrer avec la phase 2 de l'API ; captures `qa/reference/emails/` à jour
-- [~] Back-office : tableau de bord et Demandes recalés (5 rubriques, quartiers de Douala, filtre « Tous les quartiers », Magazine et Zones dans le menu — `qa/fidelite/bo-tableau-de-bord-*.png`, `bo-demandes-*.png`) ; Magazine et édition d'un numéro (`qa/fidelite/bo-magazine-*.png`, `bo-magazine-edition-*.png`), Zones d'intervention (`qa/fidelite/bo-zones-*.png`), Services (`qa/fidelite/bo-services-*.png`, `bo-ajouter-un-service-*.png`, éditeur à 70 px de la maquette) Pages & textes (`qa/fidelite/bo-pages-textes-*.png`) faits ; reste l’écran en cours sur la branche `bo/recrutement-en-cours`
+- [~] Back-office : tableau de bord et Demandes recalés (5 rubriques, quartiers de Douala, filtre « Tous les quartiers », Magazine et Zones dans le menu — `qa/fidelite/bo-tableau-de-bord-*.png`, `bo-demandes-*.png`) ; Magazine et édition d'un numéro (`qa/fidelite/bo-magazine-*.png`, `bo-magazine-edition-*.png`), Zones d'intervention (`qa/fidelite/bo-zones-*.png`), Services (`qa/fidelite/bo-services-*.png`, `bo-ajouter-un-service-*.png`, éditeur à 70 px de la maquette), Pages & textes (`qa/fidelite/bo-pages-textes-*.png`), Recrutement (`qa/fidelite/bo-recrutement-*.png`) faits ; reste à contrôler les autres écrans du back-office sur la refonte (Avis, Rendez-vous, Partenaires, Formations, Contacts, Newsletter, Paramètres)
 - [ ] Implémentation de l'API (phase 2) : `?lang`, zones, formules, citations d'avis, offres des fiches service, secteurs, rémunération et horaires des offres d'emploi
 
 ## Phase 3 — Intégration
