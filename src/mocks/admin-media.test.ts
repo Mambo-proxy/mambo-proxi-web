@@ -31,4 +31,30 @@ describe('médiathèque simulée', () => {
     );
     expect(response.status).toBe(409);
   });
+
+  it('usages tirés du catalogue actuel ; une image inutilisée se supprime', async () => {
+    const list = await resolveMockRequest(new Request(`${API}/v1/admin/media?q=chef`, { headers: session }));
+    const body = (await list.json()) as { data: { id: string; usages: { label: string }[] }[] };
+    expect(body.data.find((media) => media.id === 'med_chef')?.usages.map((usage) => usage.label)).toEqual([
+      'Service « Chef privé »',
+    ]);
+    const removed = await resolveMockRequest(
+      new Request(`${API}/v1/admin/media/med_portrait`, { method: 'DELETE', headers: session }),
+    );
+    expect(removed.status).toBe(204);
+  });
+
+  it('texte alternatif et point focal', async () => {
+    const patch = (body: unknown) =>
+      resolveMockRequest(
+        new Request(`${API}/v1/admin/media/med_marche`, {
+          method: 'PATCH',
+          headers: { ...session, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        }),
+      );
+    expect((await patch({ alt: ' ' })).status).toBe(422);
+    const saved = await patch({ alt: 'Marché de Douala', focalPoint: { x: 0.3, y: 0.6 } });
+    expect(await saved.json()).toMatchObject({ alt: 'Marché de Douala', focalPoint: { x: 0.3, y: 0.6 } });
+  });
 });

@@ -198,7 +198,6 @@ export function MediaPickerDialog({ open, onClose, onSelect, initialFile }: Medi
   const [alt, setAlt] = useState('');
   const [fileError, setFileError] = useState<string | null>(null);
   const [altError, setAltError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const upload = useUploadMedia();
   const [wasOpen, setWasOpen] = useState(open);
   if (open !== wasOpen) {
@@ -220,18 +219,10 @@ export function MediaPickerDialog({ open, onClose, onSelect, initialFile }: Medi
     enabled: open && tab === 'library',
   });
 
-  function pick(candidate: File | undefined) {
-    if (!candidate) return;
-    if (!ACCEPT.split(',').includes(candidate.type)) {
-      setFileError('Format non accepté. Formats acceptés : JPG, PNG, WebP ou SVG.');
-      return;
-    }
-    if (candidate.size > MAX_SIZE) {
-      setFileError(`L’image dépasse ${formatFileSize(MAX_SIZE)}.`);
-      return;
-    }
-    setFileError(null);
-    setFile(candidate);
+  function pick(candidate: File) {
+    const error = imageFileError(candidate);
+    setFileError(error);
+    if (!error) setFile(candidate);
   }
 
   async function confirm() {
@@ -368,69 +359,105 @@ export function MediaPickerDialog({ open, onClose, onSelect, initialFile }: Medi
             )}
           </div>
         ) : (
-          <div role="tabpanel" aria-label="Envoyer une image" className="flex flex-col gap-4">
-            <input
-              ref={inputRef}
-              type="file"
-              accept={ACCEPT}
-              className="sr-only"
-              tabIndex={-1}
-              aria-hidden
-              onChange={(event) => pick(event.target.files?.[0])}
-            />
-            <button
-              type="button"
-              onClick={() => inputRef.current?.click()}
-              onDragOver={(event) => event.preventDefault()}
-              onDrop={(event) => {
-                event.preventDefault();
-                pick(event.dataTransfer.files[0]);
+          <div role="tabpanel" aria-label="Envoyer une image">
+            <MediaUploadFields
+              file={file}
+              onFile={pick}
+              fileError={fileError}
+              alt={alt}
+              onAlt={(value) => {
+                setAlt(value);
+                setAltError(null);
               }}
-              aria-describedby={fileError ? 'media-file-error' : undefined}
-              className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border-strong bg-neutral-50 p-7 text-center hover:bg-neutral-100"
-            >
-              <span className="flex size-11 items-center justify-center rounded-[13px] bg-neutral-0 text-brand-primary">
-                <Upload aria-hidden size={20} />
-              </span>
-              <span className="font-ui text-[14px] leading-5 font-medium text-text-main">
-                {file
-                  ? `${file.name} · ${formatFileSize(file.size)}`
-                  : 'Glisser une image ou cliquer pour la choisir'}
-              </span>
-              <span className="font-ui text-[12px] leading-4 text-text-muted">
-                JPG, PNG, WebP ou SVG · 10 Mo max · 1600 px conseillé
-              </span>
-            </button>
-            {fileError && (
-              <p
-                id="media-file-error"
-                role="alert"
-                className="font-ui text-[13px] leading-4 text-feedback-error"
-              >
-                {fileError}
-              </p>
-            )}
-            <Field
-              label="Texte alternatif"
-              required
-              error={altError}
-              help="Décrivez ce que montre l’image, en une phrase courte."
-            >
-              {(control) => (
-                <Input
-                  {...control}
-                  value={alt}
-                  maxLength={200}
-                  onChange={(event) => {
-                    setAlt(event.target.value);
-                    setAltError(null);
-                  }}
-                />
-              )}
-            </Field>
+              altError={altError}
+            />
           </div>
         )}
       </div>
     </Modal>
+  );
+}
+
+/** Format ou taille refusés : message en français, `null` si l'image est acceptée. */
+export function imageFileError(file: File): string | null {
+  if (!ACCEPT.split(',').includes(file.type))
+    return 'Format non accepté. Formats acceptés : JPG, PNG, WebP ou SVG.';
+  if (file.size > MAX_SIZE) return `L’image dépasse ${formatFileSize(MAX_SIZE)}.`;
+  return null;
+}
+
+/** Zone d'envoi d'une image (glisser ou choisir) et texte alternatif obligatoire. */
+export function MediaUploadFields({
+  file,
+  onFile,
+  fileError,
+  alt,
+  onAlt,
+  altError,
+}: {
+  file: File | null;
+  onFile: (file: File) => void;
+  fileError: string | null;
+  alt: string;
+  onAlt: (alt: string) => void;
+  altError: string | null;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const errorId = useId();
+  return (
+    <div className="flex flex-col gap-4">
+      <input
+        ref={inputRef}
+        type="file"
+        accept={ACCEPT}
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden
+        onChange={(event) => {
+          const candidate = event.target.files?.[0];
+          if (candidate) onFile(candidate);
+          event.target.value = '';
+        }}
+      />
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        onDragOver={(event) => event.preventDefault()}
+        onDrop={(event) => {
+          event.preventDefault();
+          const candidate = event.dataTransfer.files[0];
+          if (candidate) onFile(candidate);
+        }}
+        aria-describedby={fileError ? errorId : undefined}
+        className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border-strong bg-neutral-50 p-7 text-center hover:bg-neutral-100"
+      >
+        <span className="flex size-11 items-center justify-center rounded-[13px] bg-neutral-0 text-brand-primary">
+          <Upload aria-hidden size={20} />
+        </span>
+        <span className="font-ui text-[14px] leading-5 font-medium text-text-main">
+          {file
+            ? `${file.name} · ${formatFileSize(file.size)}`
+            : 'Glisser une image ou cliquer pour la choisir'}
+        </span>
+        <span className="font-ui text-[12px] leading-4 text-text-muted">
+          JPG, PNG, WebP ou SVG · 10 Mo max · 1600 px conseillé
+        </span>
+      </button>
+      {fileError && (
+        <p id={errorId} role="alert" className="font-ui text-[13px] leading-4 text-feedback-error">
+          {fileError}
+        </p>
+      )}
+      <Field
+        label="Texte alternatif"
+        required
+        error={altError}
+        help="Décrivez ce que montre l’image, en une phrase courte."
+      >
+        {(control) => (
+          <Input {...control} value={alt} maxLength={200} onChange={(event) => onAlt(event.target.value)} />
+        )}
+      </Field>
+    </div>
   );
 }

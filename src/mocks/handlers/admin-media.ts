@@ -1,33 +1,50 @@
 import { http, HttpResponse } from 'msw';
 import type { IllustrationScene, Media } from '@/lib/api/schema';
 import { daysAgo, jsonBody, matches, mockId, paginate } from '../admin-utils';
+import { services } from '../data/catalogue';
 import { problem } from '../problem';
 
-const SCENES: { scene: IllustrationScene; alt: string; usage: string }[] = [
-  { scene: 'chef', alt: 'Une cheffe prépare un plat en cuisine', usage: 'Service « Chef privé »' },
-  {
-    scene: 'marche',
-    alt: 'Étal coloré d’un marché de Douala',
-    usage: 'Service « Visites guidées de Douala »',
-  },
-  { scene: 'logement', alt: 'Façade d’un appartement meublé', usage: 'Service « Logement temporaire »' },
-  {
-    scene: 'voiture',
-    alt: 'Voiture avec chauffeur devant l’agence',
-    usage: 'Service « Location de voiture »',
-  },
-  {
-    scene: 'evenement',
-    alt: 'Salle décorée pour une réception',
-    usage: 'Service « Services événementiels »',
-  },
-  { scene: 'colis', alt: 'Colis remis à un client', usage: 'Service « Réception de colis »' },
-  { scene: 'equipe', alt: 'L’équipe MAMBO Proxi réunie', usage: 'Page « Qui sommes-nous »' },
-  { scene: 'formation', alt: 'Atelier de formation en petit groupe', usage: 'Formations' },
+/** Illustrations livrées avec le site (exportées des maquettes) et leur texte alternatif. */
+const SCENES: { scene: IllustrationScene; alt: string }[] = [
+  { scene: 'accueil', alt: 'Accueil chaleureux à l’agence de Douala' },
+  { scene: 'chef', alt: 'Une cheffe prépare un plat en cuisine' },
+  { scene: 'colis', alt: 'Colis remis à un client' },
+  { scene: 'courses', alt: 'Sacs de courses posés sur une table' },
+  { scene: 'culture', alt: 'Visite d’une exposition d’art' },
+  { scene: 'equipe', alt: 'L’équipe MAMBO Proxi réunie' },
+  { scene: 'evenement', alt: 'Salle décorée pour une réception' },
+  { scene: 'formation', alt: 'Atelier de formation en petit groupe' },
+  { scene: 'livraison', alt: 'Livreur à scooter dans une rue de Douala' },
+  { scene: 'logement', alt: 'Salon lumineux d’un appartement entretenu' },
+  { scene: 'marche', alt: 'Étal coloré d’un marché de Douala' },
+  { scene: 'massage', alt: 'Séance de massage à domicile' },
+  { scene: 'photo', alt: 'Photographe pendant une séance en extérieur' },
+  { scene: 'portrait', alt: 'Portrait souriant d’une cliente' },
+  { scene: 'voiture', alt: 'Voiture avec chauffeur devant l’agence' },
 ];
 
+/** Pages qui affichent une illustration en dehors des fiches service. */
+const PAGE_USAGES: Partial<Record<IllustrationScene, Media['usages']>> = {
+  equipe: [{ kind: 'page', label: 'Page « Qui sommes-nous »', href: '/admin/pages' }],
+  formation: [{ kind: 'page', label: 'Page « Formations »', href: '/admin/formations' }],
+};
+
+/** Usages d'une illustration : fiches du catalogue actuel qui l'affichent, puis pages. */
+function usagesOf(scene: IllustrationScene): Media['usages'] {
+  return [
+    ...services
+      .filter((service) => service.visual.illustration === scene)
+      .map((service) => ({
+        kind: 'service',
+        label: `Service « ${service.shortName ?? service.name} »`,
+        href: '/admin/services',
+      })),
+    ...(PAGE_USAGES[scene] ?? []),
+  ];
+}
+
 function seed(): Media[] {
-  return SCENES.map(({ scene, alt, usage }, index) => ({
+  return SCENES.map(({ scene, alt }, index) => ({
     id: `med_${scene}`,
     url: `/illustrations/${scene}.svg`,
     width: 1600,
@@ -40,8 +57,8 @@ function seed(): Media[] {
     mimeType: 'image/svg+xml',
     size: 18_000 + index * 2_300,
     status: 'READY',
-    usages: [{ kind: 'service', label: usage, href: null }],
-    createdAt: daysAgo(30 - index * 3),
+    usages: usagesOf(scene),
+    createdAt: daysAgo(45 - index * 3),
   }));
 }
 
@@ -111,7 +128,11 @@ export const adminMediaHandlers = [
     const media = adminMedia.find((item) => item.id === params.id);
     if (!media) return problem(404, 'Ce média n’existe plus.');
     const body = await jsonBody<Partial<Pick<Media, 'alt' | 'focalPoint'>>>(request);
-    if (body.alt !== undefined) media.alt = body.alt;
+    if (body.alt !== undefined && !body.alt?.trim())
+      return problem(422, 'Le texte alternatif est obligatoire.', [
+        { path: 'alt', message: 'Décrivez l’image en quelques mots.' },
+      ]);
+    if (body.alt !== undefined) media.alt = body.alt!.trim();
     if (body.focalPoint !== undefined) media.focalPoint = body.focalPoint;
     return HttpResponse.json(media);
   }),
