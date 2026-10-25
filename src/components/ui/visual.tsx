@@ -31,11 +31,17 @@ type VisualProps = {
   visual: VisualData;
   /** Largeurs d'affichage pour le choix de la variante (attribut `sizes` de `next/image`). */
   sizes: string;
-  /** Image au-dessus de la ligne de flottaison (hero) : chargée en priorité. */
+  /**
+   * Image au-dessus de la ligne de flottaison (héros, élément LCP) : préchargée depuis `<head>` et demandée en
+   * priorité haute (`fetchpriority="high"`), sans chargement différé. Une seule image prioritaire par page.
+   */
   priority?: boolean;
   /** Le cadre (taille, rayon, ombre, bordure) reprend celui de la maquette. */
   className?: string;
 };
+
+/** Attributs `next/image` d'une image prioritaire (`priority`, déprécié depuis Next 16, est remplacé par `preload`). */
+const PRIORITY_PROPS = { preload: true, fetchPriority: 'high' } as const;
 
 /**
  * Emplacement « photo » (docs/02 §6) : affiche l'illustration provisoire tant qu'aucune image n'est fournie
@@ -52,7 +58,7 @@ export function Visual({ visual, sizes, priority = false, className }: VisualPro
           alt={visual.alt ?? image.alt ?? ''}
           fill
           sizes={sizes}
-          priority={priority}
+          {...(priority ? PRIORITY_PROPS : {})}
           placeholder={image.blurDataUrl ? 'blur' : 'empty'}
           blurDataURL={image.blurDataUrl ?? undefined}
           className="object-cover"
@@ -70,7 +76,7 @@ export function Visual({ visual, sizes, priority = false, className }: VisualPro
           alt={visual.alt ?? ''}
           fill
           sizes={sizes}
-          priority={priority}
+          {...(priority ? PRIORITY_PROPS : {})}
           unoptimized
           className="object-cover"
         />

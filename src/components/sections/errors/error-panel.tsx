@@ -42,8 +42,9 @@ export function ErrorPanel({ eyebrow, title, text, actions, showLinks = true, ph
               src={photo}
               alt=""
               fill
-              priority
-              sizes="(min-width: 1280px) 560px, 100vw"
+              preload
+              fetchPriority="high"
+              sizes="(min-width: 1280px) 560px, 92vw"
               className="object-cover"
             />
           ) : (

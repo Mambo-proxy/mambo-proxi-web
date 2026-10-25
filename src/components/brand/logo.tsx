@@ -9,6 +9,7 @@ type LogoProps = {
   /** Version blanche pour les fonds sombres. */
   inverse?: boolean;
   className?: string;
+  /** Logo de l'en-tête : chargé sans attendre, mais sans préchargement qui concurrencerait l'image du héros. */
   priority?: boolean;
 };
 
@@ -31,7 +32,7 @@ export function Logo({ variant = 'horizontal', inverse = false, className, prior
         alt=""
         width={file.width}
         height={file.height}
-        priority={priority}
+        loading={priority ? 'eager' : undefined}
         unoptimized
         className="h-full w-auto"
       />

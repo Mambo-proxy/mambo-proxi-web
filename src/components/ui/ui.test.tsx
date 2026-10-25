@@ -15,6 +15,7 @@ import { Pagination, paginationRange } from './pagination';
 import { SegmentedTabs } from './segmented-tabs';
 import { Stars } from './stars';
 import { Switch } from './switch';
+import { Visual } from './visual';
 
 describe('Button', () => {
   it('conserve le libellé et se désactive pendant le chargement', () => {
@@ -149,5 +150,27 @@ describe('affichage', () => {
     expect(screen.getByText('Devis gratuit')).toHaveAttribute('aria-current', 'page');
     expect(screen.getByRole('heading')).toHaveTextContent('19 services, un seul interlocuteur.');
     expect(screen.getByText('un seul interlocuteur.')).toHaveClass('text-text-brand');
+  });
+});
+
+describe('Visual', () => {
+  const visual = {
+    illustration: 'accueil',
+    alt: 'Une famille dans son salon',
+    image: { url: '/photos/home-hero.png', width: 1232, height: 1280 },
+  } as Parameters<typeof Visual>[0]['visual'];
+
+  it('demande l’image du héros en priorité haute, sans chargement différé', () => {
+    render(<Visual visual={visual} priority sizes="100vw" />);
+    const image = screen.getByRole('img', { name: 'Une famille dans son salon' });
+    expect(image).toHaveAttribute('fetchpriority', 'high');
+    expect(image).not.toHaveAttribute('loading', 'lazy');
+  });
+
+  it('diffère les images secondaires', () => {
+    render(<Visual visual={visual} sizes="240px" />);
+    const image = screen.getByRole('img', { name: 'Une famille dans son salon' });
+    expect(image).toHaveAttribute('loading', 'lazy');
+    expect(image).not.toHaveAttribute('fetchpriority');
   });
 });

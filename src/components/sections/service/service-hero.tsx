@@ -65,7 +65,7 @@ export function ServiceHero({ service, breadcrumb, quoteHref, whatsappHref }: Se
           <Visual
             visual={main!}
             priority
-            sizes="(min-width: 1280px) 860px, 70vw"
+            sizes="(min-width: 1280px) 860px, 64vw"
             className="flex-1 rounded-[20px] xl:rounded-[28px]"
           />
           {side.length > 0 && (

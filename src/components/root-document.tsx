@@ -4,15 +4,18 @@ import { DeferredToaster } from '@/components/ui/deferred-toaster';
 import { JS_CLASS_SCRIPT } from '@/lib/security/inline-scripts';
 import '@/app/globals.css';
 
+// `subsets` ne règle que le préchargement : les autres jeux (latin-ext…) restent déclarés et ne sont téléchargés
+// que si la page contient leurs caractères (`unicode-range`). Le français tient dans `latin` ; précharger aussi
+// `latin-ext` (85 Ko pour Inter) concurrençait l'image du héros au premier chargement.
 const inter = Inter({
-  subsets: ['latin', 'latin-ext'],
+  subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   display: 'swap',
   variable: '--font-inter',
 });
 
 const poppins = Poppins({
-  subsets: ['latin', 'latin-ext'],
+  subsets: ['latin'],
   weight: ['500', '600', '700'],
   display: 'swap',
   variable: '--font-poppins',

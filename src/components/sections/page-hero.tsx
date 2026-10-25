@@ -74,7 +74,7 @@ export function PageHero({ section, breadcrumb, whatsappHref, visualClassName }:
           <Visual
             visual={section.visual}
             priority
-            sizes="(min-width: 1280px) 560px, 100vw"
+            sizes="(min-width: 1280px) 560px, 92vw"
             className={cn('h-60 rounded-xl md:h-[360px] xl:h-[420px] xl:rounded-[32px]', visualClassName)}
           />
         )}

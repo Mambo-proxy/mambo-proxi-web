@@ -37,7 +37,16 @@ export function RegistrationLayout({ initialProfile, categories, labels }: Regis
   return (
     <div className="bg-neutral-50 xl:grid xl:grid-cols-[600px_minmax(0,1fr)]">
       <div className="relative hidden h-[980px] self-start overflow-hidden xl:sticky xl:top-[var(--site-header-h,121px)] xl:block">
-        <Image src="/photos/inscrire.png" alt="" fill sizes="600px" priority className="object-cover" />
+        {/* Panneau masqué en mobile : pas de préchargement (il téléchargerait la photo pour rien), chargement différé
+            (une image masquée n'est pas demandée) et priorité haute dès qu'elle est affichée en desktop. */}
+        <Image
+          src="/photos/inscrire.png"
+          alt=""
+          fill
+          sizes="600px"
+          fetchPriority="high"
+          className="object-cover"
+        />
         <div
           aria-hidden
           className="absolute inset-0 bg-[linear-gradient(180deg,rgb(28_26_23/0)_35%,rgb(28_26_23/0.85)_100%)]"
