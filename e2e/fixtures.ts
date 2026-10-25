@@ -56,6 +56,11 @@ export async function expectAccessible(page: Page) {
   ).toEqual([]);
 }
 
+/** Approche de la carte des zones, chargée seulement à moins de 1 000 px de l'écran (`lazy-zones-map.tsx`). */
+export async function approachZonesMap(page: Page) {
+  await page.locator('[data-zones-map]').first().scrollIntoViewIfNeeded();
+}
+
 /** Pas de défilement horizontal de la page. */
 export async function expectNoHorizontalScroll(page: Page) {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);

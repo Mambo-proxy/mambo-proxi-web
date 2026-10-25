@@ -1,11 +1,12 @@
 import type { Page } from '@playwright/test';
-import { expect, expectAccessible, expectNoHorizontalScroll, test } from './fixtures';
+import { approachZonesMap, expect, expectAccessible, expectNoHorizontalScroll, test } from './fixtures';
 
 /** Quartiers géolocalisés des données de démonstration (`GET /v1/zones`) : 5 + 5 + 8 + 1. */
 const PLACED_QUARTERS = 19;
 
 /** Carte chargée à la demande : on s'en approche, puis on attend les repères. */
 async function openMap(page: Page, name = 'Carte des zones d’intervention à Douala') {
+  await approachZonesMap(page);
   const map = page.getByRole('group', { name });
   await map.scrollIntoViewIfNeeded();
   await expect(map.locator('[data-quarter]')).toHaveCount(PLACED_QUARTERS, { timeout: 15_000 });

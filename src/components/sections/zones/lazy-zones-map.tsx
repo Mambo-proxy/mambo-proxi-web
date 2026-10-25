@@ -19,9 +19,10 @@ function MapPlaceholder({ areas, link }: Props) {
 }
 
 /**
- * Carte (Leaflet et sa feuille de styles) et recherche des zones chargées hors du JavaScript initial : dès que la
- * page est au repos, ou plus tôt à l'approche de l'écran (600 px avant). Le titre, la légende et le lien sont rendus
- * avec la page. Les tuiles OpenStreetMap ne sont demandées qu'une fois la carte affichée.
+ * Carte (Leaflet et sa feuille de styles) et recherche des zones chargées hors du JavaScript initial, à l'approche de
+ * l'écran (1 000 px avant) : pas au repos de la page, Leaflet (~42 Ko) pèserait sur chaque visite de l'accueil, même
+ * sans défilement jusqu'à la carte. Le titre, la légende et le lien sont rendus avec la page. Les tuiles
+ * OpenStreetMap ne sont demandées qu'une fois la carte affichée.
  */
 export function LazyZonesMap(props: Props) {
   const ref = useRef<HTMLDivElement>(null);
@@ -40,20 +41,16 @@ export function LazyZonesMap(props: Props) {
       );
     };
     const observer = new IntersectionObserver(([entry]) => entry?.isIntersecting && start(), {
-      rootMargin: '600px 0px',
+      rootMargin: '1000px 0px',
     });
     observer.observe(node);
-    const idle =
-      typeof window.requestIdleCallback === 'function'
-        ? window.requestIdleCallback(start, { timeout: 4000 })
-        : window.setTimeout(start, 2000);
-    return () => {
-      observer.disconnect();
-      if (typeof window.cancelIdleCallback === 'function') window.cancelIdleCallback(idle);
-      else window.clearTimeout(idle);
-    };
+    return () => observer.disconnect();
   }, []);
 
   // Le cadre d'attente reste affiché pendant le téléchargement du module (pas de saut de mise en page).
-  return <div ref={ref}>{LoadedMap ? <LoadedMap {...props} /> : <MapPlaceholder {...props} />}</div>;
+  return (
+    <div ref={ref} data-zones-map>
+      {LoadedMap ? <LoadedMap {...props} /> : <MapPlaceholder {...props} />}
+    </div>
+  );
 }

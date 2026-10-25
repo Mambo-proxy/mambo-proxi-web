@@ -214,9 +214,10 @@ export function DesktopNav({ items, megaMenu, signUp, compact, search }: Desktop
               menu.openKey === SIGN_UP_KEY ? menu.setOpenKey(null) : openWithFocus(SIGN_UP_KEY)
             }
             onKeyDown={(event) => triggerKeyDown(event, SIGN_UP_KEY)}
-            className="flex cursor-pointer items-center gap-1.5 rounded-full border border-border-strong px-2.5 py-3 font-ui text-[14px] leading-5 font-semibold text-text-main transition-colors hover:bg-neutral-100 wide:gap-2 wide:px-3.5"
+            className="flex cursor-pointer items-center gap-1.5 rounded-full border border-border-strong px-2.5 py-3 font-ui text-[14px] leading-5 font-semibold text-text-main transition-colors hover:bg-neutral-100 wide:px-3.5 2xl:gap-2"
           >
-            <User aria-hidden size={18} className="max-wide:hidden" />
+            {/* Pictogramme masqué sous 1536 px : place de la loupe de recherche (polices Linux plus larges). */}
+            <User aria-hidden size={18} className="max-2xl:hidden" />
             {t('signUp')}
           </button>
           <Dropdown

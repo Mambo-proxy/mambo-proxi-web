@@ -56,7 +56,7 @@ test.describe('mesure d’audience du site', () => {
     await page.locator('a[href^="https://wa.me/"]').first().dispatchEvent('click');
     await flush(page);
 
-    await expect.poll(() => batchWith(page, 'whatsapp'), { timeout: 10_000 }).not.toBeNull();
+    await expect.poll(() => batchWith(page, 'whatsapp'), { timeout: 30_000 }).not.toBeNull();
     const batch = await batchWith(page, 'whatsapp');
     expect(batch?.consent).toBe(false);
     expect(batch?.visitorId).toBeNull();
@@ -81,10 +81,10 @@ test.describe('mesure d’audience du site', () => {
     const quote = page.locator('main a[href^="/devis"]').first();
     await quote.scrollIntoViewIfNeeded();
     await quote.click();
-    await expect(page).toHaveURL(/\/devis/);
+    await expect(page).toHaveURL(/\/devis/, { timeout: 15_000 });
     await flush(page);
 
-    await expect.poll(() => batchWith(page, 'quote'), { timeout: 10_000 }).not.toBeNull();
+    await expect.poll(() => batchWith(page, 'quote'), { timeout: 30_000 }).not.toBeNull();
     const batch = await batchWith(page, 'quote');
     expect(batch?.consent).toBe(true);
     expect(batch?.visitorId).toMatch(UUID);

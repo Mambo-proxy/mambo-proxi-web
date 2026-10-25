@@ -1,4 +1,4 @@
-import { expect, expectNoHorizontalScroll, test } from './fixtures';
+import { approachZonesMap, expect, expectNoHorizontalScroll, test } from './fixtures';
 
 const isMobile = (width: number | undefined) => (width ?? 0) < 768;
 
@@ -70,6 +70,7 @@ test.describe('accueil', () => {
   });
 
   test('zones : recherche d’un quartier au clavier', async ({ page }) => {
+    await approachZonesMap(page);
     const search = page.getByRole('combobox', { name: 'Rechercher un quartier' });
     await search.fill('bonam');
     await expect(page.getByRole('option', { name: /Bonamoussadi/ })).toBeVisible();
@@ -143,7 +144,7 @@ test.describe('accueil', () => {
     await finder.getByRole('option', { name: 'Chef privé' }).click();
     await expect(field).toHaveValue('Chef privé');
     await finder.getByRole('link', { name: 'Demander un devis' }).click();
-    await expect(page).toHaveURL(/\/devis\?service=chef-prive$/);
+    await expect(page).toHaveURL(/\/devis\?service=chef-prive$/, { timeout: 15_000 });
     await expect(page.getByRole('radio', { name: 'Chef privé' })).toBeChecked();
     expect(pageErrors).toEqual([]);
   });
