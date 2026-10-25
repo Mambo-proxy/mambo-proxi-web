@@ -985,6 +985,7 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 
 - **Mesure sans consentement limitée au comptage anonyme agrégé** (pas d'identifiant ni de cookie) ; visiteurs uniques comptés seulement avec consentement (CLAUDE.md mis à jour).
 - **AGENT** ne voit que les demandes et rendez-vous qui lui sont assignés (pas de file commune, pas de prise en charge spontanée).
+- **EDITOR (équipe Douala) distribue aussi le travail** : assignation des demandes et rendez-vous et anonymisation, comme ADMIN et MANAGER (matrice du contrat conservée).
 - **Fond de carte** : tuiles OpenStreetMap publiques en développement ; fournisseur à choisir pour la production (limites d'usage d'OSM).
 
 ### Difficultés et solutions

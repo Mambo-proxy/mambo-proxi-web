@@ -104,7 +104,8 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [x] Carte interactive OpenStreetMap (Leaflet chargé à la demande) : contours des zones, 19 quartiers, agence ; molette avec Ctrl, deux doigts en mobile ; back-office : coordonnées des quartiers (saisie ou clic) et contour GeoJSON — contrat `ZoneQuarter.coordinates`, `Zone.area`
 - [x] Mesure d'audience interne : pages vues et clics comptés anonymement sans consentement, visiteurs uniques avec consentement ; tableau de bord « Audience » et « Équipe connectée » — contrat `POST /v1/analytics/events`, `GET /v1/admin/analytics/summary`, `GET /v1/admin/users/presence`
 - [x] Rôles et tâches : 5 rôles (ADMIN, MANAGER, AGENT, EDITOR, WRITER), permissions par opération (`x-permissions`), menus et écrans filtrés, assignation et échéance des demandes et rendez-vous, filtres « Assignées à » / « Échéance », carte « Mes tâches », notification d'assignation — contrat `GET /v1/admin/roles`, `GET /v1/admin/me/tasks`
-  - [ ] À trancher : EDITOR peut assigner et anonymiser dans la matrice du contrat ; boutons d'écriture des écrans de contenus encore affichés pour MANAGER (l'API répond 403)
+  - [x] EDITOR (équipe Douala) peut assigner et anonymiser, comme dans la matrice du contrat (décision du 25/10)
+  - [ ] Boutons d'écriture des écrans de contenus encore affichés pour MANAGER (l'API répond 403)
 
 ## Phase 1 bis — Refonte des maquettes (octobre 2026)
 
