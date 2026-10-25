@@ -957,3 +957,15 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 
 - **Pas de `force-static`** : `headers()` y renvoie un objet vide, la langue serait retombée sur le français sans erreur pour les pages anglaises.
 - **Second lot à venir** : lire les paramètres d'URL côté client (onglet du contact, service du devis, profil, filtres) pour rendre statiques les pages à formulaire ; `/avis-clients` (filtre et pagination côté serveur) et les pages à jeton restent dynamiques.
+- Lighthouse en CI après ce lot : rubrique 0,87 → 0,92, fiche 0,89 → 0,94 (LCP 3,0-3,3 s, réponse du serveur 10-15 ms) ; accueil et `/en` 0,92 ; contact 0,80 et devis 0,81 (temps de blocage variable d'un passage à l'autre, mocks MSW chargés dans le navigateur).
+
+### Rendu statique, second lot : pages à formulaire (25 octobre 2026)
+
+- `/contact`, `/devis`, `/inscription`, `/partenaires`, `/formation` et `/recrutement` sont prérendues dans les deux langues : le serveur ne lit plus les paramètres d'URL et rend l'état par défaut ; une variante `…FromUrl` de chaque composant lit `useSearchParams()` dans le navigateur et sert d'état initial (onglet du contact, service et rubrique du devis, profil de l'inscription, filtre et type de partenariat, catégorie des formations, poste visé). Le repli du `<Suspense>` est le même composant dans son état par défaut : le HTML statique reste complet et indexable.
+- `/recrutement` est régénérée toutes les heures (`revalidate = 3600`) : l'ancienneté des offres (« Publiée hier ») resterait sinon figée à la date du build.
+- Tests : arrivée avec paramètre en français et en anglais pour les six pages (onglet coché, présélection, filtre enfoncé, poste visé).
+- Restent dynamiques : `/avis-clients` (filtre, tri et pagination côté serveur), les pages à jeton ou à référence (confirmations, désinscription, questionnaire) et la page introuvable.
+
+### Décisions
+
+- **État par défaut affiché brièvement à l'arrivée avec un paramètre** (ex. étape 1 du devis avant l'étape 2 avec `?service=`) : inévitable avec du HTML statique ; sans paramètre, rien ne change.

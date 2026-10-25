@@ -100,4 +100,26 @@ test.describe('devis gratuit', () => {
     await expect(page.getByRole('link', { name: 'Back to home' })).toHaveAttribute('href', '/en');
     expect(pageErrors).toEqual([]);
   });
+
+  // Page prérendue : la présélection de l'adresse est appliquée dans le navigateur, à l'hydratation.
+  test('arrivée sur ?rubrique= : rubrique cochée, service encore à choisir', async ({ page, pageErrors }) => {
+    await page.goto('/devis?rubrique=immobilier', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('input[name="categorySlug"][value="immobilier"]')).toBeChecked();
+    await expect(page.getByRole('radio', { name: 'Gestion locative' })).not.toBeChecked();
+    expect(pageErrors).toEqual([]);
+  });
+
+  test('version anglaise, arrivée sur ?service= : service coché, étape 2 active', async ({
+    page,
+    pageErrors,
+  }) => {
+    await page.goto('/en/free-quote?service=chef-prive', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('input[name="serviceSlug"][value="chef-prive"]')).toBeChecked();
+    await expect(page.locator('input[name="categorySlug"][value="experience"]')).toBeChecked();
+    await expect(page.getByRole('listitem').filter({ hasText: 'Votre besoin (en cours)' })).toHaveAttribute(
+      'aria-current',
+      'step',
+    );
+    expect(pageErrors).toEqual([]);
+  });
 });

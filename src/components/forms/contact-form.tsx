@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CircleCheck, Mail, Smartphone, User } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod/mini';
@@ -67,6 +68,16 @@ const EMPTY: FormInput = {
   message: '',
   consent: false as unknown as true,
 };
+
+/**
+ * `ContactForm` ouvert sur l'onglet de l'adresse (`?onglet=information`). La page étant prérendue, l'adresse
+ * n'est lue que dans le navigateur : à placer sous `<Suspense>`, avec en repli `ContactForm` sur
+ * « Nous contacter » (même rendu que sans paramètre).
+ */
+export function ContactFormFromUrl(props: Omit<ContactFormProps, 'initialTab'>) {
+  const onglet = useSearchParams().get('onglet');
+  return <ContactForm {...props} initialTab={onglet === 'information' ? 'INFORMATION' : 'CONTACT'} />;
+}
 
 /**
  * Carte « Écrivez-nous » (Contact `69:7807`) : onglets « Nous contacter » / « Demande d’information »

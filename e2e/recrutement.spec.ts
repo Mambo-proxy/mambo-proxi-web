@@ -108,4 +108,13 @@ test.describe('recrutement', () => {
     await form.getByRole('button', { name: 'Envoyer ma candidature' }).click();
     await expect(page.getByRole('status')).toContainText('Merci', { timeout: 15_000 });
   });
+
+  // Page prérendue : le poste de l'adresse est appliqué dans le navigateur, à l'hydratation.
+  test('version anglaise, arrivée sur ?poste= : poste présélectionné', async ({ page, pageErrors }) => {
+    await page.goto('/en/careers?poste=coordinateur-rice-de-services#candidature', {
+      waitUntil: 'domcontentloaded',
+    });
+    await expect(page.getByLabel(/Poste visé/)).toHaveValue('coordinateur-rice-de-services');
+    expect(pageErrors).toEqual([]);
+  });
 });

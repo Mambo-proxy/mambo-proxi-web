@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Check, CircleCheck, Lock, Mail, Smartphone, User } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import * as z from 'zod/mini';
@@ -59,6 +60,15 @@ type FormOutput = z.output<typeof schema>;
 /** Valeur initiale du type depuis `?type=` (lien « Je candidate » sans JavaScript). */
 function isPartnershipType(value: string | null | undefined): value is PartnershipType {
   return PARTNERSHIP_TYPES.some((type) => type.value === value);
+}
+
+/**
+ * `PartnerForm` sur le type de partenariat de l'adresse (`?type=`). La page étant prérendue, l'adresse n'est
+ * lue que dans le navigateur : à placer sous `<Suspense>`, avec en repli `PartnerForm` sur le premier type
+ * (même rendu que sans paramètre).
+ */
+export function PartnerFormFromUrl() {
+  return <PartnerForm initialType={useSearchParams().get('type')} />;
 }
 
 /**

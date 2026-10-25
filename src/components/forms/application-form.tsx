@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CircleCheck, Mail, MapPin, Smartphone, User } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import * as z from 'zod/mini';
@@ -42,6 +43,15 @@ type ApplicationFormProps = {
   /** Poste présélectionné (`?poste=` depuis « Postuler à cette offre » ou « Candidature spontanée »). */
   initialJob: string | null;
 };
+
+/**
+ * `ApplicationForm` sur le poste de l'adresse (`?poste=`). La page étant prérendue, l'adresse n'est lue que
+ * dans le navigateur : à placer sous `<Suspense>`, avec en repli `ApplicationForm` en candidature spontanée
+ * (même rendu que sans paramètre).
+ */
+export function ApplicationFormFromUrl(props: Omit<ApplicationFormProps, 'initialJob'>) {
+  return <ApplicationForm {...props} initialJob={useSearchParams().get('poste')} />;
+}
 
 /**
  * Carte « Candidature » (Recrutement `67:7005`) : poste visé (offres ouvertes ou candidature spontanée), identité,

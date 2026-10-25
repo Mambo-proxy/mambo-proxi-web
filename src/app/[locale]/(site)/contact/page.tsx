@@ -1,10 +1,10 @@
 import { Mail, Smartphone, type LucideIcon } from 'lucide-react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import type { ComponentType } from 'react';
+import { Suspense, type ComponentType } from 'react';
 import { WhatsappIcon } from '@/components/brand/social-icons';
 import { AppointmentForm } from '@/components/forms/appointment-form';
-import { ContactForm, type ContactTab } from '@/components/forms/contact-form';
+import { ContactForm, ContactFormFromUrl } from '@/components/forms/contact-form';
 import { Agency } from '@/components/sections/contact/agency';
 import { ZonesSection } from '@/components/sections/zones/zones-section';
 import { AccentText } from '@/components/ui/accent-text';
@@ -27,8 +27,6 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
   return seoMetadata({ title: t('metaTitle'), description: t('metaDescription'), path: '/contact' });
 }
 
-type SearchParams = { searchParams: Promise<{ onglet?: string }> };
-
 type ContactMethod = {
   icon: LucideIcon | ComponentType<{ size?: number; className?: string }>;
   label: string;
@@ -40,11 +38,11 @@ type ContactMethod = {
 
 /**
  * Contact (desktop `69:7651`, mobile `69:8178`) : moyens de contact, formulaires, rendez-vous, agence, carte des zones
- * d'intervention (`290:31838`). Pas de bandeau CTA.
+ * d'intervention (`290:31838`). Pas de bandeau CTA. Page prérendue : l'onglet `?onglet=` est lu dans le
+ * navigateur.
  */
-export default async function ContactPage({ params, searchParams }: LocaleParams & SearchParams) {
+export default async function ContactPage({ params }: LocaleParams) {
   await withLocale(params);
-  const { onglet } = await searchParams;
   const [settings, categories, zones, t, tRubrique] = await Promise.all([
     getSiteSettings(),
     unwrap(
@@ -93,7 +91,6 @@ export default async function ContactPage({ params, searchParams }: LocaleParams
     name: category.name,
     services: (category.services ?? []).map((service) => ({ slug: service.slug, name: service.name })),
   }));
-  const initialTab: ContactTab = onglet === 'information' ? 'INFORMATION' : 'CONTACT';
   const zonesSection: DynamicSection = {
     id: 'zones',
     type: 'dynamic',
@@ -151,7 +148,10 @@ export default async function ContactPage({ params, searchParams }: LocaleParams
 
       <section className="bg-neutral-0 py-14 xl:py-24">
         <div className="container-site grid items-start gap-10 xl:grid-cols-2 xl:gap-8">
-          <ContactForm initialTab={initialTab} serviceGroups={serviceGroups} />
+          {/* Repli prérendu : le formulaire sur son onglet par défaut, remplacé à l'hydratation. */}
+          <Suspense fallback={<ContactForm initialTab="CONTACT" serviceGroups={serviceGroups} />}>
+            <ContactFormFromUrl serviceGroups={serviceGroups} />
+          </Suspense>
           <AppointmentForm />
         </div>
       </section>

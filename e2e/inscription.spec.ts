@@ -50,4 +50,14 @@ test.describe('inscription', () => {
     await expect(page).toHaveTitle(/^Sign up/);
     expect(pageErrors).toEqual([]);
   });
+
+  // Page prérendue : le profil de l'adresse est appliqué dans le navigateur, à l'hydratation.
+  for (const path of ['/inscription?profil=professionnel', '/en/sign-up?profil=professionnel']) {
+    test(`arrivée sur ${path} : profil professionnel sélectionné`, async ({ page, pageErrors }) => {
+      await page.goto(path, { waitUntil: 'domcontentloaded' });
+      await expect(page.getByRole('radio', { name: /professionnel/i })).toBeChecked();
+      await expect(page.getByLabel(/Nom de la structure/)).toBeVisible();
+      expect(pageErrors).toEqual([]);
+    });
+  }
 });

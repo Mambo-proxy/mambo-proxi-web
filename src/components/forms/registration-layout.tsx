@@ -2,6 +2,7 @@
 
 import { Quote } from 'lucide-react';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { frenchTypography } from '@/lib/format/typography';
@@ -26,6 +27,21 @@ type RegistrationLayoutProps = {
   /** Textes de la page dans sa langue (le formulaire reste en français). */
   labels: { home: string; breadcrumb: string; title: string };
 };
+
+/**
+ * Gabarit ouvert sur le profil de l'adresse (`?profil=professionnel`). La page étant prérendue, l'adresse
+ * n'est lue que dans le navigateur : à placer sous `<Suspense>`, avec en repli `RegistrationLayout` sur
+ * « Particulier » (même rendu que sans paramètre).
+ */
+export function RegistrationLayoutFromUrl(props: Omit<RegistrationLayoutProps, 'initialProfile'>) {
+  const profil = useSearchParams().get('profil');
+  return (
+    <RegistrationLayout
+      {...props}
+      initialProfile={profil === 'professionnel' ? 'PROFESSIONNEL' : 'PARTICULIER'}
+    />
+  );
+}
 
 /**
  * Gabarit de l'inscription : panneau photo collant à gauche en desktop (600 × 980 : photo `inscrire`, voile sombre

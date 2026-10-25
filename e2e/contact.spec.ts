@@ -112,4 +112,14 @@ test.describe('contact', () => {
     );
     expect(pageErrors).toEqual([]);
   });
+
+  // Page prérendue : l'onglet de l'adresse est appliqué dans le navigateur, à l'hydratation.
+  for (const path of ['/contact?onglet=information', '/en/contact?onglet=information']) {
+    test(`arrivée sur ${path} : onglet « Demande d’information » ouvert`, async ({ page, pageErrors }) => {
+      await page.goto(path, { waitUntil: 'domcontentloaded' });
+      await expect(page.getByRole('radio', { name: /information/i })).toBeChecked();
+      await expect(page.getByLabel('Service concerné')).toBeVisible();
+      expect(pageErrors).toEqual([]);
+    });
+  }
 });

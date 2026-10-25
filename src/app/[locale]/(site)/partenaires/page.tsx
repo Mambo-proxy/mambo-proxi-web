@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { PartnerForm } from '@/components/forms/partner-form';
+import { Suspense } from 'react';
+import { PartnerForm, PartnerFormFromUrl } from '@/components/forms/partner-form';
 import { FormSection } from '@/components/sections/content/form-section';
 import { PageSections } from '@/components/sections/content/page-sections';
-import { PartnersGrid } from '@/components/sections/partners/partners-grid';
-import type { PartnerCategory } from '@/lib/api/schema';
+import { PartnersGrid, PartnersGridFromUrl } from '@/components/sections/partners/partners-grid';
 import { unwrap } from '@/lib/api/result';
 import { api, cached } from '@/lib/api/server';
 import { cacheTags } from '@/lib/api/tags';
@@ -19,14 +19,13 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
   return pageMetadata('partenaires', '/partenaires');
 }
 
-const CATEGORIES: PartnerCategory[] = ['EXPERIENCE', 'IMMOBILIER', 'ENTREPRISES'];
-
-type SearchParams = { searchParams: Promise<{ categorie?: string; type?: string }> };
-
-/** Partenaires (desktop `65:5704`, mobile `65:6208`) : logos filtrables, types de partenariat, formulaire. Pas de bandeau CTA. */
-export default async function PartnersPage({ params, searchParams }: LocaleParams & SearchParams) {
+/**
+ * Partenaires (desktop `65:5704`, mobile `65:6208`) : logos filtrables, types de partenariat, formulaire. Pas
+ * de bandeau CTA. Page prérendue : le filtre `?categorie=` et le type `?type=` sont lus dans le navigateur ;
+ * les replis des `<Suspense>` sont les rendus par défaut (« Tous », premier type), remplacés à l'hydratation.
+ */
+export default async function PartnersPage({ params }: LocaleParams) {
   await withLocale(params);
-  const query = await searchParams;
   const [page, settings, partners, t] = await Promise.all([
     getPage('partenaires'),
     getSiteSettings(),
@@ -34,7 +33,6 @@ export default async function PartnersPage({ params, searchParams }: LocaleParam
     getTranslations('rubrique'),
   ]);
   if (!page) notFound();
-  const initialFilter = CATEGORIES.find((category) => category === query.categorie) ?? 'TOUS';
 
   return (
     <PageSections
@@ -47,17 +45,19 @@ export default async function PartnersPage({ params, searchParams }: LocaleParam
         if (section.type !== 'dynamic') return undefined;
         if (section.source === 'partners-grid')
           return (
-            <PartnersGrid
+            <Suspense
               key={section.id}
-              section={section}
-              partners={partners}
-              initialFilter={initialFilter}
-            />
+              fallback={<PartnersGrid section={section} partners={partners} initialFilter="TOUS" />}
+            >
+              <PartnersGridFromUrl section={section} partners={partners} />
+            </Suspense>
           );
         if (section.source === 'partner-form')
           return (
             <FormSection key={section.id} section={section}>
-              <PartnerForm initialType={query.type ?? null} />
+              <Suspense fallback={<PartnerForm initialType={null} />}>
+                <PartnerFormFromUrl />
+              </Suspense>
             </FormSection>
           );
         return undefined;

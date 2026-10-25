@@ -61,4 +61,29 @@ test.describe('partenaires', () => {
     await expect(page.locator('#partenaires li').first()).toContainText('Experience');
     await expect(page.getByRole('link', { name: 'Apply : Real estate' })).toBeVisible();
   });
+
+  // Page prérendue : filtre et type de l'adresse appliqués dans le navigateur, à l'hydratation.
+  test('arrivée sur ?categorie= : filtre appliqué, dans les deux langues', async ({ page, pageErrors }) => {
+    const tiles = page.locator('#partenaires li');
+    await page.goto('/partenaires?categorie=IMMOBILIER', { waitUntil: 'domcontentloaded' });
+    await expect(
+      page
+        .getByRole('group', { name: 'Filtrer les partenaires' })
+        .getByRole('button', { name: 'Immobilier' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+    await expect(tiles).toHaveCount(3);
+    await page.goto('/en/partners?categorie=IMMOBILIER', { waitUntil: 'domcontentloaded' });
+    await expect(
+      page.getByRole('group', { name: 'Filter partners' }).getByRole('button', { name: 'Real estate' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+    await expect(tiles).toHaveCount(3);
+    expect(pageErrors).toEqual([]);
+  });
+
+  test('arrivée sur ?type= : type de partenariat présélectionné', async ({ page, pageErrors }) => {
+    await page.goto('/partenaires?type=IMMOBILIER#formulaire', { waitUntil: 'domcontentloaded' });
+    const form = page.getByRole('form', { name: 'Devenir partenaire' });
+    await expect(form.getByRole('radio', { name: 'Immobilier' })).toBeChecked();
+    expect(pageErrors).toEqual([]);
+  });
 });

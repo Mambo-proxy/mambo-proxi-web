@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
-import { ApplicationForm } from '@/components/forms/application-form';
+import { Suspense } from 'react';
+import { ApplicationForm, ApplicationFormFromUrl } from '@/components/forms/application-form';
 import { FormSection } from '@/components/sections/content/form-section';
 import { PageSections } from '@/components/sections/content/page-sections';
 import { JobsList } from '@/components/sections/jobs/jobs-list';
@@ -18,12 +19,16 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
   return pageMetadata('recrutement', '/recrutement');
 }
 
-type SearchParams = { searchParams: Promise<{ poste?: string }> };
+/** Page prérendue, régénérée toutes les heures pour que « Publiée il y a… » des offres reste à jour. */
+export const revalidate = 3600;
 
-/** Recrutement (desktop `67:6710`, mobile `67:7189`) : atouts, offres, bandeau prestataires, candidature. */
-export default async function RecruitmentPage({ params, searchParams }: LocaleParams & SearchParams) {
+/**
+ * Recrutement (desktop `67:6710`, mobile `67:7189`) : atouts, offres, bandeau prestataires, candidature.
+ * Le poste `?poste=` est lu dans le navigateur ; repli du `<Suspense>` : la candidature spontanée, remplacée
+ * à l'hydratation.
+ */
+export default async function RecruitmentPage({ params }: LocaleParams) {
   await withLocale(params);
-  const { poste } = await searchParams;
   const [page, settings, jobs, t] = await Promise.all([
     getPage('recrutement'),
     getSiteSettings(),
@@ -32,6 +37,7 @@ export default async function RecruitmentPage({ params, searchParams }: LocalePa
   ]);
   if (!page) notFound();
   const now = new Date().toISOString();
+  const jobOptions = jobs.map((job) => ({ slug: job.slug, title: job.title }));
 
   return (
     <PageSections
@@ -51,10 +57,9 @@ export default async function RecruitmentPage({ params, searchParams }: LocalePa
               section={section}
               titleClassName="text-[26px]! leading-8! md:text-[34px]! md:leading-[42px]! xl:text-[40px]! xl:leading-[48px]!"
             >
-              <ApplicationForm
-                jobs={jobs.map((job) => ({ slug: job.slug, title: job.title }))}
-                initialJob={poste ?? null}
-              />
+              <Suspense fallback={<ApplicationForm jobs={jobOptions} initialJob={null} />}>
+                <ApplicationFormFromUrl jobs={jobOptions} />
+              </Suspense>
             </FormSection>
           );
         return undefined;

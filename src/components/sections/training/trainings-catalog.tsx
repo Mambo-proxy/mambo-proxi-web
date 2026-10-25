@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowRight, Clock, MapPin } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { Chip } from '@/components/ui/chip';
@@ -20,21 +21,24 @@ function isCategory(value: string | null, trainings: Training[]): value is Train
   return trainings.some((training) => training.category === value);
 }
 
+type TrainingsCatalogProps = { section: DynamicSection; trainings: Training[]; initialFilter: string | null };
+
+/**
+ * `TrainingsCatalog` filtré par l'adresse (`?categorie=`). La page étant prérendue, l'adresse n'est lue que
+ * dans le navigateur : à placer sous `<Suspense>`, avec en repli `TrainingsCatalog` sur « Toutes » (même
+ * rendu que sans paramètre).
+ */
+export function TrainingsCatalogFromUrl(props: Omit<TrainingsCatalogProps, 'initialFilter'>) {
+  return <TrainingsCatalog {...props} initialFilter={useSearchParams().get('categorie')} />;
+}
+
 /**
  * Catalogue (Formation `66:6354`) : filtres (Toutes + catégories, `?categorie=` dans l'adresse), cartes 3 colonnes
  * (1 en mobile) alignées en haut : pastille `vert/50`, badge de catégorie centré, titre Poppins 20/28 (17/28 en
  * mobile), durée et format · lieu, séparateur, « Demander cette formation → » qui présélectionne la formation dans le
  * formulaire.
  */
-export function TrainingsCatalog({
-  section,
-  trainings,
-  initialFilter,
-}: {
-  section: DynamicSection;
-  trainings: Training[];
-  initialFilter: string | null;
-}) {
+export function TrainingsCatalog({ section, trainings, initialFilter }: TrainingsCatalogProps) {
   const t = useTranslations('trainings');
   const [filter, setFilter] = useState<Filter>(
     isCategory(initialFilter, trainings) ? initialFilter : 'TOUTES',

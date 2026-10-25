@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
+import { Suspense } from 'react';
 import { TrainingForm } from '@/components/forms/training-form';
 import { FormSection } from '@/components/sections/content/form-section';
 import { PageSections } from '@/components/sections/content/page-sections';
-import { TrainingsCatalog } from '@/components/sections/training/trainings-catalog';
+import { TrainingsCatalog, TrainingsCatalogFromUrl } from '@/components/sections/training/trainings-catalog';
 import { Visual } from '@/components/ui/visual';
 import { unwrap } from '@/lib/api/result';
 import { api, cached } from '@/lib/api/server';
@@ -19,12 +20,13 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
   return pageMetadata('formation', '/formation');
 }
 
-type SearchParams = { searchParams: Promise<{ categorie?: string }> };
-
-/** Formation (desktop `66:6190`, mobile `66:6730`) : offres, catalogue filtrable, demande de formation. Pas de bandeau CTA. */
-export default async function TrainingPage({ params, searchParams }: LocaleParams & SearchParams) {
+/**
+ * Formation (desktop `66:6190`, mobile `66:6730`) : offres, catalogue filtrable, demande de formation. Pas de
+ * bandeau CTA. Page prérendue : le filtre `?categorie=` est lu dans le navigateur ; repli du `<Suspense>` : le
+ * catalogue complet (« Toutes »), remplacé à l'hydratation.
+ */
+export default async function TrainingPage({ params }: LocaleParams) {
   await withLocale(params);
-  const { categorie } = await searchParams;
   const [page, settings, trainings, t] = await Promise.all([
     getPage('formation'),
     getSiteSettings(),
@@ -44,12 +46,12 @@ export default async function TrainingPage({ params, searchParams }: LocaleParam
         if (section.type !== 'dynamic') return undefined;
         if (section.source === 'trainings-catalog')
           return (
-            <TrainingsCatalog
+            <Suspense
               key={section.id}
-              section={section}
-              trainings={trainings}
-              initialFilter={categorie ?? null}
-            />
+              fallback={<TrainingsCatalog section={section} trainings={trainings} initialFilter={null} />}
+            >
+              <TrainingsCatalogFromUrl section={section} trainings={trainings} />
+            </Suspense>
           );
         if (section.source === 'training-form')
           return (

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { QuoteForm } from '@/components/forms/quote/quote-form';
+import { Suspense } from 'react';
+import { QuoteForm, QuoteFormFromUrl } from '@/components/forms/quote/quote-form';
 import { AccentText } from '@/components/ui/accent-text';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { unwrap, unwrapOrNull } from '@/lib/api/result';
@@ -18,12 +19,12 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
   return seoMetadata({ title: t('metaTitle'), description: t('metaDescription'), path: '/devis' });
 }
 
-type SearchParams = { searchParams: Promise<{ service?: string; rubrique?: string }> };
-
-/** Devis gratuit (desktop `70:8077`, mobile `70:8481`) : en-tête, progression, formulaire en 3 étapes, récapitulatif. */
-export default async function QuotePage({ params, searchParams }: LocaleParams & SearchParams) {
+/**
+ * Devis gratuit (desktop `70:8077`, mobile `70:8481`) : en-tête, progression, formulaire en 3 étapes,
+ * récapitulatif. Page prérendue : la présélection `?service=` / `?rubrique=` est lue dans le navigateur.
+ */
+export default async function QuotePage({ params }: LocaleParams) {
   await withLocale(params);
-  const query = await searchParams;
   const [categories, settings, zones, t, tRubrique] = await Promise.all([
     unwrap(
       api.GET('/v1/categories', {
@@ -52,13 +53,18 @@ export default async function QuotePage({ params, searchParams }: LocaleParams &
   );
 
   const withServices = categories.map((category) => ({ ...category, services: category.services ?? [] }));
-  const presetService = withServices
-    .flatMap((category) => category.services)
-    .find((service) => service.slug === query.service);
-  const presetCategory =
-    presetService?.category.slug ??
-    withServices.find((category) => category.slug === query.rubrique)?.slug ??
-    null;
+
+  const formProps = {
+    categories: withServices,
+    fieldsByCategory,
+    areas: (zones?.zones ?? []).map((zone) => ({
+      name: zone.name,
+      quarters: zone.quarters.map((quarter) => quarter.name),
+    })),
+    whatsapp: settings.whatsapp.enabled
+      ? { number: settings.whatsapp.number, message: settings.whatsapp.message }
+      : null,
+  };
 
   return (
     <div className="bg-neutral-50">
@@ -71,21 +77,10 @@ export default async function QuotePage({ params, searchParams }: LocaleParams &
           {frenchTypography(t('lead'))}
         </p>
       </section>
-      <QuoteForm
-        categories={withServices}
-        fieldsByCategory={fieldsByCategory}
-        initialCategory={presetCategory}
-        initialService={presetService?.slug ?? null}
-        areas={(zones?.zones ?? []).map((zone) => ({
-          name: zone.name,
-          quarters: zone.quarters.map((quarter) => quarter.name),
-        }))}
-        whatsapp={
-          settings.whatsapp.enabled
-            ? { number: settings.whatsapp.number, message: settings.whatsapp.message }
-            : null
-        }
-      />
+      {/* Repli prérendu : le formulaire sans présélection, remplacé à l'hydratation. */}
+      <Suspense fallback={<QuoteForm {...formProps} initialCategory={null} initialService={null} />}>
+        <QuoteFormFromUrl {...formProps} />
+      </Suspense>
     </div>
   );
 }

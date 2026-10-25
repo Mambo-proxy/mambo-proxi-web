@@ -65,4 +65,14 @@ test.describe('formation', () => {
     ).toBeVisible();
     await expect(page.locator('#demande-formation img')).toHaveAttribute('alt', /trainer/);
   });
+
+  // Page prérendue : le filtre de l'adresse est appliqué dans le navigateur, à l'hydratation.
+  for (const path of ['/formation?categorie=ATELIERS', '/en/training?categorie=ATELIERS']) {
+    test(`arrivée sur ${path} : catalogue filtré`, async ({ page, pageErrors }) => {
+      await page.goto(path, { waitUntil: 'domcontentloaded' });
+      await expect(page.locator('#catalogue [aria-pressed="true"]')).toHaveCount(1);
+      await expect(page.locator('#catalogue li')).toHaveCount(1);
+      expect(pageErrors).toEqual([]);
+    });
+  }
 });

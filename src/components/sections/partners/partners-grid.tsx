@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Chip } from '@/components/ui/chip';
@@ -10,19 +11,30 @@ import { SectionShell } from '../content/section-shell';
 
 type Filter = PartnerCategory | 'TOUS';
 
+const CATEGORIES: PartnerCategory[] = ['EXPERIENCE', 'IMMOBILIER', 'ENTREPRISES'];
+
+type PartnersGridProps = { section: DynamicSection; partners: Partner[]; initialFilter: Filter };
+
+/**
+ * `PartnersGrid` filtré par l'adresse (`?categorie=`). La page étant prérendue, l'adresse n'est lue que dans
+ * le navigateur : à placer sous `<Suspense>`, avec en repli `PartnersGrid` sur « Tous » (même rendu que sans
+ * paramètre).
+ */
+export function PartnersGridFromUrl(props: Omit<PartnersGridProps, 'initialFilter'>) {
+  const categorie = useSearchParams().get('categorie');
+  return (
+    <PartnersGrid
+      {...props}
+      initialFilter={CATEGORIES.find((category) => category === categorie) ?? 'TOUS'}
+    />
+  );
+}
+
 /**
  * « Nos partenaires » (`65:5841`) : filtres (Tous + catégories, `?categorie=` dans l'adresse), grille de logos
  * 4 colonnes (2 en mobile, 6 premiers seulement) ; tuile `neutral/50` rayon 20 avec logo ou nom et badge de catégorie.
  */
-export function PartnersGrid({
-  section,
-  partners,
-  initialFilter,
-}: {
-  section: DynamicSection;
-  partners: Partner[];
-  initialFilter: Filter;
-}) {
+export function PartnersGrid({ section, partners, initialFilter }: PartnersGridProps) {
   // Badge de catégorie : libellé court de la maquette (« Expérience », « Immobilier », « Entreprise »).
   const t = useTranslations('partners');
   const [filter, setFilter] = useState<Filter>(initialFilter);

@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Check, Lock, Mail, Smartphone, User } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -61,6 +62,23 @@ const FIELD_NAMES = new Set<string>(Object.values(STEP_FIELDS).flat());
 function countLabel(category: QuoteCategory) {
   const formulas = category.services.filter((service) => service.kind === 'formula').length;
   return formulas > 0 ? `${formulas} formules` : `${category.serviceCount} services`;
+}
+
+/**
+ * `QuoteForm` présélectionné par l'adresse : `?service=` (et sa rubrique), sinon `?rubrique=`. La page étant
+ * prérendue, l'adresse n'est lue que dans le navigateur : à placer sous `<Suspense>`, avec en repli
+ * `QuoteForm` sans présélection (même rendu que sans paramètre).
+ */
+export function QuoteFormFromUrl(props: Omit<QuoteFormProps, 'initialCategory' | 'initialService'>) {
+  const params = useSearchParams();
+  const service = props.categories
+    .flatMap((category) => category.services)
+    .find((item) => item.slug === params.get('service'));
+  const category =
+    service?.category.slug ??
+    props.categories.find((item) => item.slug === params.get('rubrique'))?.slug ??
+    null;
+  return <QuoteForm {...props} initialCategory={category} initialService={service?.slug ?? null} />;
 }
 
 /**
