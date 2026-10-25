@@ -969,3 +969,4 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 ### Décisions
 
 - **État par défaut affiché brièvement à l'arrivée avec un paramètre** (ex. étape 1 du devis avant l'étape 2 avec `?service=`) : inévitable avec du HTML statique ; sans paramètre, rien ne change.
+- Budget de JavaScript de Lighthouse relevé à 330 000 octets : les pages à formulaire étant statiques, Next précharge leur JavaScript (formulaires, validation) depuis les liens visibles (« Devis gratuit », « S'inscrire »), environ 2 s après le chargement, en priorité basse. Lighthouse le compte (301 à 310 Ko mesurés) sans effet sur le score ; le préchargement est gardé pour la navigation.
