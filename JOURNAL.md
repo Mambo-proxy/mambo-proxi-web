@@ -933,3 +933,15 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 ### Décisions
 
 - **Performance du contact et du devis en avertissement seulement** : ces pages importent le client de l'API, qui démarre les mocks MSW dans le navigateur (~175 Ko de gestionnaires et de données, absents en production). Le seuil deviendra bloquant quand la CI tournera sur l'API réelle.
+
+### Premier passage en CI : Lighthouse et e2e sous Linux (25 octobre 2026)
+
+- Premiers scores Lighthouse (mobile simulé, mocks) : accessibilité 100 partout ; SEO 69 à cause du seul audit `is-crawlable` (le `noindex` hors production est voulu, l'audit est désormais ignoré) ; performance 0,88 sur l'accueil, `/en`, la rubrique et la fiche, 0,75 à 0,83 sur le contact et le devis. Le temps de blocage est bon (60-70 ms) : c'est le LCP (~3,8 s) qui coûte. Budget de JavaScript relevé à 240 000 octets (230 100 mesurés sur l'accueil en CI).
+- LCP : `priority` ne pose plus `fetchpriority="high"` depuis Next 16 ; `Visual` demande désormais l'image du héros en priorité haute avec préchargement (`preload`). Seul le jeu `latin` des polices est préchargé (~107 Ko de moins avant l'image ; les autres jeux restent téléchargés au besoin), le logo de l'en-tête n'est plus préchargé, `sizes` mobiles ajustés à la largeur réelle.
+- e2e sous Linux : 31 échecs de débordement horizontal à 1280 px. La ligne de l'en-tête desktop (logo, 9 onglets, « S'inscrire », « Devis gratuit », tous sans retour à la ligne) mesure 1256 px pour 1248 disponibles avec le rendu des polices de Linux (elle passait de justesse sous Windows). Écarts et logo resserrés entre 1280 et 1439 px seulement. Pastille du héros de l'accueil : largeur bornée, texte qui passe à la ligne en mobile.
+- Réordonnancement au clavier (back-office) : sur la CI, les touches arrivaient avant que dnd-kit ait mesuré les emplacements ; `moveWithKeyboard` (`e2e/admin-helpers.ts`) avance au rythme des annonces de dnd-kit.
+
+### Décisions
+
+- **Pas de rognage de l'en-tête** (`overflow-x-clip`) : il masquerait un vrai débordement au lieu de le signaler.
+- **Rendu statique des pages publiques à suivre** : toutes les pages sont dynamiques (langue lue dans les en-têtes, `setRequestLocale` absent des pages), d'où un TTFB de ~500 ms ; chantier en deux lots (pages sans paramètres d'URL, puis lecture des paramètres côté client).

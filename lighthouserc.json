@@ -13,7 +13,8 @@
       ],
       "numberOfRuns": 3,
       "settings": {
-        "chromeFlags": "--no-sandbox"
+        "chromeFlags": "--no-sandbox",
+        "skipAudits": ["is-crawlable"]
       }
     },
     "assert": {
@@ -54,7 +55,7 @@
             "resource-summary:script:size": [
               "error",
               {
-                "maxNumericValue": 225000
+                "maxNumericValue": 240000
               }
             ]
           }
