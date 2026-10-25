@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Field, Input, PhoneInput, Select } from '@/components/ui/field';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { toast } from '@/components/ui/toaster';
+import { useStaggerIn } from '@/components/ui/use-stagger-in';
 import { browserApi } from '@/lib/api/browser';
 import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
 import { cn } from '@/lib/cn';
@@ -122,6 +123,8 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
   });
   const { errors, isSubmitting } = form.formState;
   const profile = useWatch({ control: form.control, name: 'profile' });
+  // Changement d'onglet : les champs du profil choisi apparaissent en cascade.
+  const fieldsRef = useStaggerIn<HTMLDivElement>(profile);
   const interests = useWatch({ control: form.control, name: 'interests' }) ?? [];
   const copy = COPY[profile];
 
@@ -218,7 +221,10 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
           >
             <input {...antiSpam.honeypotProps} />
             <div {...antiSpam.widgetProps} />
-            <div className="grid gap-4 md:grid-cols-2 md:gap-y-[18px] max-md:[&>*:nth-child(2n+3)]:mt-0.5">
+            <div
+              ref={fieldsRef}
+              className="grid gap-4 md:grid-cols-2 md:gap-y-[18px] max-md:[&>*:nth-child(2n+3)]:mt-0.5"
+            >
               {profile === 'PROFESSIONNEL' && (
                 <>
                   <Field label="Nom de la structure" required error={errors.organization?.message}>

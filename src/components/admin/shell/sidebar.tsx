@@ -54,7 +54,7 @@ export function Sidebar({ user }: { user: CurrentUser }) {
   const pathname = usePathname();
   const counts = useSidebarCounts().data;
   const [expanded, setExpanded] = useState(false);
-  const groups = navFor(user.role);
+  const groups = navFor(user);
   // Libellés visibles : toujours en ≥ 1280 px, sur demande entre 768 et 1279 px.
   const labelClass = expanded ? '' : 'md:max-xl:sr-only';
 

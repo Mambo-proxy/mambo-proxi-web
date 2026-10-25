@@ -2,7 +2,7 @@
 
 import { CircleCheck, Clock, Lock, Mail, MapPin, Plus, Smartphone } from 'lucide-react';
 import { SideCard } from '@/components/admin/editor/editor-ui';
-import { useAdmin } from '@/components/admin/shell/admin-context';
+import { useCan } from '@/components/admin/shell/permissions';
 import { ROLE_LABELS } from '@/components/admin/shell/nav';
 import { Avatar } from '@/components/admin/shell/sidebar';
 import { SOCIAL_ICONS, WhatsappIcon } from '@/components/brand/social-icons';
@@ -17,7 +17,6 @@ import {
   backupLabel,
   formatPhone,
   parsePhone,
-  ROLE_SCOPES,
   SOCIAL_NETWORKS,
   socialDisplay,
   socialUrl,
@@ -254,8 +253,8 @@ function DisplayedOnCard() {
 
 /** « Accès au back-office » (`94:12185`) : utilisateurs et invitation (administrateurs). */
 function AccessCard({ onInvite }: { onInvite: () => void }) {
-  const { user } = useAdmin();
-  const isAdmin = user?.role === 'ADMIN';
+  // Utilisateurs et invitation : permission `users:manage`.
+  const isAdmin = useCan()('users:manage');
   const users = useAdminUsers(isAdmin);
   if (!isAdmin) return null;
   const list = users.data?.filter((item) => item.status !== 'DESACTIVE');
@@ -295,8 +294,8 @@ function AccessCard({ onInvite }: { onInvite: () => void }) {
                   {item.status === 'INVITE'
                     ? 'Invitation envoyée'
                     : item.role === 'EDITOR'
-                      ? `${ROLE_LABELS.EDITOR} (${ROLE_SCOPES.EDITOR.toLowerCase()})`
-                      : ROLE_LABELS.ADMIN}
+                      ? `${ROLE_LABELS.EDITOR} (demandes et contenus)`
+                      : ROLE_LABELS[item.role]}
                 </span>
               </span>
             </li>

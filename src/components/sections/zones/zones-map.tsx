@@ -1,28 +1,14 @@
 'use client';
 
-import { Minus, Plus, Search, Undo2 } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
+import { useId, useMemo, useState, type KeyboardEvent, type ReactNode } from 'react';
 import type { ServiceAreas, Zone, ZoneQuarter } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
 import { ZonesAside } from './zones-aside';
+import { ZonesLeafletMap, type MapAgency, type MapLabels, type MapZone } from './zones-leaflet';
 import { TONES } from './zone-tones';
-
-/** Dimensions de la carte de la maquette (`290:31639`) : les positions des quartiers y sont exprimées de 0 à 1. */
-const MAP_WIDTH = 760;
-const MAP_HEIGHT = 540;
-const MIN_SCALE = 1;
-const MAX_SCALE = 3;
-
-export type Located = ZoneQuarter & { zone: Zone; position: { x: number; y: number } };
-
-/** Quartiers placés sur la carte, avec leur zone. */
-export function locatedQuarters(zones: Zone[]): Located[] {
-  return zones
-    .flatMap((zone) => zone.quarters.map((quarter) => ({ ...quarter, zone })))
-    .filter((quarter): quarter is Located => quarter.position != null);
-}
 
 /** Recherche insensible à la casse, aux accents et aux tirets. */
 function normalize(value: string) {
@@ -32,264 +18,6 @@ function normalize(value: string) {
     .replace(/[-’']/g, ' ')
     .toLowerCase()
     .trim();
-}
-
-function clampOffset(offset: number, scale: number, size: number) {
-  return Math.min(0, Math.max(offset, size - size * scale));
-}
-
-/**
- * Carte stylisée de Douala (Wouri, aires des zones, quartiers) : zoom (boutons, Ctrl + molette, double clic) et
- * déplacement (glisser, flèches du clavier). Les libellés de tous les quartiers s'affichent à partir de 768 px ;
- * sur la carte réduite (mobile), seuls ceux marqués `labelOnSmallMap`, puis tous en zoomant.
- */
-export function DoualaMap({
-  quarters,
-  selected,
-  className,
-  interactive = true,
-}: {
-  quarters: Located[];
-  selected: string | null;
-  /** Largeur du cadre (760 px en desktop par défaut ; aperçu du back-office : pleine largeur). */
-  className?: string;
-  /** `false` : aperçu du back-office (sans zoom ni déplacement). */
-  interactive?: boolean;
-}) {
-  const t = useTranslations('zones');
-  const frameRef = useRef<HTMLDivElement>(null);
-  const drag = useRef<{ x: number; y: number; originX: number; originY: number } | null>(null);
-  const [view, setView] = useState({ scale: 1, x: 0, y: 0 });
-
-  function zoom(factor: number, focus?: { x: number; y: number }) {
-    const frame = frameRef.current;
-    if (!frame) return;
-    const { width, height } = frame.getBoundingClientRect();
-    setView((current) => {
-      const scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, current.scale * factor));
-      const fx = focus?.x ?? width / 2;
-      const fy = focus?.y ?? height / 2;
-      const x = fx - ((fx - current.x) / current.scale) * scale;
-      const y = fy - ((fy - current.y) / current.scale) * scale;
-      return { scale, x: clampOffset(x, scale, width), y: clampOffset(y, scale, height) };
-    });
-  }
-
-  function pan(dx: number, dy: number) {
-    const frame = frameRef.current;
-    if (!frame) return;
-    const { width, height } = frame.getBoundingClientRect();
-    setView((current) => ({
-      ...current,
-      x: clampOffset(current.x + dx, current.scale, width),
-      y: clampOffset(current.y + dy, current.scale, height),
-    }));
-  }
-
-  function onPointerDown(event: PointerEvent<HTMLDivElement>) {
-    if (view.scale === 1 || event.button !== 0) return;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    drag.current = { x: event.clientX, y: event.clientY, originX: view.x, originY: view.y };
-  }
-
-  function onPointerMove(event: PointerEvent<HTMLDivElement>) {
-    const start = drag.current;
-    const frame = frameRef.current;
-    if (!start || !frame) return;
-    const { width, height } = frame.getBoundingClientRect();
-    setView((current) => ({
-      ...current,
-      x: clampOffset(start.originX + event.clientX - start.x, current.scale, width),
-      y: clampOffset(start.originY + event.clientY - start.y, current.scale, height),
-    }));
-  }
-
-  function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    const step = 40;
-    const moves: Record<string, [number, number]> = {
-      ArrowLeft: [step, 0],
-      ArrowRight: [-step, 0],
-      ArrowUp: [0, step],
-      ArrowDown: [0, -step],
-    };
-    const move = moves[event.key];
-    if (move) {
-      event.preventDefault();
-      pan(...move);
-    } else if (event.key === '+' || event.key === '=') {
-      zoom(1.4);
-    } else if (event.key === '-') {
-      zoom(1 / 1.4);
-    }
-  }
-
-  const zoomed = view.scale > 1.4;
-  const control =
-    'flex size-8 cursor-pointer items-center justify-center rounded-full bg-neutral-0 text-text-main shadow-1 transition-colors hover:bg-neutral-100 disabled:cursor-default disabled:opacity-40';
-
-  return (
-    <div className={cn('relative w-full shrink-0 xl:w-[760px]', className)}>
-      <div
-        ref={frameRef}
-        role={interactive ? 'group' : 'img'}
-        aria-roledescription={interactive ? t('mapLabel') : undefined}
-        aria-label={interactive ? t('mapHint') : t('mapLabel')}
-        tabIndex={interactive ? 0 : undefined}
-        onKeyDown={interactive ? onKeyDown : undefined}
-        onPointerDown={interactive ? onPointerDown : undefined}
-        onPointerMove={interactive ? onPointerMove : undefined}
-        onPointerUp={interactive ? () => (drag.current = null) : undefined}
-        onPointerCancel={interactive ? () => (drag.current = null) : undefined}
-        onDoubleClick={
-          interactive
-            ? (event) => {
-                const box = event.currentTarget.getBoundingClientRect();
-                zoom(1.6, { x: event.clientX - box.left, y: event.clientY - box.top });
-              }
-            : undefined
-        }
-        onWheel={
-          interactive
-            ? (event) => {
-                if (!event.ctrlKey) return;
-                event.preventDefault();
-                const box = event.currentTarget.getBoundingClientRect();
-                zoom(event.deltaY < 0 ? 1.2 : 1 / 1.2, {
-                  x: event.clientX - box.left,
-                  y: event.clientY - box.top,
-                });
-              }
-            : undefined
-        }
-        className={cn(
-          'relative aspect-[760/540] w-full overflow-hidden rounded-[11px] bg-map-land select-none md:rounded-xl',
-          interactive && 'touch-pan-y focus-visible:focus-ring',
-          interactive && view.scale > 1 && 'cursor-grab touch-none active:cursor-grabbing',
-        )}
-      >
-        <div
-          className="absolute inset-0 origin-top-left transition-transform duration-200 ease-out motion-reduce:transition-none"
-          style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})` }}
-        >
-          <svg
-            aria-hidden
-            viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
-            preserveAspectRatio="none"
-            className="absolute inset-0 size-full"
-          >
-            <defs>
-              <filter id="zone-area-blur" x="-30%" y="-30%" width="160%" height="160%">
-                <feGaussianBlur stdDeviation="9" />
-              </filter>
-            </defs>
-            {/* Le Wouri et sa rive ouest (tracés de la maquette). */}
-            <path
-              d="M150 0C210 90 170 170 205 250C235 330 170 420 120 540H0V300C40 200 70 120 40 0H150Z"
-              fill="var(--mp-color-map-water)"
-            />
-            <path d="M40 0C70 120 40 200 0 300V0H40Z" fill="var(--mp-color-map-bank)" />
-            <g filter="url(#zone-area-blur)">
-              {quarters.map((quarter) => {
-                const tone = TONES[quarter.zone.tone];
-                return (
-                  <circle
-                    key={`aire-${quarter.name}`}
-                    cx={quarter.position.x * MAP_WIDTH}
-                    cy={quarter.position.y * MAP_HEIGHT}
-                    r={62}
-                    fill={tone.color}
-                    fillOpacity={tone.area}
-                  />
-                );
-              })}
-            </g>
-            {quarters.map((quarter) => {
-              const tone = TONES[quarter.zone.tone];
-              const isSelected = quarter.name === selected;
-              return (
-                <g key={`point-${quarter.name}`}>
-                  {isSelected && (
-                    <circle
-                      cx={quarter.position.x * MAP_WIDTH}
-                      cy={quarter.position.y * MAP_HEIGHT}
-                      r={14}
-                      fill={tone.color}
-                      fillOpacity={0.25}
-                    />
-                  )}
-                  <circle
-                    cx={quarter.position.x * MAP_WIDTH}
-                    cy={quarter.position.y * MAP_HEIGHT}
-                    r={quarter.isBase ? 6.5 : 4.5}
-                    fill={tone.color}
-                    stroke="var(--mp-color-neutral-0)"
-                    strokeWidth={3}
-                  />
-                </g>
-              );
-            })}
-          </svg>
-          <span
-            aria-hidden
-            className="absolute top-[25.86%] left-[19.56%] -translate-1/2 rotate-70 font-ui text-[9px] font-medium text-map-water-label md:text-[13px]"
-          >
-            {t('wouri')}
-          </span>
-          {quarters.map((quarter) => {
-            const isSelected = quarter.name === selected;
-            const visibleOnSmall =
-              !interactive || quarter.labelOnSmallMap || quarter.isBase || isSelected || zoomed;
-            return (
-              <span
-                key={`libelle-${quarter.name}`}
-                aria-hidden
-                style={{ left: `${quarter.position.x * 100}%`, top: `${quarter.position.y * 100}%` }}
-                className={cn(
-                  'absolute ml-2 -translate-y-1/2 font-ui text-[9px] whitespace-nowrap text-text-main md:ml-3 md:text-[12px]',
-                  quarter.isBase || isSelected ? 'font-semibold md:text-[13px]' : 'font-medium',
-                  !visibleOnSmall && 'max-md:hidden',
-                )}
-              >
-                {quarter.mapLabel ?? quarter.name}
-              </span>
-            );
-          })}
-        </div>
-      </div>
-      {interactive && (
-        <div className="absolute top-3 right-3 flex flex-col gap-1.5 md:top-4 md:right-4">
-          <button
-            type="button"
-            onClick={() => zoom(1.4)}
-            disabled={view.scale >= MAX_SCALE}
-            aria-label={t('zoomIn')}
-            className={control}
-          >
-            <Plus aria-hidden size={16} />
-          </button>
-          <button
-            type="button"
-            onClick={() => zoom(1 / 1.4)}
-            disabled={view.scale <= MIN_SCALE}
-            aria-label={t('zoomOut')}
-            className={control}
-          >
-            <Minus aria-hidden size={16} />
-          </button>
-          {view.scale > 1 && (
-            <button
-              type="button"
-              onClick={() => setView({ scale: 1, x: 0, y: 0 })}
-              aria-label={t('reset')}
-              className={control}
-            >
-              <Undo2 aria-hidden size={15} />
-            </button>
-          )}
-        </div>
-      )}
-    </div>
-  );
 }
 
 /** Recherche d'un quartier (liste de suggestions au clavier) et réponse : zone et conditions d'intervention. */
@@ -312,7 +40,7 @@ function QuarterSearch({
     const needle = normalize(query);
     if (!needle) return [];
     return quarters
-      .filter((quarter) => quarter.position || quarter.detail)
+      .filter((quarter) => quarter.coordinates || quarter.position || quarter.detail)
       .filter((quarter) => normalize(quarter.name).includes(needle))
       .sort(
         (a, b) =>
@@ -442,23 +170,62 @@ function QuarterSearch({
 }
 
 /**
- * Carte et recherche des zones d'intervention (accueil `290:31638`, page Zones) : carte 760 × 540 rayon 24 à gauche,
- * colonne « Trouvez votre quartier » (gap 20) : recherche, réponse, légende, lien facultatif. Empilées en mobile
- * (carte réduite 350 px, rayon 11, gap 24).
+ * Carte et recherche des zones d'intervention (accueil `290:31638`, page Zones, Contact) : carte interactive
+ * OpenStreetMap 760 × 540 rayon 24 à gauche, colonne « Trouvez votre quartier » (gap 20) : recherche, réponse,
+ * légende, lien facultatif. Empilées en mobile (carte réduite 350 px, rayon 11, gap 24). La recherche (et la liste
+ * des quartiers de la page Zones) reste l'accès principal : choisir un quartier centre la carte et ouvre son
+ * info-bulle.
  */
-export function ZonesMap({ areas, link }: { areas: ServiceAreas; link?: React.ReactNode }) {
+export function ZonesMap({
+  areas,
+  link,
+  agency,
+}: {
+  areas: ServiceAreas;
+  link?: ReactNode;
+  /** Agence (`SiteSettings.agency`), placée sur la carte si elle a des coordonnées. */
+  agency?: MapAgency | null;
+}) {
+  const t = useTranslations('zones');
   const [selectedName, setSelectedName] = useState<string | null>(null);
 
   const quarters = useMemo(
     () => areas.zones.flatMap((zone) => zone.quarters.map((quarter) => ({ ...quarter, zone }))),
     [areas.zones],
   );
-  const located = quarters.filter((quarter): quarter is Located => quarter.position != null);
   const selected = quarters.find((quarter) => quarter.name === selectedName) ?? null;
+  const zones = useMemo<MapZone[]>(
+    () => areas.zones.map((zone) => ({ ...zone, details: [frenchTypography(zone.result)] })),
+    [areas.zones],
+  );
+  const labels = useMemo<MapLabels>(
+    () => ({
+      name: t('mapLabel'),
+      hint: frenchTypography(t('mapHint')),
+      zoomIn: t('zoomIn'),
+      zoomOut: t('zoomOut'),
+      reset: t('reset'),
+      closePopup: t('closePopup'),
+      base: t('base'),
+      agency: t('agency'),
+      wheel: frenchTypography(t('wheelHint')),
+      wheelMac: frenchTypography(t('wheelHintMac')),
+      touch: frenchTypography(t('touchHint')),
+      attribution: t('attribution'),
+      newTab: t('newTab'),
+    }),
+    [t],
+  );
 
   return (
     <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:gap-10">
-      <DoualaMap quarters={located} selected={selectedName} />
+      <ZonesLeafletMap
+        zones={zones}
+        view={areas.map}
+        agency={agency}
+        labels={labels}
+        selected={selected?.coordinates ? selected.name : null}
+      />
       <ZonesAside areas={areas} link={link}>
         <QuarterSearch quarters={quarters} selected={selected} onSelect={setSelectedName} />
       </ZonesAside>

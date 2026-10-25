@@ -172,10 +172,15 @@ const inEnglish = (item: Training): Training => ({
   format: FORMATS_EN[item.format] ?? item.format,
 });
 
+/** Formations publiées dans la langue demandée (catalogue du site et recherche globale). */
+export function publicTrainings(lang: 'fr' | 'en'): Training[] {
+  return lang === 'en' ? published().map(inEnglish) : published();
+}
+
 export const trainingHandlers = [
   http.get('*/v1/trainings', ({ request }) => {
     const category = new URL(request.url).searchParams.get('category');
-    const list = langOf(request) === 'en' ? published().map(inEnglish) : published();
+    const list = publicTrainings(langOf(request));
     return HttpResponse.json(category ? list.filter((item) => item.category === category) : list);
   }),
 ];

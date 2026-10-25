@@ -1,9 +1,9 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Copy, FileText, Info, Mail, Phone, ShieldX, UserCheck, UserX, X } from 'lucide-react';
+import { Copy, FileText, Info, Mail, Phone, ShieldX, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { useAdmin } from '@/components/admin/shell/admin-context';
+import { useCan } from '@/components/admin/shell/permissions';
 import { sidebarCountsKey } from '@/components/admin/shell/sidebar';
 import { ActionMenu } from '@/components/admin/ui/action-menu';
 import {
@@ -25,6 +25,7 @@ import { cn } from '@/lib/cn';
 import { formatStamp } from '@/lib/format/date';
 import { formatPhone } from '@/lib/phone';
 import { whatsappUrl } from '@/lib/whatsapp';
+import { AssignmentField, DueBadge, presenceKey } from './assignment';
 
 const STEPS: { value: RequestStatus; label: string }[] = [
   { value: 'NOUVELLE', label: 'Nouvelle' },
@@ -61,11 +62,13 @@ function quoteMailto(request: RequestDetail) {
 /**
  * Panneau « Détail de la demande » (`87:11129`) : référence, service, carte client, actions rapides
  * (WhatsApp avec la référence, e-mail, appel), informations, besoin exprimé, statut en 4 étapes, notes internes,
- * historique, « Préparer le devis » et menu (assigner, dupliquer, copier la référence, anonymiser).
- * À droite de la liste à partir de 1280 px, en panneau superposé en dessous.
+ * historique, « Préparer le devis » et menu (dupliquer, copier la référence, anonymiser). Échéance et assignation
+ * (sélecteur des personnes assignables, « M’assigner ») selon les permissions : `requests:assign` pour assigner,
+ * `requests:revert-status` pour revenir à un statut précédent, `requests:write` pour dupliquer,
+ * `requests:anonymize` pour anonymiser. À droite de la liste à partir de 1280 px, en panneau superposé en dessous.
  */
 export function RequestPanel({ id, onClose }: { id: string; onClose: () => void }) {
-  const { user } = useAdmin();
+  const can = useCan();
   const client = useQueryClient();
   const panel = useRef<HTMLDivElement>(null);
   const [note, setNote] = useState('');
@@ -81,6 +84,7 @@ export function RequestPanel({ id, onClose }: { id: string; onClose: () => void 
     void client.invalidateQueries({ queryKey: ['requests'] });
     void client.invalidateQueries({ queryKey: sidebarCountsKey });
     void client.invalidateQueries({ queryKey: ['dashboard'] });
+    void client.invalidateQueries({ queryKey: ['my-tasks'] });
   };
 
   const updateStatus = useMutation({
@@ -116,7 +120,9 @@ export function RequestPanel({ id, onClose }: { id: string; onClose: () => void 
         updated.assignedTo ? `Demande assignée à ${updated.assignedTo.name}.` : 'Assignation retirée.',
       );
       refreshLists();
+      void client.invalidateQueries({ queryKey: presenceKey });
     },
+    onError: (error) => toast.error(errorMessage(error)),
   });
 
   const addNote = useMutation({
@@ -260,13 +266,29 @@ export function RequestPanel({ id, onClose }: { id: string; onClose: () => void 
                   <dd className="text-right font-semibold text-text-main">{field.value}</dd>
                 </div>
               ))}
-              {request.assignedTo && (
+              {request.assignedTo && !can('requests:assign') && (
                 <div className="flex justify-between gap-4">
                   <dt className="text-text-muted">Suivie par</dt>
                   <dd className="text-right font-semibold text-text-main">{request.assignedTo.name}</dd>
                 </div>
               )}
+              {(request.status === 'NOUVELLE' || request.status === 'EN_COURS') && request.dueAt && (
+                <div className="flex items-center justify-between gap-4">
+                  <dt className="text-text-muted">Échéance</dt>
+                  <dd className="text-right font-semibold text-text-main">
+                    {request.isOverdue ? <DueBadge request={request} long /> : formatStamp(request.dueAt)}
+                  </dd>
+                </div>
+              )}
             </dl>
+
+            {can('requests:assign') && (
+              <AssignmentField
+                assignedTo={request.assignedTo}
+                pending={assign.isPending}
+                onAssign={(userId) => assign.mutate(userId)}
+              />
+            )}
 
             {request.message && (
               <div className="flex flex-col gap-1.5 rounded-md border border-border-default p-3.5">
@@ -284,8 +306,8 @@ export function RequestPanel({ id, onClose }: { id: string; onClose: () => void 
               <div className="grid grid-cols-4 gap-1">
                 {STEPS.map((step, index) => {
                   const active = step.value === request.status;
-                  // Retour en arrière réservé aux administrateurs.
-                  const locked = index < currentStep && user.role !== 'ADMIN';
+                  // Retour en arrière : permission `requests:revert-status` (administrateurs).
+                  const locked = index < currentStep && !can('requests:revert-status');
                   return (
                     <button
                       key={step.value}
@@ -397,14 +419,9 @@ export function RequestPanel({ id, onClose }: { id: string; onClose: () => void 
                 label="Autres actions"
                 variant="outline"
                 items={[
-                  request.assignedTo?.id === user.id
-                    ? { label: 'Retirer l’assignation', icon: UserX, onSelect: () => assign.mutate(null) }
-                    : {
-                        label: 'M’assigner la demande',
-                        icon: UserCheck,
-                        onSelect: () => assign.mutate(user.id),
-                      },
-                  { label: 'Dupliquer', icon: Copy, onSelect: () => duplicate.mutate() },
+                  ...(can('requests:write')
+                    ? [{ label: 'Dupliquer', icon: Copy, onSelect: () => duplicate.mutate() }]
+                    : []),
                   {
                     label: 'Copier la référence',
                     icon: FileText,
@@ -413,7 +430,7 @@ export function RequestPanel({ id, onClose }: { id: string; onClose: () => void 
                         ?.writeText(request.reference)
                         .then(() => toast.success('Référence copiée.')),
                   },
-                  ...(user.role === 'ADMIN'
+                  ...(can('requests:anonymize')
                     ? [
                         {
                           label: 'Anonymiser (RGPD)',

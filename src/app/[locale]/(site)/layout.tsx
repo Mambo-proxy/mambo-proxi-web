@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
+import { AnalyticsTracker } from '@/components/site/analytics-tracker';
 import { CookieBanner } from '@/components/site/cookie-banner';
+import { PageTransition } from '@/components/site/page-transition';
 import { SiteFooter } from '@/components/site/site-footer';
 import { SiteHeader } from '@/components/site/site-header';
 import { TopBar } from '@/components/site/top-bar';
@@ -19,7 +21,9 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 }
 
 /**
- * Gabarit des pages publiques : barre supérieure, en-tête, pied de page, WhatsApp flottant, bandeau cookies.
+ * Gabarit des pages publiques : barre supérieure, en-tête, pied de page, WhatsApp flottant, bandeau cookies, mesure
+ * d'audience interne (`AnalyticsTracker`, chargée au repos) ; le contenu
+ * de la page change avec une transition (`PageTransition`), en-tête et pied de page restent en place.
  * `params` manque quand la page introuvable de `[locale]` réutilise ce gabarit : la langue y est déjà enregistrée par
  * le gabarit racine.
  */
@@ -51,11 +55,12 @@ export default async function SiteLayout({
         topBar={<TopBar settings={settings} whatsappHref={whatsappHref} />}
       />
       <main id="contenu" tabIndex={-1} className="outline-none">
-        {children}
+        <PageTransition>{children}</PageTransition>
       </main>
       <SiteFooter navigation={navigation} settings={settings} whatsappHref={whatsappHref} />
       {whatsappHref && <WhatsappFloat href={whatsappHref} />}
       <CookieBanner ga4MeasurementId={settings.analytics?.ga4MeasurementId ?? null} />
+      <AnalyticsTracker />
     </>
   );
 }

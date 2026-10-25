@@ -9,6 +9,7 @@ import {
   FileText,
   Handshake,
   Star,
+  UserCheck,
   UserPlus,
   type LucideIcon,
 } from 'lucide-react';
@@ -28,6 +29,8 @@ const ICONS: Record<Notification['kind'], LucideIcon> = {
   APPLICATION: Briefcase,
   PARTNERSHIP: Handshake,
   REGISTRATION: UserPlus,
+  // Demande ou rendez-vous qui vient de vous être assigné.
+  ASSIGNMENT: UserCheck,
   SYSTEM: CircleAlert,
 };
 

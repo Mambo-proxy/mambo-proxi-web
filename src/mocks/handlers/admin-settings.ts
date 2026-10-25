@@ -20,7 +20,9 @@ import type {
 import { jsonBody, mockId } from '../admin-utils';
 import { emailDocument } from '../email-layout';
 import { problem } from '../problem';
-import { mockUsers, sessionUser } from '../session';
+import { ROLES, can, forbidden } from '../permissions';
+import { sessionUser } from '../session';
+import { adminUsers, syncSessionRole } from '../team';
 
 type Groups = {
   coordonnees: SettingsCoordonnees;
@@ -326,6 +328,17 @@ const SEEDS: TemplateSeed[] = [
     variables: ['{nom}', '{service}', '{quartier}', '{référence}', '{lien}'],
   },
   {
+    key: 'team-assignment',
+    audience: 'equipe',
+    name: 'Alerte « demande assignée »',
+    description: 'Prévient la personne à qui une demande ou un rendez-vous vient d’être assigné.',
+    subject: '{référence} vous est assignée · {service}',
+    title: 'Une demande vous est assignée',
+    paragraphs: ['{nom} demande « {service} ».', 'Ouvrez la demande pour la prendre en charge.'],
+    buttonLabel: 'Ouvrir la demande',
+    variables: ['{nom}', '{service}', '{référence}', '{lien}'],
+  },
+  {
     key: 'user-invite',
     audience: 'utilisateur',
     name: 'Invitation au back-office',
@@ -373,19 +386,7 @@ export const adminEmailTemplates: EmailTemplate[] = SEEDS.map((seed) => ({
   updatedAt: UPDATED,
 }));
 
-/** Utilisateurs du back-office (maquette : « 2 utilisateurs », Mireille Bell et Équipe Douala). */
-export const adminUsers: AdminUser[] = mockUsers.map((user) => ({
-  id: user.id,
-  email: user.email,
-  name: user.name,
-  initials: user.initials ?? '',
-  role: user.role,
-  isActive: true,
-  status: 'ACTIF',
-  invitedAt: null,
-  lastLoginAt: user.lastLoginAt ?? null,
-  createdAt: '2026-06-02T09:00:00.000Z',
-}));
+export { adminUsers };
 
 /** Sauvegarde de la nuit à 03:00, heure de Douala (UTC+1). */
 function lastBackup(now = new Date()): string {
@@ -536,10 +537,11 @@ const findTemplate = (key: unknown) => adminEmailTemplates.find((item) => item.k
 
 const activeAdmins = (users: AdminUser[]) => users.filter((user) => user.role === 'ADMIN' && user.isActive);
 
+/** Utilisateurs : permission `users:manage` (déjà contrôlée par la garde commune, rappelée ici pour les tests). */
 function requireAdmin(request: Request) {
-  return sessionUser(request)?.role === 'ADMIN'
+  return can(sessionUser(request), 'users:manage')
     ? null
-    : problem(403, 'Cette action est réservée aux administrateurs.');
+    : forbidden('Cette action est réservée aux administrateurs.');
 }
 
 /** Back-office — Paramètres, modèles d’e-mails, utilisateurs (`/v1/admin/settings*`, `/v1/admin/email-templates*`, `/v1/admin/users*`, `/v1/admin/system-status`). */
@@ -553,10 +555,14 @@ export const adminSettingsHandlers = [
   http.put('*/v1/admin/settings/:group', async ({ request, params }) => {
     const group = params.group as SettingsGroup;
     if (!GROUPS.includes(group)) return problem(404, 'Ce groupe de paramètres n’existe pas.');
-    if (ADMIN_GROUPS.includes(group)) {
-      const denied = requireAdmin(request);
-      if (denied) return denied;
-    }
+    // Groupes sensibles : `settings:admin` ; autres groupes : `settings:write`.
+    const user = sessionUser(request);
+    if (ADMIN_GROUPS.includes(group) ? !can(user, 'settings:admin') : !can(user, 'settings:write'))
+      return forbidden(
+        ADMIN_GROUPS.includes(group)
+          ? 'Ces paramètres sont réservés aux administrateurs.'
+          : 'Votre rôle ne permet pas de modifier les paramètres.',
+      );
     const body = await jsonBody<Record<string, unknown>>(request);
     if (body.group !== group) return problem(422, 'Le groupe envoyé ne correspond pas à l’adresse.');
     const errors = validate(group, body);
@@ -632,7 +638,7 @@ export const adminSettingsHandlers = [
     const email = body.email?.trim().toLowerCase() ?? '';
     if (!name) errors.push({ path: 'name', message: 'Indiquez le nom.' });
     if (!EMAIL.test(email)) errors.push({ path: 'email', message: 'Saisissez une adresse e-mail valide.' });
-    if (body.role !== 'ADMIN' && body.role !== 'EDITOR')
+    if (!body.role || !ROLES.includes(body.role))
       errors.push({ path: 'role', message: 'Choisissez un rôle.' });
     if (errors.length) return problem(422, 'Certains champs sont à corriger.', errors);
     if (adminUsers.some((user) => user.email === email))
@@ -652,6 +658,7 @@ export const adminSettingsHandlers = [
       status: 'INVITE',
       invitedAt: now,
       lastLoginAt: null,
+      lastActiveAt: null,
       createdAt: now,
     };
     adminUsers.push(user);
@@ -664,6 +671,8 @@ export const adminSettingsHandlers = [
     const user = adminUsers.find((item) => item.id === params.id);
     if (!user) return problem(404, 'Cet utilisateur n’existe plus.');
     const body = await jsonBody<{ name?: string; role?: Role; isActive?: boolean }>(request);
+    if (body.role !== undefined && !ROLES.includes(body.role))
+      return problem(422, 'Rôle inconnu.', [{ path: 'role', message: 'Choisissez un rôle.' }]);
     if (body.isActive === false && user.id === sessionUser(request)?.id)
       return problem(409, 'Vous ne pouvez pas désactiver votre propre compte.');
     const next = { ...user, ...body };
@@ -672,6 +681,7 @@ export const adminSettingsHandlers = [
     Object.assign(user, body, {
       status: next.isActive === false ? 'DESACTIVE' : user.lastLoginAt ? 'ACTIF' : 'INVITE',
     });
+    if (body.role) syncSessionRole(user.id, body.role);
     return HttpResponse.json(user);
   }),
 

@@ -275,7 +275,12 @@ const EN: Record<string, Partial<JobOfferDetail>> = {
   },
 };
 
-const jobsEn: JobOfferDetail[] = jobs.map((job) => ({ ...job, ...EN[job.slug], benefits: BENEFITS_EN }));
+/** Offres en anglais (`?lang=en`), aussi lues par la recherche globale. */
+export const jobsEn: JobOfferDetail[] = jobs.map((job) => ({
+  ...job,
+  ...EN[job.slug],
+  benefits: BENEFITS_EN,
+}));
 
 export const jobHandlers = [
   http.get('*/v1/jobs', ({ request }) => {

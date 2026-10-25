@@ -33,6 +33,8 @@ export const routing = defineRouting({
     '/suivi-mambo': { fr: '/suivi-mambo', en: '/mambo-tracking' },
     '/magazine': '/magazine',
     '/zones-d-intervention': { fr: '/zones-d-intervention', en: '/service-areas' },
+    // Résultats de la recherche globale : hors du plan du site et non indexée (`noindex`).
+    '/recherche': { fr: '/recherche', en: '/search' },
     '/mentions-legales': { fr: '/mentions-legales', en: '/legal-notice' },
     '/confidentialite': { fr: '/confidentialite', en: '/privacy-policy' },
     '/cookies': '/cookies',

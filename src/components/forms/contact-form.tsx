@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Field, Input, PhoneInput, Select, Textarea } from '@/components/ui/field';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { toast } from '@/components/ui/toaster';
+import { useStaggerIn } from '@/components/ui/use-stagger-in';
 import { browserApi } from '@/lib/api/browser';
 import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
 import { CONSENT_TEXT, fieldRules, trimmed } from '@/lib/forms/schemas';
@@ -85,6 +86,8 @@ export function ContactFormFromUrl(props: Omit<ContactFormProps, 'initialTab'>) 
  */
 export function ContactForm({ initialTab, serviceGroups }: ContactFormProps) {
   const [tab, setTab] = useState<ContactTab>(initialTab);
+  // Changement d'onglet : les champs du formulaire réapparaissent en cascade.
+  const formRef = useStaggerIn<HTMLFormElement>(tab);
   const [sent, setSent] = useState<{ message: string; reference: string } | null>(null);
   const antiSpam = useAntiSpam();
   const form = useForm<FormInput, unknown, FormOutput>({
@@ -169,6 +172,7 @@ export function ContactForm({ initialTab, serviceGroups }: ContactFormProps) {
         </div>
       ) : (
         <form
+          ref={formRef}
           noValidate
           onSubmit={form.handleSubmit(onSubmit)}
           aria-label={title}

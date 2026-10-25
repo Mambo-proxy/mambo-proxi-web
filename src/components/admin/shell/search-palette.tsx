@@ -78,7 +78,7 @@ export function SearchPalette() {
       ? (results.data?.groups ?? []).flatMap((group) =>
           group.items.map((item) => ({ ...item, group: group.label })),
         )
-      : navFor(user.role).flatMap((group) =>
+      : navFor(user).flatMap((group) =>
           group.items.map((item) => ({
             id: item.href,
             title: item.label,

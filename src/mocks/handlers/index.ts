@@ -2,6 +2,7 @@ import { http } from 'msw';
 import { problem } from '../problem';
 import { adminCoreHandlers } from './admin-core';
 import { adminRequestHandlers } from './admin-requests';
+import { adminTeamHandlers } from './admin-team';
 import { adminServiceHandlers } from './admin-services';
 import { adminPageHandlers } from './admin-pages';
 import { adminReviewHandlers } from './admin-reviews';
@@ -17,6 +18,7 @@ import { adminNewsletterHandlers } from './admin-newsletter';
 import { adminAuditHandlers } from './admin-audit';
 import { adminSettingsHandlers } from './admin-settings';
 import { adminMediaHandlers } from './admin-media';
+import { analyticsHandlers } from './analytics';
 import { appointmentHandlers } from './appointments';
 import { authHandlers } from './auth';
 import { catalogueHandlers } from './catalogue';
@@ -27,10 +29,12 @@ import { jobHandlers } from './jobs';
 import { newsletterHandlers } from './newsletter';
 import { pageHandlers } from './pages';
 import { reviewHandlers } from './reviews';
+import { searchHandlers } from './search';
 import { siteHandlers } from './site';
 import { surveyHandlers } from './surveys';
 import { trainingHandlers } from './trainings';
 import { partnerHandlers } from './partners';
+import { zoneHandlers } from './zones';
 
 /**
  * Ordre de priorité : gestionnaires dédiés (filtres, pagination, validation), puis exemples du contrat,
@@ -41,6 +45,7 @@ export const handlers = [
   ...siteHandlers,
   ...authHandlers,
   ...adminCoreHandlers,
+  ...adminTeamHandlers,
   ...adminRequestHandlers,
   ...adminServiceHandlers,
   ...adminPageHandlers,
@@ -57,6 +62,7 @@ export const handlers = [
   ...adminSettingsHandlers,
   ...adminAuditHandlers,
   ...adminMediaHandlers,
+  ...analyticsHandlers,
   ...appointmentHandlers,
   ...formHandlers,
   ...newsletterHandlers,
@@ -66,7 +72,9 @@ export const handlers = [
   ...trainingHandlers,
   ...jobHandlers,
   ...reviewHandlers,
+  ...searchHandlers,
   ...surveyHandlers,
+  ...zoneHandlers,
   ...contractHandlers,
   http.all('*/v1/*', ({ request }) =>
     problem(501, `Route non simulée : ${request.method} ${new URL(request.url).pathname}.`),

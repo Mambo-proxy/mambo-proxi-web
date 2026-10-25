@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import type { LoginInput, LoginResult } from '@/lib/api/schema';
+import type { CurrentUser, LoginInput, LoginResult } from '@/lib/api/schema';
 import { problem } from '../problem';
 import {
   MOCK_TRUSTED_DEVICE_COOKIE,
@@ -11,6 +11,13 @@ import {
   withCookies,
 } from '../session';
 import { MOCK_FAILURE_EMAIL } from './forms';
+import { permissionsOf } from '../permissions';
+
+/** Utilisateur renvoyé à la connexion : permissions du rôle courant (il a pu changer dans Paramètres). */
+const withPermissions = (user: CurrentUser): CurrentUser => ({
+  ...user,
+  permissions: permissionsOf(user.role),
+});
 
 /** Code à 6 chiffres accepté par la simulation. */
 export const MOCK_OTP_CODE = '123456';
@@ -47,7 +54,7 @@ export const authHandlers = [
 
     // Appareil de confiance : session ouverte sans code.
     if (readCookie(request, MOCK_TRUSTED_DEVICE_COOKIE) === user.id) {
-      const result: LoginResult = { status: 'AUTHENTICATED', user };
+      const result: LoginResult = { status: 'AUTHENTICATED', user: withPermissions(user) };
       return withCookies(result, sessionCookies(user, body.rememberMe ?? false));
     }
     challengeSequence += 1;
@@ -77,7 +84,7 @@ export const authHandlers = [
     }
     challenges.delete(body.challengeId);
     const user = mockUsers.find((item) => item.id === challenge.userId) ?? mockUsers[0]!;
-    const result: LoginResult = { status: 'AUTHENTICATED', user };
+    const result: LoginResult = { status: 'AUTHENTICATED', user: withPermissions(user) };
     return withCookies(result, sessionCookies(user, challenge.rememberMe, body.trustDevice ?? false));
   }),
 

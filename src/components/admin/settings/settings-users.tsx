@@ -1,7 +1,20 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { KeyRound, Mail, Plus, Power, ShieldCheck, Trash2, User, UserPen, Users } from 'lucide-react';
+import {
+  Headset,
+  KeyRound,
+  Mail,
+  Plus,
+  Power,
+  ShieldCheck,
+  Trash2,
+  User,
+  UserCog,
+  UserPen,
+  Users,
+  type LucideIcon,
+} from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmDialog, StatusPill } from '@/components/admin/editor/editor-ui';
 import { useAdmin } from '@/components/admin/shell/admin-context';
@@ -17,11 +30,11 @@ import { toast } from '@/components/ui/toaster';
 import { data } from '@/lib/admin/query';
 import { browserApi } from '@/lib/api/browser';
 import { ApiError, errorMessage } from '@/lib/api/errors';
-import type { AdminUser, Role } from '@/lib/api/schema';
+import type { AdminUser, Role, RoleDefinition } from '@/lib/api/schema';
 import { formatAgo } from '@/lib/format/date';
 import { SettingsCard } from './settings-fields';
-import { ROLE_SCOPES } from './settings-model';
-import { adminUsersKey, useAdminUsers } from './settings-queries';
+import { ROLE_ORDER, ROLE_SCOPES } from './settings-model';
+import { adminUsersKey, useAdminUsers, useRoles } from './settings-queries';
 
 const STATUS = {
   ACTIF: { label: 'Actif', tone: 'success' },
@@ -29,13 +42,41 @@ const STATUS = {
   DESACTIVE: { label: 'Désactivé', tone: 'muted' },
 } as const;
 
-/** « Dernière connexion il y a 2 h », « Invitation envoyée hier », « Jamais connecté ». */
-function activityOf(user: AdminUser): string {
-  if (user.status === 'INVITE' && user.invitedAt)
-    return `Invitation envoyée ${formatAgo(user.invitedAt).replace(/^(\D)/, (letter) => letter.toLowerCase())}`;
+/** « il y a 2 h », « hier », « le 3 oct. » (suite d'une phrase). */
+function agoPhrase(date: string): string {
+  const ago = formatAgo(date);
+  return /^\d/.test(ago) ? `le ${ago}` : ago.charAt(0).toLowerCase() + ago.slice(1);
+}
+
+/**
+ * « Dernière activité il y a 3 min » (dernière requête authentifiée), sinon « Dernière connexion hier »,
+ * « Invitation envoyée hier », « Jamais connecté·e ».
+ */
+export function activityOf(user: AdminUser): string {
+  if (user.status === 'INVITE' && user.invitedAt) return `Invitation envoyée ${agoPhrase(user.invitedAt)}`;
+  if (user.lastActiveAt) return `Dernière activité ${agoPhrase(user.lastActiveAt)}`;
   if (!user.lastLoginAt) return 'Jamais connecté·e';
-  const ago = formatAgo(user.lastLoginAt);
-  return `Dernière connexion ${/^\d/.test(ago) ? `le ${ago}` : ago.toLowerCase()}`;
+  return `Dernière connexion ${agoPhrase(user.lastLoginAt)}`;
+}
+
+const ROLE_ICONS: Record<Role, LucideIcon> = {
+  ADMIN: ShieldCheck,
+  MANAGER: UserCog,
+  AGENT: Headset,
+  EDITOR: UserPen,
+  WRITER: UserPen,
+};
+
+/**
+ * Rôles dans l'ordre du contrat : définitions de `GET /v1/admin/roles` (libellé, périmètre, permissions), avec les
+ * libellés connus en attendant la réponse.
+ */
+function useRoleList(): Pick<RoleDefinition, 'role' | 'label' | 'description'>[] {
+  const roles = useRoles();
+  return (
+    roles.data ??
+    ROLE_ORDER.map((role) => ({ role, label: ROLE_LABELS[role], description: ROLE_SCOPES[role] }))
+  );
 }
 
 /** Onglet « Utilisateurs » (administrateurs) : accès au back-office, rôles, invitation, désactivation. */
@@ -50,6 +91,8 @@ export function UsersTab({
   const { user: me } = useAdmin();
   const users = useAdminUsers();
   const [removing, setRemoving] = useState<AdminUser | null>(null);
+  const [changingRole, setChangingRole] = useState<AdminUser | null>(null);
+  const roles = useRoleList();
 
   const store = (saved: AdminUser) =>
     client.setQueryData<AdminUser[]>(adminUsersKey, (list) =>
@@ -94,19 +137,8 @@ export function UsersTab({
 
   function itemsFor(user: AdminUser): ActionMenuItem[] {
     const self = user.id === me?.id;
-    const otherRole: Role = user.role === 'ADMIN' ? 'EDITOR' : 'ADMIN';
     return [
-      {
-        label: `Passer ${ROLE_LABELS[otherRole].toLowerCase()}`,
-        icon: otherRole === 'ADMIN' ? ShieldCheck : UserPen,
-        disabled: self,
-        onSelect: () =>
-          patch.mutate({
-            user,
-            body: { role: otherRole },
-            done: `${user.name} est maintenant ${ROLE_LABELS[otherRole].toLowerCase()}.`,
-          }),
-      },
+      { label: 'Changer le rôle', icon: UserCog, disabled: self, onSelect: () => setChangingRole(user) },
       {
         label: user.status === 'INVITE' ? 'Renvoyer l’invitation' : 'Réinitialiser le mot de passe',
         icon: user.status === 'INVITE' ? Mail : KeyRound,
@@ -180,21 +212,39 @@ export function UsersTab({
         )}
       </SettingsCard>
 
-      <SettingsCard title="Rôles">
+      <SettingsCard title="Rôles" subtitle="Chaque rôle donne accès à un périmètre du back-office">
         <dl className="grid gap-4 sm:grid-cols-2">
-          {(Object.keys(ROLE_SCOPES) as Role[]).map((role) => (
-            <div key={role} className="flex flex-col gap-1 rounded-md bg-neutral-50 p-4">
-              <dt className="flex items-center gap-2 font-ui text-[14px] leading-5 font-semibold text-text-main">
-                {role === 'ADMIN' ? <ShieldCheck aria-hidden size={16} /> : <UserPen aria-hidden size={16} />}
-                {ROLE_LABELS[role]}
-              </dt>
-              <dd className="font-ui text-[13px] leading-5 text-text-muted">{ROLE_SCOPES[role]}</dd>
-            </div>
-          ))}
+          {roles.map(({ role, label, description }) => {
+            const Icon = ROLE_ICONS[role];
+            return (
+              <div key={role} className="flex flex-col gap-1 rounded-md bg-neutral-50 p-4">
+                <dt className="flex items-center gap-2 font-ui text-[14px] leading-5 font-semibold text-text-main">
+                  <Icon aria-hidden size={16} />
+                  {label}
+                </dt>
+                <dd className="font-ui text-[13px] leading-5 text-text-muted">{description}</dd>
+              </div>
+            );
+          })}
         </dl>
       </SettingsCard>
 
       <InviteDialog open={inviting} onClose={() => onInvitingChange(false)} />
+      <RoleDialog
+        user={changingRole}
+        pending={patch.isPending}
+        onClose={() => setChangingRole(null)}
+        onSave={(user, role) =>
+          patch.mutate(
+            {
+              user,
+              body: { role },
+              done: `${user.name} est maintenant ${ROLE_LABELS[role].toLowerCase()}.`,
+            },
+            { onSuccess: () => setChangingRole(null) },
+          )
+        }
+      />
       <ConfirmDialog
         open={removing !== null}
         onClose={() => setRemoving(null)}
@@ -206,6 +256,78 @@ export function UsersTab({
         pending={remove.isPending}
       />
     </div>
+  );
+}
+
+/** Choix du rôle parmi les cinq rôles du contrat, avec le périmètre du rôle choisi en aide. */
+function RoleSelect({
+  value,
+  onChange,
+  error,
+}: {
+  value: Role;
+  onChange: (role: Role) => void;
+  error?: string;
+}) {
+  const roles = useRoleList();
+  return (
+    <Field label="Rôle" help={roles.find((item) => item.role === value)?.description} error={error}>
+      {(control) => (
+        <Select {...control} value={value} onChange={(event) => onChange(event.target.value as Role)}>
+          {roles.map((item) => (
+            <option key={item.role} value={item.role}>
+              {item.label}
+            </option>
+          ))}
+        </Select>
+      )}
+    </Field>
+  );
+}
+
+/** « Changer le rôle » : nouveau rôle d'un utilisateur (les permissions suivent le rôle). */
+function RoleDialog({
+  user,
+  pending,
+  onClose,
+  onSave,
+}: {
+  user: AdminUser | null;
+  pending: boolean;
+  onClose: () => void;
+  onSave: (user: AdminUser, role: Role) => void;
+}) {
+  const [role, setRole] = useState<Role>(user?.role ?? 'EDITOR');
+  const [shownFor, setShownFor] = useState(user?.id);
+  if (user?.id !== shownFor) {
+    setShownFor(user?.id);
+    if (user) setRole(user.role);
+  }
+  return (
+    <Modal
+      open={user !== null}
+      onClose={onClose}
+      title={`Rôle de ${user?.name ?? ''}`}
+      description="Les droits changent dès la prochaine action de la personne."
+      maxWidth={500}
+      footer={
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={onClose}>
+            Annuler
+          </Button>
+          <Button
+            size="sm"
+            loading={pending}
+            disabled={!user || role === user.role}
+            onClick={() => user && onSave(user, role)}
+          >
+            Enregistrer le rôle
+          </Button>
+        </div>
+      }
+    >
+      <RoleSelect value={role} onChange={setRole} />
+    </Modal>
   );
 }
 
@@ -296,18 +418,7 @@ function InviteDialog({ open, onClose }: { open: boolean; onClose: () => void })
             />
           )}
         </Field>
-        <Field label="Rôle" help={ROLE_SCOPES[form.role]} error={errors.role}>
-          {(control) => (
-            <Select
-              {...control}
-              value={form.role}
-              onChange={(event) => setForm({ ...form, role: event.target.value as Role })}
-            >
-              <option value="EDITOR">{ROLE_LABELS.EDITOR}</option>
-              <option value="ADMIN">{ROLE_LABELS.ADMIN}</option>
-            </Select>
-          )}
-        </Field>
+        <RoleSelect value={form.role} onChange={(role) => setForm({ ...form, role })} error={errors.role} />
         <button type="submit" hidden />
       </form>
     </Modal>

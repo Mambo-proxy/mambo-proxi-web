@@ -74,11 +74,25 @@
       "book": "Book a slot",
       "quote": "Quote"
     },
-    "step": "Step {number}: "
+    "step": "Step {number}: ",
+    "finder": {
+      "title": "Find my service",
+      "lead": "Pick a category, then your service: we’ll take you straight there.",
+      "categories": "Category",
+      "allCategories": "All",
+      "serviceLabel": "Your service",
+      "placeholder": "E.g. private chef, parcel, housing…",
+      "suggestions": "Suggested services",
+      "results": "{count, plural, =0 {No service found} one {# service found} other {# services found}}",
+      "noMatch": "No service matches “{query}”.",
+      "browseAll": "See all our services",
+      "launch": "Let’s go",
+      "quote": "Request a quote",
+      "missing": "Choose a category or a service to continue."
+    }
   },
   "zones": {
     "mapLabel": "Map of our service areas in Douala",
-    "wouri": "Wouri",
     "searchTitle": "Find your neighbourhood",
     "searchLabel": "Search for a neighbourhood",
     "searchPlaceholder": "Search for a neighbourhood",
@@ -91,7 +105,15 @@
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
     "reset": "Recentre the map",
-    "mapHint": "Drag to move the map, use + and − to zoom."
+    "mapHint": "Supporting map: the neighbourhood search centres the map on your neighbourhood. Use the arrow keys to move the map and + and − to zoom; with the mouse wheel, hold Ctrl (⌘ on Mac); on a touch screen, use two fingers.",
+    "wheelHint": "Hold Ctrl and scroll to zoom the map.",
+    "wheelHintMac": "Hold ⌘ and scroll to zoom the map.",
+    "touchHint": "Use two fingers to move the map.",
+    "closePopup": "Close the popup",
+    "base": "Starting base for our visits",
+    "agency": "Our agency in Douala",
+    "attribution": "OpenStreetMap contributors",
+    "newTab": "new tab"
   },
   "services": {
     "book": "Book a slot",
@@ -327,5 +349,40 @@
       "text": "Something went wrong on our side. Try again in a few moments; if the problem continues, contact us.",
       "retry": "Try again"
     }
+  },
+  "search": {
+    "open": "Search the site",
+    "dialogTitle": "Site search",
+    "label": "Search",
+    "placeholder": "A service, a page, an article…",
+    "close": "Close search",
+    "clear": "Clear search",
+    "emptyTitle": "What are you looking for?",
+    "emptyText": "Services, categories, Magazine articles, jobs, training courses and site pages.",
+    "tryLabel": "Try:",
+    "try1": "chef",
+    "try2": "housing",
+    "try3": "training",
+    "hint": "Type at least 2 characters.",
+    "loading": "Searching…",
+    "error": "Search is temporarily unavailable. Please try again in a moment.",
+    "noResultsTitle": "No results for “{query}”",
+    "noResultsText": "Check the spelling or try a simpler word. You can also write to us: we’ll find the right solution with you.",
+    "contact": "Contact us",
+    "resultsLabel": "Search results",
+    "resultsCount": "{count, plural, =0 {No results} one {# result} other {# results}}",
+    "seeAll": "See all results for “{query}”",
+    "groupMore": "First {shown} of {total} results",
+    "keyEnter": "Enter",
+    "keyEscape": "Esc",
+    "keysNavigate": "to browse",
+    "keysOpen": "to open",
+    "keysClose": "to close",
+    "metaTitle": "Search",
+    "metaDescription": "Search the MAMBO Proxi website: services, categories, Magazine articles, jobs, training courses and pages.",
+    "eyebrow": "Search",
+    "pageTitle": "Search the site",
+    "pageTitleQuery": "Results for “{query}”",
+    "submit": "Search"
   }
 }

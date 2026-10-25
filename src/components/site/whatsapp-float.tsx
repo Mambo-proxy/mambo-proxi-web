@@ -37,7 +37,8 @@ export function WhatsappFloat({ href }: { href: string }) {
       aria-label={t('newTab', { label: t('whatsappFloat.label') })}
       data-whatsapp-float
       className={cn(
-        'group/wa fixed right-4 bottom-4 z-40 flex items-center xl:right-7 xl:bottom-7',
+        // Nommé pour les transitions de page : le bouton reste visible au-dessus du contenu qui change.
+        'group/wa fixed right-4 bottom-4 z-40 flex items-center [view-transition-name:site-whatsapp] xl:right-7 xl:bottom-7',
         'transition-[translate,scale,opacity] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]',
         '[:root[data-cookie-banner]_&]:-translate-y-[220px] md:[:root[data-cookie-banner]_&]:-translate-y-[150px] xl:[:root[data-cookie-banner]_&]:-translate-y-[130px]',
         visible ? 'scale-100 opacity-100' : 'pointer-events-none scale-0 opacity-0',

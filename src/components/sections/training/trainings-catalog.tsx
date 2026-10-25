@@ -6,9 +6,11 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { Chip } from '@/components/ui/chip';
 import { Icon } from '@/components/ui/icon';
+import { useStaggerIn } from '@/components/ui/use-stagger-in';
 import type { DynamicSection, Training, TrainingCategory } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
+import { scrollToTarget, useHashTarget } from '@/lib/use-hash-target';
 import { SectionHeading } from '../section-heading';
 import { SectionShell } from '../content/section-shell';
 
@@ -36,20 +38,40 @@ export function TrainingsCatalogFromUrl(props: Omit<TrainingsCatalogProps, 'init
  * Catalogue (Formation `66:6354`) : filtres (Toutes + catégories, `?categorie=` dans l'adresse), cartes 3 colonnes
  * (1 en mobile) alignées en haut : pastille `vert/50`, badge de catégorie centré, titre Poppins 20/28 (17/28 en
  * mobile), durée et format · lieu, séparateur, « Demander cette formation → » qui présélectionne la formation dans le
- * formulaire.
+ * formulaire. Changement de filtre : les cartes réapparaissent en cascade.
+ * Chaque carte porte l'ancre de sa formation (`/formation#hygiene-securite-cuisine`, résultats de la recherche) : la
+ * carte visée est mise en évidence et, si le filtre la masquait, le catalogue repasse sur « Toutes » (jusqu'au
+ * prochain choix de filtre).
  */
 export function TrainingsCatalog({ section, trainings, initialFilter }: TrainingsCatalogProps) {
   const t = useTranslations('trainings');
   const [filter, setFilter] = useState<Filter>(
     isCategory(initialFilter, trainings) ? initialFilter : 'TOUTES',
   );
+  const hash = useHashTarget();
+  const targeted = trainings.find((training) => training.slug === hash) ?? null;
+  // Ancre déjà « rendue » au filtre choisi par la personne : le filtre n'est plus forcé sur « Toutes ».
+  const [released, setReleased] = useState<string | null>(null);
+  const masked =
+    targeted !== null && targeted.slug !== released && filter !== 'TOUTES' && targeted.category !== filter;
+  const shown: Filter = masked ? 'TOUTES' : filter;
+  const listRef = useStaggerIn<HTMLUListElement>(shown);
   const categories = [
     ...new Map(trainings.map((training) => [training.category, training.categoryLabel])).entries(),
   ];
   const visible =
-    filter === 'TOUTES' ? trainings : trainings.filter((training) => training.category === filter);
+    shown === 'TOUTES' ? trainings : trainings.filter((training) => training.category === shown);
+
+  // Carte visée affichée après coup (filtre levé, hydratation) : le navigateur n'a pas pu y défiler.
+  const targetedSlug = targeted?.slug ?? null;
+  useEffect(() => {
+    if (!targetedSlug) return;
+    const frame = requestAnimationFrame(() => scrollToTarget(document.getElementById(targetedSlug)));
+    return () => cancelAnimationFrame(frame);
+  }, [targetedSlug]);
 
   function choose(next: Filter) {
+    setReleased(targetedSlug);
     setFilter(next);
     const url = new URL(window.location.href);
     if (next === 'TOUTES') url.searchParams.delete('categorie');
@@ -90,20 +112,27 @@ export function TrainingsCatalog({ section, trainings, initialFilter }: Training
         className="gap-3 md:gap-4"
       />
       <div role="group" aria-label={t('filter')} className="flex flex-wrap gap-2">
-        <Chip selected={filter === 'TOUTES'} onClick={() => choose('TOUTES')}>
+        <Chip selected={shown === 'TOUTES'} onClick={() => choose('TOUTES')}>
           {t('all')}
         </Chip>
         {categories.map(([category, label]) => (
-          <Chip key={category} selected={filter === category} onClick={() => choose(category)}>
+          <Chip key={category} selected={shown === category} onClick={() => choose(category)}>
             {label}
           </Chip>
         ))}
       </div>
-      <ul aria-live="polite" className="grid items-start gap-3 md:grid-cols-2 md:gap-5 xl:grid-cols-3">
+      <ul
+        ref={listRef}
+        aria-live="polite"
+        className="grid items-start gap-3 md:grid-cols-2 md:gap-5 xl:grid-cols-3"
+      >
         {visible.map((training) => (
           <li
             key={training.slug}
-            className="flex flex-col gap-3.5 rounded-3xl border border-border-default bg-neutral-0 p-5 xl:p-7"
+            id={training.slug}
+            data-targeted={training.slug === targetedSlug || undefined}
+            // Mise en évidence douce de la carte visée par l'ancre (`:target` au chargement, attribut ensuite).
+            className="flex card-lift scroll-mt-[calc(var(--site-header-h,0px)+16px)] flex-col gap-3.5 rounded-3xl border border-border-default bg-neutral-0 p-5 target:border-orange-400 target:bg-orange-50 data-targeted:border-orange-400 data-targeted:bg-orange-50 xl:p-7"
           >
             <div className="flex items-center justify-between gap-3">
               <span

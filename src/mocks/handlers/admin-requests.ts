@@ -1,9 +1,12 @@
 import { http, HttpResponse } from 'msw';
-import type { RequestDetail, RequestNote, RequestStatus, RequestType } from '@/lib/api/schema';
+import type { CurrentUser, RequestDetail, RequestNote, RequestStatus, RequestType } from '@/lib/api/schema';
+import { matchesAssignee, matchesDue, visibleRequests, withOverdue } from '../assignments';
 import { adminRequests } from '../data/admin-requests';
+import { assignedOnly, can, forbidden } from '../permissions';
 import { problem } from '../problem';
 import { sessionUser } from '../session';
-import { toListItem } from './admin-core';
+import { assignableMember, userRefOf } from '../team';
+import { notifyAssignment, toListItem } from './admin-core';
 
 const STATUS_LABELS: Record<RequestStatus, string> = {
   NOUVELLE: 'Nouvelle',
@@ -12,6 +15,8 @@ const STATUS_LABELS: Record<RequestStatus, string> = {
   CLOTUREE: 'Clôturée',
 };
 const ORDER: RequestStatus[] = ['NOUVELLE', 'EN_COURS', 'PRESTATION_REALISEE', 'CLOTUREE'];
+const DAY = 24 * 60 * 60 * 1000;
+const NOT_FOUND = 'Cette demande n’existe pas ou a été anonymisée.';
 
 const normalize = (value: string) =>
   value
@@ -19,22 +24,40 @@ const normalize = (value: string) =>
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 
-/** Demandes filtrées (hors statut) : sert à la liste et aux compteurs des onglets. */
-function filtered(params: URLSearchParams) {
+/**
+ * Filtre `assignee` effectif : avec la seule permission `requests:read-assigned`, `me` est appliqué d'office et toute
+ * autre personne est refusée (`403`).
+ */
+function assigneeFilter(
+  params: URLSearchParams,
+  user: CurrentUser | null,
+): { assignee: string | null; denied: Response | null } {
+  const assignee = params.get('assignee');
+  if (!assignedOnly(user, 'requests')) return { assignee, denied: null };
+  if (assignee && assignee !== 'me' && assignee !== user?.id)
+    return { assignee, denied: forbidden('Vous ne voyez que les demandes qui vous sont assignées.') };
+  return { assignee: 'me', denied: null };
+}
+
+/** Demandes filtrées (hors statut) : sert à la liste, aux compteurs des onglets et à l'export. */
+function filtered(params: URLSearchParams, user: CurrentUser | null, assignee: string | null) {
   const type = params.get('type') as RequestType | null;
   const category = params.get('category');
   const country = params.get('country');
   const district = params.get('district') ? normalize(params.get('district') ?? '') : null;
+  const due = params.get('due');
   const from = params.get('from');
   const to = params.get('to');
   const q = params.get('q') ? normalize(params.get('q') ?? '') : null;
-  return adminRequests
+  return visibleRequests(user)
     .filter(
       (request) =>
         (!type || request.type === type) &&
         (!category || request.category?.slug === category) &&
         (!country || request.contact.country === country) &&
         (!district || normalize(request.contact.city ?? '').startsWith(district)) &&
+        matchesAssignee(request, assignee, user) &&
+        matchesDue(request, due) &&
         (!from || request.createdAt >= from) &&
         (!to || request.createdAt <= to) &&
         (!q ||
@@ -45,8 +68,17 @@ function filtered(params: URLSearchParams) {
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
-function find(id: string) {
-  return adminRequests.find((request) => request.id === id) ?? null;
+/** Demande visible par l'utilisateur (hors de son périmètre : introuvable, comme l'API). */
+function find(id: string, user: CurrentUser | null) {
+  return visibleRequests(user).find((request) => request.id === id) ?? null;
+}
+
+/** Statut, échéance et notes : toute demande (`requests:write`) ou les siennes (`requests:write-assigned`). */
+function canWrite(user: CurrentUser | null, request: RequestDetail) {
+  return (
+    can(user, 'requests:write') ||
+    (can(user, 'requests:write-assigned') && request.assignedTo?.id === user?.id)
+  );
 }
 
 function event(
@@ -68,13 +100,18 @@ function event(
 
 const csvCell = (value: string) => `"${value.replace(/"/g, '""')}"`;
 
+type PatchBody = { status?: RequestStatus; assignedToId?: string | null; dueAt?: string | null };
+
 export const adminRequestHandlers = [
   http.get('*/v1/admin/requests', ({ request }) => {
     const params = new URL(request.url).searchParams;
+    const user = sessionUser(request);
+    const { assignee, denied } = assigneeFilter(params, user);
+    if (denied) return denied;
     const status = params.get('status') as RequestStatus | null;
     const page = Math.max(1, Number(params.get('page') ?? 1));
     const pageSize = Math.min(100, Math.max(1, Number(params.get('pageSize') ?? 20)));
-    const base = filtered(params);
+    const base = filtered(params, user, assignee);
     const list = status ? base.filter((item) => item.status === status) : base;
     const counts = {
       ALL: base.length,
@@ -92,8 +129,11 @@ export const adminRequestHandlers = [
 
   http.get('*/v1/admin/requests/export.csv', ({ request }) => {
     const params = new URL(request.url).searchParams;
+    const user = sessionUser(request);
+    const { assignee, denied } = assigneeFilter(params, user);
+    if (denied) return denied;
     const status = params.get('status');
-    const rows = filtered(params).filter((item) => !status || item.status === status);
+    const rows = filtered(params, user, assignee).filter((item) => !status || item.status === status);
     const header = [
       'Référence',
       'Type',
@@ -104,6 +144,8 @@ export const adminRequestHandlers = [
       'Ville',
       'Pays',
       'Service',
+      'Assignée à',
+      'Échéance',
       'Reçue le',
     ];
     const lines = rows.map((item) =>
@@ -117,6 +159,8 @@ export const adminRequestHandlers = [
         item.contact.city ?? '',
         item.contact.country ?? '',
         item.subject ?? '',
+        item.assignedTo?.name ?? '',
+        item.dueAt ?? '',
         item.createdAt,
       ]
         .map(csvCell)
@@ -130,19 +174,37 @@ export const adminRequestHandlers = [
     });
   }),
 
-  http.get('*/v1/admin/requests/:id', ({ params }) => {
-    const item = find(String(params.id));
-    return item ? HttpResponse.json(item) : problem(404, 'Cette demande n’existe pas ou a été anonymisée.');
+  http.get('*/v1/admin/requests/:id', ({ request, params }) => {
+    const item = find(String(params.id), sessionUser(request));
+    return item ? HttpResponse.json(withOverdue(item)) : problem(404, NOT_FOUND);
   }),
 
   http.patch('*/v1/admin/requests/:id', async ({ request, params }) => {
-    const item = find(String(params.id));
-    if (!item) return problem(404, 'Cette demande n’existe pas ou a été anonymisée.');
     const user = sessionUser(request);
-    const body = (await request.json()) as { status?: RequestStatus; assignedToId?: string | null };
+    const item = find(String(params.id), user);
+    if (!item) return problem(404, NOT_FOUND);
+    const body = (await request.json()) as PatchBody;
+
+    // Tous les contrôles avant la moindre modification : la requête est acceptée ou refusée en entier.
+    if ((body.status !== undefined || body.dueAt !== undefined) && !canWrite(user, item))
+      return forbidden('Vous ne pouvez modifier que les demandes qui vous sont assignées.');
+    if (
+      body.status &&
+      ORDER.indexOf(body.status) < ORDER.indexOf(item.status) &&
+      !can(user, 'requests:revert-status')
+    )
+      return forbidden('Seul un administrateur peut revenir à un statut précédent.');
+    if (body.assignedToId !== undefined && !can(user, 'requests:assign'))
+      return forbidden('Seul un responsable peut assigner ou réassigner une demande.');
+    const assignee = body.assignedToId ? assignableMember(body.assignedToId) : null;
+    if (body.assignedToId && !assignee)
+      return problem(422, 'Cette personne ne peut pas recevoir de demandes.', [
+        { path: 'assignedToId', message: 'Choisissez un membre actif qui traite les demandes.' },
+      ]);
+    if (body.dueAt && Number.isNaN(Date.parse(body.dueAt)))
+      return problem(422, 'Échéance invalide.', [{ path: 'dueAt', message: 'Indiquez une date valide.' }]);
+
     if (body.status && body.status !== item.status) {
-      if (ORDER.indexOf(body.status) < ORDER.indexOf(item.status) && user?.role !== 'ADMIN')
-        return problem(403, 'Seul un administrateur peut revenir à un statut précédent.');
       event(
         item,
         'STATUS_CHANGED',
@@ -160,32 +222,45 @@ export const adminRequestHandlers = [
       }
       if (body.status === 'CLOTUREE') item.closedAt = new Date().toISOString();
     }
-    if (body.assignedToId !== undefined) {
-      item.assignedTo =
-        body.assignedToId && user ? { id: user.id, name: user.name, initials: user.initials ?? '' } : null;
+    if (body.dueAt !== undefined) {
+      item.dueAt = body.dueAt ? new Date(body.dueAt).toISOString() : null;
+      item.updatedAt = new Date().toISOString();
+    }
+    if (body.assignedToId !== undefined && (assignee?.id ?? null) !== (item.assignedTo?.id ?? null)) {
+      item.assignedTo = assignee ? userRefOf(assignee) : null;
       event(
         item,
         'ASSIGNED',
         item.assignedTo ? `Assignée à ${item.assignedTo.name}` : 'Assignation retirée',
         user,
       );
+      if (assignee)
+        notifyAssignment(
+          assignee.id,
+          user?.id,
+          `Demande assignée — ${item.subject ?? 'Demande'} (${item.reference})`,
+          `/admin/demandes?id=${item.id}`,
+        );
     }
-    return HttpResponse.json(item);
+    return HttpResponse.json(withOverdue(item));
   }),
 
+  // Anonymisation : permission `requests:anonymize`, contrôlée par la garde commune (`admin-core.ts`).
   http.delete('*/v1/admin/requests/:id', ({ request, params }) => {
-    if (sessionUser(request)?.role !== 'ADMIN')
-      return problem(403, 'Seul un administrateur peut anonymiser une demande.');
-    const index = adminRequests.findIndex((item) => item.id === String(params.id));
-    if (index < 0) return problem(404, 'Cette demande n’existe pas ou a été anonymisée.');
-    adminRequests.splice(index, 1);
+    if (!find(String(params.id), sessionUser(request))) return problem(404, NOT_FOUND);
+    adminRequests.splice(
+      adminRequests.findIndex((item) => item.id === String(params.id)),
+      1,
+    );
     return new HttpResponse(null, { status: 204 });
   }),
 
   http.post('*/v1/admin/requests/:id/notes', async ({ request, params }) => {
-    const item = find(String(params.id));
-    if (!item) return problem(404, 'Cette demande n’existe pas ou a été anonymisée.');
     const user = sessionUser(request);
+    const item = find(String(params.id), user);
+    if (!item) return problem(404, NOT_FOUND);
+    if (!canWrite(user, item))
+      return forbidden('Vous ne pouvez annoter que les demandes qui vous sont assignées.');
     const { body } = (await request.json()) as { body: string };
     if (!body?.trim())
       return problem(422, 'La note est vide.', [
@@ -203,19 +278,21 @@ export const adminRequestHandlers = [
   }),
 
   http.post('*/v1/admin/requests/:id/duplicate', ({ request, params }) => {
-    const item = find(String(params.id));
-    if (!item) return problem(404, 'Cette demande n’existe pas ou a été anonymisée.');
+    const item = find(String(params.id), sessionUser(request));
+    if (!item) return problem(404, NOT_FOUND);
     const number = 143 + adminRequests.length;
     const copy: RequestDetail = structuredClone(item);
     copy.id = `req_${number}`;
     copy.reference = `MP-2026-${String(number).padStart(4, '0')}`;
     copy.status = 'NOUVELLE';
     copy.createdAt = new Date().toISOString();
+    // Nouvelle échéance : 24 h après la création de la copie.
+    copy.dueAt = new Date(Date.now() + DAY).toISOString();
     copy.notes = [];
     copy.history = [];
     copy.survey = null;
     event(copy, 'DUPLICATED', `Copie de la demande ${item.reference}`, sessionUser(request));
     adminRequests.unshift(copy);
-    return HttpResponse.json(copy, { status: 201 });
+    return HttpResponse.json(withOverdue(copy), { status: 201 });
   }),
 ];

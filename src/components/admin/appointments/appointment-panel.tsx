@@ -32,6 +32,8 @@ import { cn } from '@/lib/cn';
 import { formatClock, formatStamp } from '@/lib/format/date';
 import { formatPhone } from '@/lib/phone';
 import { whatsappUrl } from '@/lib/whatsapp';
+import { useCan } from '@/components/admin/shell/permissions';
+import { AssignmentField } from '@/components/admin/requests/assignment';
 import { useAppointmentAction } from './appointment-actions';
 import { dayKeyOf, dayLabel, formatDuration } from './calendar-utils';
 import {
@@ -92,6 +94,8 @@ export function AppointmentPanel({
   const panel = useRef<HTMLElement>(null);
   const action = useAppointmentAction();
   const notesAction = useAppointmentAction();
+  const assignAction = useAppointmentAction();
+  const can = useCan();
   const query = useQuery({
     queryKey: ['appointment', id],
     queryFn: () =>
@@ -286,6 +290,12 @@ export function AppointmentPanel({
                   {formatStamp(appointment.createdAt)}
                 </dd>
               </div>
+              {appointment.assignedTo && !can('appointments:assign') && (
+                <div className="flex justify-between gap-4">
+                  <dt className="text-text-muted">Suivi par</dt>
+                  <dd className="text-right font-semibold text-text-main">{appointment.assignedTo.name}</dd>
+                </div>
+              )}
               {appointment.reminderSentAt && (
                 <div className="flex justify-between gap-4">
                   <dt className="text-text-muted">Rappel envoyé</dt>
@@ -295,6 +305,18 @@ export function AppointmentPanel({
                 </div>
               )}
             </dl>
+
+            {can('appointments:assign') && (
+              <AssignmentField
+                label="Assigné à"
+                emptyLabel="Non assigné"
+                assignedTo={appointment.assignedTo}
+                pending={assignAction.isPending}
+                onAssign={(assignedToId) =>
+                  assignAction.mutate({ id, action: { action: 'assign', assignedToId } })
+                }
+              />
+            )}
 
             {appointment.videoLink && (
               <a

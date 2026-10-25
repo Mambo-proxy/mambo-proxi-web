@@ -18,11 +18,12 @@ function ServiceCard({ service, badge }: { service: ServiceSummary; badge: strin
   const t = useTranslations('rubrique');
   const name = service.shortName ?? service.name;
   return (
-    <article className="group/card flex flex-col overflow-hidden rounded-xl border border-border-default bg-neutral-0">
+    <article className="group/card flex card-lift flex-col overflow-hidden rounded-xl border border-border-default bg-neutral-0">
+      {/* Photo légèrement agrandie au survol de la carte (dans son cadre, sans effet sur la mise en page). */}
       <Visual
         visual={service.visual}
         sizes="(min-width: 1280px) 424px, (min-width: 768px) 50vw, 100vw"
-        className="h-[170px] shrink-0 md:h-[220px]"
+        className="h-[170px] shrink-0 md:h-[220px] [&_img]:transition-[scale] [&_img]:duration-500 [&_img]:ease-standard motion-safe:group-hover/card:[&_img]:scale-[1.04]"
       />
       <div className="flex flex-1 flex-col gap-3 p-5 md:p-[26px]">
         <div className="flex items-center gap-3">

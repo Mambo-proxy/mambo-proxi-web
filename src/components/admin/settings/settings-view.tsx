@@ -5,6 +5,7 @@ import type { Route } from 'next';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useAdmin } from '@/components/admin/shell/admin-context';
+import { useCan } from '@/components/admin/shell/permissions';
 import { AdminPage, topbarActionClass } from '@/components/admin/shell/admin-page';
 import { StatusTabs } from '@/components/admin/ui/filters';
 import { cn } from '@/lib/cn';
@@ -26,7 +27,8 @@ export function SettingsView() {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const tabs = tabsFor(user?.role);
+  const can = useCan();
+  const tabs = tabsFor(user);
   const requested = params.get('onglet');
   const tab: SettingsTab = tabs.find((item) => item.value === requested)?.value ?? 'coordonnees';
   const [inviting, setInviting] = useState(false);
@@ -47,16 +49,19 @@ export function SettingsView() {
         </span>
       }
       actions={
-        <button
-          type="button"
-          onClick={() => void save()}
-          disabled={saving}
-          className={cn(topbarActionClass, 'disabled:opacity-60')}
-        >
-          <CircleCheck aria-hidden />
-          Enregistrer
-          {dirty && <span className="sr-only"> (modifications non enregistrées)</span>}
-        </button>
+        // Responsable : paramètres en lecture seule (`settings:read` sans `settings:write`).
+        can('settings:write', 'settings:admin') && (
+          <button
+            type="button"
+            onClick={() => void save()}
+            disabled={saving}
+            className={cn(topbarActionClass, 'disabled:opacity-60')}
+          >
+            <CircleCheck aria-hidden />
+            Enregistrer
+            {dirty && <span className="sr-only"> (modifications non enregistrées)</span>}
+          </button>
+        )
       }
     >
       <SettingsFormProvider form={form}>

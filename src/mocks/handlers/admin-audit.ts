@@ -2,6 +2,7 @@ import { http, HttpResponse } from 'msw';
 import type { AuditLogEntry, UserRef } from '@/lib/api/schema';
 import { paginate } from '../admin-utils';
 import { problem } from '../problem';
+import { can } from '../permissions';
 import { sessionUser } from '../session';
 
 const MIREILLE: UserRef = { id: 'usr_mireille', name: 'Mireille Bell', initials: 'MB' };
@@ -169,10 +170,10 @@ function seed(): AuditLogEntry[] {
 
 export const auditLog: AuditLogEntry[] = seed();
 
-/** Back-office — Journal d'activité (`/v1/admin/audit-log`), réservé aux administrateurs. */
+/** Back-office — Journal d'activité (`/v1/admin/audit-log`), permission `audit:read` (administrateurs). */
 export const adminAuditHandlers = [
   http.get('*/v1/admin/audit-log', ({ request }) => {
-    if (sessionUser(request)?.role !== 'ADMIN')
+    if (!can(sessionUser(request), 'audit:read'))
       return problem(403, 'Le journal d’activité est réservé aux administrateurs.');
     const params = new URL(request.url).searchParams;
     const actor = params.get('actor');

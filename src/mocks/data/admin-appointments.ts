@@ -274,6 +274,18 @@ function seeds(): Seed[] {
   ];
 }
 
+const MIREILLE = { id: 'usr_mireille', name: 'Mireille Bell', initials: 'MB' };
+const PAUL_NGANDO = { id: 'usr_paul', name: 'Paul Ngando', initials: 'PN' };
+const CARINE = { id: 'usr_carine', name: 'Carine Eboa', initials: 'CE' };
+
+/** Personnes chargées des rendez-vous (par défaut : Mireille Bell, qui les a saisis ou confirmés). */
+const ASSIGNEES: Record<string, AdminAppointment['assignedTo']> = {
+  'MP-2026-0137': PAUL_NGANDO,
+  'MP-2026-0152': PAUL_NGANDO,
+  'MP-2026-0151': CARINE,
+  'MP-2026-0150': null,
+};
+
 function build(seed: Seed, index: number): MockAppointment {
   const { minutes, createdDaysBefore = 3, ...rest } = seed;
   const createdAt = new Date(
@@ -282,6 +294,7 @@ function build(seed: Seed, index: number): MockAppointment {
   return {
     ...rest,
     id: `apt_${seed.reference.slice(-4)}`,
+    assignedTo: seed.reference in ASSIGNEES ? ASSIGNEES[seed.reference] : MIREILLE,
     endsAt: plus(seed.startsAt, minutes),
     createdAt: new Date(Math.min(new Date(createdAt).getTime(), Date.now() - 60 * MINUTE)).toISOString(),
     reminderSentAt:

@@ -1,11 +1,13 @@
 import type { Metadata, Route } from 'next';
 import { notFound } from 'next/navigation';
+import { Fragment } from 'react';
 import { CategoriesBento } from '@/components/sections/home/categories-bento';
 import { FormulaCards } from '@/components/sections/home/formula-cards';
 import { ZonesSection } from '@/components/sections/zones/zones-section';
 import { Commitments } from '@/components/sections/home/commitments';
 import { HomeHero } from '@/components/sections/home/home-hero';
 import { PartnersStrip } from '@/components/sections/home/partners-strip';
+import { ServiceFinder, type FinderCategory } from '@/components/sections/home/service-finder';
 import { ReviewsHighlight } from '@/components/sections/home/reviews-highlight';
 import { StepsCards } from '@/components/sections/home/steps-cards';
 import { MarqueeBand } from '@/components/sections/marquee-band';
@@ -14,12 +16,26 @@ import type { PageSection } from '@/lib/api/schema';
 import { unwrap, unwrapOrNull } from '@/lib/api/result';
 import { api, cached } from '@/lib/api/server';
 import { cacheTags } from '@/lib/api/tags';
-import { getSiteSettings } from '@/lib/site-data';
+import { getNavigation, getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
 import { seoMetadata } from '@/lib/seo/metadata';
 import { JsonLd } from '@/components/seo/json-ld';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo/json-ld';
 import { withLocale, type LocaleParams } from '@/i18n/request-locale';
+
+/**
+ * Rubriques et services de « Trouver mon service » : ceux du méga-menu (déjà chargé par la mise en page, même
+ * requête mise en cache), réduits aux champs utiles pour alléger les données envoyées au navigateur.
+ */
+async function getFinderCategories(): Promise<FinderCategory[]> {
+  const navigation = await getNavigation();
+  return navigation.megaMenu.categories.map(({ slug, name, href, services }) => ({
+    slug,
+    name,
+    href,
+    services: services.map((service) => ({ slug: service.slug, name: service.name, href: service.href })),
+  }));
+}
 
 async function getHomeData() {
   const [page, settings, categories, reviews, summary, partners, zones] = await Promise.all([
@@ -72,7 +88,7 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 /** Accueil (Figma `47:151`, mobile `53:530`) : sections de la page `accueil`, dans l'ordre défini dans le back-office. */
 export default async function HomePage({ params }: LocaleParams) {
   await withLocale(params);
-  const data = await getHomeData();
+  const [data, finderCategories] = await Promise.all([getHomeData(), getFinderCategories()]);
   if (!data.page) notFound();
   const { settings } = data;
   const whatsappHref = settings.whatsapp.enabled
@@ -83,7 +99,13 @@ export default async function HomePage({ params }: LocaleParams) {
     if (!section.enabled) return null;
     switch (section.type) {
       case 'hero':
-        return <HomeHero key={section.id} section={section} />;
+        // « Trouver mon service » juste sous le héros, sur le même fond : accès direct à un service.
+        return (
+          <Fragment key={section.id}>
+            <HomeHero section={section} />
+            {finderCategories.length > 0 && <ServiceFinder categories={finderCategories} />}
+          </Fragment>
+        );
       case 'marquee':
         return <MarqueeBand key={section.id} section={section} />;
       case 'steps':

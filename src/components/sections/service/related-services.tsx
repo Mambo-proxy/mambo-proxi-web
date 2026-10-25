@@ -30,7 +30,7 @@ export function RelatedServices({
             <Reveal as="li" key={service.id} delay={index * 70}>
               <Link
                 href={service.href as Route}
-                className="group/related flex h-full items-center gap-4 rounded-[22px] border border-border-default bg-neutral-0 p-3.5 transition-[border-color,box-shadow] duration-200 hover:border-border-strong hover:shadow-2 xl:p-4"
+                className="group/related flex h-full card-lift items-center gap-4 rounded-[22px] border border-border-default bg-neutral-0 p-3.5 hover:border-border-strong xl:p-4"
               >
                 <Visual
                   visual={service.visual}

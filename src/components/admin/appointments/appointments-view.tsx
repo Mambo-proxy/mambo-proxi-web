@@ -5,6 +5,7 @@ import { ArrowLeft, ChevronRight } from 'lucide-react';
 import type { Route } from 'next';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
+import { useCan } from '@/components/admin/shell/permissions';
 import { CompactSegmented } from '@/components/admin/ui/admin-ui';
 import { Skeleton } from '@/components/ui/skeleton';
 import { data } from '@/lib/admin/query';
@@ -120,9 +121,12 @@ export function AppointmentsView() {
       }>,
     placeholderData: keepPreviousData,
   });
+  const can = useCan();
+  // Disponibilités : `appointments:read` ou `availability:write` (pas pour un chargé de clientèle).
   const config = useQuery({
     queryKey: ['availability-config'],
     queryFn: () => data(browserApi.GET('/v1/admin/availability')),
+    enabled: can('appointments:read', 'availability:write'),
   });
   const appointments = useMemo(() => list.data?.data ?? [], [list.data]);
 
@@ -288,7 +292,7 @@ export function AppointmentsView() {
       <ProposeDialog appointment={proposeFor} onClose={() => setProposeFor(null)} />
       <CancelDialog appointment={cancelFor} onClose={() => setCancelFor(null)} />
       <NewAppointmentDialog
-        open={adding}
+        open={adding && can('appointments:write')}
         defaultDate={date >= today ? date : today}
         config={config.data}
         onClose={() => update({ nouveau: null })}

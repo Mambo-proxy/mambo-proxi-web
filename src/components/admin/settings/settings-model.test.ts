@@ -42,7 +42,15 @@ describe('paramètres', () => {
     const now = Date.parse('2026-10-24T10:00:00.000Z');
     expect(backupLabel('2026-10-24T02:00:00.000Z', now)).toBe('Chaque nuit · dernière : aujourd’hui 03:00');
     expect(backupLabel('2026-10-23T02:00:00.000Z', now)).toBe('Chaque nuit · dernière : hier 03:00');
-    expect(tabsFor('EDITOR').map((tab) => tab.value)).toEqual(['coordonnees', 'e-mails', 'referencement']);
+    const editor = { permissions: ['settings:read', 'settings:write'] as const };
+    expect(tabsFor({ permissions: [...editor.permissions] }).map((tab) => tab.value)).toEqual([
+      'coordonnees',
+      'e-mails',
+      'referencement',
+    ]);
+    expect(
+      tabsFor({ permissions: ['settings:read', 'settings:admin', 'users:manage'] }).map((tab) => tab.value),
+    ).toEqual(['coordonnees', 'e-mails', 'referencement', 'utilisateurs', 'securite']);
     expect(parseEmails('a@b.cm, c@d.cm;\ne@f.cm')).toEqual(['a@b.cm', 'c@d.cm', 'e@f.cm']);
   });
 });

@@ -1,19 +1,25 @@
-import type { EmailTemplate, EmailTemplateKey, Role } from '@/lib/api/schema';
+import type { CurrentUser, EmailTemplate, EmailTemplateKey, Permission, Role } from '@/lib/api/schema';
 import { formatClock, formatDayMonth } from '@/lib/format/date';
 
-/** Onglets de Paramètres (`?onglet=`) ; utilisateurs et sécurité réservés aux administrateurs. */
+/**
+ * Onglets de Paramètres (`?onglet=`) ; utilisateurs (`users:manage`) et sécurité (`settings:admin`) réservés aux
+ * administrateurs.
+ */
 export const SETTINGS_TABS = [
   { value: 'coordonnees', label: 'Coordonnées' },
   { value: 'e-mails', label: 'E-mails automatiques' },
   { value: 'referencement', label: 'Référencement' },
-  { value: 'utilisateurs', label: 'Utilisateurs', adminOnly: true },
-  { value: 'securite', label: 'Sécurité & sauvegardes', adminOnly: true },
-] as const;
+  { value: 'utilisateurs', label: 'Utilisateurs', permission: 'users:manage' },
+  { value: 'securite', label: 'Sécurité & sauvegardes', permission: 'settings:admin' },
+] as const satisfies readonly { value: string; label: string; permission?: Permission }[];
 
 export type SettingsTab = (typeof SETTINGS_TABS)[number]['value'];
 
-export function tabsFor(role: Role | undefined) {
-  return SETTINGS_TABS.filter((tab) => !('adminOnly' in tab) || role === 'ADMIN');
+/** Onglets accessibles avec les permissions de l'utilisateur. */
+export function tabsFor(user: Pick<CurrentUser, 'permissions'> | null | undefined) {
+  return SETTINGS_TABS.filter(
+    (tab) => !('permission' in tab) || (user?.permissions ?? []).includes(tab.permission),
+  );
 }
 
 /** « +237600000000 » → « +237 6 00 00 00 00 » ; « +33612345678 » → « +33 6 12 34 56 78 ». */
@@ -104,7 +110,7 @@ export const EMAIL_FAMILIES: EmailFamily[] = [
     name: 'Alerte à l’équipe',
     description: () => 'Une notification par e-mail pour chaque nouvelle demande',
     template: 'team-new-request',
-    keys: ['team-new-request'],
+    keys: ['team-new-request', 'team-assignment'],
   },
 ];
 
@@ -120,11 +126,21 @@ export const AUDIENCE_LABELS: Record<NonNullable<EmailTemplate['audience']>, str
   utilisateur: 'Utilisateurs du back-office',
 };
 
-/** Périmètre de chaque rôle (« Accès au back-office », invitation). */
+/**
+ * Périmètre de chaque rôle, affiché tant que `GET /v1/admin/roles` (qui fait foi) n'a pas répondu ; mêmes textes que
+ * l'exemple du contrat.
+ */
 export const ROLE_SCOPES: Record<Role, string> = {
-  ADMIN: 'Tout le back-office, paramètres sensibles et utilisateurs compris',
-  EDITOR: 'Demandes et contenus',
+  ADMIN: 'Tout le back-office, paramètres sensibles, utilisateurs et journal compris.',
+  MANAGER:
+    'Demandes, rendez-vous, assignation, candidatures, contacts et statistiques ; contenus en lecture.',
+  AGENT: 'Traite les demandes et rendez-vous qui lui sont assignés.',
+  EDITOR: 'Demandes et contenus (périmètre historique, inchangé).',
+  WRITER: 'Contenus du site, magazine et médiathèque ; aucun accès aux demandes ni aux données personnelles.',
 };
+
+/** Ordre d'affichage des rôles (contrat). */
+export const ROLE_ORDER: Role[] = ['ADMIN', 'MANAGER', 'AGENT', 'EDITOR', 'WRITER'];
 
 /** Moment d'une sauvegarde : « aujourd’hui 03:00 », « hier 03:00 », puis « 3 oct. 03:00 ». */
 export function backupMoment(date: string, now = Date.now()): string {

@@ -14,7 +14,11 @@ test.describe('back-office : zones d’intervention', () => {
     await expect(table.getByText('Cité SIC (base), Ndoghem, Bépanda, Makèpè, Ndokoti')).toBeVisible();
     await expect(table.getByText('Bonabéri et hors zone · sur devis')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Aperçu de la carte' })).toBeVisible();
-    await expect(page.getByText('Carte indicative. Sur le site : carte interactive')).toBeVisible();
+    await expect(page.getByText('Aperçu des zones actives : contours et quartiers placés.')).toBeVisible();
+    // Aperçu OpenStreetMap figé (tuiles servies vides par les fixtures) : quartiers placés des zones actives.
+    const preview = page.getByRole('img', { name: 'Carte des zones d’intervention' });
+    await expect(preview.locator('[data-quarter]')).toHaveCount(19, { timeout: 15_000 });
+    await expect(page.getByRole('link', { name: /contributeurs OpenStreetMap/ })).toBeVisible();
     await expectNoHorizontalScroll(page);
     await expectAccessible(page);
     expect(pageErrors).toEqual([]);
@@ -32,6 +36,20 @@ test.describe('back-office : zones d’intervention', () => {
     await dialog.getByRole('textbox', { name: 'Ajouter un quartier' }).fill('Bali');
     await dialog.getByRole('button', { name: 'Ajouter', exact: true }).click();
     await expect(dialog.getByRole('button', { name: 'Retirer Bali' })).toBeVisible();
+    // Position de Bali au clavier (le quartier ajouté est prêt à être placé), contour invalide refusé.
+    await expect(dialog.getByRole('group', { name: 'Position de Bali' })).toBeVisible();
+    await dialog.getByRole('textbox', { name: 'Latitude' }).fill('4.041');
+    await dialog.getByRole('textbox', { name: 'Longitude' }).fill('9.689');
+    await expect(dialog.getByText(/Bali : 4,041\u00A0N · 9,689\u00A0E/)).toBeVisible();
+    const geojson = dialog.getByRole('textbox', { name: 'GeoJSON du contour' });
+    await geojson.fill('{"type": "Point", "coordinates": [9.7, 4.05]}');
+    await dialog.getByRole('button', { name: 'Appliquer le contour' }).click();
+    await expect(dialog.getByText('Aucun polygone trouvé', { exact: false })).toBeVisible();
+    await geojson.fill(
+      '{"type": "Polygon", "coordinates": [[[9.69, 4.068], [9.688, 4.04], [9.742, 4.03], [9.75, 4.06]]]}',
+    );
+    await dialog.getByRole('button', { name: 'Appliquer le contour' }).click();
+    await expect(dialog.getByText('Contour enregistré : 1 polygone, 4 points.')).toBeVisible();
     await dialog.getByRole('button', { name: 'Enregistrer' }).click();
     await expect(page.getByText('Zone enregistrée.')).toBeVisible();
     // Colonne « Délai moyen » affichée à partir de 1 024 px.

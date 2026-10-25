@@ -9,7 +9,8 @@ import { Modal } from '@/components/ui/modal';
 import { adminRoutes } from '@/lib/admin/routes';
 import { cn } from '@/lib/cn';
 import { useAdmin } from './admin-context';
-import { ROLE_LABELS, isActive, navFor } from './nav';
+import { ROLE_LABELS, isActive, navFor, screenFor } from './nav';
+import { hasPermission } from './permissions';
 import { NotificationsButton } from './notifications';
 import { Avatar, logout } from './sidebar';
 
@@ -109,7 +110,9 @@ export function BottomNav() {
   const pathname = usePathname();
   const { user } = useAdmin();
   const [more, setMore] = useState(false);
-  const inTabs = TABS.some((tab) => isActive(tab.href, pathname));
+  // Onglets accessibles avec les permissions (ex. : pas d'« Avis » pour un chargé de clientèle).
+  const tabs = TABS.filter((tab) => hasPermission(user, ...(screenFor(tab.href)?.permissions ?? [])));
+  const inTabs = tabs.some((tab) => isActive(tab.href, pathname));
 
   return (
     <>
@@ -117,7 +120,7 @@ export function BottomNav() {
         aria-label="Navigation principale"
         className="fixed inset-x-0 bottom-0 z-30 flex justify-between border-t border-border-default bg-neutral-0 px-[18px] pt-2.5 pb-[max(24px,env(safe-area-inset-bottom))] md:hidden"
       >
-        {TABS.map((tab) => {
+        {tabs.map((tab) => {
           const active = isActive(tab.href, pathname);
           const Icon = tab.icon;
           return (
@@ -151,7 +154,7 @@ export function BottomNav() {
       </nav>
       <Modal open={more} onClose={() => setMore(false)} title="Tous les écrans">
         <nav aria-label="Tous les écrans du back-office" className="flex flex-col gap-4 pb-2">
-          {navFor(user.role).map((group) => (
+          {navFor(user).map((group) => (
             <div key={group.label} className="flex flex-col gap-1">
               <p className="px-3 font-ui text-[11px] leading-4 font-semibold tracking-[0.01em] text-text-muted uppercase">
                 {group.label}

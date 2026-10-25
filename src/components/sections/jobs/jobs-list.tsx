@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { buttonVariants } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
+import { useStaggerIn } from '@/components/ui/use-stagger-in';
 import type { DynamicSection, JobOfferSummary } from '@/lib/api/schema';
 import { formatPublishedAgo } from '@/lib/format/date';
 import { frenchTypography } from '@/lib/format/typography';
@@ -32,6 +33,7 @@ const CONTRACT_KEYS = ['cdi', 'cdd', 'freelance', 'stage', 'alternance'] as cons
  * à droite, pleine largeur collée au titre en mobile), filtres lieu et contrat, liste d'offres (titre 20/28, 17/28 en
  * mobile, badge « Nouveau », lieu, contrat, ancienneté, « Voir l’offre »), note de bas de liste.
  * Filtres de contrat : ceux de la liste des messages (`jobs.contracts`) que contient au moins une offre publiée.
+ * Changement de filtre (pas à chaque frappe de la recherche) : les offres réapparaissent en cascade.
  */
 export function JobsList({
   section,
@@ -47,6 +49,7 @@ export function JobsList({
   const locale = useLocale() === 'en' ? 'en' : 'fr';
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>(null);
+  const listRef = useStaggerIn<HTMLUListElement>(filter ? `${filter.kind}:${filter.value}` : '');
   const cities = [...new Set(jobs.map((job) => baseCity(job.city)))].sort((a, b) =>
     a === 'France' ? 1 : b === 'France' ? -1 : a.localeCompare(b, 'fr'),
   );
@@ -112,11 +115,11 @@ export function JobsList({
           </Chip>
         ))}
       </div>
-      <ul aria-live="polite" className="flex flex-col gap-3">
+      <ul ref={listRef} aria-live="polite" className="flex flex-col gap-3">
         {visible.map((job) => (
           <li
             key={job.slug}
-            className="flex flex-col gap-3 rounded-[22px] border border-border-default bg-neutral-0 p-5 md:flex-row md:items-center md:gap-6 xl:p-7"
+            className="flex card-lift flex-col gap-3 rounded-[22px] border border-border-default bg-neutral-0 p-5 md:flex-row md:items-center md:gap-6 xl:p-7"
           >
             <div className="flex flex-1 flex-col gap-2">
               <h3 className="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-brand text-[17px] leading-7 font-semibold text-text-main md:text-[20px]">

@@ -11,7 +11,9 @@ export const chipVariants = cva(
   [
     'inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-[9px]',
     'font-ui text-[14px] leading-5 font-medium tracking-[0.005em] whitespace-nowrap',
-    'transition-colors duration-150 ease-standard [&_svg]:size-4 [&_svg]:shrink-0',
+    // Retour au clic : légère pression (`scale`, sans effet sur la mise en page).
+    'transition-[background-color,border-color,color,scale] duration-150 ease-standard motion-safe:active:scale-[0.97]',
+    '[&_svg]:size-4 [&_svg]:shrink-0',
     'disabled:pointer-events-none disabled:opacity-40',
   ],
   {

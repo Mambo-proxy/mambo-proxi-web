@@ -19,12 +19,15 @@ import {
   SearchField,
   StatusTabs,
 } from '@/components/admin/ui/filters';
+import { useAdmin } from '@/components/admin/shell/admin-context';
+import { useAssignedOnly } from '@/components/admin/shell/permissions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { data } from '@/lib/admin/query';
 import { browserApi } from '@/lib/api/browser';
 import type { RequestListItem, RequestStatus, RequestType } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { formatStamp } from '@/lib/format/date';
+import { DUE_OPTIONS, DueBadge, useAssignableMembers, type DueFilter } from './assignment';
 import { RequestPanel } from './request-panel';
 
 const PAGE_SIZE = 8;
@@ -74,7 +77,7 @@ const TABS: { value: Status; label: string }[] = [
   { value: 'CLOTUREE', label: 'Clôturées' },
 ];
 
-/** Filtres lus dans l'adresse (`?status=&type=&category=&district=&period=&q=&page=&id=`). */
+/** Filtres lus dans l'adresse (`?status=&type=&category=&district=&assignee=&due=&period=&q=&page=&id=`). */
 function useFilters() {
   const params = useSearchParams();
   const router = useRouter();
@@ -84,6 +87,8 @@ function useFilters() {
     type: params.get('type') ?? '',
     category: params.get('category') ?? '',
     district: params.get('district') ?? '',
+    assignee: params.get('assignee') ?? '',
+    due: params.get('due') ?? '',
     period: params.get('period') ?? '30',
     q: params.get('q') ?? '',
     page: Math.max(1, Number(params.get('page') ?? 1) || 1),
@@ -170,7 +175,12 @@ function RequestRow({
           </span>
         </div>
       </td>
-      <td className="py-3.5 pl-4 whitespace-nowrap">{formatStamp(request.createdAt)}</td>
+      <td className="py-3.5 pl-4">
+        <div className="flex flex-col items-start gap-1">
+          <span className="whitespace-nowrap">{formatStamp(request.createdAt)}</span>
+          <DueBadge request={request} />
+        </div>
+      </td>
       <td className="py-3.5 pr-5 pl-4">
         <RequestStatusBadge status={request.status} />
       </td>
@@ -186,6 +196,10 @@ function RequestRow({
 export function RequestsView() {
   const { filters, update } = useFilters();
   const [search, setSearch] = useState(filters.q);
+  const { user } = useAdmin();
+  // Chargé·e de clientèle : l'API ne renvoie que ses demandes, le filtre « Assignées à » n'a pas lieu d'être.
+  const assignedOnly = useAssignedOnly('requests');
+  const members = useAssignableMembers();
 
   // Recherche appliquée après une courte pause de saisie.
   useEffect(() => {
@@ -200,6 +214,8 @@ export function RequestsView() {
     type: (filters.type || undefined) as RequestType | undefined,
     category: filters.category || undefined,
     district: filters.district || undefined,
+    assignee: (!assignedOnly && filters.assignee) || undefined,
+    due: (filters.due || undefined) as DueFilter | undefined,
     from: fromDate(filters.period),
     q: filters.q || undefined,
     page: filters.page,
@@ -268,6 +284,36 @@ export function RequestsView() {
                   </option>
                 ))}
               </optgroup>
+            ))}
+          </FilterSelect>
+          {!assignedOnly && (
+            <FilterSelect
+              label="Assignées à"
+              value={filters.assignee}
+              onChange={(event) => update({ assignee: event.target.value })}
+            >
+              <option value="">Toute l’équipe</option>
+              <option value="me">Moi</option>
+              <option value="none">Non assignées</option>
+              {members
+                .filter((member) => member.user.id !== user.id)
+                .map((member) => (
+                  <option key={member.user.id} value={member.user.id}>
+                    {member.user.name}
+                  </option>
+                ))}
+            </FilterSelect>
+          )}
+          <FilterSelect
+            label="Échéance"
+            value={filters.due}
+            onChange={(event) => update({ due: event.target.value })}
+          >
+            <option value="">Toutes les échéances</option>
+            {DUE_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
             ))}
           </FilterSelect>
           <FilterSelect
@@ -343,6 +389,7 @@ export function RequestsView() {
                           {request.subject ?? REQUEST_TYPE_LABELS[request.type]} ·{' '}
                           {formatStamp(request.createdAt)}
                         </span>
+                        <DueBadge request={request} className="self-start" />
                       </span>
                       <RequestStatusBadge status={request.status} />
                     </button>
@@ -361,7 +408,7 @@ export function RequestsView() {
                       Service
                     </th>
                     <th scope="col" className="w-[126px] py-3 pl-4 font-semibold">
-                      Reçue le
+                      Reçue le<span className="sr-only"> et échéance</span>
                     </th>
                     <th scope="col" className="w-[170px] py-3 pr-5 pl-4 font-semibold">
                       Statut
@@ -408,6 +455,8 @@ export function useExportQuery() {
     type: (type || undefined) as RequestType | undefined,
     category: params.get('category') || undefined,
     district: params.get('district') || undefined,
+    assignee: params.get('assignee') || undefined,
+    due: (params.get('due') || undefined) as DueFilter | undefined,
     from: fromDate(period),
   };
 }

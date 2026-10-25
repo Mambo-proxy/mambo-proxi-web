@@ -1,8 +1,23 @@
 import AxeBuilder from '@axe-core/playwright';
 import { test as base, expect, type Page } from '@playwright/test';
 
+/** Tuile PNG transparente de 1 × 1 px. */
+const EMPTY_TILE = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+  'base64',
+);
+
+/** Tuiles de la carte des zones (OpenStreetMap) : servies vides, les tests ne dépendent pas du réseau. */
+export const MAP_TILES = /^https:\/\/tile\.openstreetmap\.org\//;
+
 /** Erreurs relevées pendant le test : console, exceptions, réponses en erreur. */
 export const test = base.extend<{ pageErrors: string[] }>({
+  page: async ({ page }, provide) => {
+    await page.route(MAP_TILES, (route) =>
+      route.fulfill({ status: 200, contentType: 'image/png', body: EMPTY_TILE }),
+    );
+    await provide(page);
+  },
   pageErrors: async ({ page }, provide) => {
     const errors: string[] = [];
     // Les échecs de chargement sont relevés par l'écouteur de réponses (plus précis que le message console).

@@ -21,6 +21,9 @@ type ModalProps = {
  * Modale / panneau bas (non maquettés : même langage que les cartes — fond blanc, rayon 28, `elevation/4`).
  * `<dialog>` natif ouvert avec `showModal()` : le reste de la page devient inerte, le focus reste dans la
  * modale, `Échap` ferme, et le focus revient sur l'élément d'origine à la fermeture.
+ * Ouverture animée (200 ms, `@starting-style`, sans JavaScript) : la modale glisse de 16 px avec un fondu et le voile
+ * s'assombrit ; aucune animation si l'utilisateur a demandé de les réduire. Fermeture immédiate : une modale qui
+ * s'efface resterait lisible (et ses boutons atteignables) le temps de l'animation.
  */
 export function Modal({
   open,
@@ -61,7 +64,9 @@ export function Modal({
       className={cn(
         'm-0 mt-auto max-h-[92dvh] w-full max-w-full overflow-visible bg-transparent p-0 text-text-main',
         'backdrop:bg-surface-overlay md:m-auto md:max-w-(--modal-max)',
-        'open:animate-[modal-in_200ms_var(--mp-easing-standard)] motion-reduce:open:animate-none',
+        'transition-[opacity,translate] duration-200 ease-standard starting:open:translate-y-4 starting:open:opacity-0',
+        'backdrop:transition-opacity backdrop:duration-200 starting:open:backdrop:opacity-0',
+        'motion-reduce:transition-none motion-reduce:backdrop:transition-none',
       )}
     >
       <div

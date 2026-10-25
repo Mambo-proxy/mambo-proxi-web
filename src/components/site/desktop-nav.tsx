@@ -69,6 +69,8 @@ type DesktopNavProps = {
   megaMenu: MegaMenu;
   signUp: NavLinkData[];
   compact: boolean;
+  /** Loupe de la recherche globale, avant « S'inscrire ». */
+  search?: ReactNode;
 };
 
 /**
@@ -76,8 +78,12 @@ type DesktopNavProps = {
  * sous-menus des autres onglets et de « S'inscrire » (non maquettés, même langage).
  * Clavier : `↓` ou `Espace` ouvre le panneau et place le focus sur le premier lien, flèches dans le panneau,
  * `Échap` ferme et rend le focus à l'onglet ; `Entrée` suit le lien de l'onglet.
+ * Place de la loupe de recherche entre 1280 et 1439 px (ligne de l'en-tête à sa limite sous Linux) : loupe 40 + écart
+ * 6 = 46 px ajoutés, compensés par 50 px retirés — écart des onglets 2 → 0 (8 × 2 = 16), icône de « S'inscrire »
+ * masquée (18 + écart 6 = 24), « Devis gratuit » px 16 → 12 (8), écart des actions 8 → 6 (2). Dès 1440 px, mesures
+ * de la maquette et loupe en plus (50 px pris sur la marge de la ligne, ~100 px sous Linux).
  */
-export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps) {
+export function DesktopNav({ items, megaMenu, signUp, compact, search }: DesktopNavProps) {
   const t = useTranslations('site.header');
   const pathname = useSitePathname();
   const menu = useMenuState();
@@ -136,7 +142,7 @@ export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps
   return (
     <>
       <nav aria-label={t('mainNav')} className="hidden xl:block">
-        <ul className="flex items-center gap-0.5 wide:gap-1.5">
+        <ul className="flex items-center gap-0 wide:gap-1">
           {items.map((item) => {
             const active =
               isActive(pathname, item.href) || (item.key === 'services' && pathname.startsWith('/services'));
@@ -192,7 +198,8 @@ export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps
         </ul>
       </nav>
 
-      <div className="hidden items-center gap-2 xl:flex wide:gap-2.5">
+      <div className="hidden items-center gap-1.5 xl:flex wide:gap-2.5">
+        {search}
         <div
           className="relative"
           onMouseEnter={() => menu.hoverOpen(SIGN_UP_KEY)}
@@ -209,7 +216,7 @@ export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps
             onKeyDown={(event) => triggerKeyDown(event, SIGN_UP_KEY)}
             className="flex cursor-pointer items-center gap-1.5 rounded-full border border-border-strong px-2.5 py-3 font-ui text-[14px] leading-5 font-semibold text-text-main transition-colors hover:bg-neutral-100 wide:gap-2 wide:px-3.5"
           >
-            <User aria-hidden size={18} />
+            <User aria-hidden size={18} className="max-wide:hidden" />
             {t('signUp')}
           </button>
           <Dropdown
@@ -219,7 +226,7 @@ export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps
             {...panelProps(SIGN_UP_KEY)}
           />
         </div>
-        <Link href={routes.devis} className={cn(buttonVariants(), 'xl:px-4 wide:px-6')}>
+        <Link href={routes.devis} className={cn(buttonVariants(), 'xl:px-3 wide:px-5')}>
           {t('freeQuote')}
         </Link>
       </div>

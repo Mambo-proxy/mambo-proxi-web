@@ -23,6 +23,9 @@ export function EventRegistrationDialog({ event }: { event: Event }) {
     <>
       <button
         type="button"
+        // Mesure d'audience : clic sur « Je participe », avec l'événement concerné.
+        data-track="participate"
+        data-track-target={event.slug}
         onClick={() => {
           setLoaded(true);
           setOpen(true);

@@ -87,7 +87,7 @@ export function SegmentedTabs<T extends string>({
             onKeyDown={(event) => onKeyDown(event, index)}
             className={cn(
               'min-w-0 cursor-pointer truncate rounded-full px-4 py-[9px] font-ui text-[14px] leading-5 font-semibold tracking-[0.005em]',
-              'transition-[background-color,box-shadow,color] duration-150 ease-standard',
+              'transition-[background-color,box-shadow,color,scale] duration-150 ease-standard motion-safe:active:scale-[0.97]',
               fullWidth && 'flex-1',
               size === 'lg' && 'py-[11px]',
               active ? 'bg-neutral-0 text-text-main shadow-1' : 'text-text-muted hover:text-text-main',

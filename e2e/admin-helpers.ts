@@ -1,15 +1,27 @@
 import type { Locator, Page } from '@playwright/test';
 import { expect } from './fixtures';
 
-/** Connexion simulée : mot de passe quelconque, puis le code `123456` (gestionnaires de `src/mocks/handlers/auth.ts`). */
-export async function login(page: Page) {
+/** Comptes de démonstration (`src/mocks/session.ts`), un par rôle. */
+export const DEMO_ACCOUNTS = {
+  admin: 'mireille@mamboproxi.com',
+  editor: 'equipe.douala@mamboproxi.com',
+  manager: 'carine.eboa@mamboproxi.com',
+  agent: 'paul.ngando@mamboproxi.com',
+  writer: 'grace.nkongo@mamboproxi.com',
+} as const;
+
+/**
+ * Connexion simulée : mot de passe quelconque, puis le code `123456` (gestionnaires de `src/mocks/handlers/auth.ts`).
+ * Par défaut avec le compte administrateur de la maquette (Mireille Bell).
+ */
+export async function login(page: Page, email: string = DEMO_ACCOUNTS.admin) {
   await page.goto('/admin/connexion', { waitUntil: 'domcontentloaded' });
   const form = page.getByRole('form', { name: 'Connexion au back-office' });
   const code = page.getByRole('group', { name: 'Code de vérification à 6 chiffres' });
   // Saisie répétée tant que la page n'est pas hydratée (le formulaire est alors réinitialisé).
   await expect(async () => {
     if (await code.isVisible()) return;
-    await form.getByLabel('Adresse e-mail').fill('mireille@mamboproxi.com');
+    await form.getByLabel('Adresse e-mail').fill(email);
     await form.getByRole('textbox', { name: 'Mot de passe' }).fill('motdepasse-solide');
     await form.getByRole('button', { name: 'Se connecter' }).click();
     await expect(code).toBeVisible({ timeout: 3000 });

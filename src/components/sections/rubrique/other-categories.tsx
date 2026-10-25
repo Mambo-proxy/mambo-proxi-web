@@ -24,7 +24,7 @@ export function OtherCategories({ category }: { category: CategoryDetail }) {
             <Reveal as="li" key={other.slug} delay={index * 70}>
               <Link
                 href={other.href as Route}
-                className="group/card flex items-center gap-4 rounded-[20px] border border-border-default bg-neutral-0 p-4 transition-colors hover:bg-neutral-50 md:p-5"
+                className="group/card flex card-lift items-center gap-4 rounded-[20px] border border-border-default bg-neutral-0 p-4 hover:bg-neutral-50 md:p-5"
               >
                 <Visual
                   visual={other.thumbnail ?? other.visual}

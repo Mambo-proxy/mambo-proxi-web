@@ -4,6 +4,9 @@
  * demande, reçoit une CSP stricte avec nonce, posée par le proxy (`src/proxy.ts`).
  */
 
+// Import relatif : ce module est aussi chargé par `next.config.ts`, hors des alias de chemins.
+import { tilesOrigin } from '../geo/tiles';
+
 const isDev = process.env.NODE_ENV === 'development';
 
 /** Origine de l'API (requêtes du navigateur, images servies par le stockage). */
@@ -16,6 +19,12 @@ function apiOrigin(): string {
 }
 
 const TURNSTILE = 'https://challenges.cloudflare.com';
+/**
+ * Tuiles de la carte des zones (OpenStreetMap par défaut, ou `NEXT_PUBLIC_MAP_TILES_URL`) : images seulement
+ * (Leaflet n'utilise ni `fetch` ni scripts tiers ; ses styles sont une feuille du site et des attributs `style`,
+ * couverts par `style-src`). Déjà couvertes par `https:`, listées pour pouvoir restreindre `img-src` plus tard.
+ */
+const MAP_TILES = tilesOrigin() ?? false;
 const GOOGLE_TAG_MANAGER = 'https://www.googletagmanager.com';
 const GOOGLE_ANALYTICS = [
   GOOGLE_TAG_MANAGER,
@@ -42,7 +51,7 @@ export function publicCsp(): string {
     'default-src': ["'self'"],
     'script-src': ["'self'", "'unsafe-inline'", isDev && "'unsafe-eval'", TURNSTILE, GOOGLE_TAG_MANAGER],
     'style-src': ["'self'", "'unsafe-inline'"],
-    'img-src': ["'self'", 'data:', 'blob:', 'https:'],
+    'img-src': ["'self'", 'data:', 'blob:', 'https:', MAP_TILES],
     'font-src': ["'self'"],
     'connect-src': ["'self'", apiOrigin(), TURNSTILE, ...GOOGLE_ANALYTICS],
     'frame-src': [TURNSTILE],
@@ -70,7 +79,7 @@ export function adminCsp(nonce: string, inlineScriptHashes: string[]): string {
     ],
     // Les attributs `style` (positions calculées, animations) imposent `unsafe-inline` pour les styles.
     'style-src': ["'self'", "'unsafe-inline'"],
-    'img-src': ["'self'", 'data:', 'blob:', 'https:'],
+    'img-src': ["'self'", 'data:', 'blob:', 'https:', MAP_TILES],
     'font-src': ["'self'"],
     'connect-src': ["'self'", apiOrigin()],
     'object-src': ["'none'"],

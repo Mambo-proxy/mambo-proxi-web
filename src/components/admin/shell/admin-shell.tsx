@@ -3,6 +3,7 @@
 import type { ReactNode } from 'react';
 import { AdminQueryProvider } from '@/lib/admin/query';
 import type { CurrentUser } from '@/lib/api/schema';
+import { AccessGuard } from './access-guard';
 import { AdminContextProvider } from './admin-context';
 import { BottomNav, MobileBar } from './mobile-nav';
 import { SearchPalette } from './search-palette';
@@ -27,7 +28,7 @@ export function AdminShell({ user, children }: { user: CurrentUser; children: Re
           <div className="flex min-w-0 flex-1 flex-col">
             <MobileBar />
             <main id="contenu-admin" tabIndex={-1} className="flex flex-1 flex-col outline-none">
-              {children}
+              <AccessGuard>{children}</AccessGuard>
             </main>
           </div>
         </div>

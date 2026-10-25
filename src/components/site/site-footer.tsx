@@ -50,7 +50,8 @@ export function SiteFooter({ navigation, settings, whatsappHref }: SiteFooterPro
   ];
 
   return (
-    <footer className="bg-neutral-900 text-neutral-0">
+    // Nommé pour les transitions de page : affiché directement à sa nouvelle place.
+    <footer className="bg-neutral-900 text-neutral-0 [view-transition-name:site-footer]">
       <div aria-hidden className="h-1 bg-gradient-lien" />
       <div className="container-site flex flex-col gap-10 pt-16 pb-7 xl:gap-14 xl:pt-24 xl:pb-9">
         <section

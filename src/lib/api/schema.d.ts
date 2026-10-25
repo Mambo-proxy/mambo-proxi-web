@@ -115,6 +115,69 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Recherche globale du site public
+         * @description Recherche plein texte dans les contenus publiés, dans la langue demandée (un contenu non traduit est cherché et
+         *     renvoyé en français) : services, rubriques, pages éditoriales (qui sommes-nous, mission, zones d'intervention,
+         *     contact…), articles du Magazine, offres d'emploi et formations. Insensible à la casse et aux accents (« deido »
+         *     trouve « Deïdo »), racinisation française ou anglaise selon `lang`. Les brouillons, contenus archivés et pages
+         *     techniques (`404`, `erreur`, `maintenance`, confirmations, questionnaire) ne sont jamais renvoyés.
+         *
+         *     Résultats groupés par type, dans l'ordre de `types` (par défaut : services, rubriques, pages, articles, offres
+         *     d'emploi, formations), groupes vides omis ; tri par pertinence dans chaque groupe. Public, sans session ;
+         *     réponse mise en cache 5 min par adresse complète.
+         */
+        get: operations["searchSite"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/analytics/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Envoi d'un lot d'événements de mesure d'audience
+         * @description Mesure d'audience interne (statistiques du tableau de bord), sans outil tiers et sans cookie déposé par l'API.
+         *     Le site regroupe les événements (pages vues, clics sur les actions : devis, WhatsApp, appel, e-mail,
+         *     « Je participe », inscription à la newsletter…) et les envoie au plus toutes les 10 s, ainsi qu'à la fermeture
+         *     de la page avec `navigator.sendBeacon` : le même JSON est alors accepté en `text/plain` (pas de requête préalable CORS).
+         *
+         *     Consentement (bandeau cookies, catégorie « Mesure d'audience ») :
+         *     - donné → `consent: true` et `visitorId` (identifiant pseudonyme du navigateur) : visiteurs uniques comptés ;
+         *     - absent ou refusé → `consent: false` **sans** `visitorId` (sinon `422`) : événements comptés uniquement en
+         *       agrégats (pages vues, actions), sans identifiant ni recoupement ;
+         *     - l'adresse IP et l'agent utilisateur servent seulement au filtrage des abus et des robots et ne sont pas
+         *       conservés avec les événements ; aucune donnée saisie dans un formulaire n'est transmise.
+         *
+         *     Anti-abus : en-tête `Origin` limité aux adresses du site (`403`), corps de 16 Kio au plus (`413`), 50 événements
+         *     par lot, 30 lots par minute et par adresse IP (`429`), robots déclarés ignorés ; les événements horodatés plus
+         *     de 24 h dans le passé ou plus de 5 min dans le futur sont ignorés et comptés dans `rejected`.
+         *     Traitement asynchrone : `202` dès la validation du lot.
+         */
+        post: operations["collectAnalyticsEvents"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/health": {
         parameters: {
             query?: never;
@@ -668,7 +731,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Utilisateur connecté */
+        /**
+         * Utilisateur connecté
+         * @description Renvoie aussi les permissions du rôle (`permissions`), qui pilotent menus et tableau de bord.
+         */
         get: operations["getMe"];
         put?: never;
         post?: never;
@@ -739,7 +805,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Indicateurs du tableau de bord */
+        /**
+         * Indicateurs du tableau de bord
+         * @description Indicateurs calculés selon les permissions de l'utilisateur : avec `requests:read-assigned` seulement, demandes
+         *     et rendez-vous se limitent à ceux qui lui sont assignés ; sans permission sur les demandes (`WRITER`), les blocs
+         *     correspondants sont vides. Le bloc « Mes tâches » est servi par `GET /v1/admin/me/tasks`, les statistiques
+         *     d'audience par `GET /v1/admin/analytics/summary`.
+         */
         get: operations["adminGetDashboard"];
         put?: never;
         post?: never;
@@ -756,7 +828,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Recherche globale (palette ⌘K) */
+        /**
+         * Recherche globale (palette ⌘K)
+         * @description Seuls les groupes et éléments accessibles avec les permissions de l'utilisateur sont renvoyés.
+         */
         get: operations["adminSearch"];
         put?: never;
         post?: never;
@@ -809,9 +884,58 @@ export interface paths {
         };
         /**
          * Compteurs de la barre latérale
-         * @description Demandes nouvelles, rendez-vous à confirmer, avis à valider, candidatures non lues. Affichés sur tous les écrans du back-office.
+         * @description Demandes nouvelles, rendez-vous à confirmer, avis à valider, candidatures non lues. Affichés sur tous les écrans du back-office. Chaque compteur est limité au périmètre des permissions (dossiers assignés pour un rôle `…-assigned`, `0` sans permission).
          */
         get: operations["adminGetSidebarCounts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/me/tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Mes tâches (demandes et rendez-vous qui me sont assignés)
+         * @description Bloc « Mes tâches » du tableau de bord, pour l'utilisateur connecté (tous les rôles).
+         *     Demandes ouvertes (`NOUVELLE`, `EN_COURS`) qui lui sont assignées : nombre par statut, en retard (`dueAt`
+         *     dépassée), à traiter aujourd'hui (`dueAt` dans la journée, fuseau `Africa/Douala`) et les 10 plus urgentes
+         *     (en retard d'abord, puis par échéance). Rendez-vous qui lui sont assignés : aujourd'hui, à confirmer, et les
+         *     5 prochains (7 jours). Les liens « Voir tout » utilisent `assignee=me` et `due=` sur `GET /v1/admin/requests`,
+         *     `assignee=me` sur `GET /v1/admin/appointments`. `unassigned` (demandes ouvertes sans assignation) n'est
+         *     renseigné qu'avec la permission `requests:assign`, sinon `null`.
+         */
+        get: operations["adminGetMyTasks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/analytics/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Statistiques d'audience du site
+         * @description Agrégats de la mesure d'audience interne (`POST /v1/analytics/events`) sur la période (jours entiers jusqu'à
+         *     hier, fuseau `Africa/Douala`), comparés à la période précédente de même durée. Les visiteurs uniques ne
+         *     comptent que les visiteurs ayant consenti (identifiant pseudonyme) ; pages vues et actions comptent tous les
+         *     événements. Agrégats recalculés toutes les 15 min environ (`generatedAt`) ; événements bruts conservés 13 mois.
+         */
+        get: operations["adminGetAnalyticsSummary"];
         put?: never;
         post?: never;
         delete?: never;
@@ -827,7 +951,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Demandes (devis, contacts, inscriptions, candidatures…) */
+        /**
+         * Demandes (devis, contacts, inscriptions, candidatures…)
+         * @description Avec la seule permission `requests:read-assigned`, la liste et les compteurs se limitent aux demandes assignées
+         *     à l'utilisateur connecté (`assignee=me` appliqué d'office, autre valeur → `403`).
+         */
         get: operations["adminListRequests"];
         put?: never;
         post?: never;
@@ -872,7 +1000,17 @@ export interface paths {
         /**
          * Changer le statut ou l'assignation
          * @description Chaque changement crée un événement d'historique. Le passage à `PRESTATION_REALISEE` d'un devis planifie
-         *     l'invitation au questionnaire (délai paramétrable). Le retour arrière est réservé aux administrateurs.
+         *     l'invitation au questionnaire (délai paramétrable). Le retour arrière du statut demande la permission
+         *     `requests:revert-status` (administrateurs).
+         *
+         *     Assignation (`assignedToId`, permission `requests:assign`) : la personne doit être un membre actif pouvant traiter
+         *     des demandes (`assignable` dans `GET /v1/admin/users/presence`), sinon `422` ; `null` retire l'assignation.
+         *     Avec `requests:write-assigned` seulement, on peut changer le statut et l'échéance de ses propres demandes, mais
+         *     pas les réassigner (`403`). Toute assignation crée l'événement `ASSIGNED` et prévient la personne assignée par
+         *     une notification `ASSIGNMENT` du back-office (`GET /v1/admin/notifications`) et par l'e-mail `team-assignment`
+         *     (désactivable dans les modèles d'e-mails) ; s'assigner soi-même ne notifie pas.
+         *
+         *     Échéance (`dueAt`) : fixée à la réception (24 h après la demande), modifiable ; `null` = sans échéance.
          */
         patch: operations["adminUpdateRequest"];
         trace?: never;
@@ -1344,6 +1482,8 @@ export interface paths {
          * @description `confirm` → e-mail de confirmation avec fichier `.ics` (+ lien visio si format Visio).
          *     `propose` → e-mail avec bouton d'acceptation du nouveau créneau.
          *     `cancel` → e-mail d'annulation. `complete` → statut « Terminé ».
+         *     `assign` (permission `appointments:assign`) → assigne le rendez-vous (`null` = retirer) ; la personne assignée
+         *     reçoit une notification `ASSIGNMENT` et l'e-mail `team-assignment`, comme pour les demandes.
          */
         patch: operations["adminActOnAppointment"];
         trace?: never;
@@ -1862,6 +2002,8 @@ export interface paths {
          * Modifier une zone et ses quartiers
          * @description `quarters` remplace la liste des quartiers de la zone ; un quartier déjà présent dans une autre zone y est retiré
          *     (un quartier n'appartient qu'à une zone). Revalide le tag `zones`.
+         *     Coordonnées des quartiers (`coordinates`) et contour (`area`) en WGS84, contrôlés dans l'emprise du Cameroun
+         *     (latitude 1,6 à 13,1 ; longitude 8,4 à 16,2), sinon `422` avec le chemin du point fautif.
          */
         patch: operations["adminUpdateZone"];
         trace?: never;
@@ -2173,7 +2315,7 @@ export interface paths {
         get: operations["adminGetSettings"];
         /**
          * Enregistrer un groupe de paramètres (mise à jour partout sur le site)
-         * @description Les groupes `analytics` et `securite` sont réservés aux administrateurs.
+         * @description Les groupes `analytics` et `securite` demandent la permission `settings:admin` (administrateurs) ; les autres, `settings:write`.
          */
         put: operations["adminSaveSettings"];
         post?: never;
@@ -2276,8 +2418,51 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Utilisateurs du back-office (ADMIN) */
+        /** Utilisateurs du back-office */
         get: operations["adminListUsers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/users/presence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Équipe connectée, dernière activité et dernière connexion
+         * @description Membres actifs du back-office (statut `ACTIF`) : connectés d'abord (activité depuis moins de
+         *     `onlineWindowMinutes`), puis par dernière activité décroissante. L'activité est mise à jour par toute requête
+         *     authentifiée (au plus une écriture par minute et par session) ; une session révoquée ou expirée rend le membre
+         *     « hors ligne ». Sert aussi de liste des personnes assignables (`assignable`). Rafraîchissement conseillé : 60 s.
+         */
+        get: operations["adminGetUsersPresence"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Rôles du back-office et permissions associées
+         * @description Libellés, périmètres et permissions de chaque rôle (choix du rôle à l'invitation, écran « Utilisateurs »).
+         */
+        get: operations["adminListRoles"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2295,7 +2480,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Inviter un utilisateur (lien valable 7 jours) */
+        /**
+         * Inviter un utilisateur (lien valable 7 jours)
+         * @description Le rôle détermine les permissions (voir `Role` et `GET /v1/admin/roles`).
+         */
         post: operations["adminInviteUser"];
         delete?: never;
         options?: never;
@@ -2632,7 +2820,9 @@ export interface components {
                 phone?: components["schemas"]["PhoneE164"] | null;
                 /** @example +237 6 00 00 00 00 */
                 phoneDisplay?: string | null;
+                /** @description Latitude WGS84 de l'agence (repère de la carte interactive et de la page Contact). */
                 latitude?: number | null;
+                /** @description Longitude WGS84 de l'agence. */
                 longitude?: number | null;
                 /** Format: uri */
                 mapsUrl?: string | null;
@@ -2710,6 +2900,41 @@ export interface components {
          * @enum {string}
          */
         ZoneTone: "zone1" | "zone2" | "zone3" | "special";
+        /** @description Point géographique WGS84 (EPSG:4326), en degrés décimaux (6 décimales au plus, ≈ 0,1 m). */
+        GeoPoint: {
+            /** @example 4.0565 */
+            lat: number;
+            /** @example 9.732 */
+            lng: number;
+        };
+        /**
+         * @description Position GeoJSON `[longitude, latitude]` (ordre RFC 7946, inverse de `GeoPoint`).
+         * @example [
+         *       9.732,
+         *       4.0565
+         *     ]
+         */
+        GeoJsonPosition: number[];
+        /** @description Anneau fermé (premier point = dernier point), 4 à 500 positions ; extérieur dans le sens inverse des aiguilles d'une montre. */
+        GeoJsonLinearRing: components["schemas"]["GeoJsonPosition"][];
+        GeoJsonPolygon: {
+            /** @constant */
+            type: "Polygon";
+            /** @description Anneau extérieur puis éventuels trous. */
+            coordinates: components["schemas"]["GeoJsonLinearRing"][];
+        };
+        GeoJsonMultiPolygon: {
+            /** @constant */
+            type: "MultiPolygon";
+            coordinates: components["schemas"]["GeoJsonLinearRing"][][];
+        };
+        /**
+         * @description Contour d'une zone sur la carte interactive (fond OpenStreetMap) : géométrie GeoJSON RFC 7946 `Polygon` ou
+         *     `MultiPolygon` (une zone en plusieurs morceaux, ex. de part et d'autre du Wouri), en WGS84. Directement
+         *     utilisable par `L.geoJSON()` (Leaflet) ou une source `geojson` (MapLibre), et importable depuis geojson.io ou uMap.
+         *     5 000 positions au plus par zone ; validée côté serveur (anneaux fermés, emprise du Cameroun).
+         */
+        ZoneArea: components["schemas"]["GeoJsonPolygon"] | components["schemas"]["GeoJsonMultiPolygon"];
         ZoneQuarter: {
             /** @example Bonamoussadi */
             name: string;
@@ -2733,7 +2958,9 @@ export interface components {
              * @default false
              */
             labelOnSmallMap: boolean;
-            /** @description Position sur la carte stylisée de Douala (0 à 1, origine en haut à gauche) ; null = absent de la carte. */
+            /** @description Position géographique du quartier (repère de la carte interactive OpenStreetMap) ; `null` = non placé. */
+            coordinates?: components["schemas"]["GeoPoint"] | null;
+            /** @description Position sur la carte stylisée de Douala (0 à 1, origine en haut à gauche) ; null = absent de la carte. Conservée pour la carte illustrée. */
             position?: {
                 x: number;
                 y: number;
@@ -2752,9 +2979,22 @@ export interface components {
              */
             result: string;
             quarters: components["schemas"]["ZoneQuarter"][];
+            /** @description Contour de la zone sur la carte interactive ; `null` = pas de contour (seuls les quartiers sont placés). */
+            area?: components["schemas"]["ZoneArea"] | null;
         };
         ServiceAreas: {
             zones: components["schemas"]["Zone"][];
+            /**
+             * @description Cadrage initial de la carte interactive, calculé par l'API à partir des contours et des quartiers placés ;
+             *     `null` si aucune zone n'est géolocalisée. L'agence est placée avec `SiteSettings.agency.latitude/longitude`.
+             */
+            map?: {
+                center: components["schemas"]["GeoPoint"];
+                /** @example 12 */
+                zoom: number;
+                /** @description Emprise `[sud-ouest, nord-est]` couvrant zones et quartiers. */
+                bounds: components["schemas"]["GeoPoint"][];
+            } | null;
             /** @example Votre quartier n’apparaît pas ? Contactez-nous : nous étudions chaque demande. */
             note?: string | null;
             updatedAt?: components["schemas"]["DateTime"];
@@ -2826,6 +3066,139 @@ export interface components {
                 /** @enum {string} */
                 storage?: "up" | "down";
             };
+        };
+        /**
+         * @description Libellés — Service, Rubrique, Page, Article du Magazine, Offre d'emploi, Formation.
+         * @enum {string}
+         */
+        SearchResultType: "service" | "category" | "page" | "article" | "job" | "training";
+        /** @description Plage d'un texte à surligner, en positions UTF-16 (`String.prototype.slice`), `end` exclu. */
+        TextRange: {
+            start: number;
+            end: number;
+        };
+        SearchResult: {
+            type: components["schemas"]["SearchResultType"];
+            id: components["schemas"]["Id"];
+            /**
+             * @description Slug du service, de la rubrique, de l'offre ou de la formation ; clé de page (`PageKey`) ; `null` pour un article.
+             * @example chef-prive
+             */
+            key: string | null;
+            title: string;
+            /**
+             * @description Précision affichée avec le titre : rubrique d'un service, thème d'un article, contrat et ville d'une offre…
+             * @example Expérience
+             */
+            context: string | null;
+            /** @description Extrait en texte brut, centré sur le premier passage trouvé (« … » s'il est coupé). */
+            excerpt: string;
+            /** @description Plages de `title` correspondant à la recherche. */
+            titleHighlights: components["schemas"]["TextRange"][];
+            /** @description Plages de `excerpt` correspondant à la recherche. */
+            highlights: components["schemas"]["TextRange"][];
+            /**
+             * @description Adresse interne française, comme partout dans le contrat ; le site la convertit dans la langue de la page
+             *     (`SiteLink`). Services `/services/{rubrique}/{service}`, rubriques `/services/{rubrique}`, offres
+             *     `/recrutement/{slug}`, formations `/formation#{slug}`, articles `/magazine#article-{id}`, pages : leur adresse.
+             * @example /services/experience/chef-prive
+             */
+            href: string;
+            /** @description Photo ou illustration du contenu ; `null` pour une page sans visuel ou une offre d'emploi. */
+            visual: components["schemas"]["Visual"] | null;
+            /** @description Icône (rubriques, formations) ; `null` sinon. */
+            icon: components["schemas"]["IconName"] | null;
+        };
+        SearchGroup: {
+            type: components["schemas"]["SearchResultType"];
+            /**
+             * @description Titre du groupe dans la langue demandée.
+             * @example Services
+             */
+            label: string;
+            /** @description Nombre total de résultats du type (au-delà de `limit`). */
+            total: number;
+            items: components["schemas"]["SearchResult"][];
+        };
+        SearchResults: {
+            /** @description Texte recherché tel qu'interprété (espaces superflus retirés). */
+            query: string;
+            /** @enum {string} */
+            lang: "fr" | "en";
+            total: number;
+            /** @description Groupes non vides ; aucun résultat = liste vide. */
+            groups: components["schemas"]["SearchGroup"][];
+        };
+        /**
+         * @description Action mesurée — `quote` Devis, `whatsapp` WhatsApp, `call` Appel, `email` E-mail, `participate` « Je participe », `newsletter` Inscription newsletter, `appointment` Rendez-vous, `sign_up` Inscription, `contact` Message de contact, `application` Candidature, `partner` Demande de partenariat, `training` Demande de formation.
+         * @enum {string}
+         */
+        AnalyticsAction: "quote" | "whatsapp" | "call" | "email" | "participate" | "newsletter" | "appointment" | "sign_up" | "contact" | "application" | "partner" | "training";
+        AnalyticsEventBase: {
+            /**
+             * @description Adresse interne française de la page (sans préfixe de langue, paramètres ni ancre), ex.
+             *     `/services/experience/chef-prive` pour `/en/services/experience/private-chef`. Les adresses de
+             *     prévisualisation et du back-office sont ignorées.
+             * @example /services/experience/chef-prive
+             */
+            path: string;
+            /** @enum {string} */
+            lang: "fr" | "en";
+            occurredAt: components["schemas"]["DateTime"];
+            /**
+             * @description Selon la largeur de la fenêtre (< 768, < 1280, au-delà).
+             * @enum {string}
+             */
+            device?: "mobile" | "tablet" | "desktop";
+        };
+        /** Page vue */
+        AnalyticsPageView: components["schemas"]["AnalyticsEventBase"] & {
+            /** @constant */
+            type: "page_view";
+            /**
+             * @description Domaine du site d'origine, sans chemin ; `null` = accès direct ou navigation interne.
+             * @example www.google.com
+             */
+            referrerHost?: string | null;
+        };
+        /** Action */
+        AnalyticsActionEvent: components["schemas"]["AnalyticsEventBase"] & {
+            /** @constant */
+            type: "action";
+            action: components["schemas"]["AnalyticsAction"];
+            /**
+             * @description `click` : clic sur le bouton ou le lien ; `submit` : formulaire envoyé avec succès.
+             * @default click
+             * @enum {string}
+             */
+            step: "click" | "submit";
+            /**
+             * @description Contenu concerné : slug du service, de l'offre, de la formation ou de l'événement.
+             * @example chef-prive
+             */
+            target?: string | null;
+            /**
+             * @description Emplacement du bouton : `header`, `hero`, `section`, `sticky`, `footer`, `form`…
+             * @example hero
+             */
+            placement?: string | null;
+        };
+        AnalyticsEvent: components["schemas"]["AnalyticsPageView"] | components["schemas"]["AnalyticsActionEvent"];
+        AnalyticsEventBatch: {
+            /** @description Consentement « Mesure d'audience » donné dans le bandeau cookies. */
+            consent: boolean;
+            /**
+             * Format: uuid
+             * @description Identifiant pseudonyme aléatoire (UUID v4) généré et conservé par le navigateur, **uniquement si
+             *     `consent` vaut `true`** (sinon `422`) ; renouvelé si le consentement est retiré puis redonné, 13 mois au plus.
+             */
+            visitorId?: string;
+            events: components["schemas"]["AnalyticsEvent"][];
+        };
+        AnalyticsBatchAccepted: {
+            accepted: number;
+            /** @description Événements ignorés (horodatage hors fenêtre, page exclue, doublon). */
+            rejected: number;
         };
         /**
          * @description Teinte de la carte de rubrique (token de couleur).
@@ -3397,8 +3770,99 @@ export interface components {
             consent: components["schemas"]["Consent"];
             antiSpam: components["schemas"]["AntiSpam"];
         };
-        /** @enum {string} */
-        Role: "ADMIN" | "EDITOR";
+        /**
+         * @description Libellés — Administrateur·rice, Responsable, Chargé·e de clientèle, Éditeur·rice, Rédacteur·rice.
+         *
+         *     Matrice de référence rôle → permissions. La liste effective est toujours celle renvoyée par l'API
+         *     (`CurrentUser.permissions`, `GET /v1/admin/roles`) : le back-office ne code pas cette matrice en dur.
+         *     `ADMIN` et `EDITOR` conservent leurs droits antérieurs (`EDITOR` : « Demandes et contenus ») ; `WRITER` est
+         *     le rôle limité aux contenus. Les permissions `…-assigned` restreignent au périmètre des dossiers assignés.
+         *
+         *     | Permission | ADMIN | MANAGER | AGENT | EDITOR | WRITER |
+         *     |---|---|---|---|---|---|
+         *     | `dashboard:read` | ✓ | ✓ | ✓ | ✓ | ✓ |
+         *     | `analytics:read` | ✓ | ✓ |  |  |  |
+         *     | `team:read` | ✓ | ✓ |  | ✓ |  |
+         *     | `requests:read` | ✓ | ✓ |  | ✓ |  |
+         *     | `requests:read-assigned` |  |  | ✓ |  |  |
+         *     | `requests:write` | ✓ | ✓ |  | ✓ |  |
+         *     | `requests:write-assigned` |  |  | ✓ |  |  |
+         *     | `requests:assign` | ✓ | ✓ |  | ✓ |  |
+         *     | `requests:export` | ✓ | ✓ |  | ✓ |  |
+         *     | `requests:anonymize` | ✓ | ✓ |  | ✓ |  |
+         *     | `requests:revert-status` | ✓ |  |  |  |  |
+         *     | `appointments:read` | ✓ | ✓ |  | ✓ |  |
+         *     | `appointments:read-assigned` |  |  | ✓ |  |  |
+         *     | `appointments:write` | ✓ | ✓ |  | ✓ |  |
+         *     | `appointments:write-assigned` |  |  | ✓ |  |  |
+         *     | `appointments:assign` | ✓ | ✓ |  | ✓ |  |
+         *     | `availability:write` | ✓ | ✓ |  | ✓ |  |
+         *     | `applications:read` | ✓ | ✓ |  | ✓ |  |
+         *     | `applications:write` | ✓ | ✓ |  | ✓ |  |
+         *     | `contacts:read` | ✓ | ✓ |  | ✓ |  |
+         *     | `contacts:write` | ✓ | ✓ |  | ✓ |  |
+         *     | `contacts:export` | ✓ | ✓ |  | ✓ |  |
+         *     | `reviews:moderate` | ✓ | ✓ |  | ✓ |  |
+         *     | `content:read` | ✓ | ✓ |  | ✓ | ✓ |
+         *     | `content:write` | ✓ |  |  | ✓ | ✓ |
+         *     | `media:write` | ✓ |  |  | ✓ | ✓ |
+         *     | `newsletter:read` | ✓ | ✓ |  | ✓ |  |
+         *     | `newsletter:write` | ✓ |  |  | ✓ |  |
+         *     | `settings:read` | ✓ | ✓ |  | ✓ |  |
+         *     | `settings:write` | ✓ |  |  | ✓ |  |
+         *     | `settings:admin` | ✓ |  |  |  |  |
+         *     | `users:manage` | ✓ |  |  |  |  |
+         *     | `audit:read` | ✓ |  |  |  |  |
+         * @enum {string}
+         */
+        Role: "ADMIN" | "MANAGER" | "AGENT" | "EDITOR" | "WRITER";
+        /**
+         * @description Droit élémentaire du back-office (`domaine:action`). Chaque opération `/v1/admin` indique dans
+         *     `x-permissions` les permissions qui y donnent accès (une seule suffit).
+         *
+         *     - `dashboard:read` : Tableau de bord, « Mes tâches », notifications, compteurs et recherche du back-office ;
+         *     - `analytics:read` : Statistiques d'audience du site ;
+         *     - `team:read` : Équipe connectée, rôles et personnes assignables ;
+         *     - `requests:read` : Toutes les demandes (liste, détail, pièces jointes, demandes de formation) ;
+         *     - `requests:read-assigned` : Demandes assignées à soi uniquement ;
+         *     - `requests:write` : Statut, notes, échéance et duplication de toute demande ;
+         *     - `requests:write-assigned` : Statut, notes et échéance de ses demandes ;
+         *     - `requests:assign` : Assigner et réassigner les demandes ;
+         *     - `requests:export` : Export CSV des demandes ;
+         *     - `requests:anonymize` : Anonymisation d'une demande (RGPD) ;
+         *     - `requests:revert-status` : Retour arrière du statut d'une demande ;
+         *     - `appointments:read` : Tous les rendez-vous ;
+         *     - `appointments:read-assigned` : Rendez-vous assignés à soi uniquement ;
+         *     - `appointments:write` : Saisir, confirmer, déplacer, annuler, terminer tout rendez-vous ;
+         *     - `appointments:write-assigned` : Mêmes actions sur ses rendez-vous ;
+         *     - `appointments:assign` : Assigner et réassigner les rendez-vous ;
+         *     - `availability:write` : Disponibilités de la prise de rendez-vous ;
+         *     - `applications:read` : Candidatures et CV ;
+         *     - `applications:write` : Statut et notes des candidatures ;
+         *     - `contacts:read` : Contacts et inscrits ;
+         *     - `contacts:write` : Modifier ou effacer un contact (RGPD) ;
+         *     - `contacts:export` : Exports CSV et RGPD des contacts et abonnés ;
+         *     - `reviews:moderate` : Avis clients et questions du questionnaire ;
+         *     - `content:read` : Contenus du back-office : services, rubriques, pages, partenaires, formations, offres, magazine, zones, agenda, médiathèque ;
+         *     - `content:write` : Créer, modifier, publier et réordonner ces contenus ;
+         *     - `media:write` : Téléverser, modifier et supprimer des médias ;
+         *     - `newsletter:read` : Abonnés et campagnes ;
+         *     - `newsletter:write` : Campagnes (création, test, programmation, envoi), envoi du magazine, abonnés ;
+         *     - `settings:read` : Paramètres, modèles d'e-mails, état du système ;
+         *     - `settings:write` : Paramètres courants (coordonnées, WhatsApp, réseaux, e-mails, référencement, chiffres, RGPD) et modèles d'e-mails ;
+         *     - `settings:admin` : Paramètres sensibles (groupes `analytics` et `securite`) ;
+         *     - `users:manage` : Utilisateurs : invitation, rôle, désactivation, réinitialisation ;
+         *     - `audit:read` : Journal d'activité.
+         * @enum {string}
+         */
+        Permission: "dashboard:read" | "analytics:read" | "team:read" | "requests:read" | "requests:read-assigned" | "requests:write" | "requests:write-assigned" | "requests:assign" | "requests:export" | "requests:anonymize" | "requests:revert-status" | "appointments:read" | "appointments:read-assigned" | "appointments:write" | "appointments:write-assigned" | "appointments:assign" | "availability:write" | "applications:read" | "applications:write" | "contacts:read" | "contacts:write" | "contacts:export" | "reviews:moderate" | "content:read" | "content:write" | "media:write" | "newsletter:read" | "newsletter:write" | "settings:read" | "settings:write" | "settings:admin" | "users:manage" | "audit:read";
+        RoleDefinition: {
+            role: components["schemas"]["Role"];
+            /** @example Responsable */
+            label: string;
+            description: string;
+            permissions: components["schemas"]["Permission"][];
+        };
         CurrentUser: {
             id: components["schemas"]["Id"];
             email: components["schemas"]["Email"];
@@ -3409,6 +3873,8 @@ export interface components {
             /** @example MB */
             initials?: string;
             role: components["schemas"]["Role"];
+            /** @description Permissions du rôle, à utiliser pour adapter menus, actions et tableau de bord. */
+            permissions: components["schemas"]["Permission"][];
             lastLoginAt?: components["schemas"]["DateTime"] | null;
         };
         LoginInput: {
@@ -3461,8 +3927,11 @@ export interface components {
         };
         Notification: {
             id: components["schemas"]["Id"];
-            /** @enum {string} */
-            kind: "REQUEST" | "APPOINTMENT" | "REVIEW" | "APPLICATION" | "PARTNERSHIP" | "REGISTRATION" | "SYSTEM";
+            /**
+             * @description `ASSIGNMENT` : une demande ou un rendez-vous vient de vous être assigné.
+             * @enum {string}
+             */
+            kind: "REQUEST" | "APPOINTMENT" | "REVIEW" | "APPLICATION" | "PARTNERSHIP" | "REGISTRATION" | "ASSIGNMENT" | "SYSTEM";
             /** @example Nouvelle demande de devis — Chef privé (MP-2026-0142) */
             title: string;
             link?: string | null;
@@ -3536,6 +4005,88 @@ export interface components {
             /** @description Candidatures « Nouveau ». */
             applications: number;
         };
+        MyTasks: {
+            generatedAt: components["schemas"]["DateTime"];
+            requests: {
+                /** @description Demandes ouvertes assignées. */
+                open: number;
+                byStatus: {
+                    NOUVELLE: number;
+                    EN_COURS: number;
+                };
+                overdue: number;
+                dueToday: number;
+                items: components["schemas"]["RequestListItem"][];
+            };
+            appointments: {
+                /** @description Rendez-vous confirmés du jour. */
+                today: number;
+                toConfirm: number;
+                upcoming: components["schemas"]["AdminAppointment"][];
+            };
+            /** @description Demandes ouvertes non assignées (permission `requests:assign`). */
+            unassigned: number | null;
+        };
+        AnalyticsActionCount: {
+            action: components["schemas"]["AnalyticsAction"];
+            /** @example WhatsApp */
+            label?: string;
+            count: number;
+            previous?: number | null;
+            deltaPercent?: number | null;
+        };
+        AnalyticsSummary: {
+            /** @enum {string} */
+            period: "7d" | "30d" | "90d";
+            /** Format: date */
+            from: string;
+            /**
+             * Format: date
+             * @description Dernier jour inclus.
+             */
+            to: string;
+            generatedAt: components["schemas"]["DateTime"];
+            totals: {
+                /** @description Visiteurs uniques (avec consentement). */
+                visitors: components["schemas"]["Kpi"];
+                pageViews: components["schemas"]["Kpi"];
+                /** @description Clics et envois mesurés, toutes actions. */
+                actions: components["schemas"]["Kpi"];
+                /** @description Part des pages vues avec consentement (0–100) ; `null` sans données. */
+                consentRate: number | null;
+            };
+            /** @description Toutes les actions, de la plus fréquente à la moins fréquente (y compris à 0). */
+            actions: components["schemas"]["AnalyticsActionCount"][];
+            /** @description Un point par jour de la période. */
+            series: {
+                /** Format: date */
+                date: string;
+                visitors: number;
+                pageViews: number;
+                actions: number;
+            }[];
+            topPages: {
+                /** @description Adresse interne française de la page. */
+                path: string;
+                title: string;
+                pageViews: number;
+                visitors: number;
+                actions: number;
+            }[];
+            /** @description Pages générant le plus d'actions, avec le détail par action (actions à 0 omises). */
+            actionsByPage: {
+                path: string;
+                title: string;
+                total: number;
+                byAction: components["schemas"]["AnalyticsActionCount"][];
+            }[];
+            languages: {
+                /** @enum {string} */
+                lang: "fr" | "en";
+                pageViews: number;
+                percent: number;
+            }[];
+        };
         /**
          * @description Libellés — Devis, Contact, Information, Inscription, Formation, Candidature, Partenariat, Événement, Rendez-vous.
          * @enum {string}
@@ -3580,6 +4131,10 @@ export interface components {
             /** @description Libellé court (service, formation, poste, événement…). */
             subject?: string | null;
             assignedTo?: components["schemas"]["UserRef"] | null;
+            /** @description Échéance de traitement (24 h après réception par défaut, modifiable) ; `null` = sans échéance. */
+            dueAt?: components["schemas"]["DateTime"] | null;
+            /** @description Échéance dépassée alors que la demande est encore ouverte (`NOUVELLE`, `EN_COURS`). */
+            isOverdue?: boolean;
             createdAt: components["schemas"]["DateTime"];
         };
         RequestNote: {
@@ -3906,6 +4461,8 @@ export interface components {
             message?: string | null;
             notes?: string | null;
             reminderSentAt?: components["schemas"]["DateTime"] | null;
+            /** @description Personne chargée du rendez-vous. */
+            assignedTo?: components["schemas"]["UserRef"] | null;
             createdAt: components["schemas"]["DateTime"];
         };
         AdminAppointmentInput: {
@@ -3921,6 +4478,8 @@ export interface components {
             notes?: string | null;
             /** @default true */
             notifyClient: boolean;
+            /** @description Absent = l'utilisateur qui saisit le rendez-vous. */
+            assignedToId?: components["schemas"]["Id"] | null;
         };
         AppointmentAction: {
             /** @constant */
@@ -3944,6 +4503,10 @@ export interface components {
             /** @constant */
             action: "notes";
             notes: string | null;
+        } | {
+            /** @constant */
+            action: "assign";
+            assignedToId: components["schemas"]["Id"] | null;
         };
         AvailabilityConfig: {
             rules: {
@@ -4238,7 +4801,10 @@ export interface components {
             fee?: components["schemas"]["ZoneFee"] | null;
             /** @description Zone affichée sur le site (carte, légende, recherche, formulaires). */
             active?: boolean;
+            /** @description Chaque quartier peut recevoir ses coordonnées (`coordinates`), saisies sur la carte ou au clavier. */
             quarters?: components["schemas"]["ZoneQuarter"][];
+            /** @description Contour dessiné sur la carte ou importé (GeoJSON) ; `null` = supprimer le contour. */
+            area?: components["schemas"]["ZoneArea"] | null;
         };
         ZoneInput: components["schemas"]["ZoneFields"] & Record<string, never>;
         ZonePatch: components["schemas"]["ZoneFields"] & Record<string, never>;
@@ -4257,6 +4823,7 @@ export interface components {
             fee: components["schemas"]["ZoneFee"] | null;
             active: boolean;
             quarters: components["schemas"]["ZoneQuarter"][];
+            area?: components["schemas"]["ZoneArea"] | null;
             /** @description Demandes des 12 derniers mois dont la ville commence par un quartier de la zone. */
             requestsCount: number;
             sortOrder: number;
@@ -4488,7 +5055,7 @@ export interface components {
             emailProvider?: string | null;
         };
         /** @enum {string} */
-        EmailTemplateKey: "quote-ack" | "team-new-request" | "contact-ack" | "appointment-received" | "appointment-confirmed" | "appointment-proposed" | "appointment-cancelled" | "appointment-reminder" | "survey-invitation" | "survey-reminder" | "registration-confirmed" | "application-received" | "training-request-received" | "partner-request-received" | "event-registration" | "newsletter-confirm" | "newsletter-campaign" | "user-invite" | "otp-code" | "password-reset";
+        EmailTemplateKey: "quote-ack" | "team-new-request" | "team-assignment" | "contact-ack" | "appointment-received" | "appointment-confirmed" | "appointment-proposed" | "appointment-cancelled" | "appointment-reminder" | "survey-invitation" | "survey-reminder" | "registration-confirmed" | "application-received" | "training-request-received" | "partner-request-received" | "event-registration" | "newsletter-confirm" | "newsletter-campaign" | "user-invite" | "otp-code" | "password-reset";
         EmailTemplateFields: {
             subject?: string;
             preheader?: string | null;
@@ -4522,7 +5089,28 @@ export interface components {
             status: "ACTIF" | "INVITE" | "DESACTIVE";
             invitedAt?: components["schemas"]["DateTime"] | null;
             lastLoginAt?: components["schemas"]["DateTime"] | null;
+            /** @description Dernière requête authentifiée (mise à jour au plus une fois par minute). */
+            lastActiveAt?: components["schemas"]["DateTime"] | null;
             createdAt: components["schemas"]["DateTime"];
+        };
+        TeamMemberPresence: {
+            user: components["schemas"]["UserRef"];
+            role: components["schemas"]["Role"];
+            /** @description Activité depuis moins de `onlineWindowMinutes` sur une session encore valide. */
+            online: boolean;
+            lastActiveAt: components["schemas"]["DateTime"] | null;
+            lastLoginAt: components["schemas"]["DateTime"] | null;
+            /** @description Peut recevoir des demandes et des rendez-vous (`requests:read` ou `requests:read-assigned`). */
+            assignable: boolean;
+            /** @description Demandes ouvertes (`NOUVELLE`, `EN_COURS`) et rendez-vous à venir qui lui sont assignés. */
+            openTasks: number;
+        };
+        TeamPresence: {
+            /** @example 5 */
+            onlineWindowMinutes: number;
+            onlineCount: number;
+            generatedAt: components["schemas"]["DateTime"];
+            data: components["schemas"]["TeamMemberPresence"][];
         };
         Media: components["schemas"]["MediaImage"] & {
             fileName: string;
@@ -4980,6 +5568,13 @@ export interface components {
          *     (« Bonapriso, Douala »), sans tenir compte de la casse ni des accents.
          */
         District: string;
+        /** @description Personne assignée : `me` (utilisateur connecté), `none` (non assigné) ou identifiant d'un utilisateur. */
+        Assignee: ("me" | "none") | components["schemas"]["Id"];
+        /**
+         * @description Échéance des demandes ouvertes (`NOUVELLE`, `EN_COURS`) : `overdue` en retard, `today` à traiter aujourd'hui,
+         *     `week` dans les 7 prochains jours (fuseau `Africa/Douala`).
+         */
+        Due: "overdue" | "today" | "week";
         /**
          * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
          *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
@@ -5043,6 +5638,12 @@ export type NavLink = components['schemas']['NavLink'];
 export type NavItem = components['schemas']['NavItem'];
 export type MegaMenuCategory = components['schemas']['MegaMenuCategory'];
 export type ZoneTone = components['schemas']['ZoneTone'];
+export type GeoPoint = components['schemas']['GeoPoint'];
+export type GeoJsonPosition = components['schemas']['GeoJsonPosition'];
+export type GeoJsonLinearRing = components['schemas']['GeoJsonLinearRing'];
+export type GeoJsonPolygon = components['schemas']['GeoJsonPolygon'];
+export type GeoJsonMultiPolygon = components['schemas']['GeoJsonMultiPolygon'];
+export type ZoneArea = components['schemas']['ZoneArea'];
 export type ZoneQuarter = components['schemas']['ZoneQuarter'];
 export type Zone = components['schemas']['Zone'];
 export type ServiceAreas = components['schemas']['ServiceAreas'];
@@ -5052,6 +5653,18 @@ export type Page = components['schemas']['Page'];
 export type SitemapEntry = components['schemas']['SitemapEntry'];
 export type Redirect = components['schemas']['Redirect'];
 export type Health = components['schemas']['Health'];
+export type SearchResultType = components['schemas']['SearchResultType'];
+export type TextRange = components['schemas']['TextRange'];
+export type SearchResult = components['schemas']['SearchResult'];
+export type SearchGroup = components['schemas']['SearchGroup'];
+export type SearchResults = components['schemas']['SearchResults'];
+export type AnalyticsAction = components['schemas']['AnalyticsAction'];
+export type AnalyticsEventBase = components['schemas']['AnalyticsEventBase'];
+export type AnalyticsPageView = components['schemas']['AnalyticsPageView'];
+export type AnalyticsActionEvent = components['schemas']['AnalyticsActionEvent'];
+export type AnalyticsEvent = components['schemas']['AnalyticsEvent'];
+export type AnalyticsEventBatch = components['schemas']['AnalyticsEventBatch'];
+export type AnalyticsBatchAccepted = components['schemas']['AnalyticsBatchAccepted'];
 export type CategoryTint = components['schemas']['CategoryTint'];
 export type IconTextItem = components['schemas']['IconTextItem'];
 export type StepItem = components['schemas']['StepItem'];
@@ -5096,6 +5709,8 @@ export type EventRegistrationInput = components['schemas']['EventRegistrationInp
 export type JobApplicationInput = components['schemas']['JobApplicationInput'];
 export type NewsletterSubscriptionInput = components['schemas']['NewsletterSubscriptionInput'];
 export type Role = components['schemas']['Role'];
+export type Permission = components['schemas']['Permission'];
+export type RoleDefinition = components['schemas']['RoleDefinition'];
 export type CurrentUser = components['schemas']['CurrentUser'];
 export type LoginInput = components['schemas']['LoginInput'];
 export type LoginResult = components['schemas']['LoginResult'];
@@ -5108,6 +5723,9 @@ export type Notification = components['schemas']['Notification'];
 export type Kpi = components['schemas']['Kpi'];
 export type Dashboard = components['schemas']['Dashboard'];
 export type SidebarCounts = components['schemas']['SidebarCounts'];
+export type MyTasks = components['schemas']['MyTasks'];
+export type AnalyticsActionCount = components['schemas']['AnalyticsActionCount'];
+export type AnalyticsSummary = components['schemas']['AnalyticsSummary'];
 export type RequestType = components['schemas']['RequestType'];
 export type RequestStatus = components['schemas']['RequestStatus'];
 export type RequestStatusCounts = components['schemas']['RequestStatusCounts'];
@@ -5211,6 +5829,8 @@ export type EmailTemplateFields = components['schemas']['EmailTemplateFields'];
 export type EmailTemplateInput = components['schemas']['EmailTemplateInput'];
 export type EmailTemplate = components['schemas']['EmailTemplate'];
 export type AdminUser = components['schemas']['AdminUser'];
+export type TeamMemberPresence = components['schemas']['TeamMemberPresence'];
+export type TeamPresence = components['schemas']['TeamPresence'];
 export type Media = components['schemas']['Media'];
 export type AuditLogEntry = components['schemas']['AuditLogEntry'];
 export type PageSectionType = components['schemas']['PageSectionType'];
@@ -5240,6 +5860,8 @@ export type ResponseTooManyRequests = components['responses']['TooManyRequests']
 export type ResponseSpamRejected = components['responses']['SpamRejected'];
 export type ResponseNoContent = components['responses']['NoContent'];
 export type ParameterDistrict = components['parameters']['District'];
+export type ParameterAssignee = components['parameters']['Assignee'];
+export type ParameterDue = components['parameters']['Due'];
 export type ParameterLang = components['parameters']['Lang'];
 export type ParameterPage = components['parameters']['Page'];
 export type ParameterPageSize = components['parameters']['PageSize'];
@@ -5434,6 +6056,147 @@ export interface operations {
                     "application/json": components["schemas"]["SitemapEntry"][];
                 };
             };
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    searchSite: {
+        parameters: {
+            query: {
+                /** @description Texte recherché (espaces de début et de fin ignorés), 2 caractères au moins. */
+                q: string;
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
+                /** @description Types cherchés, séparés par des virgules (`types=service,article`) ; absent = tous. */
+                types?: components["schemas"]["SearchResultType"][];
+                /** @description Nombre maximal de résultats par type. */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Résultats groupés par type. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchResults"];
+                };
+            };
+            /** @description Recherche invalide (texte trop court ou trop long, type inconnu, limite hors bornes). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "type": "https://api.mamboproxi.com/problems/invalid-query",
+                     *       "title": "Recherche invalide",
+                     *       "status": 400,
+                     *       "detail": "Saisissez au moins 2 caractères pour lancer la recherche.",
+                     *       "errors": [
+                     *         {
+                     *           "path": "q",
+                     *           "code": "too_short",
+                     *           "message": "Saisissez au moins 2 caractères."
+                     *         }
+                     *       ]
+                     *     }
+                     */
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    collectAnalyticsEvents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AnalyticsEventBatch"];
+                "text/plain": string;
+            };
+        };
+        responses: {
+            /** @description Lot accepté. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "accepted": 3,
+                     *       "rejected": 0
+                     *     }
+                     */
+                    "application/json": components["schemas"]["AnalyticsBatchAccepted"];
+                };
+            };
+            /** @description Corps illisible (JSON invalide). */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "type": "https://api.mamboproxi.com/problems/invalid-body",
+                     *       "title": "Requête invalide",
+                     *       "status": 400,
+                     *       "detail": "Le contenu envoyé n'est pas un JSON valide."
+                     *     }
+                     */
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Origine non autorisée. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "type": "https://api.mamboproxi.com/problems/forbidden-origin",
+                     *       "title": "Origine non autorisée",
+                     *       "status": 403,
+                     *       "detail": "Ces mesures ne sont acceptées que depuis le site MAMBO Proxi."
+                     *     }
+                     */
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            /** @description Lot trop volumineux (16 Kio au plus). */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "type": "https://api.mamboproxi.com/problems/payload-too-large",
+                     *       "title": "Envoi trop volumineux",
+                     *       "status": 413,
+                     *       "detail": "Envoyez au plus 50 événements et 16 Kio par lot."
+                     *     }
+                     */
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            422: components["responses"]["ValidationError"];
             429: components["responses"]["TooManyRequests"];
         };
     };
@@ -6482,6 +7245,37 @@ export interface operations {
                      *         "firstName": "Mireille",
                      *         "initials": "MB",
                      *         "role": "ADMIN",
+                     *         "permissions": [
+                     *           "dashboard:read",
+                     *           "analytics:read",
+                     *           "team:read",
+                     *           "requests:read",
+                     *           "requests:write",
+                     *           "requests:assign",
+                     *           "requests:export",
+                     *           "requests:anonymize",
+                     *           "requests:revert-status",
+                     *           "appointments:read",
+                     *           "appointments:write",
+                     *           "appointments:assign",
+                     *           "availability:write",
+                     *           "applications:read",
+                     *           "applications:write",
+                     *           "contacts:read",
+                     *           "contacts:write",
+                     *           "contacts:export",
+                     *           "reviews:moderate",
+                     *           "content:read",
+                     *           "content:write",
+                     *           "media:write",
+                     *           "newsletter:read",
+                     *           "newsletter:write",
+                     *           "settings:read",
+                     *           "settings:write",
+                     *           "settings:admin",
+                     *           "users:manage",
+                     *           "audit:read"
+                     *         ],
                      *         "lastLoginAt": "2026-10-19T07:58:00.000Z"
                      *       }
                      *     }
@@ -6922,6 +7716,53 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
         };
     };
+    adminGetMyTasks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Tâches de l'utilisateur connecté. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MyTasks"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    adminGetAnalyticsSummary: {
+        parameters: {
+            query?: {
+                period?: "7d" | "30d" | "90d";
+                /** @description Limiter aux pages vues dans une langue ; absent = toutes les langues. */
+                lang?: "fr" | "en";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Statistiques de la période. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalyticsSummary"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
     adminListRequests: {
         parameters: {
             query?: {
@@ -6934,6 +7775,13 @@ export interface operations {
                  *     (« Bonapriso, Douala »), sans tenir compte de la casse ni des accents.
                  */
                 district?: components["parameters"]["District"];
+                /** @description Personne assignée : `me` (utilisateur connecté), `none` (non assigné) ou identifiant d'un utilisateur. */
+                assignee?: components["parameters"]["Assignee"];
+                /**
+                 * @description Échéance des demandes ouvertes (`NOUVELLE`, `EN_COURS`) : `overdue` en retard, `today` à traiter aujourd'hui,
+                 *     `week` dans les 7 prochains jours (fuseau `Africa/Douala`).
+                 */
+                due?: components["parameters"]["Due"];
                 from?: components["parameters"]["From"];
                 to?: components["parameters"]["To"];
                 /** @description Recherche plein texte. */
@@ -6977,6 +7825,13 @@ export interface operations {
                  *     (« Bonapriso, Douala »), sans tenir compte de la casse ni des accents.
                  */
                 district?: components["parameters"]["District"];
+                /** @description Personne assignée : `me` (utilisateur connecté), `none` (non assigné) ou identifiant d'un utilisateur. */
+                assignee?: components["parameters"]["Assignee"];
+                /**
+                 * @description Échéance des demandes ouvertes (`NOUVELLE`, `EN_COURS`) : `overdue` en retard, `today` à traiter aujourd'hui,
+                 *     `week` dans les 7 prochains jours (fuseau `Africa/Douala`).
+                 */
+                due?: components["parameters"]["Due"];
                 from?: components["parameters"]["From"];
                 to?: components["parameters"]["To"];
             };
@@ -7053,6 +7908,7 @@ export interface operations {
                 "application/json": {
                     status?: components["schemas"]["RequestStatus"];
                     assignedToId?: components["schemas"]["Id"] | null;
+                    dueAt?: components["schemas"]["DateTime"] | null;
                 };
             };
         };
@@ -7955,6 +8811,8 @@ export interface operations {
                 from: string;
                 to: string;
                 status?: components["schemas"]["AppointmentStatus"];
+                /** @description Personne assignée : `me` (utilisateur connecté), `none` (non assigné) ou identifiant d'un utilisateur. */
+                assignee?: components["parameters"]["Assignee"];
             };
             header?: never;
             path?: never;
@@ -7962,7 +8820,10 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Rendez-vous de la période + file « À confirmer » (toutes dates). */
+            /**
+             * @description Rendez-vous de la période + file « À confirmer » (toutes dates), filtrés par `assignee` le cas échéant.
+             *     Avec la seule permission `appointments:read-assigned`, limités aux rendez-vous assignés à l'utilisateur.
+             */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -9949,6 +10810,50 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminUser"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    adminGetUsersPresence: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Présence de l'équipe. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamPresence"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    adminListRoles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Rôles dans l'ordre d'affichage. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleDefinition"][];
                 };
             };
             401: components["responses"]["Unauthorized"];

@@ -1,18 +1,15 @@
 import { http, HttpResponse } from 'msw';
-import type {
-  Dashboard,
-  Notification,
-  RequestDetail,
-  RequestListItem,
-  RequestStatus,
-  SidebarCounts,
-} from '@/lib/api/schema';
+import type { CurrentUser, Dashboard, Notification, RequestStatus, SidebarCounts } from '@/lib/api/schema';
+import { toListItem, visibleAppointments, visibleRequests } from '../assignments';
 import { appointmentsToConfirm } from '../data/admin-appointments';
 import { unreadApplications } from '../data/admin-jobs';
-import { adminRequests } from '../data/admin-requests';
 import { reviewsToValidate } from '../data/admin-reviews';
+import { can, checkPermissions } from '../permissions';
 import { problem } from '../problem';
-import { requireSession } from '../session';
+import { mockUser, requireSession, sessionUser } from '../session';
+import { touchActivity } from '../team';
+
+export { toListItem };
 
 const HOUR = 60 * 60 * 1000;
 
@@ -34,18 +31,22 @@ export const pendingCounts = {
   newRegistrations: 5,
 };
 
-export function sidebarCounts(): SidebarCounts {
-  return {
-    requests: adminRequests.filter((request) => request.status === 'NOUVELLE').length,
-    appointments: pendingCounts.appointmentsToConfirm,
-    reviews: pendingCounts.reviewsToValidate,
-    applications: pendingCounts.unreadApplications,
-  };
-}
+type Scope = Pick<CurrentUser, 'id' | 'role'> | null;
 
-export function toListItem(request: RequestDetail): RequestListItem {
-  const { id, reference, type, status, contact, service, category, subject, assignedTo, createdAt } = request;
-  return { id, reference, type, status, contact, service, category, subject, assignedTo, createdAt };
+/** Périmètre complet (tests sans session). */
+const FULL_SCOPE: Scope = { id: '', role: 'ADMIN' };
+
+/**
+ * Compteurs de la barre latérale, limités au périmètre des permissions (dossiers assignés pour un rôle
+ * `…-assigned`, `0` sans permission).
+ */
+export function sidebarCounts(user: Scope = FULL_SCOPE): SidebarCounts {
+  return {
+    requests: visibleRequests(user).filter((request) => request.status === 'NOUVELLE').length,
+    appointments: visibleAppointments(user).filter((item) => item.status === 'A_CONFIRMER').length,
+    reviews: can(user, 'reviews:moderate') ? pendingCounts.reviewsToValidate : 0,
+    applications: can(user, 'applications:read') ? pendingCounts.unreadApplications : 0,
+  };
 }
 
 const byNewest = (a: { createdAt: string }, b: { createdAt: string }) =>
@@ -162,8 +163,67 @@ function notifications(): Notification[] {
   ];
 }
 
-let notificationState: Notification[] | null = null;
-const getNotifications = () => (notificationState ??= notifications());
+/** Notification utile au rôle (une candidature n'est pas signalée à un chargé de clientèle…). */
+function allowed(user: CurrentUser, notification: Notification): boolean {
+  switch (notification.kind) {
+    case 'REQUEST':
+    case 'PARTNERSHIP':
+      return can(user, 'requests:read');
+    case 'APPOINTMENT':
+      return can(user, 'appointments:read');
+    case 'REVIEW':
+      return can(user, 'reviews:moderate');
+    case 'APPLICATION':
+      return can(user, 'applications:read');
+    case 'REGISTRATION':
+      return can(user, 'contacts:read');
+    default:
+      return true;
+  }
+}
+
+/** Notifications par utilisateur : une assignation ne concerne que la personne assignée. */
+const notificationState = new Map<string, Notification[]>();
+let notificationSequence = 0;
+
+function getNotifications(user: CurrentUser): Notification[] {
+  let list = notificationState.get(user.id);
+  if (!list) {
+    list = notifications().filter((item) => allowed(user, item));
+    // Démonstration : Paul Ngando (chargé de clientèle) a reçu une demande à traiter.
+    if (user.id === 'usr_paul')
+      list.unshift({
+        id: 'ntf_assign_paul',
+        kind: 'ASSIGNMENT',
+        title: 'Demande assignée — Maison + Linge (MP-2026-0137)',
+        link: '/admin/demandes?id=req_0137',
+        readAt: null,
+        createdAt: new Date(Date.now() - 3 * HOUR).toISOString(),
+      });
+    notificationState.set(user.id, list);
+  }
+  return list;
+}
+
+/** Notification `ASSIGNMENT` à la personne assignée (demande ou rendez-vous) ; s'assigner soi-même ne notifie pas. */
+export function notifyAssignment(
+  assigneeId: string,
+  actorId: string | undefined,
+  title: string,
+  link: string,
+) {
+  const assignee = mockUser(assigneeId);
+  if (!assignee || assigneeId === actorId) return;
+  notificationSequence += 1;
+  getNotifications(assignee).unshift({
+    id: `ntf_assign_${notificationSequence}`,
+    kind: 'ASSIGNMENT',
+    title,
+    link,
+    readAt: null,
+    createdAt: new Date().toISOString(),
+  });
+}
 
 const STATUS_LABELS: Record<RequestStatus, string> = {
   NOUVELLE: 'Nouvelle',
@@ -173,42 +233,79 @@ const STATUS_LABELS: Record<RequestStatus, string> = {
 };
 
 export const adminCoreHandlers = [
-  // Toute route du back-office exige une session (sinon 401, comme l'API).
-  http.all('*/v1/admin/*', ({ request }) => requireSession(request) ?? undefined),
+  // Toute route du back-office exige une session (sinon 401, comme l'API), puis l'une des permissions de
+  // l'opération (`x-permissions` du contrat, sinon 403). Chaque requête met à jour la dernière activité.
+  http.all('*/v1/admin/*', ({ request }) => {
+    const denied = requireSession(request);
+    if (denied) return denied;
+    const user = sessionUser(request)!;
+    touchActivity(user.id);
+    return checkPermissions(request, user) ?? undefined;
+  }),
 
-  http.get('*/v1/admin/sidebar-counts', () => HttpResponse.json(sidebarCounts())),
+  http.get('*/v1/admin/sidebar-counts', ({ request }) =>
+    HttpResponse.json(sidebarCounts(sessionUser(request))),
+  ),
 
+  // Indicateurs selon les permissions : dossiers assignés seulement pour un chargé de clientèle, blocs des demandes
+  // vides sans permission sur les demandes (rédacteur).
   http.get('*/v1/admin/dashboard', ({ request }) => {
     const range = (new URL(request.url).searchParams.get('range') ?? '30d') as Dashboard['range'];
     if (!['7d', '30d', '12m'].includes(range)) return problem(400, 'Période inconnue.');
+    const user = sessionUser(request);
+    const counts = sidebarCounts(user);
+    const fullScope = can(user, 'requests:read');
+    const requests = visibleRequests(user);
+    const scoped = (value: number) => ({ value, previous: null, deltaPercent: null, unit: null });
     const body: Dashboard = {
       range,
-      kpis: {
-        ...KPIS[range],
-        newRequests: { ...KPIS[range].newRequests, value: range === '12m' ? 513 : sidebarCounts().requests },
+      kpis: fullScope
+        ? {
+            ...KPIS[range],
+            newRequests: { ...KPIS[range].newRequests, value: range === '12m' ? 513 : counts.requests },
+          }
+        : {
+            newRequests: scoped(counts.requests),
+            quotesInProgress: scoped(
+              requests.filter((item) => item.type === 'DEVIS' && item.status === 'EN_COURS').length,
+            ),
+            servicesCompleted: scoped(
+              requests.filter((item) => item.status === 'PRESTATION_REALISEE').length,
+            ),
+            satisfaction: { ...KPIS[range].satisfaction, previous: null, deltaPercent: null },
+          },
+      requestsSeries: fullScope ? series(range) : series(range).map((point) => ({ ...point, count: 0 })),
+      byCategory: fullScope ? BY_CATEGORY : [],
+      latestRequests: [...requests].sort(byNewest).slice(0, 5).map(toListItem),
+      todo: {
+        reviewsToValidate: counts.reviews,
+        unreadApplications: counts.applications,
+        appointmentsToConfirm: counts.appointments,
+        partnershipRequests: fullScope ? pendingCounts.partnershipRequests : 0,
+        newRegistrations: can(user, 'contacts:read') ? pendingCounts.newRegistrations : 0,
       },
-      requestsSeries: series(range),
-      byCategory: BY_CATEGORY,
-      latestRequests: [...adminRequests].sort(byNewest).slice(0, 5).map(toListItem),
-      todo: { ...pendingCounts },
       surveys: { sent: 34, answered: 23, responseRate: 68 },
       newsletter: { subscribers: 1248, newThisPeriod: 56 },
       visits: { total: 4320, deltaPercent: null },
-      sidebarCounts: sidebarCounts(),
+      sidebarCounts: counts,
     };
     return HttpResponse.json(body);
   }),
 
-  http.get('*/v1/admin/notifications', () => {
-    const data = getNotifications();
+  http.get('*/v1/admin/notifications', ({ request }) => {
+    const data = getNotifications(sessionUser(request)!);
     return HttpResponse.json({ data, unreadCount: data.filter((item) => !item.readAt).length });
   }),
 
   http.patch('*/v1/admin/notifications/read', async ({ request }) => {
+    const user = sessionUser(request)!;
     const body = (await request.json()) as { ids?: string[] };
     const now = new Date().toISOString();
-    notificationState = getNotifications().map((item) =>
-      !body.ids || body.ids.includes(item.id) ? { ...item, readAt: item.readAt ?? now } : item,
+    notificationState.set(
+      user.id,
+      getNotifications(user).map((item) =>
+        !body.ids || body.ids.includes(item.id) ? { ...item, readAt: item.readAt ?? now } : item,
+      ),
     );
     return new HttpResponse(null, { status: 204 });
   }),
@@ -221,7 +318,10 @@ export const adminCoreHandlers = [
         .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase();
     const needle = normalize(q);
-    const requests = adminRequests
+    // Seuls les groupes accessibles avec les permissions de l'utilisateur sont renvoyés.
+    const user = sessionUser(request);
+    const scope = visibleRequests(user);
+    const requests = scope
       .filter((item) =>
         normalize(`${item.reference} ${item.contact.fullName} ${item.subject ?? ''}`).includes(needle),
       )
@@ -232,7 +332,11 @@ export const adminCoreHandlers = [
         subtitle: `${item.subject ?? ''} · ${STATUS_LABELS[item.status]}`,
         href: `/admin/demandes?id=${item.id}`,
       }));
-    const contacts = [...new Map(adminRequests.map((item) => [item.contact.id, item.contact])).values()]
+    const contacts = [
+      ...new Map(
+        (can(user, 'contacts:read') ? scope : []).map((item) => [item.contact.id, item.contact]),
+      ).values(),
+    ]
       .filter((contact) => normalize(`${contact.fullName} ${contact.email}`).includes(needle))
       .slice(0, 4)
       .map((contact) => ({

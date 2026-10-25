@@ -141,6 +141,29 @@
   outline-offset: 2px;
 }
 
+/*
+ * Carte interactive (lien ou carte contenant des liens) : légère élévation au survol et au focus clavier.
+ * Translation (`translate`) et ombre seulement : aucun décalage de mise en page. Pas de déplacement sur écran tactile
+ * (survol collant) ni si l'utilisateur a demandé de réduire les animations.
+ */
+@utility card-lift {
+  transition-property: translate, box-shadow, border-color, background-color;
+  transition-duration: var(--mp-duration-base);
+  transition-timing-function: var(--mp-easing-standard);
+  &:hover,
+  &:focus-visible,
+  &:has(:focus-visible) {
+    box-shadow: var(--mp-shadow-3);
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    &:hover,
+    &:focus-visible,
+    &:has(:focus-visible) {
+      translate: 0 -4px;
+    }
+  }
+}
+
 /* Ouverture des modales : léger glissement vers le haut. */
 @keyframes modal-in {
   from {
@@ -193,6 +216,65 @@
   .js .reveal:not([data-visible]) {
     opacity: 0;
     transform: translateY(16px);
+  }
+}
+
+/*
+ * Transitions de page (API View Transitions, composant PageTransition) : l'ancienne page s'efface vite (120 ms), la
+ * nouvelle apparaît en glissant de 12 px vers le haut (240 ms, après 60 ms). Transform et opacité seulement.
+ * L'en-tête, le pied de page et le bouton WhatsApp sont nommés : affichés directement dans leur nouvel état, sans
+ * animation, au-dessus du contenu qui change (l'ancienne image est masquée pour éviter un double affichage).
+ * Les clics traversent la couche de transition. Rien n'est animé si l'utilisateur a demandé de réduire les animations.
+ */
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-old(.site-page-exit) {
+  animation: page-out 120ms var(--mp-easing-standard) both;
+}
+
+::view-transition-new(.site-page-enter) {
+  animation: page-in 240ms var(--mp-easing-standard) 60ms both;
+}
+
+::view-transition-group(site-header),
+::view-transition-group(site-footer),
+::view-transition-group(site-whatsapp) {
+  animation: none;
+  z-index: 1;
+}
+
+::view-transition-old(site-header),
+::view-transition-old(site-footer),
+::view-transition-old(site-whatsapp) {
+  display: none;
+}
+
+::view-transition-new(site-header),
+::view-transition-new(site-footer),
+::view-transition-new(site-whatsapp) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+@keyframes page-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
   }
 }
 
@@ -258,4 +340,14 @@
   to {
     stroke-dashoffset: -70;
   }
+}
+
+/*
+ * Carte des zones (Leaflet) : bouton de fermeture des info-bulles agrandi (24 px par défaut), pour rester une cible
+ * tactile d'au moins 24 px quand un repère passe sous l'info-bulle.
+ */
+.leaflet-container .leaflet-popup a.leaflet-popup-close-button {
+  width: 32px;
+  height: 32px;
+  font: 20px/32px var(--font-ui, sans-serif);
 }

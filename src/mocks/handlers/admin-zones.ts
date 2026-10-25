@@ -1,12 +1,9 @@
 import { http, HttpResponse } from 'msw';
-import type { AdminZone, ServiceAreas, ZoneFields } from '@/lib/api/schema';
-import operations from '../data/contract-examples.json';
+import type { AdminZone, ZoneFields } from '@/lib/api/schema';
+import { validatePoint, validateZoneArea } from '@/lib/geo/zones';
+import { serviceAreas as areas, serviceAreasEn as areasEn } from '../data/zones';
 import { jsonBody, mockId, slugify } from '../admin-utils';
 import { problem } from '../problem';
-
-const examples = operations.find((operation) => operation.operationId === 'getServiceAreas')?.examples;
-const areas = examples?.default as ServiceAreas;
-const areasEn = examples?.en as ServiceAreas | undefined;
 
 /** Délais, tarifs indicatifs et demandes de la maquette « BO — Zones d'intervention » (`267:2047`). */
 const DETAILS: Record<string, Pick<AdminZone, 'delay' | 'fee' | 'requestsCount'>> = {
@@ -16,9 +13,9 @@ const DETAILS: Record<string, Pick<AdminZone, 'delay' | 'fee' | 'requestsCount'>
   'zone-speciale': { delay: null, fee: { amount: 3500, currency: 'XAF', from: true }, requestsCount: 3 },
 };
 
-/** Zones du back-office, initialisées depuis l'exemple public du contrat (mêmes quartiers que le site). */
+/** Zones du back-office, initialisées depuis l'exemple public du contrat (mêmes quartiers, coordonnées et contours). */
 export const adminZones: AdminZone[] = areas.zones.map((zone, index) => {
-  const en = areasEn?.zones.find((item) => item.key === zone.key);
+  const en = areasEn.zones.find((item) => item.key === zone.key);
   return {
     id: `zon_${zone.key.replace(/^zone-/, '')}`,
     key: zone.key,
@@ -35,6 +32,7 @@ export const adminZones: AdminZone[] = areas.zones.map((zone, index) => {
     ...DETAILS[zone.key],
     active: true,
     quarters: zone.quarters,
+    area: zone.area ?? null,
     sortOrder: index,
     updatedAt: areas.updatedAt ?? '2026-10-18T08:00:00.000Z',
   };
@@ -64,6 +62,14 @@ function validate(body: ZoneFields) {
     return problem(422, 'Un quartier figure deux fois dans la zone.', [
       { path: 'quarters', message: 'Chaque quartier ne peut figurer qu’une fois.' },
     ]);
+  // Coordonnées et contour en WGS84, dans l'emprise du Cameroun (422 avec le chemin du point fautif).
+  for (const [index, quarter] of (body.quarters ?? []).entries()) {
+    const issue =
+      quarter.coordinates != null && validatePoint(quarter.coordinates, `quarters.${index}.coordinates`);
+    if (issue) return problem(422, `Coordonnées invalides pour ${quarter.name.trim()}.`, [issue]);
+  }
+  const areaIssue = body.area != null && validateZoneArea(body.area);
+  if (areaIssue) return problem(422, 'Contour de la zone invalide.', [areaIssue]);
   if (body.fee && (!Number.isInteger(body.fee.amount) || body.fee.amount < 0))
     return problem(422, 'Tarif indicatif invalide.', [
       { path: 'fee', message: 'Saisissez un montant en FCFA.' },
@@ -93,6 +99,7 @@ export const adminZoneHandlers = [
       fee: body.fee ?? null,
       active: body.active ?? false,
       quarters: body.quarters ?? [],
+      area: body.area ?? null,
       requestsCount: 0,
       sortOrder: Math.max(-1, ...adminZones.map((item) => item.sortOrder)) + 1,
       updatedAt: new Date().toISOString(),

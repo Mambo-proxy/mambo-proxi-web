@@ -33,7 +33,8 @@ test.describe('back-office : paramètres', () => {
     await expect(page.getByRole('textbox', { name: 'Instagram' })).toHaveValue('instagram.com/mamboproxi');
     await expect(page.getByRole('switch', { name: 'Afficher le bouton WhatsApp' })).toBeChecked();
     await expect(page.getByRole('switch', { name: /^Envoyer « / })).toHaveCount(4);
-    await expect(page.getByText('2 utilisateurs')).toBeVisible();
+    // Maquette : 2 utilisateurs ; les mocks ajoutent un compte de démonstration par rôle (5 au total).
+    await expect(page.getByText('5 utilisateurs')).toBeVisible();
     await expect(page.getByText(/^Chaque nuit · dernière : /)).toBeVisible();
     await expectNoHorizontalScroll(page);
     await expectAccessible(page);
@@ -108,7 +109,7 @@ test.describe('back-office : paramètres', () => {
 
   test('inviter un utilisateur depuis la colonne latérale', async ({ page }) => {
     await openSettings(page);
-    await expect(page.getByText('2 utilisateurs')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('5 utilisateurs')).toBeVisible({ timeout: 15_000 });
     await page.getByRole('button', { name: 'Inviter' }).click();
     const dialog = page.getByRole('dialog', { name: 'Inviter un utilisateur' });
     await expect(dialog).toBeVisible();

@@ -24,6 +24,18 @@ export function useAdminUsers(enabled = true) {
   });
 }
 
+export const rolesKey = ['admin-roles'] as const;
+
+/** Rôles, libellés, périmètres et permissions (`GET /v1/admin/roles`, permission `team:read`). */
+export function useRoles(enabled = true) {
+  return useQuery({
+    queryKey: rolesKey,
+    queryFn: () => data(browserApi.GET('/v1/admin/roles')),
+    staleTime: Infinity,
+    enabled,
+  });
+}
+
 export function useSystemStatus() {
   return useQuery({
     queryKey: systemStatusKey,

@@ -110,7 +110,7 @@ export const legalPages: Record<LegalKey, Page> = {
       },
       {
         title: 'Mesure d’audience',
-        html: '<p>Avec votre accord uniquement, nous mesurons la fréquentation du site (Google Analytics 4) pour l’améliorer. Aucun script de mesure n’est chargé avant votre choix.</p>',
+        html: '<p>Sans cookie : pour améliorer le site, nous comptons de façon anonyme et agrégée les pages vues et les clics sur les principaux boutons (devis, WhatsApp, appel, e-mail, inscription…). Ce comptage n’utilise aucun identifiant, aucun cookie ni stockage dans votre navigateur et ne transmet aucune donnée saisie dans les formulaires ; votre adresse IP sert uniquement à écarter les abus et n’est pas conservée avec les mesures.</p><p>Avec votre accord uniquement, nous ajoutons un identifiant pseudonyme aléatoire, conservé dans votre navigateur et renouvelé au moins tous les 6 mois, pour compter les visiteurs uniques, et nous chargeons Google Analytics 4. Aucun script de mesure tiers n’est chargé avant votre choix. Si vous retirez votre accord, l’identifiant est effacé. Les réglages « Ne pas me pister » (Do Not Track) et Global Privacy Control de votre navigateur sont respectés : aucun identifiant n’est alors utilisé.</p>',
       },
       {
         title: 'Durée de vos choix',
@@ -208,7 +208,7 @@ export const legalPagesEn: Record<LegalKey, Page> = {
       },
       {
         title: 'Audience measurement',
-        html: '<p>Only with your consent, we measure website traffic (Google Analytics 4) to improve it. No measurement script is loaded before you choose.</p>',
+        html: '<p>Without cookies: to improve the website, we count page views and clicks on the main buttons (quote, WhatsApp, call, email, sign-up…) anonymously and in aggregate. This count uses no identifier, no cookie or browser storage, and never sends anything you type into a form; your IP address is only used to filter out abuse and is not stored with the measurements.</p><p>Only with your consent, we add a random pseudonymous identifier, kept in your browser and renewed at least every 6 months, to count unique visitors, and we load Google Analytics 4. No third-party measurement script is loaded before you choose. If you withdraw your consent, the identifier is deleted. Your browser’s Do Not Track and Global Privacy Control settings are respected: no identifier is used.</p>',
       },
       {
         title: 'How long your choice lasts',

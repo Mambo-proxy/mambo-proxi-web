@@ -114,6 +114,8 @@ export function NewsletterForm() {
         <div {...turnstile.widgetProps} />
         <Button
           type="submit"
+          // Mesure d'audience : clic sur « S'abonner » (délégation, `src/lib/analytics/classify.ts`).
+          data-track="newsletter"
           loading={status.kind === 'sending'}
           className="focus-visible:focus-ring-inverse"
         >

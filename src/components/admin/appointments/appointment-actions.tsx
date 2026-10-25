@@ -33,6 +33,7 @@ const SUCCESS: Record<AppointmentAction['action'], string> = {
   cancel: 'Rendez-vous annulé\u00A0: le client est prévenu par e-mail.',
   complete: 'Rendez-vous marqué comme terminé.',
   notes: 'Note enregistrée.',
+  assign: 'Rendez-vous assigné.',
 };
 
 /**

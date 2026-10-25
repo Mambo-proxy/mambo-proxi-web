@@ -3,7 +3,7 @@
 import { BarChart3, Search } from 'lucide-react';
 import { charCountHelp } from '@/components/admin/editor/editor-ui';
 import { ImageField } from '@/components/admin/editor/media-picker';
-import { useAdmin } from '@/components/admin/shell/admin-context';
+import { useCan } from '@/components/admin/shell/permissions';
 import { EmptyState } from '@/components/admin/ui/filters';
 import { Field, Input, Textarea } from '@/components/ui/field';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,11 +13,12 @@ import { useSettingsGroup } from './settings-form';
 
 /** Onglet « Référencement » : titre, description et image de partage par défaut, mesure d'audience (administrateurs). */
 export function SeoTab() {
-  const { user } = useAdmin();
+  // Mesure d'audience : paramètres sensibles (`settings:admin`).
+  const canAdmin = useCan()('settings:admin');
   return (
     <div className="flex max-w-[752px] flex-col gap-5">
       <SeoCard />
-      {user?.role === 'ADMIN' && <AnalyticsCard />}
+      {canAdmin && <AnalyticsCard />}
     </div>
   );
 }

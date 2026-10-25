@@ -79,7 +79,9 @@ test.describe('gabarit des pages publiques', () => {
     await email.fill('deja@exemple.fr');
     await form.getByRole('button', { name: "S'abonner" }).click();
     // Premier envoi : le module des mocks est chargé à la demande dans le navigateur.
-    await expect(page.getByRole('status')).toContainText('déjà inscrit', { timeout: 15_000 });
+    await expect(page.getByRole('status').filter({ hasText: 'déjà inscrit' })).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test('bouton WhatsApp flottant après défilement', async ({ page }) => {

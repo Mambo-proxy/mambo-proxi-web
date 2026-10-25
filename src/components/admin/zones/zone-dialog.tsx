@@ -1,8 +1,8 @@
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
-import { X } from 'lucide-react';
-import { useState } from 'react';
+import { MapPin, X } from 'lucide-react';
+import { useCallback, useMemo, useState, type ChangeEvent } from 'react';
 import {
   CompactField,
   CompactInput,
@@ -12,6 +12,7 @@ import {
   type EditingLanguage,
 } from '@/components/admin/magazine/magazine-ui';
 import { TONES } from '@/components/sections/zones/zone-tones';
+import { ZonesLeafletMap, type MapZone } from '@/components/sections/zones/zones-leaflet';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { Switch } from '@/components/ui/switch';
@@ -19,8 +20,13 @@ import { toast } from '@/components/ui/toaster';
 import { data } from '@/lib/admin/query';
 import { browserApi } from '@/lib/api/browser';
 import { ApiError, errorMessage } from '@/lib/api/errors';
-import type { AdminZone, ZoneFields, ZoneQuarter, ZoneTone } from '@/lib/api/schema';
+import type { AdminZone, GeoPoint, ZoneArea, ZoneFields, ZoneQuarter, ZoneTone } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
+import { isInCameroon, parseCoordinate, parseZoneArea } from '@/lib/geo/zones';
+import { ADMIN_MAP_LABELS, areaSummary, pointLabel } from './zone-labels';
+
+/** Fichier GeoJSON importé : 2 Mo au plus (5 000 points tiennent largement). */
+const MAX_GEOJSON_BYTES = 2 * 1024 * 1024;
 
 export const TONE_LABELS: Record<ZoneTone, string> = {
   zone1: 'Vert (zone 1)',
@@ -42,6 +48,7 @@ type Draft = {
   feeFrom: boolean;
   active: boolean;
   quarters: ZoneQuarter[];
+  area: ZoneArea | null;
 };
 
 function draftOf(zone: AdminZone | null): Draft {
@@ -58,12 +65,30 @@ function draftOf(zone: AdminZone | null): Draft {
     feeFrom: zone?.fee?.from ?? false,
     active: zone?.active ?? true,
     quarters: zone?.quarters ?? [],
+    area: zone?.area ?? null,
   };
+}
+
+/** Texte des champs latitude / longitude d'un quartier. */
+function coordinateText(quarter: ZoneQuarter | undefined) {
+  return {
+    lat: quarter?.coordinates ? String(quarter.coordinates.lat) : '',
+    lng: quarter?.coordinates ? String(quarter.coordinates.lng) : '',
+  };
+}
+
+/** Message d'erreur de l'API sur les coordonnées d'un quartier (`quarters.2.coordinates`), avec son nom. */
+function coordinateError(errors: Record<string, string>, quarters: ZoneQuarter[]) {
+  const entry = Object.entries(errors).find(([path]) => /^quarters\.\d+\.coordinates/.test(path));
+  if (!entry) return null;
+  const name = quarters[Number(entry[0].split('.')[1])]?.name;
+  return name ? `${name} : ${entry[1]}` : entry[1];
 }
 
 /**
  * Zone d'intervention (non maquetté, même langage que les éditeurs du back-office) : nom, couleur, textes du site
- * en français et en anglais, délai moyen, tarif indicatif (masqué sur le site), quartiers.
+ * en français et en anglais, délai moyen, tarif indicatif (masqué sur le site), quartiers et leur position (clic
+ * sur la carte ou latitude / longitude), contour GeoJSON collé ou importé (contrôlé avant l'envoi).
  */
 export function ZoneDialog({
   open,
@@ -82,19 +107,138 @@ export function ZoneDialog({
   const [quarter, setQuarter] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [wasOpen, setWasOpen] = useState(open);
+  // Quartier dont la position est en cours de saisie, et texte des champs latitude / longitude.
+  const [placing, setPlacing] = useState<string | null>(null);
+  const [coordinates, setCoordinates] = useState({ lat: '', lng: '' });
+  const [areaText, setAreaText] = useState('');
 
   if (open !== wasOpen) {
     setWasOpen(open);
     if (open) {
-      setDraft(draftOf(zone));
+      const next = draftOf(zone);
+      setDraft(next);
       setLanguage('fr');
       setQuarter('');
       setErrors({});
+      const first = next.quarters.find((item) => item.coordinates) ?? next.quarters[0];
+      setPlacing(first?.name ?? null);
+      setCoordinates(coordinateText(first));
+      setAreaText(next.area ? JSON.stringify(next.area) : '');
     }
   }
 
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) =>
     setDraft((current) => ({ ...current, [key]: value }));
+
+  /** Position d'un quartier (`null` : retiré de la carte). */
+  const setQuarterPoint = useCallback((name: string, point: GeoPoint | null) => {
+    setDraft((current) => ({
+      ...current,
+      quarters: current.quarters.map((item) => (item.name === name ? { ...item, coordinates: point } : item)),
+    }));
+  }, []);
+
+  const choosePlacing = useCallback(
+    (name: string) => {
+      setPlacing(name);
+      setCoordinates(coordinateText(draft.quarters.find((item) => item.name === name)));
+      setErrors((current) => ({ ...current, coordinates: '' }));
+    },
+    [draft.quarters],
+  );
+
+  // Clic sur la carte : position du quartier choisi.
+  const pick = useCallback(
+    (point: GeoPoint) => {
+      if (!placing) {
+        toast.error('Choisissez d’abord le quartier à placer.');
+        return;
+      }
+      setQuarterPoint(placing, point);
+      setCoordinates({ lat: String(point.lat), lng: String(point.lng) });
+      setErrors((current) => ({ ...current, coordinates: '' }));
+    },
+    [placing, setQuarterPoint],
+  );
+
+  function typeCoordinate(axis: 'lat' | 'lng', text: string) {
+    const next = { ...coordinates, [axis]: text };
+    setCoordinates(next);
+    if (!placing) return;
+    if (!next.lat.trim() && !next.lng.trim()) {
+      setQuarterPoint(placing, null);
+      setErrors((current) => ({ ...current, coordinates: '' }));
+      return;
+    }
+    const lat = parseCoordinate(next.lat);
+    const lng = parseCoordinate(next.lng);
+    if (lat === null || lng === null) {
+      setErrors((current) => ({
+        ...current,
+        coordinates: 'Saisissez la latitude et la longitude en degrés décimaux (ex. 4.0565 et 9.732).',
+      }));
+      return;
+    }
+    if (!isInCameroon({ lat, lng })) {
+      setErrors((current) => ({
+        ...current,
+        coordinates:
+          'Ce point est hors du Cameroun : vérifiez la latitude (environ 4 à Douala) et la longitude (environ 9,7).',
+      }));
+      return;
+    }
+    setQuarterPoint(placing, { lat, lng });
+    setErrors((current) => ({ ...current, coordinates: '' }));
+  }
+
+  /** Contour collé ou importé : contrôlé (règles de l'API) puis appliqué ; texte vide : contour supprimé. */
+  function applyArea(text = areaText) {
+    if (!text.trim()) {
+      set('area', null);
+      setErrors((current) => ({ ...current, area: '' }));
+      return;
+    }
+    const result = parseZoneArea(text);
+    if ('error' in result) {
+      setErrors((current) => ({ ...current, area: result.error }));
+      return;
+    }
+    set('area', result.area);
+    setAreaText(JSON.stringify(result.area));
+    setErrors((current) => ({ ...current, area: '' }));
+    toast.success(`Contour appliqué : ${areaSummary(result.area)}.`);
+  }
+
+  async function importFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    if (file.size > MAX_GEOJSON_BYTES) {
+      setErrors((current) => ({ ...current, area: 'Fichier trop volumineux (2 Mo au plus).' }));
+      return;
+    }
+    const text = await file.text();
+    setAreaText(text);
+    applyArea(text);
+  }
+
+  // Aperçu de la zone en cours de saisie (contour et quartiers placés).
+  const previewZones = useMemo<MapZone[]>(
+    () => [
+      {
+        key: zone?.key ?? 'nouvelle-zone',
+        name: draft.name || 'Nouvelle zone',
+        tone: draft.tone,
+        quarters: draft.quarters,
+        area: draft.area,
+      },
+    ],
+    [zone?.key, draft.name, draft.tone, draft.quarters, draft.area],
+  );
+  const placingQuarter = draft.quarters.find((item) => item.name === placing);
+  const apiCoordinateError = coordinateError(errors, draft.quarters);
+  const areaError =
+    errors.area || Object.entries(errors).find(([path]) => path.startsWith('area.'))?.[1] || null;
 
   function addQuarter() {
     const name = quarter.trim();
@@ -103,9 +247,15 @@ export function ZoneDialog({
       setErrors({ quarters: 'Ce quartier figure déjà dans la zone.' });
       return;
     }
-    set('quarters', [...draft.quarters, { name, isBase: false, labelOnSmallMap: false, position: null }]);
+    set('quarters', [
+      ...draft.quarters,
+      { name, isBase: false, labelOnSmallMap: false, coordinates: null, position: null },
+    ]);
     setQuarter('');
     setErrors({});
+    // Le quartier ajouté est prêt à être placé sur la carte.
+    setPlacing(name);
+    setCoordinates({ lat: '', lng: '' });
   }
 
   const save = useMutation({
@@ -122,6 +272,7 @@ export function ZoneDialog({
         fee: draft.fee ? { amount: Number(draft.fee), currency: 'XAF', from: draft.feeFrom } : null,
         active: draft.active,
         quarters: draft.quarters,
+        area: draft.area,
       };
       // Schémas `allOf` du contrat générés avec `Record<string, never>` : le corps est typé par `ZoneFields`.
       return zone
@@ -148,6 +299,8 @@ export function ZoneDialog({
     const next: Record<string, string> = {};
     if (!draft.name.trim()) next.name = 'Saisissez le nom de la zone.';
     if (draft.fee && !/^\d+$/.test(draft.fee)) next.fee = 'Saisissez un montant en FCFA, sans espace.';
+    if (errors.coordinates) next.coordinates = errors.coordinates;
+    if (errors.area) next.area = errors.area;
     setErrors(next);
     if (Object.keys(next).length) {
       setLanguage('fr');
@@ -301,17 +454,38 @@ export function ZoneDialog({
                   className="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 py-1 pr-1 pl-3 font-ui text-[13px] leading-4 text-text-main"
                 >
                   <span aria-hidden className={cn('size-2 rounded-full', TONES[draft.tone].dot)} />
-                  {item.name}
-                  {item.isBase && <span className="text-text-muted">(base)</span>}
+                  {/* Choisir le quartier à placer sur la carte. */}
+                  <button
+                    type="button"
+                    aria-pressed={placing === item.name}
+                    title="Placer sur la carte"
+                    onClick={() => choosePlacing(item.name)}
+                    className={cn(
+                      'inline-flex items-center gap-1 rounded-full hover:underline',
+                      placing === item.name && 'font-semibold underline',
+                    )}
+                  >
+                    {item.name}
+                    {item.isBase && <span className="font-normal text-text-muted">(base)</span>}
+                    {item.coordinates ? (
+                      <>
+                        <MapPin aria-hidden size={12} className="text-icon-default" />
+                        <span className="sr-only">(placé sur la carte)</span>
+                      </>
+                    ) : (
+                      <span className="sr-only">(non placé)</span>
+                    )}
+                  </button>
                   <button
                     type="button"
                     aria-label={`Retirer ${item.name}`}
-                    onClick={() =>
+                    onClick={() => {
                       set(
                         'quarters',
                         draft.quarters.filter((other) => other !== item),
-                      )
-                    }
+                      );
+                      if (placing === item.name) setPlacing(null);
+                    }}
                     className="flex size-6 items-center justify-center rounded-full text-icon-default hover:bg-neutral-200 hover:text-text-main"
                   >
                     <X aria-hidden size={14} />
@@ -344,9 +518,132 @@ export function ZoneDialog({
           ) : (
             <p className="font-ui text-[12px] leading-4 text-text-muted">
               Un quartier ajouté ici est retiré de son ancienne zone. Les nouveaux quartiers apparaissent dans
-              la recherche et les formulaires ; leur position sur la carte est réglée à l’import des contours.
+              la recherche et les formulaires ; choisissez un quartier pour le placer sur la carte.
             </p>
           )}
+        </fieldset>
+        <fieldset className="flex flex-col gap-3">
+          <legend className="mb-1.5 font-ui text-[13px] leading-4 font-medium text-neutral-700">
+            {placingQuarter ? `Position de ${placingQuarter.name}` : 'Position des quartiers'}
+          </legend>
+          {placingQuarter ? (
+            <div className="grid items-start gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+              <CompactField label="Latitude" help="Degrés décimaux, ex. 4.0565">
+                {(control) => (
+                  <CompactInput
+                    {...control}
+                    aria-invalid={errors.coordinates ? true : undefined}
+                    inputMode="decimal"
+                    value={coordinates.lat}
+                    onChange={(event) => typeCoordinate('lat', event.target.value)}
+                  />
+                )}
+              </CompactField>
+              <CompactField label="Longitude" help="Degrés décimaux, ex. 9.732">
+                {(control) => (
+                  <CompactInput
+                    {...control}
+                    aria-invalid={errors.coordinates ? true : undefined}
+                    inputMode="decimal"
+                    value={coordinates.lng}
+                    onChange={(event) => typeCoordinate('lng', event.target.value)}
+                  />
+                )}
+              </CompactField>
+              <button
+                type="button"
+                disabled={!placingQuarter.coordinates}
+                className={cn(compactButtonClass, 'sm:mt-[21px]')}
+                onClick={() => {
+                  setQuarterPoint(placingQuarter.name, null);
+                  setCoordinates({ lat: '', lng: '' });
+                  setErrors((current) => ({ ...current, coordinates: '' }));
+                }}
+              >
+                Retirer de la carte
+              </button>
+            </div>
+          ) : (
+            <p className="font-ui text-[12px] leading-4 text-text-muted">
+              Ajoutez ou choisissez un quartier ci-dessus pour le placer.
+            </p>
+          )}
+          {(errors.coordinates || apiCoordinateError) && (
+            <p role="alert" className="font-ui text-[13px] leading-4 text-feedback-error">
+              {errors.coordinates || apiCoordinateError}
+            </p>
+          )}
+          <p aria-live="polite" className="font-ui text-[12px] leading-4 text-text-muted">
+            {placingQuarter?.coordinates
+              ? `${placingQuarter.name} : ${pointLabel(placingQuarter.coordinates)}. Cliquez ailleurs sur la carte pour le déplacer.`
+              : 'Cliquez sur la carte pour placer le quartier choisi.'}
+          </p>
+          {/* Montée à l'ouverture seulement (le dialogue reste dans la page fermé) : cadrage sur la zone ouverte. */}
+          {open && (
+            <ZonesLeafletMap
+              key={zone?.id ?? 'nouvelle-zone'}
+              zones={previewZones}
+              labels={ADMIN_MAP_LABELS}
+              selected={placing}
+              onPick={pick}
+              onMarkerClick={choosePlacing}
+              className="xl:w-full"
+            />
+          )}
+        </fieldset>
+        <fieldset className="flex flex-col gap-2.5">
+          <legend className="mb-1.5 font-ui text-[13px] leading-4 font-medium text-neutral-700">
+            Contour de la zone
+          </legend>
+          <p className="font-ui text-[13px] leading-4 text-text-main">
+            {draft.area
+              ? `Contour enregistré : ${areaSummary(draft.area)}.`
+              : 'Aucun contour : seuls les quartiers placés apparaissent sur la carte.'}
+          </p>
+          <CompactField
+            label="GeoJSON du contour"
+            help="Polygon, MultiPolygon, Feature ou FeatureCollection (geojson.io, uMap, QGIS), en [longitude, latitude]."
+            error={areaError}
+          >
+            {(control) => (
+              <textarea
+                {...control}
+                rows={3}
+                spellCheck={false}
+                value={areaText}
+                placeholder='{"type": "Polygon", "coordinates": [[[9.715, 4.07], …]]}'
+                onChange={(event) => setAreaText(event.target.value)}
+                className={cn(compactInputClass, 'resize-y font-mono text-[12px] leading-4')}
+              />
+            )}
+          </CompactField>
+          <div className="flex flex-wrap gap-2.5">
+            <button type="button" className={compactButtonClass} onClick={() => applyArea()}>
+              Appliquer le contour
+            </button>
+            <label className={cn(compactButtonClass, 'cursor-pointer focus-within:focus-ring')}>
+              Importer un fichier
+              <input
+                type="file"
+                accept=".geojson,.json,application/geo+json,application/json"
+                onChange={importFile}
+                className="sr-only"
+              />
+            </label>
+            {draft.area && (
+              <button
+                type="button"
+                className={compactButtonClass}
+                onClick={() => {
+                  set('area', null);
+                  setAreaText('');
+                  setErrors((current) => ({ ...current, area: '' }));
+                }}
+              >
+                Supprimer le contour
+              </button>
+            )}
+          </div>
         </fieldset>
       </div>
     </Modal>

@@ -12,7 +12,11 @@ import { routes } from '@/lib/routes';
 import { frenchTypography } from '@/lib/format/typography';
 import { CategoryBadge } from './category-badge';
 import { LanguageSwitch } from './language-switch';
+import { SearchMenuEntry } from './search/search-launcher';
 import { isActive, type MegaMenu, type NavItem } from './nav-types';
+
+/** Liens du menu : sans transition de page, la fermeture du menu (glissement) en tient lieu. */
+const noPageTransition: string[] = [];
 
 type MobileMenuProps = {
   open: boolean;
@@ -20,14 +24,17 @@ type MobileMenuProps = {
   items: NavItem[];
   megaMenu: MegaMenu;
   whatsappHref: string | null;
+  /** Ouvre la recherche globale (le menu se ferme d'abord). */
+  onSearch?: () => void;
 };
 
 /**
  * Menu mobile plein écran (Figma `72:10211`) : `<dialog>` modal (page inerte, focus piégé, `Échap`),
  * glissement depuis la droite (300 ms), accordéons +/−, fermeture au changement de page ; en bas, la langue
- * (FR — Français / EN — English), S'inscrire, Devis gratuit et WhatsApp.
+ * (FR — Français / EN — English), S'inscrire, Devis gratuit et WhatsApp. En tête de liste (non maquetté), l'entrée
+ * « Rechercher sur le site » ferme le menu et ouvre le panneau de recherche.
  */
-export function MobileMenu({ open, onClose, items, megaMenu, whatsappHref }: MobileMenuProps) {
+export function MobileMenu({ open, onClose, items, megaMenu, whatsappHref, onSearch }: MobileMenuProps) {
   const t = useTranslations('site.header');
   const ref = useRef<HTMLDialogElement>(null);
   const pathname = useSitePathname();
@@ -78,6 +85,16 @@ export function MobileMenu({ open, onClose, items, megaMenu, whatsappHref }: Mob
           </button>
         </div>
 
+        {onSearch && (
+          <div className="px-5 pt-1 pb-2">
+            <SearchMenuEntry
+              onOpen={() => {
+                onClose();
+                onSearch();
+              }}
+            />
+          </div>
+        )}
         <nav aria-label={t('mainNav')} className="flex-1 overflow-y-auto px-5 py-2">
           <ul>
             {items.map((item, index) => (
@@ -92,6 +109,7 @@ export function MobileMenu({ open, onClose, items, megaMenu, whatsappHref }: Mob
                 {item.kind === 'link' ? (
                   <Link
                     href={item.href}
+                    transitionTypes={noPageTransition}
                     aria-current={isActive(pathname, item.href) ? 'page' : undefined}
                     className="block py-[13px] font-brand text-[19px] leading-7 font-semibold"
                   >
@@ -115,11 +133,16 @@ export function MobileMenu({ open, onClose, items, megaMenu, whatsappHref }: Mob
           <div className="flex gap-2.5">
             <Link
               href={routes.inscription}
+              transitionTypes={noPageTransition}
               className={cn(buttonVariants({ variant: 'outline' }), 'flex-1 px-4 py-[13px]')}
             >
               {t('signUp')}
             </Link>
-            <Link href={routes.devis} className={cn(buttonVariants(), 'flex-1')}>
+            <Link
+              href={routes.devis}
+              transitionTypes={noPageTransition}
+              className={cn(buttonVariants(), 'flex-1')}
+            >
               {t('freeQuote')}
             </Link>
           </div>
@@ -218,6 +241,7 @@ function SubmenuRow({ href, children }: { href: string; children: React.ReactNod
   return (
     <Link
       href={href}
+      transitionTypes={noPageTransition}
       className="flex min-h-[54px] items-center gap-3 rounded-lg bg-neutral-50 px-3 py-[9px] text-text-main"
     >
       {children}

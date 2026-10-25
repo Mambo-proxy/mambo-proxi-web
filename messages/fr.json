@@ -74,11 +74,25 @@
       "book": "Réserver un créneau",
       "quote": "Devis"
     },
-    "step": "Étape {number} : "
+    "step": "Étape {number} : ",
+    "finder": {
+      "title": "Trouver mon service",
+      "lead": "Choisissez une rubrique, puis votre service : nous vous y emmenons directement.",
+      "categories": "Rubrique",
+      "allCategories": "Toutes",
+      "serviceLabel": "Votre service",
+      "placeholder": "Ex. : chef privé, colis, logement…",
+      "suggestions": "Services proposés",
+      "results": "{count, plural, =0 {Aucun service proposé} one {# service proposé} other {# services proposés}}",
+      "noMatch": "Aucun service ne correspond à « {query} ».",
+      "browseAll": "Voir tous nos services",
+      "launch": "C’est parti",
+      "quote": "Demander un devis",
+      "missing": "Choisissez une rubrique ou un service pour continuer."
+    }
   },
   "zones": {
     "mapLabel": "Carte des zones d’intervention à Douala",
-    "wouri": "Wouri",
     "searchTitle": "Trouvez votre quartier",
     "searchLabel": "Rechercher un quartier",
     "searchPlaceholder": "Rechercher un quartier",
@@ -91,7 +105,15 @@
     "zoomIn": "Zoomer",
     "zoomOut": "Dézoomer",
     "reset": "Recentrer la carte",
-    "mapHint": "Faites glisser pour déplacer la carte, utilisez + et − pour zoomer."
+    "mapHint": "Carte complémentaire : la recherche de quartier centre la carte sur votre quartier. Flèches du clavier pour déplacer la carte, + et − pour zoomer ; à la molette, maintenez Ctrl (⌘ sur Mac) ; sur écran tactile, utilisez deux doigts.",
+    "wheelHint": "Maintenez Ctrl et faites défiler pour zoomer sur la carte.",
+    "wheelHintMac": "Maintenez ⌘ et faites défiler pour zoomer sur la carte.",
+    "touchHint": "Utilisez deux doigts pour déplacer la carte.",
+    "closePopup": "Fermer l’info-bulle",
+    "base": "Base de départ des interventions",
+    "agency": "Notre agence à Douala",
+    "attribution": "contributeurs OpenStreetMap",
+    "newTab": "nouvel onglet"
   },
   "services": {
     "book": "Réserver un créneau",
@@ -327,5 +349,40 @@
       "text": "Une erreur est survenue de notre côté. Réessayez dans quelques instants ; si le problème continue, contactez-nous.",
       "retry": "Réessayer"
     }
+  },
+  "search": {
+    "open": "Rechercher sur le site",
+    "dialogTitle": "Recherche sur le site",
+    "label": "Rechercher",
+    "placeholder": "Un service, une page, un article…",
+    "close": "Fermer la recherche",
+    "clear": "Effacer la recherche",
+    "emptyTitle": "Que cherchez-vous ?",
+    "emptyText": "Services, rubriques, articles du Magazine, offres d’emploi, formations et pages du site.",
+    "tryLabel": "Essayez :",
+    "try1": "chef",
+    "try2": "logement",
+    "try3": "formation",
+    "hint": "Saisissez au moins 2 caractères.",
+    "loading": "Recherche en cours…",
+    "error": "La recherche est momentanément indisponible. Réessayez dans un instant.",
+    "noResultsTitle": "Aucun résultat pour « {query} »",
+    "noResultsText": "Vérifiez l’orthographe ou essayez un mot plus simple. Vous pouvez aussi nous écrire : nous trouverons la bonne solution avec vous.",
+    "contact": "Nous contacter",
+    "resultsLabel": "Résultats de la recherche",
+    "resultsCount": "{count, plural, =0 {Aucun résultat} one {# résultat} other {# résultats}}",
+    "seeAll": "Voir tous les résultats pour « {query} »",
+    "groupMore": "{shown} premiers résultats sur {total}",
+    "keyEnter": "Entrée",
+    "keyEscape": "Échap",
+    "keysNavigate": "pour parcourir",
+    "keysOpen": "pour ouvrir",
+    "keysClose": "pour fermer",
+    "metaTitle": "Recherche",
+    "metaDescription": "Rechercher sur le site MAMBO Proxi : services, rubriques, articles du Magazine, offres d’emploi, formations et pages.",
+    "eyebrow": "Recherche",
+    "pageTitle": "Rechercher sur le site",
+    "pageTitleQuery": "Résultats pour « {query} »",
+    "submit": "Rechercher"
   }
 }

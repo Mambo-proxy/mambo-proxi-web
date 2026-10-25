@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import { DashboardView } from '@/components/admin/dashboard/dashboard-view';
 import { AdminPage, topbarActionClass } from '@/components/admin/shell/admin-page';
+import { Can } from '@/components/admin/shell/permissions';
 import { adminRoutes } from '@/lib/admin/routes';
 
 export const metadata: Metadata = { title: 'Tableau de bord' };
@@ -14,10 +15,13 @@ export default function DashboardPage() {
       title="Tableau de bord"
       hideMobileTitle
       actions={
-        <Link href={adminRoutes.newService} className={topbarActionClass}>
-          <Plus aria-hidden />
-          Nouveau service
-        </Link>
+        // « Nouveau service » : permission `content:write`.
+        <Can permission="content:write">
+          <Link href={adminRoutes.newService} className={topbarActionClass}>
+            <Plus aria-hidden />
+            Nouveau service
+          </Link>
+        </Can>
       }
     >
       <DashboardView />

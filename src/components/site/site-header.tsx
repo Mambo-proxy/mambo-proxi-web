@@ -11,6 +11,7 @@ import { cn } from '@/lib/cn';
 import { routes } from '@/lib/routes';
 import { DesktopNav } from './desktop-nav';
 import { MobileMenu } from './mobile-menu';
+import { SearchButton, SiteSearchDialog, useSiteSearch } from './search/search-launcher';
 import { useScroll } from './use-scroll';
 
 type SiteHeaderProps = {
@@ -26,11 +27,15 @@ type SiteHeaderProps = {
  * masqué en descendant et réaffiché en remontant.
  * Entre 1280 et 1440 px (non maquetté), logo, marges et écarts resserrés : la ligne doit tenir avec une réserve
  * d'au moins 30 px, car le rendu des polices sous Linux élargit les libellés d'environ 40 px par rapport à Windows.
+ * Recherche globale : loupe 40 px dans l'en-tête (desktop et tablette ; en mobile, dans le menu), raccourcis `/` et
+ * `Ctrl+K`, panneau chargé à la demande. Entre 1280 et 1439 px, la loupe et son écart (40 + 6 px) sont compensés dans
+ * `DesktopNav` (50 px retirés : voir son commentaire) ; la réserve de 30 px est conservée.
  */
 export function SiteHeader({ navigation, whatsappHref, topBar }: SiteHeaderProps) {
   const t = useTranslations('site.header');
   const { scrolled, goingDown } = useScroll(80);
   const [menuOpen, setMenuOpen] = useState(false);
+  const search = useSiteSearch();
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   // Hauteur visible de l'en-tête (`--site-header-h`) : position des barres collantes et marge des ancres.
@@ -58,10 +63,11 @@ export function SiteHeader({ navigation, whatsappHref, topBar }: SiteHeaderProps
       )}
     >
       {topBar}
+      {/* Nommé pour les transitions de page : l'en-tête reste en place au-dessus du contenu qui change. */}
       <header
         className={cn(
-          'relative border-b border-border-default backdrop-blur-[24px] transition-[padding,background-color,box-shadow] duration-200 ease-standard',
-          'flex items-center justify-between gap-3 px-4 py-3 xl:gap-2 xl:px-3 wide:gap-3 wide:px-10',
+          'relative border-b border-border-default backdrop-blur-[24px] transition-[padding,background-color,box-shadow] duration-200 ease-standard [view-transition-name:site-header]',
+          'flex items-center justify-between gap-3 px-4 py-3 xl:gap-2 xl:px-3 wide:gap-3 wide:px-9',
           scrolled ? 'bg-neutral-0/95 shadow-1 xl:py-[11.5px]' : 'bg-neutral-0/86 xl:py-[18px]',
         )}
       >
@@ -71,8 +77,11 @@ export function SiteHeader({ navigation, whatsappHref, topBar }: SiteHeaderProps
           megaMenu={navigation.megaMenu}
           signUp={navigation.signUp}
           compact={scrolled}
+          search={<SearchButton onOpen={search.show} open={search.open} />}
         />
         <div className="flex items-center gap-2 xl:hidden">
+          {/* En mobile (< 768 px), la ligne est trop étroite : la recherche est proposée dans le menu. */}
+          <SearchButton onOpen={search.show} open={search.open} className="max-md:hidden md:size-11" />
           <Link href={routes.devis} className={buttonVariants({ size: 'sm', shape: 'pill' })}>
             {t('freeQuote')}
           </Link>
@@ -94,7 +103,9 @@ export function SiteHeader({ navigation, whatsappHref, topBar }: SiteHeaderProps
         items={navigation.main}
         megaMenu={navigation.megaMenu}
         whatsappHref={whatsappHref}
+        onSearch={search.show}
       />
+      <SiteSearchDialog search={search} />
     </div>
   );
 }

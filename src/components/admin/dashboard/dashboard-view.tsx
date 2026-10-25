@@ -40,6 +40,8 @@ import type { Dashboard, Kpi, RequestListItem } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { DEFAULT_TIME_ZONE, formatAgo, formatLongDate } from '@/lib/format/date';
 import { formatNumber, formatRating } from '@/lib/format/number';
+import { DashboardInsights } from './dashboard-insights';
+import { MyTasksCard } from './my-tasks-card';
 import { RequestsChart } from './requests-chart';
 
 type Range = Dashboard['range'];
@@ -469,6 +471,10 @@ export function DashboardView() {
         />
       </div>
 
+      {/* ── Emplacement : Mes tâches (`my-tasks-card.tsx`), demandes et rendez-vous assignés ── */}
+      <MyTasksCard />
+      {/* ── Fin de l'emplacement Mes tâches ── */}
+
       {query.isError && !dashboard ? (
         <AdminCard role="alert" className="flex flex-col items-start gap-3 p-6">
           <p className="font-ui text-[15px] leading-6 text-text-main">
@@ -564,6 +570,10 @@ export function DashboardView() {
           </div>
         </div>
       )}
+
+      {/* ── Emplacement : Audience et Équipe connectée (`dashboard-insights.tsx`), selon les permissions ── */}
+      <DashboardInsights />
+      {/* ── Fin de l'emplacement Audience et Équipe connectée ── */}
     </div>
   );
 }

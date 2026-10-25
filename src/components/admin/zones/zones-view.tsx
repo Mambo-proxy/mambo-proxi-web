@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowDown, ArrowUp, Eye, MapPin, Pencil, Plus, Power, Trash2 } from 'lucide-react';
 import type { Route } from 'next';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { ConfirmDialog } from '@/components/admin/editor/editor-ui';
 import { moveItem } from '@/components/admin/editor/sortable';
 import { compactInputClass } from '@/components/admin/magazine/magazine-ui';
@@ -12,7 +12,7 @@ import { topbarActionClass } from '@/components/admin/shell/admin-page';
 import { ActionMenu } from '@/components/admin/ui/action-menu';
 import { AdminCard } from '@/components/admin/ui/admin-ui';
 import { EmptyState, StatusTabs } from '@/components/admin/ui/filters';
-import { DoualaMap, locatedQuarters } from '@/components/sections/zones/zones-map';
+import { ZonesLeafletMap } from '@/components/sections/zones/zones-leaflet';
 import { TONES } from '@/components/sections/zones/zone-tones';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/toaster';
@@ -22,7 +22,7 @@ import { errorMessage } from '@/lib/api/errors';
 import type { AdminZone, ZoneQuarter } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { formatNumber } from '@/lib/format/number';
-import { feeLabel, zoneSubline } from './zone-labels';
+import { ADMIN_MAP_LABELS, feeLabel, pointLabel, zoneSubline } from './zone-labels';
 import { ZoneDialog } from './zone-dialog';
 
 export const zonesKey = ['zones', 'admin'] as const;
@@ -63,12 +63,17 @@ export function NewZoneButton() {
   );
 }
 
-/** Zones d'intervention (`267:1934`) : onglets « Zones » / « Quartiers », tableau, information, aperçu de la carte. */
+/**
+ * Zones d'intervention (`267:1934`) : onglets « Zones » / « Quartiers », tableau, information, aperçu de la carte.
+ * L'aperçu reprend la carte OpenStreetMap du site (Leaflet, chargé à la demande) en mode figé : il montre les
+ * contours et les positions réellement enregistrés, que la saisie au clic de la fiche d'une zone modifie.
+ */
 export function ZonesView() {
   const [tab, setTab] = useTab();
   const zones = useQuery({ queryKey: zonesKey, queryFn: () => data(browserApi.GET('/v1/admin/zones')) });
   const list = zones.data?.zones;
   const quartersCount = list?.reduce((total, zone) => total + zone.quarters.length, 0);
+  const activeZones = useMemo(() => list?.filter((zone) => zone.active), [list]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -90,7 +95,8 @@ export function ZonesView() {
           />
           <p className="rounded-md bg-orange-50 px-4 py-3 font-ui text-[14px] leading-5 text-orange-800">
             Les tarifs indicatifs restent masqués sur le site tant que l’option « Afficher les tarifs » est
-            désactivée dans les Paramètres. Importez un fichier GeoJSON pour dessiner les contours d’une zone.
+            désactivée dans les Paramètres. Pour placer les quartiers et dessiner le contour d’une zone,
+            ouvrez-la avec « Modifier » (clic sur la carte, coordonnées ou fichier GeoJSON).
           </p>
           <section aria-labelledby="zones-map-preview" className="flex flex-col gap-4">
             <h2
@@ -99,16 +105,17 @@ export function ZonesView() {
             >
               Aperçu de la carte
             </h2>
-            {list ? (
-              <div className="relative">
-                <DoualaMap
-                  quarters={locatedQuarters(list.filter((zone) => zone.active))}
-                  selected={null}
-                  interactive={false}
+            {activeZones ? (
+              <div className="flex flex-col gap-2.5">
+                <ZonesLeafletMap
+                  zones={activeZones}
+                  labels={ADMIN_MAP_LABELS}
+                  mode="static"
                   className="xl:w-full"
                 />
-                <p className="pointer-events-none absolute bottom-5 left-6 max-w-[420px] font-ui text-[13px] leading-[18px] text-text-muted">
-                  Carte indicative. Sur le site : carte interactive (zoom, déplacement, contours des zones).
+                <p className="font-ui text-[13px] leading-[18px] text-text-muted">
+                  Aperçu des zones actives : contours et quartiers placés. Sur le site : carte interactive
+                  (zoom, déplacement, info-bulles) reliée à la recherche de quartier.
                 </p>
               </div>
             ) : (
@@ -372,7 +379,7 @@ function ZoneStatus({ active }: { active: boolean }) {
   );
 }
 
-/** Onglet « Quartiers » (non maquetté) : chaque quartier, sa zone (modifiable) et sa présence sur la carte. */
+/** Onglet « Quartiers » (non maquetté) : chaque quartier, sa zone (modifiable) et sa position sur la carte. */
 function QuartersTable({ zones }: { zones: AdminZone[] | undefined }) {
   const refresh = useRefreshZones();
   const [removing, setRemoving] = useState<{ zone: AdminZone; quarter: ZoneQuarter } | null>(null);
@@ -417,7 +424,7 @@ function QuartersTable({ zones }: { zones: AdminZone[] | undefined }) {
               Zone
             </th>
             <th scope="col" className={cn(headerCell, 'px-2 py-3 max-lg:hidden')}>
-              Sur la carte
+              Position sur la carte
             </th>
             <th scope="col" className="w-14 px-3 py-3 md:px-5">
               <span className="sr-only">Actions</span>
@@ -467,7 +474,13 @@ function QuartersTable({ zones }: { zones: AdminZone[] | undefined }) {
                   </select>
                 </span>
               </td>
-              <td className={cn(bodyCell, 'px-2 py-3 max-lg:hidden')}>{quarter.position ? 'Oui' : 'Non'}</td>
+              <td className={cn(bodyCell, 'px-2 py-3 whitespace-nowrap max-lg:hidden')}>
+                {quarter.coordinates ? (
+                  pointLabel(quarter.coordinates)
+                ) : (
+                  <span className="text-text-muted">Non placé</span>
+                )}
+              </td>
               <td className="px-3 py-3 text-right md:px-5">
                 <ActionMenu
                   label={`Actions pour ${quarter.name}`}

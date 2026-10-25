@@ -9,8 +9,13 @@ import type {
   Problem,
 } from '@/lib/api/schema';
 import { jsonBody } from '../admin-utils';
+import { matchesAssignee, visibleAppointments } from '../assignments';
 import { adminAppointments, availabilityState, type MockAppointment } from '../data/admin-appointments';
+import { assignedOnly, can, forbidden } from '../permissions';
 import { problem } from '../problem';
+import { sessionUser } from '../session';
+import { assignableMember, userRefOf } from '../team';
+import { notifyAssignment } from './admin-core';
 import { MOCK_FAILURE_EMAIL } from './forms';
 
 const REASONS: AppointmentReason[] = ['DEVIS', 'IMMOBILIER', 'PARTENARIAT', 'RECRUTEMENT', 'AUTRE'];
@@ -34,8 +39,9 @@ const byStart = (a: MockAppointment, b: MockAppointment) => a.startsAt.localeCom
 /** Début affiché d'un rendez-vous : le créneau proposé s'il y en a un. */
 const shownStart = (item: MockAppointment) => item.proposedStartsAt ?? item.startsAt;
 
-function find(id: string) {
-  return adminAppointments.find((item) => item.id === id) ?? null;
+/** Rendez-vous visible par l'utilisateur (hors de son périmètre : introuvable). */
+function find(id: string, user: ReturnType<typeof sessionUser>) {
+  return visibleAppointments(user).find((item) => item.id === id) ?? null;
 }
 
 function isUrl(value: string) {
@@ -146,20 +152,29 @@ export const adminAppointmentHandlers: HttpHandler[] = [
         { path: 'from', message: 'Date obligatoire.' },
       ]);
     if (status && !STATUSES.includes(status)) return problem(422, 'Statut inconnu.');
+    // Avec la seule permission `appointments:read-assigned` : ses rendez-vous uniquement (`assignee=me` d'office).
+    const user = sessionUser(request);
+    let assignee = params.get('assignee');
+    if (assignedOnly(user, 'appointments')) {
+      if (assignee && assignee !== 'me' && assignee !== user?.id)
+        return forbidden('Vous ne voyez que les rendez-vous qui vous sont assignés.');
+      assignee = 'me';
+    }
+    const scope = visibleAppointments(user).filter((item) => matchesAssignee(item, assignee, user));
     const start = new Date(from).getTime();
     const end = new Date(to).getTime();
-    const data = adminAppointments
+    const data = scope
       .filter((item) => {
         const time = new Date(shownStart(item)).getTime();
         return time >= start && time < end && (!status || item.status === status);
       })
       .sort(byStart);
-    const pending = adminAppointments.filter((item) => item.status === 'A_CONFIRMER').sort(byStart);
+    const pending = scope.filter((item) => item.status === 'A_CONFIRMER').sort(byStart);
     return HttpResponse.json({ data, pending });
   }),
 
-  http.get('*/v1/admin/appointments/:id', ({ params }) => {
-    const item = find(String(params.id));
+  http.get('*/v1/admin/appointments/:id', ({ request, params }) => {
+    const item = find(String(params.id), sessionUser(request));
     return item ? HttpResponse.json(item) : problem(404, 'Rendez-vous introuvable.');
   }),
 
@@ -170,6 +185,16 @@ export const adminAppointmentHandlers: HttpHandler[] = [
     const errors = validateInput(body);
     if (errors?.length) return problem(422, 'Certains champs sont à corriger.', errors);
     const input = body as AdminAppointmentInput;
+    const user = sessionUser(request);
+    // Personne chargée : absente = l'utilisateur qui saisit ; choisir quelqu'un d'autre demande `appointments:assign`.
+    const assigneeId = input.assignedToId === undefined ? (user?.id ?? null) : input.assignedToId;
+    if (assigneeId && assigneeId !== user?.id && !can(user, 'appointments:assign'))
+      return forbidden('Seul un responsable peut assigner un rendez-vous à une autre personne.');
+    const assignee = assigneeId ? assignableMember(assigneeId) : null;
+    if (assigneeId && !assignee)
+      return problem(422, 'Cette personne ne peut pas recevoir de rendez-vous.', [
+        { path: 'assignedToId', message: 'Choisissez un membre actif qui traite les demandes.' },
+      ]);
     const minutes = input.durationMinutes ?? 90;
     const conflict = overlapping(input.startsAt, minutes);
     if (conflict)
@@ -212,18 +237,54 @@ export const adminAppointmentHandlers: HttpHandler[] = [
       message: null,
       notes: input.notes || null,
       reminderSentAt: null,
+      assignedTo: assignee ? userRefOf(assignee) : null,
       createdAt: now,
     };
     adminAppointments.push(created);
+    if (assignee)
+      notifyAssignment(
+        assignee.id,
+        user?.id,
+        `Rendez-vous assigné — ${created.contact.fullName} (${reference})`,
+        `/admin/rendez-vous?id=${created.id}`,
+      );
     return HttpResponse.json(created, { status: 201 });
   }),
 
   http.patch('*/v1/admin/appointments/:id', async ({ params, request }) => {
-    const item = find(String(params.id));
+    const user = sessionUser(request);
+    const item = find(String(params.id), user);
     if (!item) return problem(404, 'Rendez-vous introuvable.');
     const body = await jsonBody<Partial<AppointmentAction>>(request);
     const closed = item.status === 'ANNULE' || item.status === 'TERMINE';
+    // `assign` : `appointments:assign` ; autres actions : tout rendez-vous (`appointments:write`) ou les siens.
+    if (body.action === 'assign') {
+      if (!can(user, 'appointments:assign'))
+        return forbidden('Seul un responsable peut assigner ou réassigner un rendez-vous.');
+    } else if (
+      !can(user, 'appointments:write') &&
+      !(can(user, 'appointments:write-assigned') && item.assignedTo?.id === user?.id)
+    )
+      return forbidden('Vous ne pouvez agir que sur les rendez-vous qui vous sont assignés.');
     switch (body.action) {
+      case 'assign': {
+        const assigneeId = 'assignedToId' in body ? (body.assignedToId ?? null) : null;
+        const assignee = assigneeId ? assignableMember(assigneeId) : null;
+        if (assigneeId && !assignee)
+          return problem(422, 'Cette personne ne peut pas recevoir de rendez-vous.', [
+            { path: 'assignedToId', message: 'Choisissez un membre actif qui traite les demandes.' },
+          ]);
+        const changed = (assignee?.id ?? null) !== (item.assignedTo?.id ?? null);
+        item.assignedTo = assignee ? userRefOf(assignee) : null;
+        if (assignee && changed)
+          notifyAssignment(
+            assignee.id,
+            user?.id,
+            `Rendez-vous assigné — ${item.contact.fullName} (${item.reference})`,
+            `/admin/rendez-vous?id=${item.id}`,
+          );
+        break;
+      }
       case 'confirm': {
         if (item.status !== 'A_CONFIRMER' && item.status !== 'AUTRE_CRENEAU_PROPOSE')
           return problem(409, 'Ce rendez-vous n’est plus à confirmer.');

@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Chip } from '@/components/ui/chip';
+import { useStaggerIn } from '@/components/ui/use-stagger-in';
 import type { DynamicSection, Partner, PartnerCategory } from '@/lib/api/schema';
 import { SectionHeading } from '../section-heading';
 import { SectionShell } from '../content/section-shell';
@@ -33,11 +34,13 @@ export function PartnersGridFromUrl(props: Omit<PartnersGridProps, 'initialFilte
 /**
  * « Nos partenaires » (`65:5841`) : filtres (Tous + catégories, `?categorie=` dans l'adresse), grille de logos
  * 4 colonnes (2 en mobile, 6 premiers seulement) ; tuile `neutral/50` rayon 20 avec logo ou nom et badge de catégorie.
+ * Changement de filtre : les tuiles réapparaissent en cascade ; tuile cliquable soulevée au survol.
  */
 export function PartnersGrid({ section, partners, initialFilter }: PartnersGridProps) {
   // Badge de catégorie : libellé court de la maquette (« Expérience », « Immobilier », « Entreprise »).
   const t = useTranslations('partners');
   const [filter, setFilter] = useState<Filter>(initialFilter);
+  const listRef = useStaggerIn<HTMLUListElement>(filter);
   const categories = [
     ...new Map(partners.map((partner) => [partner.category, partner.categoryLabel])).entries(),
   ];
@@ -71,6 +74,7 @@ export function PartnersGrid({ section, partners, initialFilter }: PartnersGridP
         ))}
       </div>
       <ul
+        ref={listRef}
         aria-live="polite"
         className="grid grid-cols-2 gap-2.5 md:gap-4 xl:grid-cols-4 max-md:[&>li:nth-child(n+7)]:hidden"
       >
@@ -102,7 +106,7 @@ export function PartnersGrid({ section, partners, initialFilter }: PartnersGridP
                   href={partner.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-[100px] flex-col items-center justify-center gap-2.5 rounded-[20px] bg-neutral-50 px-3 py-6 text-center hover:bg-neutral-100"
+                  className="flex h-[100px] card-lift flex-col items-center justify-center gap-2.5 rounded-[20px] bg-neutral-50 px-3 py-6 text-center hover:bg-neutral-100"
                 >
                   {content}
                   <span className="sr-only"> (nouvel onglet)</span>

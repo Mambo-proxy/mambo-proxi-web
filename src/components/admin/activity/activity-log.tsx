@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { StatusPill } from '@/components/admin/editor/editor-ui';
 import { useAdminUsers } from '@/components/admin/settings/settings-queries';
-import { useAdmin } from '@/components/admin/shell/admin-context';
+import { useCan } from '@/components/admin/shell/permissions';
 import { AdminPage } from '@/components/admin/shell/admin-page';
 import { Avatar } from '@/components/admin/shell/sidebar';
 import { AdminCard } from '@/components/admin/ui/admin-ui';
@@ -68,10 +68,11 @@ function useActivityParams() {
  * type de contenu et période ; détail des modifications (avant → après) et adresse IP.
  */
 export function ActivityLog() {
-  const { user } = useAdmin();
-  const isAdmin = user?.role === 'ADMIN';
+  const can = useCan();
+  // Journal : permission `audit:read` (administrateurs) ; filtre par utilisateur : `users:manage`.
+  const isAdmin = can('audit:read');
   const { actor, entity, period, page, set } = useActivityParams();
-  const users = useAdminUsers(isAdmin);
+  const users = useAdminUsers(isAdmin && can('users:manage'));
   // Début de période au début d'une journée : clé de requête stable pendant toute la journée.
   const from = periodStart(period);
   const log = useQuery({

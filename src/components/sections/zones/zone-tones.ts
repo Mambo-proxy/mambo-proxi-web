@@ -2,7 +2,7 @@ import type { Zone } from '@/lib/api/schema';
 
 export type Tone = Zone['tone'];
 
-/** Couleur et opacité des aires (cercles flous de 62 px autour de chaque quartier) et des points, par zone. */
+/** Couleur des contours et des repères, opacité du remplissage des contours (carte OpenStreetMap) et pastille de légende, par zone. */
 export const TONES: Record<Tone, { color: string; area: number; dot: string }> = {
   zone1: { color: 'var(--mp-color-map-zone-1)', area: 0.18, dot: 'bg-map-zone-1' },
   zone2: { color: 'var(--mp-color-map-zone-2)', area: 0.18, dot: 'bg-map-zone-2' },

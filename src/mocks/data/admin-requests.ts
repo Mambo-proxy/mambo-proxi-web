@@ -483,6 +483,8 @@ function toDetail(seed: Seed, index: number): RequestDetail {
           ? 'Rendez-vous à l’agence'
           : 'Demande d’information'),
     assignedTo: null,
+    // Échéance par défaut : 24 h après la réception (contrat).
+    dueAt: new Date(new Date(received).getTime() + DAY).toISOString(),
     createdAt: received,
     contactPreference: seed.preference ?? 'EMAIL',
     message: seed.message ?? `Bonjour, je souhaite un devis pour : ${seed.service.toLowerCase()}.`,
@@ -502,5 +504,42 @@ function toDetail(seed: Seed, index: number): RequestDetail {
   };
 }
 
-/** Demandes simulées (état modifiable pendant la session : statut, notes, historique). */
+/** Demandes simulées (état modifiable pendant la session : statut, notes, historique, assignation). */
 export const adminRequests: RequestDetail[] = [...SEEDS, ...generated].map(toDetail);
+
+const TEAM = {
+  mireille: { id: 'usr_mireille', name: 'Mireille Bell', initials: 'MB' },
+  carine: { id: 'usr_carine', name: 'Carine Eboa', initials: 'CE' },
+  equipe: { id: 'usr_equipe', name: 'Équipe Douala', initials: 'ED' },
+  paul: { id: 'usr_paul', name: 'Paul Ngando', initials: 'PN' },
+} as const;
+
+/**
+ * Assignations de démonstration. Paul Ngando (chargé de clientèle) suit Clarisse Ngo (échéance dans 2 jours) et deux
+ * demandes en retard (Boris Owona, Marie Fotso) ; Aurélie Kamga et Patrick Essomba restent à distribuer.
+ */
+const ASSIGNMENTS: [string, keyof typeof TEAM, number?][] = [
+  ['req_0137', 'paul', 2 * DAY],
+  ['req_0125', 'paul'],
+  ['req_0124', 'paul'],
+  ['req_0139', 'mireille'],
+  ['req_0136', 'mireille'],
+  ['req_0140', 'carine'],
+  ['req_0133', 'carine'],
+  ['req_0135', 'equipe'],
+];
+
+for (const [id, member, dueIn] of ASSIGNMENTS) {
+  const request = adminRequests.find((item) => item.id === id);
+  if (!request) continue;
+  request.assignedTo = TEAM[member];
+  if (dueIn !== undefined) request.dueAt = new Date(Date.now() + dueIn).toISOString();
+  request.history.push({
+    id: `${request.reference}-assigned`,
+    kind: 'ASSIGNED',
+    label: `Assignée à ${TEAM[member].name}`,
+    actor: TEAM.mireille,
+    data: null,
+    createdAt: new Date(new Date(request.createdAt).getTime() + HOUR).toISOString(),
+  });
+}

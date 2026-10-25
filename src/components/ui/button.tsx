@@ -7,11 +7,14 @@ import { Spinner } from './spinner';
 /**
  * Bouton (docs/02 §5, Figma `4:50`) : padding 12/24, rayon 12, gap 8, Inter SemiBold 16/24 → 48 px.
  * La bordure 1,5 px de la variante Outline s'ajoute à la hauteur (51 px), comme dans les maquettes.
+ * Micro-interactions : couleur au survol, soulèvement de 1 px (pointeur fin, animations non réduites), léger
+ * enfoncement au clic ; `translate` et `scale` seulement, sans effet sur la mise en page.
  */
 export const buttonVariants = cva(
   [
     'inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 font-ui font-semibold whitespace-nowrap select-none',
-    'transition-[background-color,border-color,color,transform] duration-150 ease-standard active:scale-[0.98]',
+    'transition-[background-color,border-color,color,opacity,translate,scale] duration-150 ease-standard active:scale-[0.98]',
+    'pointer-fine:motion-safe:hover:-translate-y-px pointer-fine:motion-safe:active:translate-y-0',
     'disabled:pointer-events-none disabled:opacity-40 aria-disabled:pointer-events-none aria-disabled:opacity-40',
     '[&_svg]:shrink-0',
   ],

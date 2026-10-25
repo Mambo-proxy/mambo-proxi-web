@@ -28,7 +28,7 @@ function ServiceCard({ service, tone, badge }: { service: ServiceSummary; tone: 
   return (
     <article
       className={cn(
-        'group/card relative flex items-center gap-3.5 rounded-[18px] border border-border-default p-4 md:flex-col md:items-stretch md:rounded-xl md:p-7',
+        'group/card relative flex card-lift items-center gap-3.5 rounded-[18px] border border-border-default p-4 md:flex-col md:items-stretch md:rounded-xl md:p-7',
         tone.card,
       )}
     >

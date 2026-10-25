@@ -1930,6 +1930,23 @@
     "contentType": "application/json",
     "examples": {
       "default": {
+        "map": {
+          "center": {
+            "lat": 4.0565,
+            "lng": 9.74
+          },
+          "zoom": 12,
+          "bounds": [
+            {
+              "lat": 4,
+              "lng": 9.655
+            },
+            {
+              "lat": 4.11,
+              "lng": 9.815
+            }
+          ]
+        },
         "note": "Votre quartier n’apparaît pas ? Contactez-nous : nous étudions chaque demande. Délai moyen de livraison : 30 à 60 minutes selon le trafic.",
         "updatedAt": "2026-10-18T08:00:00.000Z",
         "zones": [
@@ -1939,12 +1956,47 @@
             "tone": "zone1",
             "description": "Autour de la base de Cité SIC.",
             "result": "Intervention à domicile et livraison dans les meilleurs délais. Conditions confirmées sur devis.",
+            "area": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    9.715,
+                    4.07
+                  ],
+                  [
+                    9.755,
+                    4.09
+                  ],
+                  [
+                    9.77,
+                    4.05
+                  ],
+                  [
+                    9.765,
+                    4.018
+                  ],
+                  [
+                    9.735,
+                    4.025
+                  ],
+                  [
+                    9.715,
+                    4.07
+                  ]
+                ]
+              ]
+            },
             "quarters": [
               {
                 "name": "Cité SIC",
                 "mapLabel": "Cité SIC · base de départ",
                 "isBase": true,
                 "labelOnSmallMap": true,
+                "coordinates": {
+                  "lat": 4.0565,
+                  "lng": 9.732
+                },
                 "position": {
                   "x": 0.5789,
                   "y": 0.5889
@@ -1952,6 +2004,10 @@
               },
               {
                 "name": "Ndoghem",
+                "coordinates": {
+                  "lat": 4.0262,
+                  "lng": 9.76
+                },
                 "position": {
                   "x": 0.7895,
                   "y": 0.837
@@ -1959,6 +2015,10 @@
               },
               {
                 "name": "Bépanda",
+                "coordinates": {
+                  "lat": 4.064,
+                  "lng": 9.721
+                },
                 "position": {
                   "x": 0.55,
                   "y": 0.4556
@@ -1966,6 +2026,10 @@
               },
               {
                 "name": "Makèpè",
+                "coordinates": {
+                  "lat": 4.083,
+                  "lng": 9.752
+                },
                 "position": {
                   "x": 0.6184,
                   "y": 0.3111
@@ -1973,6 +2037,10 @@
               },
               {
                 "name": "Ndokoti",
+                "coordinates": {
+                  "lat": 4.042,
+                  "lng": 9.748
+                },
                 "position": {
                   "x": 0.7105,
                   "y": 0.7407
@@ -1986,9 +2054,14 @@
             "tone": "zone2",
             "description": "Centre-ville et quartiers voisins.",
             "result": "Intervention à domicile et livraison possibles. Conditions confirmées sur devis.",
+            "area": null,
             "quarters": [
               {
                 "name": "Ndogbong",
+                "coordinates": {
+                  "lat": 4.052,
+                  "lng": 9.746
+                },
                 "position": {
                   "x": 0.6947,
                   "y": 0.5556
@@ -1996,6 +2069,10 @@
               },
               {
                 "name": "Cité des Palmiers",
+                "coordinates": {
+                  "lat": 4.038,
+                  "lng": 9.739
+                },
                 "position": {
                   "x": 0.6289,
                   "y": 0.6704
@@ -2004,6 +2081,10 @@
               {
                 "name": "Akwa",
                 "labelOnSmallMap": true,
+                "coordinates": {
+                  "lat": 4.049,
+                  "lng": 9.697
+                },
                 "position": {
                   "x": 0.4184,
                   "y": 0.6259
@@ -2011,6 +2092,10 @@
               },
               {
                 "name": "New Bell",
+                "coordinates": {
+                  "lat": 4.035,
+                  "lng": 9.712
+                },
                 "position": {
                   "x": 0.5158,
                   "y": 0.7963
@@ -2018,6 +2103,10 @@
               },
               {
                 "name": "Deïdo",
+                "coordinates": {
+                  "lat": 4.062,
+                  "lng": 9.7
+                },
                 "position": {
                   "x": 0.4368,
                   "y": 0.4963
@@ -2031,10 +2120,15 @@
             "tone": "zone3",
             "description": "Quartiers résidentiels et périphérie.",
             "result": "Intervention à domicile et livraison possibles. Conditions confirmées sur devis.",
+            "area": null,
             "quarters": [
               {
                 "name": "Bonamoussadi",
                 "labelOnSmallMap": true,
+                "coordinates": {
+                  "lat": 4.093,
+                  "lng": 9.74
+                },
                 "position": {
                   "x": 0.6842,
                   "y": 0.1926
@@ -2042,6 +2136,10 @@
               },
               {
                 "name": "Bonanjo",
+                "coordinates": {
+                  "lat": 4.034,
+                  "lng": 9.69
+                },
                 "position": {
                   "x": 0.3763,
                   "y": 0.7593
@@ -2049,6 +2147,10 @@
               },
               {
                 "name": "Bonapriso",
+                "coordinates": {
+                  "lat": 4.023,
+                  "lng": 9.695
+                },
                 "position": {
                   "x": 0.3947,
                   "y": 0.8704
@@ -2056,6 +2158,10 @@
               },
               {
                 "name": "Kotto",
+                "coordinates": {
+                  "lat": 4.08,
+                  "lng": 9.763
+                },
                 "position": {
                   "x": 0.7763,
                   "y": 0.2963
@@ -2064,6 +2170,10 @@
               {
                 "name": "Yassa",
                 "labelOnSmallMap": true,
+                "coordinates": {
+                  "lat": 4.008,
+                  "lng": 9.8
+                },
                 "position": {
                   "x": 0.9079,
                   "y": 0.8704
@@ -2071,6 +2181,10 @@
               },
               {
                 "name": "Makea",
+                "coordinates": {
+                  "lat": 4.06,
+                  "lng": 9.77
+                },
                 "position": {
                   "x": 0.8553,
                   "y": 0.437
@@ -2078,6 +2192,10 @@
               },
               {
                 "name": "PK14",
+                "coordinates": {
+                  "lat": 4.04,
+                  "lng": 9.81
+                },
                 "position": {
                   "x": 0.9211,
                   "y": 0.6222
@@ -2085,6 +2203,10 @@
               },
               {
                 "name": "Lendi",
+                "coordinates": {
+                  "lat": 4.105,
+                  "lng": 9.755
+                },
                 "position": {
                   "x": 0.8053,
                   "y": 0.137
@@ -2098,11 +2220,16 @@
             "tone": "special",
             "description": "Intervention possible, sur devis.",
             "result": "Intervention possible selon votre demande. Conditions et délais confirmés sur devis.",
+            "area": null,
             "quarters": [
               {
                 "name": "Bonabéri",
                 "detail": "rive ouest du Wouri",
                 "labelOnSmallMap": true,
+                "coordinates": {
+                  "lat": 4.073,
+                  "lng": 9.662
+                },
                 "position": {
                   "x": 0.1211,
                   "y": 0.463
@@ -2110,6 +2237,7 @@
               },
               {
                 "name": "Autres quartiers hors zone",
+                "coordinates": null,
                 "position": null
               }
             ]
@@ -2117,6 +2245,23 @@
         ]
       },
       "en": {
+        "map": {
+          "center": {
+            "lat": 4.0565,
+            "lng": 9.74
+          },
+          "zoom": 12,
+          "bounds": [
+            {
+              "lat": 4,
+              "lng": 9.655
+            },
+            {
+              "lat": 4.11,
+              "lng": 9.815
+            }
+          ]
+        },
         "note": "Can’t find your neighbourhood? Contact us: we look at every request. Average delivery time: 30 to 60 minutes depending on traffic.",
         "updatedAt": "2026-10-18T08:00:00.000Z",
         "zones": [
@@ -2126,12 +2271,47 @@
             "tone": "zone1",
             "description": "Around our Cité SIC base.",
             "result": "Home visits and delivery as quickly as possible. Terms confirmed in the quote.",
+            "area": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    9.715,
+                    4.07
+                  ],
+                  [
+                    9.755,
+                    4.09
+                  ],
+                  [
+                    9.77,
+                    4.05
+                  ],
+                  [
+                    9.765,
+                    4.018
+                  ],
+                  [
+                    9.735,
+                    4.025
+                  ],
+                  [
+                    9.715,
+                    4.07
+                  ]
+                ]
+              ]
+            },
             "quarters": [
               {
                 "name": "Cité SIC",
                 "mapLabel": "Cité SIC · starting base",
                 "isBase": true,
                 "labelOnSmallMap": true,
+                "coordinates": {
+                  "lat": 4.0565,
+                  "lng": 9.732
+                },
                 "position": {
                   "x": 0.5789,
                   "y": 0.5889
@@ -2139,6 +2319,10 @@
               },
               {
                 "name": "Ndoghem",
+                "coordinates": {
+                  "lat": 4.0262,
+                  "lng": 9.76
+                },
                 "position": {
                   "x": 0.7895,
                   "y": 0.837
@@ -2146,6 +2330,10 @@
               },
               {
                 "name": "Bépanda",
+                "coordinates": {
+                  "lat": 4.064,
+                  "lng": 9.721
+                },
                 "position": {
                   "x": 0.55,
                   "y": 0.4556
@@ -2153,6 +2341,10 @@
               },
               {
                 "name": "Makèpè",
+                "coordinates": {
+                  "lat": 4.083,
+                  "lng": 9.752
+                },
                 "position": {
                   "x": 0.6184,
                   "y": 0.3111
@@ -2160,6 +2352,10 @@
               },
               {
                 "name": "Ndokoti",
+                "coordinates": {
+                  "lat": 4.042,
+                  "lng": 9.748
+                },
                 "position": {
                   "x": 0.7105,
                   "y": 0.7407
@@ -2173,9 +2369,14 @@
             "tone": "zone2",
             "description": "City centre and neighbouring districts.",
             "result": "Home visits and delivery available. Terms confirmed in the quote.",
+            "area": null,
             "quarters": [
               {
                 "name": "Ndogbong",
+                "coordinates": {
+                  "lat": 4.052,
+                  "lng": 9.746
+                },
                 "position": {
                   "x": 0.6947,
                   "y": 0.5556
@@ -2183,6 +2384,10 @@
               },
               {
                 "name": "Cité des Palmiers",
+                "coordinates": {
+                  "lat": 4.038,
+                  "lng": 9.739
+                },
                 "position": {
                   "x": 0.6289,
                   "y": 0.6704
@@ -2191,6 +2396,10 @@
               {
                 "name": "Akwa",
                 "labelOnSmallMap": true,
+                "coordinates": {
+                  "lat": 4.049,
+                  "lng": 9.697
+                },
                 "position": {
                   "x": 0.4184,
                   "y": 0.6259
@@ -2198,6 +2407,10 @@
               },
               {
                 "name": "New Bell",
+                "coordinates": {
+                  "lat": 4.035,
+                  "lng": 9.712
+                },
                 "position": {
                   "x": 0.5158,
                   "y": 0.7963
@@ -2205,6 +2418,10 @@
               },
               {
                 "name": "Deïdo",
+                "coordinates": {
+                  "lat": 4.062,
+                  "lng": 9.7
+                },
                 "position": {
                   "x": 0.4368,
                   "y": 0.4963
@@ -2218,10 +2435,15 @@
             "tone": "zone3",
             "description": "Residential areas and outskirts.",
             "result": "Home visits and delivery available. Terms confirmed in the quote.",
+            "area": null,
             "quarters": [
               {
                 "name": "Bonamoussadi",
                 "labelOnSmallMap": true,
+                "coordinates": {
+                  "lat": 4.093,
+                  "lng": 9.74
+                },
                 "position": {
                   "x": 0.6842,
                   "y": 0.1926
@@ -2229,6 +2451,10 @@
               },
               {
                 "name": "Bonanjo",
+                "coordinates": {
+                  "lat": 4.034,
+                  "lng": 9.69
+                },
                 "position": {
                   "x": 0.3763,
                   "y": 0.7593
@@ -2236,6 +2462,10 @@
               },
               {
                 "name": "Bonapriso",
+                "coordinates": {
+                  "lat": 4.023,
+                  "lng": 9.695
+                },
                 "position": {
                   "x": 0.3947,
                   "y": 0.8704
@@ -2243,6 +2473,10 @@
               },
               {
                 "name": "Kotto",
+                "coordinates": {
+                  "lat": 4.08,
+                  "lng": 9.763
+                },
                 "position": {
                   "x": 0.7763,
                   "y": 0.2963
@@ -2251,6 +2485,10 @@
               {
                 "name": "Yassa",
                 "labelOnSmallMap": true,
+                "coordinates": {
+                  "lat": 4.008,
+                  "lng": 9.8
+                },
                 "position": {
                   "x": 0.9079,
                   "y": 0.8704
@@ -2258,6 +2496,10 @@
               },
               {
                 "name": "Makea",
+                "coordinates": {
+                  "lat": 4.06,
+                  "lng": 9.77
+                },
                 "position": {
                   "x": 0.8553,
                   "y": 0.437
@@ -2265,6 +2507,10 @@
               },
               {
                 "name": "PK14",
+                "coordinates": {
+                  "lat": 4.04,
+                  "lng": 9.81
+                },
                 "position": {
                   "x": 0.9211,
                   "y": 0.6222
@@ -2272,6 +2518,10 @@
               },
               {
                 "name": "Lendi",
+                "coordinates": {
+                  "lat": 4.105,
+                  "lng": 9.755
+                },
                 "position": {
                   "x": 0.8053,
                   "y": 0.137
@@ -2285,11 +2535,16 @@
             "tone": "special",
             "description": "Visits possible, on quotation.",
             "result": "Visits possible depending on your request. Terms and timing confirmed in the quote.",
+            "area": null,
             "quarters": [
               {
                 "name": "Bonabéri",
                 "detail": "west bank of the Wouri",
                 "labelOnSmallMap": true,
+                "coordinates": {
+                  "lat": 4.073,
+                  "lng": 9.662
+                },
                 "position": {
                   "x": 0.1211,
                   "y": 0.463
@@ -2297,6 +2552,7 @@
               },
               {
                 "name": "Other areas outside the zones",
+                "coordinates": null,
                 "position": null
               }
             ]
@@ -2326,6 +2582,382 @@
           "priority": 0.8
         }
       ]
+    }
+  },
+  {
+    "operationId": "searchSite",
+    "method": "GET",
+    "path": "/v1/search",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "query": "chef",
+        "lang": "fr",
+        "total": 6,
+        "groups": [
+          {
+            "type": "service",
+            "label": "Services",
+            "total": 1,
+            "items": [
+              {
+                "type": "service",
+                "id": "svc_chef_prive",
+                "key": "chef-prive",
+                "title": "Chef privé",
+                "context": "Expérience",
+                "excerpt": "Un chef cuisine chez vous pour un dîner en famille, un anniversaire ou une réception : cuisine camerounaise, africaine ou internationale.",
+                "titleHighlights": [
+                  {
+                    "start": 0,
+                    "end": 4
+                  }
+                ],
+                "highlights": [
+                  {
+                    "start": 3,
+                    "end": 7
+                  }
+                ],
+                "href": "/services/experience/chef-prive",
+                "visual": {
+                  "illustration": "chef",
+                  "image": {
+                    "id": "photo-chef-2",
+                    "url": "/photos/chef-2.png",
+                    "width": 1536,
+                    "height": 1024,
+                    "variants": []
+                  },
+                  "alt": ""
+                },
+                "icon": null
+              }
+            ]
+          },
+          {
+            "type": "category",
+            "label": "Rubriques",
+            "total": 1,
+            "items": [
+              {
+                "type": "category",
+                "id": "cat_experience",
+                "key": "experience",
+                "title": "Expérience",
+                "context": "Rubrique · 5 services",
+                "excerpt": "Voiture, chef privé, massage, photographe, événementiel.",
+                "titleHighlights": [],
+                "highlights": [
+                  {
+                    "start": 9,
+                    "end": 13
+                  }
+                ],
+                "href": "/services/experience",
+                "visual": {
+                  "illustration": "chef",
+                  "image": {
+                    "id": "photo-exp-hero",
+                    "url": "/photos/exp-hero.png",
+                    "width": 1280,
+                    "height": 960,
+                    "variants": []
+                  },
+                  "alt": ""
+                },
+                "icon": "Sparkles"
+              }
+            ]
+          },
+          {
+            "type": "page",
+            "label": "Pages",
+            "total": 1,
+            "items": [
+              {
+                "type": "page",
+                "id": "page_qui_sommes_nous",
+                "key": "qui-sommes-nous",
+                "title": "Qui sommes-nous",
+                "context": null,
+                "excerpt": "… des prestataires triés sur le volet : chefs, chauffeurs, photographes et artisans de Douala, que nous connaissons personnellement.",
+                "titleHighlights": [],
+                "highlights": [
+                  {
+                    "start": 40,
+                    "end": 45
+                  }
+                ],
+                "href": "/qui-sommes-nous",
+                "visual": null,
+                "icon": null
+              }
+            ]
+          },
+          {
+            "type": "article",
+            "label": "Magazine",
+            "total": 2,
+            "items": [
+              {
+                "type": "article",
+                "id": "mag_art_2",
+                "key": null,
+                "title": "Recevoir à la camerounaise : les conseils d'un chef de Bonapriso",
+                "context": "Art de vivre",
+                "excerpt": "Ndolé, poisson braisé, beignets-haricots : un chef de Bonapriso partage ses astuces pour recevoir douze personnes sans stress.",
+                "titleHighlights": [
+                  {
+                    "start": 47,
+                    "end": 51
+                  }
+                ],
+                "highlights": [
+                  {
+                    "start": 46,
+                    "end": 50
+                  }
+                ],
+                "href": "/magazine#article-mag_art_2",
+                "visual": {
+                  "illustration": "marche",
+                  "image": null,
+                  "alt": ""
+                },
+                "icon": null
+              },
+              {
+                "type": "article",
+                "id": "mag_art_5",
+                "key": null,
+                "title": "Bien manger au quotidien à Douala",
+                "context": "Santé et nutrition",
+                "excerpt": "… les conseils de notre chef pour des repas équilibrés avec les produits du marché Sandaga.",
+                "titleHighlights": [],
+                "highlights": [
+                  {
+                    "start": 24,
+                    "end": 28
+                  }
+                ],
+                "href": "/magazine#article-mag_art_5",
+                "visual": {
+                  "illustration": "marche",
+                  "image": null,
+                  "alt": ""
+                },
+                "icon": null
+              }
+            ]
+          },
+          {
+            "type": "job",
+            "label": "Offres d'emploi",
+            "total": 1,
+            "items": [
+              {
+                "type": "job",
+                "id": "job_chef_domicile",
+                "key": "chef-cuisinier-a-domicile",
+                "title": "Chef cuisinier à domicile (H/F)",
+                "context": "Freelance · Douala",
+                "excerpt": "Vous cuisinez chez nos clients pour des dîners et des réceptions, à partir des menus validés avec eux.",
+                "titleHighlights": [
+                  {
+                    "start": 0,
+                    "end": 4
+                  }
+                ],
+                "highlights": [],
+                "href": "/recrutement/chef-cuisinier-a-domicile",
+                "visual": null,
+                "icon": null
+              }
+            ]
+          }
+        ]
+      },
+      "en": {
+        "query": "chef",
+        "lang": "en",
+        "total": 5,
+        "groups": [
+          {
+            "type": "service",
+            "label": "Services",
+            "total": 1,
+            "items": [
+              {
+                "type": "service",
+                "id": "svc_chef_prive",
+                "key": "chef-prive",
+                "title": "Private chef",
+                "context": "Experience",
+                "excerpt": "A chef cooks at your home for a family dinner, a birthday or a reception: Cameroonian, African or international cuisine.",
+                "titleHighlights": [
+                  {
+                    "start": 8,
+                    "end": 12
+                  }
+                ],
+                "highlights": [
+                  {
+                    "start": 2,
+                    "end": 6
+                  }
+                ],
+                "href": "/services/experience/chef-prive",
+                "visual": {
+                  "illustration": "chef",
+                  "image": {
+                    "id": "photo-chef-2",
+                    "url": "/photos/chef-2.png",
+                    "width": 1536,
+                    "height": 1024,
+                    "variants": []
+                  },
+                  "alt": ""
+                },
+                "icon": null
+              }
+            ]
+          },
+          {
+            "type": "category",
+            "label": "Categories",
+            "total": 1,
+            "items": [
+              {
+                "type": "category",
+                "id": "cat_experience",
+                "key": "experience",
+                "title": "Experience",
+                "context": "Category · 5 services",
+                "excerpt": "Car, private chef, massage, photographer, events.",
+                "titleHighlights": [],
+                "highlights": [
+                  {
+                    "start": 13,
+                    "end": 17
+                  }
+                ],
+                "href": "/services/experience",
+                "visual": {
+                  "illustration": "chef",
+                  "image": {
+                    "id": "photo-exp-hero",
+                    "url": "/photos/exp-hero.png",
+                    "width": 1280,
+                    "height": 960,
+                    "variants": []
+                  },
+                  "alt": ""
+                },
+                "icon": "Sparkles"
+              }
+            ]
+          },
+          {
+            "type": "page",
+            "label": "Pages",
+            "total": 1,
+            "items": [
+              {
+                "type": "page",
+                "id": "page_qui_sommes_nous",
+                "key": "qui-sommes-nous",
+                "title": "About us",
+                "context": null,
+                "excerpt": "… hand-picked professionals: chefs, drivers, photographers and craftspeople from Douala whom we know personally.",
+                "titleHighlights": [],
+                "highlights": [
+                  {
+                    "start": 29,
+                    "end": 34
+                  }
+                ],
+                "href": "/qui-sommes-nous",
+                "visual": null,
+                "icon": null
+              }
+            ]
+          },
+          {
+            "type": "article",
+            "label": "Magazine",
+            "total": 1,
+            "items": [
+              {
+                "type": "article",
+                "id": "mag_art_2",
+                "key": null,
+                "title": "Hosting the Cameroonian way: tips from a Bonapriso chef",
+                "context": "Art of living",
+                "excerpt": "Ndolé, grilled fish, beans and puff-puff: a Bonapriso chef shares his tips for hosting twelve people stress-free.",
+                "titleHighlights": [
+                  {
+                    "start": 51,
+                    "end": 55
+                  }
+                ],
+                "highlights": [
+                  {
+                    "start": 54,
+                    "end": 58
+                  }
+                ],
+                "href": "/magazine#article-mag_art_2",
+                "visual": {
+                  "illustration": "marche",
+                  "image": null,
+                  "alt": ""
+                },
+                "icon": null
+              }
+            ]
+          },
+          {
+            "type": "job",
+            "label": "Jobs",
+            "total": 1,
+            "items": [
+              {
+                "type": "job",
+                "id": "job_chef_domicile",
+                "key": "chef-cuisinier-a-domicile",
+                "title": "Home chef (M/F)",
+                "context": "Freelance · Douala",
+                "excerpt": "You cook in our clients’ homes for dinners and receptions, using menus agreed with them.",
+                "titleHighlights": [
+                  {
+                    "start": 5,
+                    "end": 9
+                  }
+                ],
+                "highlights": [],
+                "href": "/recrutement/chef-cuisinier-a-domicile",
+                "visual": null,
+                "icon": null
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operationId": "collectAnalyticsEvents",
+    "method": "POST",
+    "path": "/v1/analytics/events",
+    "status": 202,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "accepted": 3,
+        "rejected": 0
+      }
     }
   },
   {
@@ -5211,6 +5843,37 @@
           "firstName": "Mireille",
           "initials": "MB",
           "role": "ADMIN",
+          "permissions": [
+            "dashboard:read",
+            "analytics:read",
+            "team:read",
+            "requests:read",
+            "requests:write",
+            "requests:assign",
+            "requests:export",
+            "requests:anonymize",
+            "requests:revert-status",
+            "appointments:read",
+            "appointments:write",
+            "appointments:assign",
+            "availability:write",
+            "applications:read",
+            "applications:write",
+            "contacts:read",
+            "contacts:write",
+            "contacts:export",
+            "reviews:moderate",
+            "content:read",
+            "content:write",
+            "media:write",
+            "newsletter:read",
+            "newsletter:write",
+            "settings:read",
+            "settings:write",
+            "settings:admin",
+            "users:manage",
+            "audit:read"
+          ],
           "lastLoginAt": "2026-10-19T07:58:00.000Z"
         }
       }
@@ -5254,7 +5917,64 @@
     "path": "/v1/auth/me",
     "status": 200,
     "contentType": "application/json",
-    "examples": {}
+    "examples": {
+      "default": {
+        "id": "clx8m2k4p0001mp9a7v3f2c1d",
+        "email": "mireille@mamboproxi.com",
+        "name": "Mireille Bell",
+        "firstName": "Mireille",
+        "initials": "MB",
+        "role": "ADMIN",
+        "permissions": [
+          "dashboard:read",
+          "analytics:read",
+          "team:read",
+          "requests:read",
+          "requests:write",
+          "requests:assign",
+          "requests:export",
+          "requests:anonymize",
+          "requests:revert-status",
+          "appointments:read",
+          "appointments:write",
+          "appointments:assign",
+          "availability:write",
+          "applications:read",
+          "applications:write",
+          "contacts:read",
+          "contacts:write",
+          "contacts:export",
+          "reviews:moderate",
+          "content:read",
+          "content:write",
+          "media:write",
+          "newsletter:read",
+          "newsletter:write",
+          "settings:read",
+          "settings:write",
+          "settings:admin",
+          "users:manage",
+          "audit:read"
+        ],
+        "lastLoginAt": "2026-10-19T07:58:00.000Z"
+      },
+      "agent": {
+        "id": "usr_paul",
+        "email": "paul.ngando@mamboproxi.com",
+        "name": "Paul Ngando",
+        "firstName": "Paul",
+        "initials": "PN",
+        "role": "AGENT",
+        "permissions": [
+          "dashboard:read",
+          "requests:read-assigned",
+          "requests:write-assigned",
+          "appointments:read-assigned",
+          "appointments:write-assigned"
+        ],
+        "lastLoginAt": "2026-10-25T08:10:00.000Z"
+      }
+    }
   },
   {
     "operationId": "forgotPassword",
@@ -5500,6 +6220,685 @@
     }
   },
   {
+    "operationId": "adminGetMyTasks",
+    "method": "GET",
+    "path": "/v1/admin/me/tasks",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "generatedAt": "2026-10-25T09:30:00.000Z",
+        "requests": {
+          "open": 7,
+          "byStatus": {
+            "NOUVELLE": 2,
+            "EN_COURS": 5
+          },
+          "overdue": 1,
+          "dueToday": 2,
+          "items": [
+            {
+              "id": "req_0151",
+              "reference": "MP-2026-0151",
+              "type": "DEVIS",
+              "status": "EN_COURS",
+              "contact": {
+                "id": "ctc_req_0151",
+                "fullName": "Christelle Ngo Mbe",
+                "initials": "CN",
+                "email": "christelle.ngo@example.com",
+                "phone": "+237677112233",
+                "country": "CM",
+                "city": "Bonamoussadi, Douala",
+                "profile": "PARTICULIER"
+              },
+              "service": {
+                "id": "svc_recherche_logement",
+                "name": "Recherche de logement",
+                "slug": "recherche-logement"
+              },
+              "category": {
+                "slug": "immobilier",
+                "name": "Immobilier"
+              },
+              "subject": "Recherche de logement",
+              "assignedTo": {
+                "id": "usr_paul",
+                "name": "Paul Ngando",
+                "initials": "PN"
+              },
+              "dueAt": "2026-10-24T16:00:00.000Z",
+              "isOverdue": true,
+              "createdAt": "2026-10-22T10:05:00.000Z"
+            },
+            {
+              "id": "req_0156",
+              "reference": "MP-2026-0156",
+              "type": "DEVIS",
+              "status": "NOUVELLE",
+              "contact": {
+                "id": "ctc_req_0156",
+                "fullName": "Hervé Tchoumi",
+                "initials": "HT",
+                "email": "herve.tchoumi@example.com",
+                "phone": "+237699887766",
+                "country": "CM",
+                "city": "Akwa, Douala",
+                "profile": "PARTICULIER"
+              },
+              "service": {
+                "id": "svc_entretien_logement",
+                "name": "Entretien du logement",
+                "slug": "entretien-du-logement"
+              },
+              "category": {
+                "slug": "services-a-domicile",
+                "name": "Services à domicile"
+              },
+              "subject": "Entretien du logement",
+              "assignedTo": {
+                "id": "usr_paul",
+                "name": "Paul Ngando",
+                "initials": "PN"
+              },
+              "dueAt": "2026-10-25T14:20:00.000Z",
+              "isOverdue": false,
+              "createdAt": "2026-10-24T14:20:00.000Z"
+            },
+            {
+              "id": "req_0157",
+              "reference": "MP-2026-0157",
+              "type": "DEVIS",
+              "status": "EN_COURS",
+              "contact": {
+                "id": "ctc_req_0157",
+                "fullName": "Aurélie Kamga",
+                "initials": "AK",
+                "email": "aurelie.k@example.com",
+                "phone": "+237612345678",
+                "country": "CM",
+                "city": "Bonapriso, Douala",
+                "profile": "PARTICULIER"
+              },
+              "service": {
+                "id": "svc_chef_prive",
+                "name": "Chef privé",
+                "slug": "chef-prive"
+              },
+              "category": {
+                "slug": "experience",
+                "name": "Expérience"
+              },
+              "subject": "Chef privé",
+              "assignedTo": {
+                "id": "usr_paul",
+                "name": "Paul Ngando",
+                "initials": "PN"
+              },
+              "dueAt": "2026-10-25T17:00:00.000Z",
+              "isOverdue": false,
+              "createdAt": "2026-10-24T17:00:00.000Z"
+            }
+          ]
+        },
+        "appointments": {
+          "today": 1,
+          "toConfirm": 1,
+          "upcoming": [
+            {
+              "id": "apt_7",
+              "reference": "MP-2026-0153",
+              "contact": {
+                "id": "ctc_samuel",
+                "fullName": "Samuel Eto Mbarga",
+                "initials": "SE",
+                "email": "samuel.em@example.com",
+                "phone": "+33612345678",
+                "country": "FR",
+                "city": "Lyon",
+                "profile": "PARTICULIER"
+              },
+              "reason": "IMMOBILIER",
+              "format": "VISIO",
+              "startsAt": "2026-10-25T13:00:00.000Z",
+              "endsAt": "2026-10-25T14:30:00.000Z",
+              "status": "CONFIRME",
+              "proposedStartsAt": null,
+              "location": null,
+              "videoLink": "https://meet.example.com/mambo-samuel",
+              "message": null,
+              "notes": null,
+              "reminderSentAt": "2026-10-24T13:00:00.000Z",
+              "assignedTo": {
+                "id": "usr_paul",
+                "name": "Paul Ngando",
+                "initials": "PN"
+              },
+              "createdAt": "2026-10-20T09:00:00.000Z"
+            },
+            {
+              "id": "apt_9",
+              "reference": "MP-2026-0158",
+              "contact": {
+                "id": "ctc_brigitte",
+                "fullName": "Brigitte Nana",
+                "initials": "BN",
+                "email": "brigitte.nana@example.com",
+                "phone": "+237655443322",
+                "country": "CM",
+                "city": "Makèpè, Douala",
+                "profile": "PARTICULIER"
+              },
+              "reason": "DEVIS",
+              "format": "AGENCE",
+              "startsAt": "2026-10-27T09:00:00.000Z",
+              "endsAt": "2026-10-27T10:30:00.000Z",
+              "status": "A_CONFIRMER",
+              "proposedStartsAt": null,
+              "location": null,
+              "videoLink": null,
+              "message": "Je voudrais un devis pour le ménage hebdomadaire de mon appartement.",
+              "notes": null,
+              "reminderSentAt": null,
+              "assignedTo": {
+                "id": "usr_paul",
+                "name": "Paul Ngando",
+                "initials": "PN"
+              },
+              "createdAt": "2026-10-24T18:40:00.000Z"
+            }
+          ]
+        },
+        "unassigned": null
+      }
+    }
+  },
+  {
+    "operationId": "adminGetAnalyticsSummary",
+    "method": "GET",
+    "path": "/v1/admin/analytics/summary",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "period": "30d",
+        "from": "2026-09-25",
+        "to": "2026-10-24",
+        "generatedAt": "2026-10-25T09:15:00.000Z",
+        "totals": {
+          "visitors": {
+            "value": 1864,
+            "previous": 1590,
+            "deltaPercent": 17.2,
+            "unit": null
+          },
+          "pageViews": {
+            "value": 7412,
+            "previous": 6630,
+            "deltaPercent": 11.8,
+            "unit": null
+          },
+          "actions": {
+            "value": 486,
+            "previous": 402,
+            "deltaPercent": 20.9,
+            "unit": null
+          },
+          "consentRate": 62.4
+        },
+        "actions": [
+          {
+            "action": "whatsapp",
+            "label": "WhatsApp",
+            "count": 168,
+            "previous": 131,
+            "deltaPercent": 28.2
+          },
+          {
+            "action": "quote",
+            "label": "Devis",
+            "count": 132,
+            "previous": 118,
+            "deltaPercent": 11.9
+          },
+          {
+            "action": "call",
+            "label": "Appel",
+            "count": 54,
+            "previous": 49,
+            "deltaPercent": 10.2
+          },
+          {
+            "action": "participate",
+            "label": "« Je participe »",
+            "count": 38,
+            "previous": 22,
+            "deltaPercent": 72.7
+          },
+          {
+            "action": "newsletter",
+            "label": "Inscription newsletter",
+            "count": 33,
+            "previous": 28,
+            "deltaPercent": 17.9
+          },
+          {
+            "action": "email",
+            "label": "E-mail",
+            "count": 21,
+            "previous": 24,
+            "deltaPercent": -12.5
+          },
+          {
+            "action": "appointment",
+            "label": "Rendez-vous",
+            "count": 19,
+            "previous": 15,
+            "deltaPercent": 26.7
+          },
+          {
+            "action": "sign_up",
+            "label": "Inscription",
+            "count": 11,
+            "previous": 9,
+            "deltaPercent": 22.2
+          },
+          {
+            "action": "contact",
+            "label": "Message de contact",
+            "count": 10,
+            "previous": 6,
+            "deltaPercent": 66.7
+          },
+          {
+            "action": "application",
+            "label": "Candidature",
+            "count": 0,
+            "previous": 0,
+            "deltaPercent": null
+          },
+          {
+            "action": "partner",
+            "label": "Demande de partenariat",
+            "count": 0,
+            "previous": 0,
+            "deltaPercent": null
+          },
+          {
+            "action": "training",
+            "label": "Demande de formation",
+            "count": 0,
+            "previous": 0,
+            "deltaPercent": null
+          }
+        ],
+        "series": [
+          {
+            "date": "2026-09-25",
+            "visitors": 56,
+            "pageViews": 207,
+            "actions": 14
+          },
+          {
+            "date": "2026-09-26",
+            "visitors": 50,
+            "pageViews": 186,
+            "actions": 12
+          },
+          {
+            "date": "2026-09-27",
+            "visitors": 45,
+            "pageViews": 165,
+            "actions": 11
+          },
+          {
+            "date": "2026-09-28",
+            "visitors": 71,
+            "pageViews": 264,
+            "actions": 17
+          },
+          {
+            "date": "2026-09-29",
+            "visitors": 66,
+            "pageViews": 243,
+            "actions": 16
+          },
+          {
+            "date": "2026-09-30",
+            "visitors": 60,
+            "pageViews": 222,
+            "actions": 15
+          },
+          {
+            "date": "2026-10-01",
+            "visitors": 70,
+            "pageViews": 261,
+            "actions": 17
+          },
+          {
+            "date": "2026-10-02",
+            "visitors": 65,
+            "pageViews": 240,
+            "actions": 16
+          },
+          {
+            "date": "2026-10-03",
+            "visitors": 59,
+            "pageViews": 219,
+            "actions": 14
+          },
+          {
+            "date": "2026-10-04",
+            "visitors": 53,
+            "pageViews": 198,
+            "actions": 13
+          },
+          {
+            "date": "2026-10-05",
+            "visitors": 64,
+            "pageViews": 237,
+            "actions": 16
+          },
+          {
+            "date": "2026-10-06",
+            "visitors": 75,
+            "pageViews": 276,
+            "actions": 18
+          },
+          {
+            "date": "2026-10-07",
+            "visitors": 69,
+            "pageViews": 255,
+            "actions": 17
+          },
+          {
+            "date": "2026-10-08",
+            "visitors": 63,
+            "pageViews": 234,
+            "actions": 15
+          },
+          {
+            "date": "2026-10-09",
+            "visitors": 74,
+            "pageViews": 273,
+            "actions": 18
+          },
+          {
+            "date": "2026-10-10",
+            "visitors": 52,
+            "pageViews": 192,
+            "actions": 13
+          },
+          {
+            "date": "2026-10-11",
+            "visitors": 62,
+            "pageViews": 231,
+            "actions": 15
+          },
+          {
+            "date": "2026-10-12",
+            "visitors": 73,
+            "pageViews": 270,
+            "actions": 18
+          },
+          {
+            "date": "2026-10-13",
+            "visitors": 67,
+            "pageViews": 249,
+            "actions": 16
+          },
+          {
+            "date": "2026-10-14",
+            "visitors": 78,
+            "pageViews": 288,
+            "actions": 19
+          },
+          {
+            "date": "2026-10-15",
+            "visitors": 72,
+            "pageViews": 267,
+            "actions": 18
+          },
+          {
+            "date": "2026-10-16",
+            "visitors": 83,
+            "pageViews": 306,
+            "actions": 20
+          },
+          {
+            "date": "2026-10-17",
+            "visitors": 61,
+            "pageViews": 225,
+            "actions": 15
+          },
+          {
+            "date": "2026-10-18",
+            "visitors": 55,
+            "pageViews": 204,
+            "actions": 13
+          },
+          {
+            "date": "2026-10-19",
+            "visitors": 82,
+            "pageViews": 303,
+            "actions": 20
+          },
+          {
+            "date": "2026-10-20",
+            "visitors": 76,
+            "pageViews": 282,
+            "actions": 19
+          },
+          {
+            "date": "2026-10-21",
+            "visitors": 70,
+            "pageViews": 261,
+            "actions": 17
+          },
+          {
+            "date": "2026-10-22",
+            "visitors": 81,
+            "pageViews": 300,
+            "actions": 20
+          },
+          {
+            "date": "2026-10-23",
+            "visitors": 75,
+            "pageViews": 279,
+            "actions": 18
+          },
+          {
+            "date": "2026-10-24",
+            "visitors": 70,
+            "pageViews": 275,
+            "actions": 16
+          }
+        ],
+        "topPages": [
+          {
+            "path": "/",
+            "title": "Accueil",
+            "pageViews": 2310,
+            "visitors": 1205,
+            "actions": 151
+          },
+          {
+            "path": "/services/experience/chef-prive",
+            "title": "Chef privé",
+            "pageViews": 812,
+            "visitors": 498,
+            "actions": 74
+          },
+          {
+            "path": "/services/services-a-domicile",
+            "title": "Services à domicile",
+            "pageViews": 640,
+            "visitors": 402,
+            "actions": 41
+          },
+          {
+            "path": "/zones-d-intervention",
+            "title": "Zones d'intervention",
+            "pageViews": 520,
+            "visitors": 371,
+            "actions": 28
+          },
+          {
+            "path": "/devis",
+            "title": "Demande de devis",
+            "pageViews": 488,
+            "visitors": 341,
+            "actions": 62
+          },
+          {
+            "path": "/services/immobilier/recherche-logement",
+            "title": "Recherche de logement",
+            "pageViews": 402,
+            "visitors": 260,
+            "actions": 33
+          },
+          {
+            "path": "/magazine",
+            "title": "Magazine",
+            "pageViews": 355,
+            "visitors": 248,
+            "actions": 18
+          },
+          {
+            "path": "/recrutement",
+            "title": "Recrutement",
+            "pageViews": 290,
+            "visitors": 201,
+            "actions": 0
+          },
+          {
+            "path": "/contact",
+            "title": "Contact",
+            "pageViews": 260,
+            "visitors": 188,
+            "actions": 57
+          },
+          {
+            "path": "/qui-sommes-nous",
+            "title": "Qui sommes-nous",
+            "pageViews": 231,
+            "visitors": 170,
+            "actions": 9
+          }
+        ],
+        "actionsByPage": [
+          {
+            "path": "/",
+            "title": "Accueil",
+            "total": 151,
+            "byAction": [
+              {
+                "action": "whatsapp",
+                "count": 58
+              },
+              {
+                "action": "quote",
+                "count": 41
+              },
+              {
+                "action": "participate",
+                "count": 26
+              },
+              {
+                "action": "call",
+                "count": 15
+              },
+              {
+                "action": "newsletter",
+                "count": 11
+              }
+            ]
+          },
+          {
+            "path": "/services/experience/chef-prive",
+            "title": "Chef privé",
+            "total": 74,
+            "byAction": [
+              {
+                "action": "quote",
+                "count": 38
+              },
+              {
+                "action": "whatsapp",
+                "count": 30
+              },
+              {
+                "action": "call",
+                "count": 6
+              }
+            ]
+          },
+          {
+            "path": "/devis",
+            "title": "Demande de devis",
+            "total": 62,
+            "byAction": [
+              {
+                "action": "quote",
+                "count": 62
+              }
+            ]
+          },
+          {
+            "path": "/contact",
+            "title": "Contact",
+            "total": 57,
+            "byAction": [
+              {
+                "action": "whatsapp",
+                "count": 20
+              },
+              {
+                "action": "email",
+                "count": 15
+              },
+              {
+                "action": "call",
+                "count": 12
+              },
+              {
+                "action": "contact",
+                "count": 10
+              }
+            ]
+          },
+          {
+            "path": "/services/services-a-domicile",
+            "title": "Services à domicile",
+            "total": 41,
+            "byAction": [
+              {
+                "action": "quote",
+                "count": 22
+              },
+              {
+                "action": "whatsapp",
+                "count": 19
+              }
+            ]
+          }
+        ],
+        "languages": [
+          {
+            "lang": "fr",
+            "pageViews": 6150,
+            "percent": 83
+          },
+          {
+            "lang": "en",
+            "pageViews": 1262,
+            "percent": 17
+          }
+        ]
+      }
+    }
+  },
+  {
     "operationId": "adminListRequests",
     "method": "GET",
     "path": "/v1/admin/requests",
@@ -5534,6 +6933,8 @@
             },
             "subject": "Chef privé",
             "assignedTo": null,
+            "dueAt": "2026-10-06T08:12:00.000Z",
+            "isOverdue": false,
             "createdAt": "2026-10-05T08:12:00.000Z"
           }
         ],
@@ -5594,6 +6995,8 @@
         },
         "subject": "Chef privé",
         "assignedTo": null,
+        "dueAt": "2026-10-06T08:12:00.000Z",
+        "isOverdue": false,
         "createdAt": "2026-10-05T08:12:00.000Z",
         "contactPreference": "WHATSAPP",
         "message": "Dîner pour les 60 ans de ma mère, cuisine camerounaise revisitée, un invité végétarien.",
@@ -6086,6 +7489,11 @@
             "message": null,
             "notes": null,
             "reminderSentAt": null,
+            "assignedTo": {
+              "id": "usr_mireille",
+              "name": "Mireille Bell",
+              "initials": "MB"
+            },
             "createdAt": "2026-10-02T10:00:00.000Z"
           }
         ],
@@ -6114,6 +7522,7 @@
             "message": "Je souhaite parler d'un dîner pour 12 personnes en décembre.",
             "notes": null,
             "reminderSentAt": null,
+            "assignedTo": null,
             "createdAt": "2026-10-05T07:30:00.000Z"
           }
         ]
@@ -6778,12 +8187,47 @@
               "from": false
             },
             "active": true,
+            "area": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    9.715,
+                    4.07
+                  ],
+                  [
+                    9.755,
+                    4.09
+                  ],
+                  [
+                    9.77,
+                    4.05
+                  ],
+                  [
+                    9.765,
+                    4.018
+                  ],
+                  [
+                    9.735,
+                    4.025
+                  ],
+                  [
+                    9.715,
+                    4.07
+                  ]
+                ]
+              ]
+            },
             "quarters": [
               {
                 "name": "Cité SIC",
                 "mapLabel": "Cité SIC · base de départ",
                 "isBase": true,
                 "labelOnSmallMap": true,
+                "coordinates": {
+                  "lat": 4.0565,
+                  "lng": 9.732
+                },
                 "position": {
                   "x": 0.5789,
                   "y": 0.5889
@@ -6791,6 +8235,10 @@
               },
               {
                 "name": "Ndoghem",
+                "coordinates": {
+                  "lat": 4.0262,
+                  "lng": 9.76
+                },
                 "position": {
                   "x": 0.7895,
                   "y": 0.837
@@ -6818,11 +8266,16 @@
               "from": true
             },
             "active": true,
+            "area": null,
             "quarters": [
               {
                 "name": "Bonabéri",
                 "detail": "rive ouest du Wouri",
                 "labelOnSmallMap": true,
+                "coordinates": {
+                  "lat": 4.073,
+                  "lng": 9.662
+                },
                 "position": {
                   "x": 0.1211,
                   "y": 0.463
@@ -6830,6 +8283,7 @@
               },
               {
                 "name": "Autres quartiers hors zone",
+                "coordinates": null,
                 "position": null
               }
             ],
@@ -7136,6 +8590,216 @@
     "status": 200,
     "contentType": "application/json",
     "examples": {}
+  },
+  {
+    "operationId": "adminGetUsersPresence",
+    "method": "GET",
+    "path": "/v1/admin/users/presence",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "onlineWindowMinutes": 5,
+        "onlineCount": 2,
+        "generatedAt": "2026-10-25T09:30:00.000Z",
+        "data": [
+          {
+            "user": {
+              "id": "usr_mireille",
+              "name": "Mireille Bell",
+              "initials": "MB"
+            },
+            "role": "ADMIN",
+            "online": true,
+            "lastActiveAt": "2026-10-25T09:29:00.000Z",
+            "lastLoginAt": "2026-10-25T07:58:00.000Z",
+            "assignable": true,
+            "openTasks": 3
+          },
+          {
+            "user": {
+              "id": "usr_paul",
+              "name": "Paul Ngando",
+              "initials": "PN"
+            },
+            "role": "AGENT",
+            "online": true,
+            "lastActiveAt": "2026-10-25T09:27:00.000Z",
+            "lastLoginAt": "2026-10-25T08:10:00.000Z",
+            "assignable": true,
+            "openTasks": 9
+          },
+          {
+            "user": {
+              "id": "usr_carine",
+              "name": "Carine Eboa",
+              "initials": "CE"
+            },
+            "role": "MANAGER",
+            "online": false,
+            "lastActiveAt": "2026-10-24T18:05:00.000Z",
+            "lastLoginAt": "2026-10-24T07:45:00.000Z",
+            "assignable": true,
+            "openTasks": 4
+          },
+          {
+            "user": {
+              "id": "usr_equipe",
+              "name": "Équipe Douala",
+              "initials": "ED"
+            },
+            "role": "EDITOR",
+            "online": false,
+            "lastActiveAt": "2026-10-24T16:42:00.000Z",
+            "lastLoginAt": "2026-10-24T08:02:00.000Z",
+            "assignable": true,
+            "openTasks": 2
+          },
+          {
+            "user": {
+              "id": "usr_grace",
+              "name": "Grace Nkongo",
+              "initials": "GN"
+            },
+            "role": "WRITER",
+            "online": false,
+            "lastActiveAt": "2026-10-20T15:12:00.000Z",
+            "lastLoginAt": "2026-10-20T09:30:00.000Z",
+            "assignable": false,
+            "openTasks": 0
+          }
+        ]
+      }
+    }
+  },
+  {
+    "operationId": "adminListRoles",
+    "method": "GET",
+    "path": "/v1/admin/roles",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": [
+        {
+          "role": "ADMIN",
+          "label": "Administrateur·rice",
+          "description": "Tout le back-office, paramètres sensibles, utilisateurs et journal compris.",
+          "permissions": [
+            "dashboard:read",
+            "analytics:read",
+            "team:read",
+            "requests:read",
+            "requests:write",
+            "requests:assign",
+            "requests:export",
+            "requests:anonymize",
+            "requests:revert-status",
+            "appointments:read",
+            "appointments:write",
+            "appointments:assign",
+            "availability:write",
+            "applications:read",
+            "applications:write",
+            "contacts:read",
+            "contacts:write",
+            "contacts:export",
+            "reviews:moderate",
+            "content:read",
+            "content:write",
+            "media:write",
+            "newsletter:read",
+            "newsletter:write",
+            "settings:read",
+            "settings:write",
+            "settings:admin",
+            "users:manage",
+            "audit:read"
+          ]
+        },
+        {
+          "role": "MANAGER",
+          "label": "Responsable",
+          "description": "Demandes, rendez-vous, assignation, candidatures, contacts et statistiques ; contenus en lecture.",
+          "permissions": [
+            "dashboard:read",
+            "analytics:read",
+            "team:read",
+            "requests:read",
+            "requests:write",
+            "requests:assign",
+            "requests:export",
+            "requests:anonymize",
+            "appointments:read",
+            "appointments:write",
+            "appointments:assign",
+            "availability:write",
+            "applications:read",
+            "applications:write",
+            "contacts:read",
+            "contacts:write",
+            "contacts:export",
+            "reviews:moderate",
+            "content:read",
+            "newsletter:read",
+            "settings:read"
+          ]
+        },
+        {
+          "role": "AGENT",
+          "label": "Chargé·e de clientèle",
+          "description": "Traite les demandes et rendez-vous qui lui sont assignés.",
+          "permissions": [
+            "dashboard:read",
+            "requests:read-assigned",
+            "requests:write-assigned",
+            "appointments:read-assigned",
+            "appointments:write-assigned"
+          ]
+        },
+        {
+          "role": "EDITOR",
+          "label": "Éditeur·rice",
+          "description": "Demandes et contenus (périmètre historique, inchangé).",
+          "permissions": [
+            "dashboard:read",
+            "team:read",
+            "requests:read",
+            "requests:write",
+            "requests:assign",
+            "requests:export",
+            "requests:anonymize",
+            "appointments:read",
+            "appointments:write",
+            "appointments:assign",
+            "availability:write",
+            "applications:read",
+            "applications:write",
+            "contacts:read",
+            "contacts:write",
+            "contacts:export",
+            "reviews:moderate",
+            "content:read",
+            "content:write",
+            "media:write",
+            "newsletter:read",
+            "newsletter:write",
+            "settings:read",
+            "settings:write"
+          ]
+        },
+        {
+          "role": "WRITER",
+          "label": "Rédacteur·rice",
+          "description": "Contenus du site, magazine et médiathèque ; aucun accès aux demandes ni aux données personnelles.",
+          "permissions": [
+            "dashboard:read",
+            "content:read",
+            "content:write",
+            "media:write"
+          ]
+        }
+      ]
+    }
   },
   {
     "operationId": "adminInviteUser",

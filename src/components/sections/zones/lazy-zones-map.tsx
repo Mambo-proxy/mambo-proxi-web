@@ -19,8 +19,9 @@ function MapPlaceholder({ areas, link }: Props) {
 }
 
 /**
- * Carte et recherche des zones chargées hors du JavaScript initial : dès que la page est au repos, ou plus tôt à
- * l'approche de l'écran (600 px avant). Le titre, la légende et le lien sont rendus avec la page.
+ * Carte (Leaflet et sa feuille de styles) et recherche des zones chargées hors du JavaScript initial : dès que la
+ * page est au repos, ou plus tôt à l'approche de l'écran (600 px avant). Le titre, la légende et le lien sont rendus
+ * avec la page. Les tuiles OpenStreetMap ne sont demandées qu'une fois la carte affichée.
  */
 export function LazyZonesMap(props: Props) {
   const ref = useRef<HTMLDivElement>(null);
@@ -33,7 +34,10 @@ export function LazyZonesMap(props: Props) {
     const start = () => {
       if (started) return;
       started = true;
-      void import('./zones-map').then((module) => setLoadedMap(() => module.ZonesMap));
+      // Leaflet est demandé en même temps que le module de la carte (deux fichiers en parallèle, pas en cascade).
+      void Promise.all([import('./zones-map'), import('leaflet')]).then(([module]) =>
+        setLoadedMap(() => module.ZonesMap),
+      );
     };
     const observer = new IntersectionObserver(([entry]) => entry?.isIntersecting && start(), {
       rootMargin: '600px 0px',

@@ -1,6 +1,7 @@
 import type { DynamicSection, ServiceAreas } from '@/lib/api/schema';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { frenchTypography } from '@/lib/format/typography';
+import { getSiteSettings } from '@/lib/site-data';
 import { QuarterList } from './quarter-list';
 import { LazyZonesMap } from './lazy-zones-map';
 
@@ -8,8 +9,9 @@ import { LazyZonesMap } from './lazy-zones-map';
  * Carte des zones d'intervention : accueil (Figma `290:31634`, mobile `290:31736`) et page Zones d'intervention
  * (`256:12724`, `256:12824`) : fond blanc, py 88 (56), sur-titre Inter SemiBold 13 orange, titre Poppins 40 (28/34 en
  * mobile), gap 12 ; carte et recherche à 40 (28) px, puis la liste des quartiers par zone sur la page Zones.
+ * L'agence (`SiteSettings.agency.latitude/longitude`) est placée sur la carte quand elle est géolocalisée.
  */
-export function ZonesSection({
+export async function ZonesSection({
   section,
   areas,
   withQuarterList = false,
@@ -18,6 +20,7 @@ export function ZonesSection({
   areas: ServiceAreas;
   withQuarterList?: boolean;
 }) {
+  const { agency } = await getSiteSettings();
   return (
     <section
       id={section.anchor ?? undefined}
@@ -38,6 +41,11 @@ export function ZonesSection({
         </div>
         <LazyZonesMap
           areas={areas}
+          agency={
+            agency.latitude != null && agency.longitude != null
+              ? { name: agency.name, lat: agency.latitude, lng: agency.longitude }
+              : null
+          }
           link={
             section.link && (
               <Link
