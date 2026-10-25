@@ -163,7 +163,7 @@ export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps
                       : 'font-medium text-neutral-700 hover:text-text-main',
                   )}
                 >
-                  <span className="flex items-center gap-0.5 whitespace-nowrap">
+                  <span className="flex items-center whitespace-nowrap wide:gap-0.5">
                     {frenchTypography(item.label)}
                     {hasPanel && (
                       <ChevronDown
@@ -192,7 +192,7 @@ export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps
         </ul>
       </nav>
 
-      <div className="hidden items-center gap-2.5 xl:flex">
+      <div className="hidden items-center gap-2 xl:flex wide:gap-2.5">
         <div
           className="relative"
           onMouseEnter={() => menu.hoverOpen(SIGN_UP_KEY)}
@@ -207,7 +207,7 @@ export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps
               menu.openKey === SIGN_UP_KEY ? menu.setOpenKey(null) : openWithFocus(SIGN_UP_KEY)
             }
             onKeyDown={(event) => triggerKeyDown(event, SIGN_UP_KEY)}
-            className="flex cursor-pointer items-center gap-2 rounded-full border border-border-strong px-3 py-3 font-ui text-[14px] leading-5 font-semibold text-text-main transition-colors hover:bg-neutral-100 wide:px-3.5"
+            className="flex cursor-pointer items-center gap-1.5 rounded-full border border-border-strong px-2.5 py-3 font-ui text-[14px] leading-5 font-semibold text-text-main transition-colors hover:bg-neutral-100 wide:gap-2 wide:px-3.5"
           >
             <User aria-hidden size={18} />
             {t('signUp')}
@@ -219,7 +219,7 @@ export function DesktopNav({ items, megaMenu, signUp, compact }: DesktopNavProps
             {...panelProps(SIGN_UP_KEY)}
           />
         </div>
-        <Link href={routes.devis} className={cn(buttonVariants(), 'xl:px-5 wide:px-6')}>
+        <Link href={routes.devis} className={cn(buttonVariants(), 'xl:px-4 wide:px-6')}>
           {t('freeQuote')}
         </Link>
       </div>

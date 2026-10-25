@@ -24,6 +24,8 @@ type SiteHeaderProps = {
  * Barre supérieure + en-tête, collants. Desktop (Figma `45:57`) : 85 px, px 40, compact 72 px au défilement
  * avec ombre `elevation/1` ; la barre supérieure se replie après 80 px. Mobile (`45:125`) : 69 px, px 16,
  * masqué en descendant et réaffiché en remontant.
+ * Entre 1280 et 1440 px (non maquetté), logo, marges et écarts resserrés : la ligne doit tenir avec une réserve
+ * d'au moins 30 px, car le rendu des polices sous Linux élargit les libellés d'environ 40 px par rapport à Windows.
  */
 export function SiteHeader({ navigation, whatsappHref, topBar }: SiteHeaderProps) {
   const t = useTranslations('site.header');
@@ -59,11 +61,11 @@ export function SiteHeader({ navigation, whatsappHref, topBar }: SiteHeaderProps
       <header
         className={cn(
           'relative border-b border-border-default backdrop-blur-[24px] transition-[padding,background-color,box-shadow] duration-200 ease-standard',
-          'flex items-center justify-between gap-3 px-4 py-3 xl:px-4 wide:px-10',
+          'flex items-center justify-between gap-3 px-4 py-3 xl:gap-2 xl:px-3 wide:gap-3 wide:px-10',
           scrolled ? 'bg-neutral-0/95 shadow-1 xl:py-[11.5px]' : 'bg-neutral-0/86 xl:py-[18px]',
         )}
       >
-        <Logo priority className="h-9 wide:h-10" />
+        <Logo priority className="h-9 xl:h-8 wide:h-10" />
         <DesktopNav
           items={navigation.main.filter((item) => item.placement !== 'mobile')}
           megaMenu={navigation.megaMenu}

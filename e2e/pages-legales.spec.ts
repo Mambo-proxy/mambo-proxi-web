@@ -25,10 +25,13 @@ test.describe('pages légales', () => {
 
   test('gestion des cookies : « Modifier mes choix » rouvre les préférences', async ({ page }) => {
     await page.goto('/cookies', { waitUntil: 'domcontentloaded' });
+    // La modale est chargée à sa première ouverture : on ne reclique (hydratation) que si elle n'est pas déjà ouverte.
+    const dialog = page.getByRole('dialog');
     await expect(async () => {
-      await page.getByRole('button', { name: 'Modifier mes choix de cookies' }).click();
-      await expect(page.getByRole('dialog')).toBeVisible({ timeout: 1500 });
-    }).toPass();
+      if (!(await dialog.isVisible()))
+        await page.getByRole('button', { name: 'Modifier mes choix de cookies' }).click({ timeout: 3000 });
+      await expect(dialog).toBeVisible({ timeout: 5000 });
+    }).toPass({ timeout: 30_000 });
   });
 
   test('version anglaise : contenu, sommaire et bouton traduits', async ({ page, pageErrors }) => {

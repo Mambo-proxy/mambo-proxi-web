@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { expect } from './fixtures';
 
 /** Connexion simulée : mot de passe quelconque, puis le code `123456` (gestionnaires de `src/mocks/handlers/auth.ts`). */
@@ -22,4 +22,38 @@ export async function login(page: Page) {
     if (await submit.isVisible()) await submit.click({ timeout: 5000 }).catch(() => {});
   });
   await expect(page).toHaveURL(/\/admin$/, { timeout: 15_000 });
+}
+
+type KeyboardMove = {
+  /** Libellé de l'élément tel qu'annoncé (« Chef privé »). */
+  label: string;
+  key: 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight';
+  /** Positions (à partir de 1) avant et après le déplacement, et nombre d'éléments de la liste. */
+  from: number;
+  to: number;
+  total: number;
+};
+
+/**
+ * Déplacement au clavier dans une `SortableList` (dnd-kit) : `Espace` pour saisir, une flèche, `Espace` pour déposer.
+ * Chaque touche attend l'annonce de l'étape précédente : la flèche n'est prise en compte qu'une fois les emplacements
+ * mesurés (l'élément saisi « survole » alors sa propre place) et son écouteur n'est posé qu'au tour suivant la saisie.
+ * Enchaînées sans attente, les touches devancent ces deux étapes sur une machine rapide (CI) et la flèche est ignorée.
+ */
+export async function moveWithKeyboard(page: Page, handle: Locator, move: KeyboardMove) {
+  const announced = (step: string) =>
+    page.getByText(`« ${move.label} » ${step} sur ${move.total}.`, { exact: true });
+  // Saisie répétée tant que la poignée n'a pas réagi (page pas encore hydratée).
+  await expect(async () => {
+    await handle.focus();
+    await page.keyboard.press('Space');
+    await expect(announced(`déplacé en position ${move.from}`)).toBeAttached({ timeout: 2000 });
+  }).toPass({ timeout: 20_000 });
+  // Flèche répétée seulement si elle a été ignorée : l'annonce suit le déplacement dans le même rendu.
+  await expect(async () => {
+    await page.keyboard.press(move.key);
+    await expect(announced(`déplacé en position ${move.to}`)).toBeAttached({ timeout: 1000 });
+  }).toPass({ timeout: 10_000 });
+  // Dépôt : l'annonce est aussitôt remplacée par le rendu de la liste réordonnée ; l'appelant vérifie le résultat.
+  await page.keyboard.press('Space');
 }

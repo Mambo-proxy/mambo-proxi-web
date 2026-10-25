@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { login } from './admin-helpers';
+import { login, moveWithKeyboard } from './admin-helpers';
 import { expect, expectAccessible, expectNoHorizontalScroll, test } from './fixtures';
 
 /** Ordonnée d'un service dans la liste visible (tableau en desktop, cartes en mobile). */
@@ -51,13 +51,8 @@ test.describe('back-office : services', () => {
     await expect(handle).toBeVisible();
     expect(await top(page, 'Chef privé')).toBeLessThan(await top(page, 'Location de voiture'));
 
-    await expect(async () => {
-      await handle.focus();
-      await page.keyboard.press('Space');
-      await page.keyboard.press('ArrowDown');
-      await page.keyboard.press('Space');
-      await expect(page.getByText('Ordre d’affichage enregistré.')).toBeVisible({ timeout: 3000 });
-    }).toPass({ timeout: 30_000 });
+    await moveWithKeyboard(page, handle, { label: 'Chef privé', key: 'ArrowDown', from: 1, to: 2, total: 5 });
+    await expect(page.getByText('Ordre d’affichage enregistré.')).toBeVisible();
     expect(await top(page, 'Location de voiture')).toBeLessThan(await top(page, 'Chef privé'));
 
     // Onglet « Tous » : nouvelle requête aux données simulées, l'ordre envoyé est bien celui enregistré.

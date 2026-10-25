@@ -27,13 +27,14 @@ export function HomeHero({ section }: { section: HeroSection }) {
       <div className="container-site grid items-center gap-[22px] pt-7 pb-10 xl:grid-cols-[640px_1fr] xl:gap-14 xl:pt-16 xl:pb-[88px]">
         <div className="flex min-w-0 flex-col gap-[22px] xl:gap-7">
           {section.badge && (
-            <p className="flex items-center gap-2.5 self-start rounded-full border border-border-default bg-neutral-0 py-2 pr-4 pl-2">
+            // Largeur bornée : en mobile, le texte passe à la ligne plutôt que de déborder (rendu Linux plus large).
+            <p className="flex max-w-full items-center gap-2.5 self-start rounded-full border border-border-default bg-neutral-0 py-2 pr-4 pl-2">
               {section.badge.tag && (
                 <span className="rounded-full bg-vert-50 px-2 py-[3px] font-ui text-[12px] leading-4 font-semibold tracking-[0.01em] whitespace-nowrap text-vert-700 md:px-2.5 md:py-1 md:text-[13px] md:leading-5 md:tracking-[0.005em] md:whitespace-pre">
                   {section.badge.tag}
                 </span>
               )}
-              <span className="font-ui text-[13px] leading-4 tracking-[0.01em] whitespace-nowrap text-text-muted md:text-[14px] md:leading-5 md:font-medium md:tracking-[0.005em]">
+              <span className="min-w-0 font-ui text-[13px] leading-4 tracking-[0.01em] text-text-muted md:text-[14px] md:leading-5 md:font-medium md:tracking-[0.005em] md:whitespace-nowrap">
                 {frenchTypography(section.badge.text)}
               </span>
             </p>
@@ -104,7 +105,7 @@ export function HomeHero({ section }: { section: HeroSection }) {
             <Visual
               visual={section.visual}
               priority
-              sizes="(min-width: 768px) 500px, 100vw"
+              sizes="(min-width: 768px) 500px, calc(100vw - 40px)"
               className="absolute inset-0 rounded-[28px] md:inset-auto md:top-[3.125%] md:left-[6.5%] md:h-[93.75%] md:w-[81.2%] md:rounded-[32px]"
             />
           )}

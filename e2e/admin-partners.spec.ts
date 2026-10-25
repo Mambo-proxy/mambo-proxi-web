@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { login } from './admin-helpers';
+import { login, moveWithKeyboard } from './admin-helpers';
 import { expect, expectAccessible, expectNoHorizontalScroll, test } from './fixtures';
 
 async function openPartners(page: Page, query = '') {
@@ -83,10 +83,13 @@ test.describe('back-office : partenaires', () => {
     await openPartners(page);
     const handle = page.getByRole('button', { name: 'Déplacer Saveurs de Douala' });
     await expect(handle).toBeVisible({ timeout: 15_000 });
-    await handle.focus();
-    await page.keyboard.press('Space');
-    await page.keyboard.press('ArrowRight');
-    await page.keyboard.press('Space');
+    await moveWithKeyboard(page, handle, {
+      label: 'Saveurs de Douala',
+      key: 'ArrowRight',
+      from: 1,
+      to: 2,
+      total: 8,
+    });
     await expect(page.getByRole('switch').first()).toHaveAccessibleName(
       'Afficher Immo Bonapriso sur le site',
     );
