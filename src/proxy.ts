@@ -116,12 +116,10 @@ export const config = {
   matcher: [
     {
       // Ni fichiers statiques, ni images optimisées, ni routes techniques, ni fichiers publics (extension).
+      // Les préchargements passent aussi par le proxy : sans la réécriture de langue (`/x` → `/fr/x`), ils
+      // recevaient un 404 que la navigation réutilisait ensuite.
       source:
         '/((?!_next/static|_next/image|api/|health|sitemap\\.xml|robots\\.txt|opengraph-image|icon\\.svg|.*\\.[a-zA-Z0-9]+$).*)',
-      missing: [
-        { type: 'header', key: 'next-router-prefetch' },
-        { type: 'header', key: 'purpose', value: 'prefetch' },
-      ],
     },
   ],
 };
