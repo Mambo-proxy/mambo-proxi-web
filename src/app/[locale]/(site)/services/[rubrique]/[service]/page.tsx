@@ -18,8 +18,9 @@ import { whatsappUrl } from '@/lib/whatsapp';
 import { seoMetadata } from '@/lib/seo/metadata';
 import { JsonLd } from '@/components/seo/json-ld';
 import { faqJsonLd, serviceJsonLd } from '@/lib/seo/json-ld';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-type Params = { params: Promise<{ rubrique: string; service: string }> };
+type Params = LocaleParams<{ rubrique: string; service: string }>;
 
 /** Fiche du service, à condition qu'elle appartienne bien à la rubrique de l'adresse. */
 async function getService(rubrique: string, slug: string) {
@@ -32,15 +33,21 @@ async function getService(rubrique: string, slug: string) {
   return service?.category.slug === rubrique ? service : null;
 }
 
+/** Fiches générées au build ; API injoignable : aucune, chaque fiche est générée à sa première visite. */
 export async function generateStaticParams() {
-  const services = await unwrap(api.GET('/v1/services', cached([cacheTags.services])));
-  // Une formule n'a pas de fiche : sa carte mène à la section des formules de sa rubrique.
-  return services
-    .filter((service) => service.kind !== 'formula')
-    .map((service) => ({ rubrique: service.category.slug, service: service.slug }));
+  try {
+    const services = await unwrap(api.GET('/v1/services', cached([cacheTags.services])));
+    // Une formule n'a pas de fiche : sa carte mène à la section des formules de sa rubrique.
+    return services
+      .filter((service) => service.kind !== 'formula')
+      .map((service) => ({ rubrique: service.category.slug, service: service.slug }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  await withLocale(params);
   const { rubrique, service: slug } = await params;
   const service = await getService(rubrique, slug);
   if (!service) return {};
@@ -57,6 +64,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
  * gabarit commun à tous les services, avec le carrousel « Nos offres » sous le héros quand la fiche en a.
  */
 export default async function ServicePage({ params }: Params) {
+  await withLocale(params);
   const { rubrique, service: slug } = await params;
   const [service, settings, t] = await Promise.all([
     getService(rubrique, slug),

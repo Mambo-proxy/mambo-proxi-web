@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { hasLocale, NextIntlClientProvider } from 'next-intl';
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { NextIntlClientProvider } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { RootDocument } from '@/components/root-document';
+import { withLocale } from '@/i18n/request-locale';
 import { routing } from '@/i18n/routing';
 import { SITE_NAME } from '@/lib/seo/site';
 
@@ -12,8 +12,7 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: LayoutProps<'/[locale]'>): Promise<Metadata> {
-  const { locale: requested } = await params;
-  const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
+  const locale = await withLocale(params);
   const t = await getTranslations({ locale, namespace: 'metadata' });
   return {
     title: { default: SITE_NAME, template: `%s | ${SITE_NAME}` },
@@ -23,9 +22,7 @@ export async function generateMetadata({ params }: LayoutProps<'/[locale]'>): Pr
 
 /** Racine du site public, une par langue (`fr` sans préfixe, `en` sous `/en`). */
 export default async function LocaleLayout({ children, params }: LayoutProps<'/[locale]'>) {
-  const { locale } = await params;
-  if (!hasLocale(routing.locales, locale)) notFound();
-  setRequestLocale(locale);
+  const locale = await withLocale(params);
 
   return (
     <RootDocument lang={locale}>

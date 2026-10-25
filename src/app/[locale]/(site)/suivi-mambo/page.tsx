@@ -7,8 +7,10 @@ import { getPage, pageMetadata } from '@/lib/pages';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-export function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await withLocale(params);
   return pageMetadata('suivi-mambo', '/suivi-mambo');
 }
 
@@ -16,7 +18,8 @@ export function generateMetadata(): Promise<Metadata> {
  * Suivi Mambo (desktop `83:9413`, mobile `83:9731`) : page d'information, l'espace client étant hors lot 1
  * (cahier §9). Inscription pour être prévenu de l'ouverture, fonctionnalités à venir, bandeau CTA.
  */
-export default async function SuiviPage() {
+export default async function SuiviPage({ params }: LocaleParams) {
+  await withLocale(params);
   const [page, settings, t, tRubrique] = await Promise.all([
     getPage('suivi-mambo'),
     getSiteSettings(),

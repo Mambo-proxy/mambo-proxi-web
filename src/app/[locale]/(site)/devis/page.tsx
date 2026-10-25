@@ -10,8 +10,10 @@ import { frenchTypography } from '@/lib/format/typography';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { seoMetadata } from '@/lib/seo/metadata';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await withLocale(params);
   const t = await getTranslations('quote');
   return seoMetadata({ title: t('metaTitle'), description: t('metaDescription'), path: '/devis' });
 }
@@ -19,7 +21,8 @@ export async function generateMetadata(): Promise<Metadata> {
 type SearchParams = { searchParams: Promise<{ service?: string; rubrique?: string }> };
 
 /** Devis gratuit (desktop `70:8077`, mobile `70:8481`) : en-tête, progression, formulaire en 3 étapes, récapitulatif. */
-export default async function QuotePage({ searchParams }: SearchParams) {
+export default async function QuotePage({ params, searchParams }: LocaleParams & SearchParams) {
+  await withLocale(params);
   const query = await searchParams;
   const [categories, settings, zones, t, tRubrique] = await Promise.all([
     unwrap(

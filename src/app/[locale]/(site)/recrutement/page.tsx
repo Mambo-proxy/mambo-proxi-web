@@ -11,15 +11,18 @@ import { cacheTags } from '@/lib/api/tags';
 import { getPage, pageMetadata } from '@/lib/pages';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-export function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await withLocale(params);
   return pageMetadata('recrutement', '/recrutement');
 }
 
 type SearchParams = { searchParams: Promise<{ poste?: string }> };
 
 /** Recrutement (desktop `67:6710`, mobile `67:7189`) : atouts, offres, bandeau prestataires, candidature. */
-export default async function RecruitmentPage({ searchParams }: SearchParams) {
+export default async function RecruitmentPage({ params, searchParams }: LocaleParams & SearchParams) {
+  await withLocale(params);
   const { poste } = await searchParams;
   const [page, settings, jobs, t] = await Promise.all([
     getPage('recrutement'),

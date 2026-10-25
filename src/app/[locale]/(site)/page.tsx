@@ -19,6 +19,7 @@ import { whatsappUrl } from '@/lib/whatsapp';
 import { seoMetadata } from '@/lib/seo/metadata';
 import { JsonLd } from '@/components/seo/json-ld';
 import { organizationJsonLd, websiteJsonLd } from '@/lib/seo/json-ld';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
 async function getHomeData() {
   const [page, settings, categories, reviews, summary, partners, zones] = await Promise.all([
@@ -56,7 +57,8 @@ async function getHomeData() {
   return { page, settings, categories, reviews: reviews.data, summary, partners, zones, formulas };
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await withLocale(params);
   const { page, settings } = await getHomeData();
   return seoMetadata({
     title: settings.seo?.defaultTitle ?? settings.siteName,
@@ -68,7 +70,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /** Accueil (Figma `47:151`, mobile `53:530`) : sections de la page `accueil`, dans l'ordre défini dans le back-office. */
-export default async function HomePage() {
+export default async function HomePage({ params }: LocaleParams) {
+  await withLocale(params);
   const data = await getHomeData();
   if (!data.page) notFound();
   const { settings } = data;

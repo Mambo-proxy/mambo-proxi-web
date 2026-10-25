@@ -6,6 +6,7 @@ import { ErrorPanel } from '@/components/sections/errors/error-panel';
 import { buttonVariants } from '@/components/ui/button';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
 export const metadata: Metadata = { title: 'Maintenance en cours', robots: { index: false } };
 
@@ -28,7 +29,8 @@ async function contactLinks() {
  * Page de maintenance (non maquettée, gabarit de la 404) : affichée pendant une mise à jour ; elle ne dépend pas de
  * l'API pour s'afficher et laisse joindre l'agence par e-mail ou WhatsApp.
  */
-export default async function MaintenancePage() {
+export default async function MaintenancePage({ params }: LocaleParams) {
+  await withLocale(params);
   const { email, whatsapp } = await contactLinks();
   return (
     <div className="flex min-h-dvh flex-col bg-neutral-50">

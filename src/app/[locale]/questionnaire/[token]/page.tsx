@@ -9,10 +9,11 @@ import { api, uncached } from '@/lib/api/server';
 import { formatLongDate } from '@/lib/format/date';
 import { frenchTypography } from '@/lib/format/typography';
 import { routes } from '@/lib/routes';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
 export const metadata: Metadata = { title: 'Questionnaire de satisfaction' };
 
-type Params = { params: Promise<{ token: string }> };
+type Params = LocaleParams<{ token: string }>;
 
 /** Carte du questionnaire (`82:9579`) : blanche, bordée, rayon 28, 720 px, p 48 (22 en mobile). */
 const CARD =
@@ -46,6 +47,7 @@ function Unavailable({ title, message }: { title: string; message: string }) {
  * après la prestation. Jeton inconnu → « lien non valide » ; expiré ou déjà utilisé (410) → message de l'API.
  */
 export default async function SurveyPage({ params }: Params) {
+  await withLocale(params);
   const { token } = await params;
   const {
     data: survey,

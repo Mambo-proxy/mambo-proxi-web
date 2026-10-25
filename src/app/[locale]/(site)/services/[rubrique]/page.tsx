@@ -23,8 +23,9 @@ import { whatsappUrl } from '@/lib/whatsapp';
 import { seoMetadata } from '@/lib/seo/metadata';
 import { JsonLd } from '@/components/seo/json-ld';
 import { categoryJsonLd } from '@/lib/seo/json-ld';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-type Params = { params: Promise<{ rubrique: string }> };
+type Params = LocaleParams<{ rubrique: string }>;
 
 /** Nombre d'événements chargés pour l'agenda (3 affichés, les suivants au clic). */
 const AGENDA_LIMIT = 12;
@@ -38,12 +39,18 @@ function getCategory(slug: string) {
   );
 }
 
+/** Rubriques générées au build ; API injoignable : aucune, chaque rubrique est générée à sa première visite. */
 export async function generateStaticParams() {
-  const categories = await unwrap(api.GET('/v1/categories', cached([cacheTags.categories])));
-  return categories.map((category) => ({ rubrique: category.slug }));
+  try {
+    const categories = await unwrap(api.GET('/v1/categories', cached([cacheTags.categories])));
+    return categories.map((category) => ({ rubrique: category.slug }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  await withLocale(params);
   const { rubrique } = await params;
   const category = await getCategory(rubrique);
   if (!category) return {};
@@ -61,6 +68,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
  * « Nos formules » dans le fil d'Ariane.
  */
 export default async function RubriquePage({ params }: Params) {
+  await withLocale(params);
   const { rubrique } = await params;
   const [category, settings, t] = await Promise.all([
     getCategory(rubrique),

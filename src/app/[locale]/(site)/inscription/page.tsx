@@ -5,8 +5,10 @@ import { unwrap } from '@/lib/api/result';
 import { api, cached } from '@/lib/api/server';
 import { cacheTags } from '@/lib/api/tags';
 import { seoMetadata } from '@/lib/seo/metadata';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await withLocale(params);
   const t = await getTranslations('registration');
   return seoMetadata({ title: t('metaTitle'), description: t('metaDescription'), path: '/inscription' });
 }
@@ -14,7 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
 type SearchParams = { searchParams: Promise<{ profil?: string }> };
 
 /** S'inscrire (particulier `70:10558`, professionnel `70:11134`, mobile `70:10903` / `70:11492`). */
-export default async function RegistrationPage({ searchParams }: SearchParams) {
+export default async function RegistrationPage({ params, searchParams }: LocaleParams & SearchParams) {
+  await withLocale(params);
   const { profil } = await searchParams;
   const [categories, t, tRubrique] = await Promise.all([
     unwrap(api.GET('/v1/categories', cached([cacheTags.categories]))),

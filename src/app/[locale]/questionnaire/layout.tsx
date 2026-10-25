@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { Logo } from '@/components/brand/logo';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
@@ -8,7 +9,8 @@ export const metadata: Metadata = { robots: { index: false, follow: false } };
  * Gabarit du questionnaire de satisfaction (`82:9565`) : page autonome ouverte depuis l'e-mail, sans en-tête, pied de
  * page ni WhatsApp flottant — une barre blanche avec le logo centré, puis le contenu sur fond `neutral/50`.
  */
-export default function SurveyLayout({ children }: { children: ReactNode }) {
+export default async function SurveyLayout({ children, params }: LocaleParams & { children: ReactNode }) {
+  await withLocale(params);
   return (
     <div className="flex min-h-dvh flex-col bg-neutral-50">
       <header className="flex justify-center border-b border-border-default bg-neutral-0 px-5 py-[18px]">

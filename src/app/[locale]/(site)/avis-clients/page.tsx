@@ -13,8 +13,10 @@ import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
 import { JsonLd } from '@/components/seo/json-ld';
 import { organizationJsonLd } from '@/lib/seo/json-ld';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-export function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await withLocale(params);
   return pageMetadata('avis-clients', '/avis-clients');
 }
 
@@ -24,7 +26,8 @@ const PAGE_SIZE = 6;
 type SearchParams = { searchParams: Promise<{ page?: string; categorie?: string; tri?: string }> };
 
 /** Avis clients (desktop `68:7186`, mobile `68:7686`) : note globale, avis filtrables et paginés, collecte, CTA. */
-export default async function ReviewsPage({ searchParams }: SearchParams) {
+export default async function ReviewsPage({ params, searchParams }: LocaleParams & SearchParams) {
+  await withLocale(params);
   const query = await searchParams;
   const [page, settings, categories, summary, t] = await Promise.all([
     getPage('avis-clients'),

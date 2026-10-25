@@ -6,8 +6,10 @@ import { getPage, pageMetadata } from '@/lib/pages';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-export function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await withLocale(params);
   return pageMetadata('magazine', '/magazine');
 }
 
@@ -15,7 +17,8 @@ export function generateMetadata(): Promise<Metadata> {
  * Magazine, édition en cours (desktop `254:26265`, mobile `254:26493`) : sections de la page `magazine` — héros et
  * pastilles, édito de la fondatrice, thèmes du numéro, bandeau d'abonnement à la lettre Mambo.
  */
-export default async function MagazinePage() {
+export default async function MagazinePage({ params }: LocaleParams) {
+  await withLocale(params);
   const [page, settings, t] = await Promise.all([
     getPage('magazine'),
     getSiteSettings(),

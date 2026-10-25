@@ -945,3 +945,15 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 
 - **Pas de rognage de l'en-tête** (`overflow-x-clip`) : il masquerait un vrai débordement au lieu de le signaler.
 - **Rendu statique des pages publiques à suivre** : toutes les pages sont dynamiques (langue lue dans les en-têtes, `setRequestLocale` absent des pages), d'où un TTFB de ~500 ms ; chantier en deux lots (pages sans paramètres d'URL, puis lecture des paramètres côté client).
+
+### Rendu statique des pages publiques, premier lot (25 octobre 2026)
+
+- Toutes les pages publiques étaient rendues à chaque requête (TTFB ~500 ms en CI) : la langue n'était fixée que dans `app/[locale]/layout.tsx`, et pages, métadonnées et client de l'API la lisaient dans les en-têtes (`getLocale()`). `withLocale(params)` (`src/i18n/request-locale.ts`) valide la langue des paramètres et appelle `setRequestLocale` en tête de chaque page, de chaque `generateMetadata` et des gabarits.
+- Le client de l'API serveur relance l'erreur de rendu dynamique (`unstable_rethrow`) au lieu de l'avaler (la page devenait dynamique sans le signaler) ; les `generateStaticParams` renvoient `[]` si l'API est injoignable au build (pages générées à la première visite).
+- Prérendues au build, en français et en anglais : accueil, rubriques, 44 fiches service, offres d'emploi, pages éditoriales et légales, Suivi Mambo, Zones d'intervention. TTFB local ~40 ms en cache (contre ~180 ms pour une page dynamique). Restent dynamiques : les pages qui lisent leurs paramètres d'URL (contact, devis, inscription, partenaires, formation, liste des offres, avis), celles à jeton, et le plan du site.
+- Préchargements des liens : le `matcher` du proxy excluait les requêtes `next-router-prefetch` (exemple de Next pour la CSP à nonce) ; sans la réécriture de langue, `/avis-clients` était lu comme une langue inconnue. Le layout retombait auparavant sur le français sans erreur visible (404 de `/?_rsc=` déjà relevé) ; la langue désormais validée rendait l'erreur visible et cassait les navigations (filtre des avis, candidature partenaire). Les préchargements passent maintenant par le proxy.
+
+### Décisions
+
+- **Pas de `force-static`** : `headers()` y renvoie un objet vide, la langue serait retombée sur le français sans erreur pour les pages anglaises.
+- **Second lot à venir** : lire les paramètres d'URL côté client (onglet du contact, service du devis, profil, filtres) pour rendre statiques les pages à formulaire ; `/avis-clients` (filtre et pagination côté serveur) et les pages à jeton restent dynamiques.

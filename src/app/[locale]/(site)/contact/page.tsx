@@ -19,8 +19,10 @@ import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
 import { seoMetadata } from '@/lib/seo/metadata';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await withLocale(params);
   const t = await getTranslations('contact');
   return seoMetadata({ title: t('metaTitle'), description: t('metaDescription'), path: '/contact' });
 }
@@ -40,7 +42,8 @@ type ContactMethod = {
  * Contact (desktop `69:7651`, mobile `69:8178`) : moyens de contact, formulaires, rendez-vous, agence, carte des zones
  * d'intervention (`290:31838`). Pas de bandeau CTA.
  */
-export default async function ContactPage({ searchParams }: SearchParams) {
+export default async function ContactPage({ params, searchParams }: LocaleParams & SearchParams) {
+  await withLocale(params);
   const { onglet } = await searchParams;
   const [settings, categories, zones, t, tRubrique] = await Promise.all([
     getSiteSettings(),

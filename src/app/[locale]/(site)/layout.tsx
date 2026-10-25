@@ -6,18 +6,28 @@ import { SiteFooter } from '@/components/site/site-footer';
 import { SiteHeader } from '@/components/site/site-header';
 import { TopBar } from '@/components/site/top-bar';
 import { WhatsappFloat } from '@/components/site/whatsapp-float';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 import { getNavigation, getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
 
 /** Balise de vérification Google Search Console, saisie dans les Paramètres du back-office. */
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await withLocale(params);
   const settings = await getSiteSettings();
   const google = settings.analytics?.searchConsoleVerification;
   return google ? { verification: { google } } : {};
 }
 
-/** Gabarit des pages publiques : barre supérieure, en-tête, pied de page, WhatsApp flottant, bandeau cookies. */
-export default async function SiteLayout({ children }: { children: ReactNode }) {
+/**
+ * Gabarit des pages publiques : barre supérieure, en-tête, pied de page, WhatsApp flottant, bandeau cookies.
+ * `params` manque quand la page introuvable de `[locale]` réutilise ce gabarit : la langue y est déjà enregistrée par
+ * le gabarit racine.
+ */
+export default async function SiteLayout({
+  children,
+  params,
+}: Partial<LocaleParams> & { children: ReactNode }) {
+  if (params) await withLocale(params);
   const [settings, navigation, t] = await Promise.all([
     getSiteSettings(),
     getNavigation(),

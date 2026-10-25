@@ -1,7 +1,7 @@
 import { ArrowLeft, Banknote, Briefcase, Calendar, Check, Clock, MapPin } from 'lucide-react';
 import type { Metadata, Route } from 'next';
 import { notFound } from 'next/navigation';
-import { getLocale, getTranslations } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { ShareButtons } from '@/components/sections/jobs/share-buttons';
 import { JsonLd } from '@/components/seo/json-ld';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
@@ -16,8 +16,9 @@ import { frenchTypography } from '@/lib/format/typography';
 import { routes } from '@/lib/routes';
 import { jobPostingJsonLd } from '@/lib/seo/json-ld';
 import { seoMetadata } from '@/lib/seo/metadata';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-type Params = { params: Promise<{ slug: string }> };
+type Params = LocaleParams<{ slug: string }>;
 
 function getJob(slug: string) {
   return unwrapOrNull(
@@ -28,12 +29,18 @@ function getJob(slug: string) {
   );
 }
 
+/** Offres générées au build ; API injoignable : aucune, chaque offre est générée à sa première visite. */
 export async function generateStaticParams() {
-  const jobs = await unwrap(api.GET('/v1/jobs', cached([cacheTags.jobs])));
-  return jobs.map((job) => ({ slug: job.slug }));
+  try {
+    const jobs = await unwrap(api.GET('/v1/jobs', cached([cacheTags.jobs])));
+    return jobs.map((job) => ({ slug: job.slug }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  await withLocale(params);
   const { slug } = await params;
   const job = await getJob(slug);
   if (!job) return {};
@@ -83,13 +90,13 @@ function CheckList({ items }: { items: string[] }) {
  * prise de poste, publication ; une information par ligne en mobile), contenu de l'offre, carte « Intéressé·e ? ».
  */
 export default async function JobPage({ params }: Params) {
+  const locale = await withLocale(params);
   const { slug } = await params;
-  const [job, t, tj, tr, locale] = await Promise.all([
+  const [job, t, tj, tr] = await Promise.all([
     getJob(slug),
     getTranslations('job'),
     getTranslations('jobs'),
     getTranslations('rubrique'),
-    getLocale(),
   ]);
   if (!job) notFound();
   const lang = locale === 'en' ? 'en' : 'fr';

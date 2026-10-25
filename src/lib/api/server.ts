@@ -1,6 +1,7 @@
 import 'server-only';
 import createClient from 'openapi-fetch';
 import { cookies } from 'next/headers';
+import { unstable_rethrow } from 'next/navigation';
 import { getLocale } from 'next-intl/server';
 import { defaultLocale } from '@/i18n/routing';
 import { getApiBaseUrl } from './config';
@@ -13,11 +14,16 @@ const FALLBACK_REVALIDATE_SECONDS = 3600;
 /** Client des routes publiques, utilisé par les Server Components. */
 export const api = createClient<paths>({ baseUrl: getApiBaseUrl(), fetch: (request) => transport(request) });
 
-/** Langue de la requête en cours ; hors d'un rendu de page (tests, tâches), le français. */
+/**
+ * Langue du rendu en cours, enregistrée par `withLocale` (`@/i18n/request-locale`) ; hors d'un rendu (tests,
+ * `generateStaticParams`), le français. Les interruptions de Next (rendu dynamique, page introuvable…) sont relancées :
+ * avalées, elles feraient servir une page statique en français à l'adresse anglaise.
+ */
 async function currentLocale(): Promise<string> {
   try {
     return await getLocale();
-  } catch {
+  } catch (error) {
+    unstable_rethrow(error);
     return defaultLocale;
   }
 }

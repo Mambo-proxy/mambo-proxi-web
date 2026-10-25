@@ -4,6 +4,7 @@ import { SiteLink as Link } from '@/i18n/site-link';
 import { buttonVariants } from '@/components/ui/button';
 import { frenchTypography } from '@/lib/format/typography';
 import { routes } from '@/lib/routes';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
 export const metadata: Metadata = { title: 'Merci pour votre avis' };
 
@@ -11,7 +12,8 @@ export const metadata: Metadata = { title: 'Merci pour votre avis' };
  * Remerciement après le questionnaire (desktop `82:9847`, mobile `82:9873`) : pastille de succès animée (80/54/28),
  * titre, texte, « Découvrir nos services » et « Retour à l’accueil ».
  */
-export default function SurveyThanksPage() {
+export default async function SurveyThanksPage({ params }: LocaleParams) {
+  await withLocale(params);
   return (
     <div className="flex w-full max-w-[720px] flex-col items-center gap-6 self-start rounded-[28px] border border-border-default bg-neutral-0 p-[22px] text-center md:gap-7 md:p-12">
       <span

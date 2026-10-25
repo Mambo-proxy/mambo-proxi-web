@@ -12,15 +12,18 @@ import { cacheTags } from '@/lib/api/tags';
 import { getPage, pageMetadata } from '@/lib/pages';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-export function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await withLocale(params);
   return pageMetadata('formation', '/formation');
 }
 
 type SearchParams = { searchParams: Promise<{ categorie?: string }> };
 
 /** Formation (desktop `66:6190`, mobile `66:6730`) : offres, catalogue filtrable, demande de formation. Pas de bandeau CTA. */
-export default async function TrainingPage({ searchParams }: SearchParams) {
+export default async function TrainingPage({ params, searchParams }: LocaleParams & SearchParams) {
+  await withLocale(params);
   const { categorie } = await searchParams;
   const [page, settings, trainings, t] = await Promise.all([
     getPage('formation'),

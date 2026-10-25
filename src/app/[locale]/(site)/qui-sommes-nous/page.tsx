@@ -6,13 +6,16 @@ import { getPage, pageMetadata } from '@/lib/pages';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-export function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await withLocale(params);
   return pageMetadata('qui-sommes-nous', '/qui-sommes-nous');
 }
 
 /** Qui sommes-nous ? (desktop `63:4730`, mobile `63:5199`) : sections de la page `qui-sommes-nous`. */
-export default async function AboutPage() {
+export default async function AboutPage({ params }: LocaleParams) {
+  await withLocale(params);
   const [page, settings, t] = await Promise.all([
     getPage('qui-sommes-nous'),
     getSiteSettings(),

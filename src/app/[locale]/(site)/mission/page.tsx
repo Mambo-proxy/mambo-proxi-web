@@ -6,13 +6,16 @@ import { getPage, pageMetadata } from '@/lib/pages';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-export function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await withLocale(params);
   return pageMetadata('mission', '/mission');
 }
 
 /** Mission (desktop `64:5257`, mobile `64:5667`) : sections de la page `mission`. */
-export default async function MissionPage() {
+export default async function MissionPage({ params }: LocaleParams) {
+  await withLocale(params);
   const [page, settings, t] = await Promise.all([
     getPage('mission'),
     getSiteSettings(),

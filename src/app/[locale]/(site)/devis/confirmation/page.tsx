@@ -9,8 +9,10 @@ import { frenchTypography } from '@/lib/format/typography';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await withLocale(params);
   const t = await getTranslations('quoteConfirmation');
   return { title: t('metaTitle'), robots: { index: false } };
 }
@@ -25,7 +27,8 @@ type SearchParams = { searchParams: Promise<{ ref?: string }> };
  * référence, « Suivre sur WhatsApp » (message pré-rempli avec la référence) et « Retour à l’accueil ».
  * Sans référence valide, retour au formulaire.
  */
-export default async function QuoteConfirmationPage({ searchParams }: SearchParams) {
+export default async function QuoteConfirmationPage({ params, searchParams }: LocaleParams & SearchParams) {
+  await withLocale(params);
   const { ref } = await searchParams;
   if (!ref || !REFERENCE.test(ref)) redirect(routes.devis);
   const [settings, t] = await Promise.all([getSiteSettings(), getTranslations('quoteConfirmation')]);

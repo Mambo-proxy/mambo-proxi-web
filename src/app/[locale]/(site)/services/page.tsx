@@ -13,6 +13,7 @@ import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
 import { seoMetadata } from '@/lib/seo/metadata';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
 async function getServicesData() {
   const [page, settings, categories] = await Promise.all([
@@ -33,13 +34,15 @@ async function getServicesData() {
   return { page, settings, categories };
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await withLocale(params);
   const [{ page }, t] = await Promise.all([getServicesData(), getTranslations('services')]);
   return seoMetadata({ title: t('metaTitle'), path: '/services', seo: page?.seo });
 }
 
 /** « Nos services » (Figma `58:828`, mobile `58:1543`) : héros, rubriques avec leurs services, bandeau CTA. */
-export default async function ServicesPage() {
+export default async function ServicesPage({ params }: LocaleParams) {
+  await withLocale(params);
   const { page, settings, categories } = await getServicesData();
   if (!page) notFound();
   const whatsappHref = settings.whatsapp.enabled

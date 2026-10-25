@@ -12,8 +12,10 @@ import { cacheTags } from '@/lib/api/tags';
 import { getPage, pageMetadata } from '@/lib/pages';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-export function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await withLocale(params);
   return pageMetadata('partenaires', '/partenaires');
 }
 
@@ -22,7 +24,8 @@ const CATEGORIES: PartnerCategory[] = ['EXPERIENCE', 'IMMOBILIER', 'ENTREPRISES'
 type SearchParams = { searchParams: Promise<{ categorie?: string; type?: string }> };
 
 /** Partenaires (desktop `65:5704`, mobile `65:6208`) : logos filtrables, types de partenariat, formulaire. Pas de bandeau CTA. */
-export default async function PartnersPage({ searchParams }: SearchParams) {
+export default async function PartnersPage({ params, searchParams }: LocaleParams & SearchParams) {
+  await withLocale(params);
   const query = await searchParams;
   const [page, settings, partners, t] = await Promise.all([
     getPage('partenaires'),

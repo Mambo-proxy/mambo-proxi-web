@@ -3,6 +3,7 @@ import { SiteLink as Link } from '@/i18n/site-link';
 import { TokenAction } from '@/components/sections/system/token-action';
 import { buttonVariants } from '@/components/ui/button';
 import { routes } from '@/lib/routes';
+import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
 export const metadata: Metadata = { title: 'Confirmer votre rendez-vous', robots: { index: false } };
 
@@ -12,7 +13,8 @@ type SearchParams = { searchParams: Promise<{ ref?: string; token?: string }> };
  * Lien de l'e-mail « nouveau créneau proposé » : le client accepte le créneau
  * (`POST /v1/appointments/{reference}/accept-proposal`) ; en cas d'échec, il peut en choisir un autre.
  */
-export default async function AcceptAppointmentPage({ searchParams }: SearchParams) {
+export default async function AcceptAppointmentPage({ params, searchParams }: LocaleParams & SearchParams) {
+  await withLocale(params);
   const { ref, token } = await searchParams;
   return (
     <TokenAction
