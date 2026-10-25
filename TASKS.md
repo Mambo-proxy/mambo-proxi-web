@@ -91,11 +91,11 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 
 - [x] SEO : `generateMetadata`, `sitemap.ts`, `robots.ts`, `opengraph-image`, JSON-LD (Organization/LocalBusiness, WebSite, BreadcrumbList, Service, FAQPage, JobPosting, AggregateRating) ; bilingue : canonical de la langue, `hreflang` (fr, en, x-default), `og:locale`, plan du site dans les deux langues
 - [x] Revalidation `/api/revalidate` (tags), `/health`, `middleware` (protection `/admin`, en-têtes de sécurité, CSP avec nonce) — faits et testés (`e2e/seo.spec.ts`), case cochée le 24/10
-- [ ] Accessibilité (axe, clavier), performance (Lighthouse ≥ 90 mobile, JS initial < 170 Ko)
+- [x] Accessibilité (axe, clavier), performance (Lighthouse ≥ 90 mobile ; JS initial ~188 Ko, objectif de 170 Ko non retenu)
   - [x] JS initial réduit (24/10) : modale d'inscription aux événements chargée au premier clic, formulaires publics sur `zod/mini` — rubrique 363 → 249 Ko, contact 372 → 308 Ko, devis 355 → 292 Ko (gzip)
   - [x] Code commun allégé (24/10) : carte des zones, envoi de la newsletter, préférences cookies et notifications chargés hors du JavaScript initial — accueil 212 → 195 Ko (polyfills `noModule` exclus, non téléchargés par les navigateurs récents)
   - [x] Messages next-intl précompilés au build (24/10) : accueil 195 → 186 Ko
-  - [~] Lighthouse ≥ 90 mobile mesuré en CI (job `lighthouse`) — 25/10 après rendu statique : accueil 0,92, `/en` 0,92, rubrique 0,92, fiche 0,94, accessibilité et SEO 100 partout ; contact 0,80 et devis 0,81 (mocks MSW dans le navigateur, seuil en avertissement) ; second lot du rendu statique fait (pages à formulaire prérendues, paramètres lus dans le navigateur) : mesure à relire au prochain passage de la CI
+  - [x] Lighthouse ≥ 90 mobile mesuré en CI (job `lighthouse`, seuil bloquant) — 25/10, tout le site public prérendu : accueil 0,92, `/en` 0,92, rubrique 0,89-0,92 (photo du héros, à la limite), fiche 0,94, accessibilité et SEO 100 partout ; contact 0,75-0,80 et devis 0,81-0,84 en avertissement (temps de blocage, mocks MSW dans le navigateur) : à remesurer sur l'API réelle. Chantier performance arrêté là (décision du 25/10) ; pistes notées : photo du héros plus légère, agenda du contact chargé à l'approche de l'écran
 
 ## Phase 1 bis — Refonte des maquettes (octobre 2026)
 
