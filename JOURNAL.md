@@ -970,3 +970,25 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 
 - **État par défaut affiché brièvement à l'arrivée avec un paramètre** (ex. étape 1 du devis avant l'étape 2 avec `?service=`) : inévitable avec du HTML statique ; sans paramètre, rien ne change.
 - Budget de JavaScript de Lighthouse relevé à 330 000 octets : les pages à formulaire étant statiques, Next précharge leur JavaScript (formulaires, validation) depuis les liens visibles (« Devis gratuit », « S'inscrire »), environ 2 s après le chargement, en priorité basse. Lighthouse le compte (301 à 310 Ko mesurés) sans effet sur le score ; le préchargement est gardé pour la navigation.
+
+### Recherche, sélecteur de service, carte, audience, rôles et tâches (25 octobre 2026)
+
+- **Contrat** (dépôt de l'API) : `GET /v1/search`, `POST /v1/analytics/events`, `GET /v1/admin/analytics/summary`, `GET /v1/admin/users/presence`, `GET /v1/admin/roles`, `GET /v1/admin/me/tasks` ; `x-permissions` sur les 136 opérations du back-office ; rôles AGENT et WRITER ; `CurrentUser.permissions`, `AdminUser.lastActiveAt` ; assignation, échéance (`dueAt`, `isOverdue`) et filtres `assignee` / `due` ; coordonnées des quartiers et contours GeoJSON des zones.
+- **Recherche globale** : panneau chargé au premier usage (loupe, `/`), page `/recherche` prérendue qui lit `?q=` dans le navigateur ; les résultats du magazine et des formations ouvrent la page sur leur ancre.
+- **Trouver mon service** (accueil) : rubriques et services de la navigation, saisie libre insensible aux accents, « C'est parti » vers la fiche, « Demander un devis » avec le service présélectionné.
+- **Transitions** : `<ViewTransition>` de React 19.3 entre les pages du site (en-tête fixe, contenu en fondu), apparitions en cascade (`useStaggerIn`), cartes qui se soulèvent au survol ; mouvements coupés avec `prefers-reduced-motion`.
+- **Carte OpenStreetMap** : Leaflet (~40 Ko gzip) chargé au repos ou à l'approche de l'écran, jamais dans le JavaScript initial ; tuiles configurables (`NEXT_PUBLIC_MAP_TILES_URL`), origine ajoutée à `img-src`. L'ancienne carte SVG est supprimée ; le back-office la remplace par la même carte (saisie des coordonnées, contour GeoJSON).
+- **Audience** : envoi groupé (`sendBeacon`) des pages vues et des clics marqués `data-track` ; identifiant de visiteur seulement après consentement. Tableau de bord : chiffres, courbe sur 7/30/90 jours, clics par action, pages les plus vues, équipe connectée.
+- **Rôles et tâches** : mocks avec la matrice de permissions du contrat (403 centralisé), comptes de démonstration par rôle (`carine.eboa@`, `paul.ngando@`, `grace.nkongo@`), garde des écrans « Accès réservé », carte « Mes tâches ».
+
+### Décisions
+
+- **Mesure sans consentement limitée au comptage anonyme agrégé** (pas d'identifiant ni de cookie) ; visiteurs uniques comptés seulement avec consentement (CLAUDE.md mis à jour).
+- **AGENT** ne voit que les demandes et rendez-vous qui lui sont assignés (pas de file commune, pas de prise en charge spontanée).
+- **Fond de carte** : tuiles OpenStreetMap publiques en développement ; fournisseur à choisir pour la production (limites d'usage d'OSM).
+
+### Difficultés et solutions
+
+- **Débordement d'1 px à 1440** après l'ajout de la loupe : marges de l'en-tête et du menu réduites (≈ 24 px de réserve pour les polices Linux de la CI).
+- **Croix des info-bulles de la carte recouverte par les boutons de zoom en mobile** (axe `target-size`) : largeur des info-bulles limitée à la place libre, recentrage à l'écart de la colonne des boutons, croix agrandie à 32 px.
+- **Tableau de bord trop large en mobile** : un `<table class="sr-only">` garde sa largeur de contenu (571 px) et les grilles sans colonne explicite suivaient le contenu le plus large ; tableau placé dans un `div.sr-only`, grilles en `grid-cols-1`, tableau défilant focalisable.

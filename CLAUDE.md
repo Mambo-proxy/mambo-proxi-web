@@ -64,7 +64,7 @@ Les données viennent de l'API (`mambo-proxi-api`) décrite par `contracts/opena
 
 - Aucun prix affiché (devis uniquement), aucun paiement en ligne, pas d'espace client (cahier §9).
 - WCAG 2.2 AA, mobile d'abord, Lighthouse ≥ 90 sur mobile, `prefers-reduced-motion` respecté.
-- RGPD : cases de consentement non cochées par défaut, double opt-in newsletter, aucun script de mesure avant consentement.
+- RGPD : cases de consentement non cochées par défaut, double opt-in newsletter, aucun script de mesure tiers (GA4) avant consentement ; mesure d'audience interne (`/v1/analytics/events`) : sans consentement, comptage anonyme agrégé uniquement (pages vues, clics, sans identifiant de visiteur ni cookie) ; visiteurs uniques comptés seulement avec consentement (décision du 25/10/2026).
 - Langue : interface, contenus, messages d'erreur et documentation en français ; code et noms techniques en anglais.
 - Ne jamais mentionner d'outil d'IA ni d'assistant dans le code, les commentaires, la documentation, l'interface ou les messages de commit ; aucune ligne `Co-Authored-By` d'outil. Le dépôt appartient à la cliente.
 - Versions : dernières versions stables vérifiées dans la documentation officielle, figées (lockfile, `packageManager`, `.nvmrc`).

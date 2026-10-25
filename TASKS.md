@@ -36,7 +36,7 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
 - [x] Pied de page + formulaire newsletter (états succès / déjà inscrit / erreur)
 - [x] Bouton WhatsApp flottant (apparition, pulsation, étiquette, décalage cookies)
 - [x] Bandeau cookies + modale « Personnaliser » + chargement GA4 après consentement
-- [~] Bandeau CTA (variantes par page), fil d'Ariane, transitions de page — bandeau et fil d'Ariane faits ; reste : transitions de page (View Transitions)
+- [x] Bandeau CTA (variantes par page), fil d'Ariane, transitions de page — transitions de page (View Transitions de React 19.3) et animations d'apparition faites le 25/10
 - [x] Protection Turnstile (widget invisible) sur tous les formulaires publics, newsletter comprise — fait le 24/10 ; reste à essayer avec une vraie clé (`NEXT_PUBLIC_TURNSTILE_SITE_KEY`, clé de test Cloudflare) sur l'environnement de recette, et à vérifier que l'API refuse un jeton vide en production
 
 ### 1.3 Pages publiques (desktop 1440, tablette, mobile 390)
@@ -96,6 +96,15 @@ Une page n'est cochée qu'après : fidélité 390/768/1280/1440 vérifiée (`qa/
   - [x] Code commun allégé (24/10) : carte des zones, envoi de la newsletter, préférences cookies et notifications chargés hors du JavaScript initial — accueil 212 → 195 Ko (polyfills `noModule` exclus, non téléchargés par les navigateurs récents)
   - [x] Messages next-intl précompilés au build (24/10) : accueil 195 → 186 Ko
   - [x] Lighthouse ≥ 90 mobile mesuré en CI (job `lighthouse`, seuil bloquant) — 25/10, tout le site public prérendu : accueil 0,92, `/en` 0,92, rubrique 0,89-0,92 (photo du héros, à la limite), fiche 0,94, accessibilité et SEO 100 partout ; contact 0,75-0,80 et devis 0,81-0,84 en avertissement (temps de blocage, mocks MSW dans le navigateur) : à remesurer sur l'API réelle. Chantier performance arrêté là (décision du 25/10) ; pistes notées : photo du héros plus légère, agenda du contact chargé à l'approche de l'écran
+
+### 1.6 Fonctions ajoutées (demande du 25/10, non maquettées)
+
+- [x] Recherche globale : loupe de l'en-tête et raccourci `/` (suggestions groupées, clavier), page `/recherche` ↔ `/en/search` (non indexée) ; magazine et formations ouverts sur leur ancre — contrat `GET /v1/search`
+- [x] Accueil : « Trouver mon service » (rubrique ou service, saisie libre insensible aux accents, fiche ou devis présélectionné)
+- [x] Carte interactive OpenStreetMap (Leaflet chargé à la demande) : contours des zones, 19 quartiers, agence ; molette avec Ctrl, deux doigts en mobile ; back-office : coordonnées des quartiers (saisie ou clic) et contour GeoJSON — contrat `ZoneQuarter.coordinates`, `Zone.area`
+- [x] Mesure d'audience interne : pages vues et clics comptés anonymement sans consentement, visiteurs uniques avec consentement ; tableau de bord « Audience » et « Équipe connectée » — contrat `POST /v1/analytics/events`, `GET /v1/admin/analytics/summary`, `GET /v1/admin/users/presence`
+- [x] Rôles et tâches : 5 rôles (ADMIN, MANAGER, AGENT, EDITOR, WRITER), permissions par opération (`x-permissions`), menus et écrans filtrés, assignation et échéance des demandes et rendez-vous, filtres « Assignées à » / « Échéance », carte « Mes tâches », notification d'assignation — contrat `GET /v1/admin/roles`, `GET /v1/admin/me/tasks`
+  - [ ] À trancher : EDITOR peut assigner et anonymiser dans la matrice du contrat ; boutons d'écriture des écrans de contenus encore affichés pour MANAGER (l'API répond 403)
 
 ## Phase 1 bis — Refonte des maquettes (octobre 2026)
 
