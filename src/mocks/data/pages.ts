@@ -41,7 +41,7 @@ const quiSommesNous: Page = {
   seo: {
     title: 'Qui sommes-nous ? Une agence de services de proximité au Cameroun',
     description:
-      'MAMBO Proxi, agence de services de proximité à Douala : services à domicile, immobilier, services du quotidien, expérience, culture et événementiel, avec des intervenants de confiance.',
+      'MAMBO Proxi, agence de services de proximité à Douala : à domicile, immobilier, quotidien, expérience, culture et événementiel, avec des intervenants de confiance.',
     ogImageUrl: null,
     noindex: false,
   },
@@ -1553,7 +1553,7 @@ const magazine: Page = {
   updatedAt: '2026-10-02T08:00:00.000Z',
   isPreview: false,
   seo: {
-    title: 'Magazine Mambo Proxi — Édition n° 1 : ensemble vers un bien-être global',
+    title: 'Magazine Mambo Proxi, édition n° 1 : ensemble vers un bien-être global',
     description:
       'Le magazine du bien-être global : santé, nutrition, beauté, immobilier, solidarité et culture. À lire en ligne et à recevoir par e-mail.',
     ogImageUrl: null,
