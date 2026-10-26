@@ -20,7 +20,7 @@ import { adminSettingsHandlers } from './admin-settings';
 import { adminMediaHandlers } from './admin-media';
 import { analyticsHandlers } from './analytics';
 import { appointmentHandlers } from './appointments';
-import { authHandlers } from './auth';
+import { authHandlers, expiredAccessTokenHandler } from './auth';
 import { catalogueHandlers } from './catalogue';
 import { contractHandlers } from './contract';
 import { eventHandlers } from './events';
@@ -41,6 +41,7 @@ import { zoneHandlers } from './zones';
  * puis une erreur explicite pour toute route de l'API qui ne serait pas simulée.
  */
 export const handlers = [
+  expiredAccessTokenHandler,
   ...catalogueHandlers,
   ...siteHandlers,
   ...authHandlers,

@@ -2,8 +2,14 @@ import { http, HttpResponse } from 'msw';
 import type { CurrentUser, LoginInput, LoginResult } from '@/lib/api/schema';
 import { problem } from '../problem';
 import {
+  MOCK_EXPIRED_ACCESS_TOKEN,
+  MOCK_REFRESH_COOKIE,
+  MOCK_SESSION_COOKIE,
+  MOCK_SET_COOKIE_HEADER,
   MOCK_TRUSTED_DEVICE_COOKIE,
+  accessTokenCookie,
   clearedSessionCookies,
+  mockUser,
   mockUsers,
   readCookie,
   sessionCookies,
@@ -37,6 +43,16 @@ function hint(email: string) {
   const [name = '', domain = ''] = email.split('@');
   return `${name.slice(0, 1)}•••••@${domain}`;
 }
+
+/**
+ * Jeton d'accès expiré (`mp_at=expire`, voir `MOCK_EXPIRED_ACCESS_TOKEN`) : toute route du back-office répond 401,
+ * comme l'API au-delà des 15 minutes. Placé avant tous les gestionnaires ; sans effet sinon.
+ */
+export const expiredAccessTokenHandler = http.all('*/v1/admin/*', ({ request }) => {
+  if (readCookie(request, MOCK_SESSION_COOKIE) === MOCK_EXPIRED_ACCESS_TOKEN)
+    return problem(401, 'Veuillez vous reconnecter.');
+  return undefined;
+});
 
 export const authHandlers = [
   http.post('*/v1/auth/login', async ({ request }) => {
@@ -111,11 +127,14 @@ export const authHandlers = [
 
   http.post('*/v1/auth/logout', () => withCookies(null, clearedSessionCookies, { status: 204 })),
 
-  http.post('*/v1/auth/refresh', ({ request }) =>
-    sessionUser(request)
-      ? new HttpResponse(null, { status: 204 })
-      : problem(401, 'Votre session a expiré. Merci de vous reconnecter.'),
-  ),
+  // Rotation : `mp_rt` doit désigner un compte de démonstration (sinon 401 et cookies effacés, comme l'API).
+  http.post('*/v1/auth/refresh', ({ request }) => {
+    const user = mockUser(readCookie(request, MOCK_REFRESH_COOKIE));
+    if (user) return withCookies(null, [accessTokenCookie(user)], { status: 204 });
+    const refused = problem(401, 'Veuillez vous reconnecter.');
+    refused.headers.set(MOCK_SET_COOKIE_HEADER, JSON.stringify(clearedSessionCookies));
+    return refused;
+  }),
 
   http.post('*/v1/auth/forgot-password', () =>
     HttpResponse.json(

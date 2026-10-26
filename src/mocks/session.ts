@@ -8,6 +8,15 @@ import { problem } from './problem';
  * déposer : elle les décrit dans l'en-tête `x-mock-set-cookie`, appliqué au navigateur par `resolveMockRequest`.
  */
 export const MOCK_SESSION_COOKIE = 'mp_at';
+/** Jeton de rafraîchissement simulé : identifiant du compte, comme `mp_at` (`POST /v1/auth/refresh`). */
+export const MOCK_REFRESH_COOKIE = 'mp_rt';
+/**
+ * Jeton d'accès expiré (tests) : avec `mp_at=expire`, toute requête du back-office répond 401 jusqu'au
+ * renouvellement par `POST /v1/auth/refresh`, qui réussit si `mp_rt` désigne un compte de démonstration.
+ */
+export const MOCK_EXPIRED_ACCESS_TOKEN = 'expire';
+/** Durée du jeton d'accès, comme l'API : au-delà, le cookie `mp_at` disparaît et la session est renouvelée. */
+const ACCESS_TOKEN_MAX_AGE = 900;
 export const MOCK_TRUSTED_DEVICE_COOKIE = 'mp_td';
 export const MOCK_SET_COOKIE_HEADER = 'x-mock-set-cookie';
 export const MOCK_COOKIE_HEADER = 'x-mock-cookie';
@@ -93,11 +102,17 @@ export function requireSession(request: Request) {
   return sessionUser(request) ? null : problem(401, 'Votre session a expiré. Merci de vous reconnecter.');
 }
 
+/** Cookie du jeton d'accès (15 min), déposé à la connexion et à chaque renouvellement. */
+export function accessTokenCookie(user: CurrentUser): string {
+  return `${MOCK_SESSION_COOKIE}=${user.id}; path=/; samesite=lax; max-age=${ACCESS_TOKEN_MAX_AGE}`;
+}
+
 /** Cookies de session à déposer (format `document.cookie`). */
 export function sessionCookies(user: CurrentUser, rememberMe: boolean, trustDevice = false): string[] {
   const maxAge = rememberMe ? '; max-age=2592000' : '';
   return [
-    `${MOCK_SESSION_COOKIE}=${user.id}; path=/; samesite=lax${maxAge}`,
+    accessTokenCookie(user),
+    `${MOCK_REFRESH_COOKIE}=${user.id}; path=/; samesite=lax${maxAge}`,
     `mp_csrf=mock-csrf-token; path=/; samesite=lax${maxAge}`,
     ...(trustDevice
       ? [`${MOCK_TRUSTED_DEVICE_COOKIE}=${user.id}; path=/; samesite=lax; max-age=2592000`]
@@ -107,6 +122,7 @@ export function sessionCookies(user: CurrentUser, rememberMe: boolean, trustDevi
 
 export const clearedSessionCookies = [
   `${MOCK_SESSION_COOKIE}=; path=/; max-age=0`,
+  `${MOCK_REFRESH_COOKIE}=; path=/; max-age=0`,
   'mp_csrf=; path=/; max-age=0',
 ];
 

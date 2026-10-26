@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import createIntlMiddleware from 'next-intl/middleware';
 import { routing } from '@/i18n/routing';
+import { mergeCookieHeader, renewSession } from '@/lib/admin/session-renewal';
 import { getApiBaseUrl } from '@/lib/api/config';
 import { transport } from '@/lib/api/transport';
 import { adminCsp } from '@/lib/security/headers';
@@ -61,13 +62,31 @@ function isAdminPublic(pathname: string): boolean {
   return ADMIN_PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
 }
 
-/** Back-office : redirection vers la connexion sans session ; CSP stricte avec nonce ; jamais indexé. */
-async function admin(request: NextRequest): Promise<NextResponse> {
+function loginRedirect(request: NextRequest, setCookies: string[] = []): NextResponse {
   const { pathname, search } = request.nextUrl;
-  if (!isAdminPublic(pathname) && !hasSession(request)) {
-    const login = new URL('/admin/connexion', request.url);
-    if (pathname !== '/admin') login.searchParams.set('suite', `${pathname}${search}`);
-    return NextResponse.redirect(login);
+  const login = new URL('/admin/connexion', request.url);
+  if (pathname !== '/admin') login.searchParams.set('suite', `${pathname}${search}`);
+  const response = NextResponse.redirect(login);
+  for (const cookie of setCookies) response.headers.append('set-cookie', cookie);
+  return response;
+}
+
+/**
+ * Back-office : redirection vers la connexion sans session ; jeton d'accès expiré (cookie `mp_at` absent, `mp_rt`
+ * présent) → session renouvelée avant le rendu, ou connexion si le renouvellement est refusé ; CSP stricte avec
+ * nonce ; jamais indexé.
+ */
+async function admin(request: NextRequest): Promise<NextResponse> {
+  const { pathname } = request.nextUrl;
+  const isPublic = isAdminPublic(pathname);
+  if (!isPublic && !hasSession(request)) return loginRedirect(request);
+
+  let renewed: string[] = [];
+  const refreshToken = request.cookies.get('mp_rt')?.value;
+  if (!isPublic && refreshToken && !request.cookies.get('mp_at')?.value) {
+    const renewal = await renewSession(refreshToken, request.headers.get('user-agent'));
+    if (renewal.kind === 'expired') return loginRedirect(request, renewal.cookies);
+    if (renewal.kind === 'renewed') renewed = renewal.cookies;
   }
 
   const nonce = btoa(crypto.randomUUID());
@@ -75,7 +94,10 @@ async function admin(request: NextRequest): Promise<NextResponse> {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-nonce', nonce);
   requestHeaders.set('Content-Security-Policy', csp);
+  if (renewed.length > 0)
+    requestHeaders.set('cookie', mergeCookieHeader(request.headers.get('cookie'), renewed));
   const response = NextResponse.next({ request: { headers: requestHeaders } });
+  for (const cookie of renewed) response.headers.append('set-cookie', cookie);
   response.headers.set('Content-Security-Policy', csp);
   response.headers.set('X-Robots-Tag', 'noindex, nofollow');
   return response;

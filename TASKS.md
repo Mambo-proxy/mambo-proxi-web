@@ -141,6 +141,7 @@ Les maquettes ont été refondues mi-octobre 2026 (recentrage sur Douala et les 
 ## Phase 3 — Intégration
 
 - [ ] Branchement sur l'API réelle, téléversements, OTP, revalidation par tags
+- [x] Renouvellement de la session du back-office (`POST /v1/auth/refresh`) : sur un 401 dans le navigateur (renouvellement unique partagé, rejeu avec le nouveau jeton CSRF, retour à la connexion avec `?suite=` si refusé) et au chargement d'une page (proxy, cookie `mp_at` expiré) ; mocks `mp_at=expire` / `mp_rt` ; tests unitaires et `e2e/admin-session.spec.ts`
 - [ ] E2E de bout en bout sur la pile Docker (devis, contact + RDV, inscription, candidature, newsletter, questionnaire, cookies, BO : OTP, demande → « Prestation réalisée », ajout et publication d'un service, page, avis)
 
 ## Phase 4 — Production

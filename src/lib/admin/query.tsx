@@ -4,15 +4,14 @@ import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@ta
 import { useState, type ReactNode } from 'react';
 import { toast } from '@/components/ui/toaster';
 import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
-import { adminRoutes } from './routes';
+import { redirectToLogin } from './expired-session';
 
-/** Session expirée : retour à l'écran de connexion, en revenant ensuite sur la page en cours. */
+/**
+ * Session expirée : le client a déjà tenté de la renouveler (`browserApi`) ; un `401` restant ramène à l'écran de
+ * connexion, puis à la page en cours.
+ */
 function onUnauthorized(error: unknown) {
-  if (!(error instanceof ApiError) || error.status !== 401) return;
-  const next = `${window.location.pathname}${window.location.search}`;
-  // Rechargement complet volontaire : le cache des données de la session expirée est abandonné.
-  // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-  window.location.assign(`${adminRoutes.login}?suite=${encodeURIComponent(next)}`);
+  if (error instanceof ApiError && error.status === 401) redirectToLogin();
 }
 
 function createClient() {

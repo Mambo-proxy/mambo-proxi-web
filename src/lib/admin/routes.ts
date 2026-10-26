@@ -37,3 +37,8 @@ export function safeNextPath(value: string | null | undefined): Route {
     return adminRoutes.dashboard;
   return value as Route;
 }
+
+/** Écran de connexion qui ramène ensuite à `next` (`/admin/connexion?suite=…`). */
+export function loginRoute(next: string): Route {
+  return `${adminRoutes.login}?suite=${encodeURIComponent(next)}` as Route;
+}

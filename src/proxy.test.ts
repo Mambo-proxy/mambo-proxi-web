@@ -2,6 +2,7 @@ import { http, HttpResponse } from 'msw';
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { server } from '@/mocks/node';
+import { resetSessionRenewals } from '@/lib/admin/session-renewal';
 import { proxy, resetMaintenanceCache } from './proxy';
 
 function request(path: string, cookies: Record<string, string> = {}) {
@@ -21,7 +22,10 @@ function maintenance(enabled: boolean) {
   );
 }
 
-beforeEach(() => resetMaintenanceCache());
+beforeEach(() => {
+  resetMaintenanceCache();
+  resetSessionRenewals();
+});
 afterEach(() => vi.unstubAllEnvs());
 
 describe('proxy — back-office', () => {
@@ -43,8 +47,102 @@ describe('proxy — back-office', () => {
   });
 
   it('laisse passer une session ouverte', async () => {
-    const response = await proxy(request('/admin', { mp_rt: 'jeton' }));
+    const response = await proxy(request('/admin', { mp_at: 'acces', mp_rt: 'jeton' }));
     expect(response.headers.get('location')).toBeNull();
+  });
+
+  describe('jeton d’accès expiré (cookie mp_at absent)', () => {
+    /** Renouvellement simulé : cookies reçus et nombre d'appels. */
+    function refreshRoute(status: 204 | 401, setCookies: string[]) {
+      const calls: { cookie: string | null; userAgent: string | null; csrf: string | null }[] = [];
+      server.use(
+        http.post('*/v1/auth/refresh', async ({ request }) => {
+          calls.push({
+            cookie: request.headers.get('cookie'),
+            userAgent: request.headers.get('user-agent'),
+            csrf: request.headers.get('x-csrf-token'),
+          });
+          await new Promise((done) => setTimeout(done, 10));
+          const headers = new Headers();
+          for (const cookie of setCookies) headers.append('set-cookie', cookie);
+          return new HttpResponse(null, { status, headers });
+        }),
+      );
+      return calls;
+    }
+
+    it('renouvelle la session avant le rendu : cookies transmis au navigateur et à la page', async () => {
+      const calls = refreshRoute(204, [
+        'mp_at=nouvel-acces; Path=/; HttpOnly; SameSite=Lax; Max-Age=900',
+        'mp_rt=nouveau-jeton; Path=/; HttpOnly; SameSite=Lax',
+        'mp_csrf=nouveau-csrf; Path=/; SameSite=Lax',
+      ]);
+      const incoming = request('/admin/demandes', { mp_rt: 'jeton', mp_csrf: 'ancien', mp_td: 'appareil' });
+      incoming.headers.set('user-agent', 'Navigateur de test');
+
+      const response = await proxy(incoming);
+
+      expect(response.headers.get('location')).toBeNull();
+      expect(calls).toEqual([{ cookie: 'mp_rt=jeton', userAgent: 'Navigateur de test', csrf: null }]);
+      expect(response.headers.getSetCookie().map((cookie) => cookie.split(';')[0])).toEqual([
+        'mp_at=nouvel-acces',
+        'mp_rt=nouveau-jeton',
+        'mp_csrf=nouveau-csrf',
+      ]);
+      // En-têtes de la requête transmise aux Server Components.
+      expect(response.headers.get('x-middleware-request-cookie')).toBe(
+        'mp_rt=nouveau-jeton; mp_csrf=nouveau-csrf; mp_td=appareil; mp_at=nouvel-acces',
+      );
+    });
+
+    it('un seul renouvellement pour des chargements simultanés (préchargements)', async () => {
+      const calls = refreshRoute(204, ['mp_at=nouvel-acces; Path=/', 'mp_rt=nouveau-jeton; Path=/']);
+
+      const responses = await Promise.all(
+        ['/admin', '/admin/demandes', '/admin/rendez-vous'].map((path) =>
+          proxy(request(path, { mp_rt: 'jeton' })),
+        ),
+      );
+
+      expect(calls).toHaveLength(1);
+      for (const response of responses)
+        expect(response.headers.getSetCookie().map((cookie) => cookie.split(';')[0])).toContain(
+          'mp_at=nouvel-acces',
+        );
+    });
+
+    it('renouvellement refusé : connexion en conservant la page demandée, cookies effacés', async () => {
+      refreshRoute(401, [
+        'mp_at=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT',
+        'mp_rt=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT',
+      ]);
+
+      const response = await proxy(request('/admin/demandes?statut=NOUVELLE', { mp_rt: 'revoque' }));
+
+      expect(response.status).toBe(307);
+      const location = new URL(response.headers.get('location') ?? '');
+      expect(location.pathname).toBe('/admin/connexion');
+      expect(location.searchParams.get('suite')).toBe('/admin/demandes?statut=NOUVELLE');
+      expect(response.headers.getSetCookie().map((cookie) => cookie.split(';')[0])).toEqual([
+        'mp_at=',
+        'mp_rt=',
+      ]);
+    });
+
+    it('API injoignable : la page est servie sans renouvellement (pas de déconnexion)', async () => {
+      server.use(http.post('*/v1/auth/refresh', () => HttpResponse.error()));
+
+      const response = await proxy(request('/admin', { mp_rt: 'jeton' }));
+
+      expect(response.headers.get('location')).toBeNull();
+      expect(response.headers.getSetCookie()).toEqual([]);
+    });
+
+    it('pas de renouvellement sur les écrans de connexion', async () => {
+      const calls = refreshRoute(204, []);
+      await proxy(request('/admin/connexion', { mp_rt: 'jeton' }));
+      expect(calls).toEqual([]);
+    });
   });
 });
 

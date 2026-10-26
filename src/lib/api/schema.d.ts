@@ -699,7 +699,13 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Rotation des jetons (cookie `mp_rt`) */
+        /**
+         * Rotation des jetons (cookie `mp_rt`)
+         * @description Seul le cookie `mp_rt` est lu : ni jeton d'accès ni jeton CSRF exigés (le jeton d'accès a pu expirer).
+         *     À appeler quand une requête authentifiée reçoit `401`, puis rejouer la requête une fois.
+         *     Jeton déjà remplacé il y a moins de 10 s (plusieurs onglets en même temps) : `204` sans nouveaux cookies,
+         *     ceux de la première rotation restent valables. Refus : `401` et cookies de session effacés.
+         */
         post: operations["refreshSession"];
         delete?: never;
         options?: never;
@@ -2501,7 +2507,11 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Supprimer un utilisateur */
+        /**
+         * Supprimer un utilisateur
+         * @description Refus (`409`) : son propre compte, le dernier administrateur actif, ou un utilisateur auteur de notes sur des
+         *     demandes (historique conservé : le désactiver plutôt que le supprimer).
+         */
         delete: operations["adminDeleteUser"];
         options?: never;
         head?: never;
@@ -2518,7 +2528,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Envoyer un lien de réinitialisation et révoquer les sessions */
+        /**
+         * Envoyer un lien de réinitialisation et révoquer les sessions
+         * @description Lien valable 1 heure, sessions du compte révoquées. Invitation pas encore acceptée : nouvelle invitation
+         *     (7 jours) à la place.
+         */
         post: operations["adminResetUserPassword"];
         delete?: never;
         options?: never;
@@ -5466,20 +5480,15 @@ export interface components {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
-        /** @description Droits insuffisants ou jeton CSRF invalide. */
+        /**
+         * @description Droits insuffisants (`forbidden`) ou, pour une mutation, jeton CSRF absent ou invalide (`csrf-token-invalid` :
+         *     en-tête `X-CSRF-Token` différent du cookie `mp_csrf` ou émis pour un autre compte).
+         */
         Forbidden: {
             headers: {
                 [name: string]: unknown;
             };
             content: {
-                /**
-                 * @example {
-                 *       "type": "https://api.mamboproxi.com/problems/forbidden",
-                 *       "title": "Action non autorisée",
-                 *       "status": 403,
-                 *       "detail": "Votre rôle ne permet pas d'effectuer cette action."
-                 *     }
-                 */
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
@@ -7317,6 +7326,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
+            422: components["responses"]["ValidationError"];
             /** @description Compte temporairement verrouillé. */
             423: {
                 headers: {
@@ -7381,6 +7391,24 @@ export interface operations {
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
+            422: components["responses"]["ValidationError"];
+            /** @description Compte verrouillé entre la saisie du mot de passe et celle du code. */
+            423: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "type": "https://api.mamboproxi.com/problems/account-locked",
+                     *       "title": "Compte verrouillé",
+                     *       "status": 423,
+                     *       "detail": "Trop de tentatives. Réessayez dans 15 minutes ou réinitialisez votre mot de passe."
+                     *     }
+                     */
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             429: components["responses"]["TooManyRequests"];
         };
     };
@@ -7408,6 +7436,24 @@ export interface operations {
                     "application/json": components["schemas"]["LoginResult"];
                 };
             };
+            /** @description Défi inconnu, expiré, déjà utilisé ou épuisé (se reconnecter). */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "type": "https://api.mamboproxi.com/problems/invalid-otp",
+                     *       "title": "Code incorrect",
+                     *       "status": 401,
+                     *       "detail": "Ce code a expiré. Reconnectez-vous pour en recevoir un nouveau."
+                     *     }
+                     */
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            422: components["responses"]["ValidationError"];
             429: components["responses"]["TooManyRequests"];
         };
     };
@@ -7420,7 +7466,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Nouveaux cookies déposés. */
+            /** @description Nouveaux cookies déposés (ou déjà déposés par une rotation de moins de 10 s). */
             204: {
                 headers: {
                     [name: string]: unknown;
@@ -7428,6 +7474,7 @@ export interface operations {
                 content?: never;
             };
             401: components["responses"]["Unauthorized"];
+            429: components["responses"]["TooManyRequests"];
         };
     };
     logout: {
@@ -7447,6 +7494,7 @@ export interface operations {
                 content?: never;
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     getMe: {
@@ -7499,6 +7547,7 @@ export interface operations {
                     "application/json": components["schemas"]["MessageResponse"];
                 };
             };
+            422: components["responses"]["ValidationError"];
             429: components["responses"]["TooManyRequests"];
         };
     };
@@ -10906,7 +10955,24 @@ export interface operations {
             204: components["responses"]["NoContent"];
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
-            409: components["responses"]["Conflict"];
+            404: components["responses"]["NotFound"];
+            /** @description Son propre compte, dernier administrateur actif, ou utilisateur ayant un historique dans les demandes. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "type": "https://api.mamboproxi.com/problems/conflict",
+                     *       "title": "Conflit",
+                     *       "status": 409,
+                     *       "detail": "Cet utilisateur a un historique dans les demandes : désactivez-le plutôt que de le supprimer."
+                     *     }
+                     */
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
         };
     };
     adminUpdateUser: {
@@ -10940,15 +11006,24 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
-            /** @description Impossible de retirer le dernier administrateur actif. */
+            /** @description Impossible de retirer (rétrograder ou désactiver) le dernier administrateur actif, ou de désactiver son propre compte. */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
+                    /**
+                     * @example {
+                     *       "type": "https://api.mamboproxi.com/problems/conflict",
+                     *       "title": "Conflit",
+                     *       "status": 409,
+                     *       "detail": "Impossible de retirer le dernier administrateur actif."
+                     *     }
+                     */
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
+            422: components["responses"]["ValidationError"];
         };
     };
     adminResetUserPassword: {
@@ -10973,6 +11048,24 @@ export interface operations {
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            /** @description Compte désactivé (le réactiver d'abord). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "type": "https://api.mamboproxi.com/problems/conflict",
+                     *       "title": "Conflit",
+                     *       "status": 409,
+                     *       "detail": "Ce compte est désactivé : réactivez-le avant de lui envoyer un lien."
+                     *     }
+                     */
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
         };
     };
     adminListMedia: {

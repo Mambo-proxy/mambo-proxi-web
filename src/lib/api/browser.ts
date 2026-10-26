@@ -1,6 +1,8 @@
 import createClient, { type Middleware } from 'openapi-fetch';
+import { redirectToLogin } from '@/lib/admin/expired-session';
 import { getApiBaseUrl } from './config';
 import type { paths } from './schema';
+import { withSessionRefresh, type RefreshOutcome } from './session-refresh';
 import { transport } from './transport';
 
 const CSRF_COOKIE = 'mp_csrf';
@@ -13,21 +15,50 @@ function readCookie(name: string): string | null {
   return entry ? decodeURIComponent(entry.slice(prefix.length)) : null;
 }
 
+/** Recopie le cookie lisible `mp_csrf` dans l'en-tête `X-CSRF-Token` d'une mutation. */
+function withCsrfToken(request: Request): Request {
+  if (SAFE_METHODS.has(request.method)) return request;
+  const token = readCookie(CSRF_COOKIE);
+  if (token) request.headers.set(CSRF_HEADER, token);
+  return request;
+}
+
 /** Jeton CSRF « double-submit » : le cookie lisible `mp_csrf` est recopié dans l'en-tête des mutations. */
 const csrf: Middleware = {
   onRequest({ request }) {
     if (SAFE_METHODS.has(request.method)) return undefined;
-    const token = readCookie(CSRF_COOKIE);
-    if (token) request.headers.set(CSRF_HEADER, token);
-    return request;
+    return withCsrfToken(request);
   },
 };
+
+/**
+ * `POST /v1/auth/refresh` : seul le cookie `mp_rt` compte (ni jeton d'accès ni jeton CSRF, selon le contrat). Un
+ * `204` sans nouveaux cookies (rotation faite par un autre onglet il y a moins de 10 s) est aussi un succès.
+ */
+async function refreshSession(): Promise<RefreshOutcome> {
+  const response = await transport(
+    new Request(`${getApiBaseUrl()}/v1/auth/refresh`, { method: 'POST', credentials: 'include' }),
+  );
+  if (response.ok) return 'refreshed';
+  return response.status === 401 ? 'expired' : 'failed';
+}
+
+/**
+ * Envoi avec renouvellement de la session du back-office : sur un `401`, un seul `POST /v1/auth/refresh` puis rejeu
+ * de la requête, avec le jeton CSRF renouvelé. Renouvellement refusé : retour à l'écran de connexion.
+ */
+const send = withSessionRefresh({
+  send: (request) => transport(request),
+  refresh: refreshSession,
+  onExpired: redirectToLogin,
+  prepareReplay: withCsrfToken,
+});
 
 /** Client utilisé par les composants client (formulaires du site, back-office). Cookies de session inclus. */
 export const browserApi = createClient<paths>({
   baseUrl: getApiBaseUrl(),
   credentials: 'include',
-  fetch: (request) => transport(request),
+  fetch: send,
 });
 
 browserApi.use(csrf);

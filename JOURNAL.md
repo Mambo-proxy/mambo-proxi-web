@@ -993,3 +993,48 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - **Débordement d'1 px à 1440** après l'ajout de la loupe : marges de l'en-tête et du menu réduites (≈ 24 px de réserve pour les polices Linux de la CI).
 - **Croix des info-bulles de la carte recouverte par les boutons de zoom en mobile** (axe `target-size`) : largeur des info-bulles limitée à la place libre, recentrage à l'écart de la colonne des boutons, croix agrandie à 32 px.
 - **Tableau de bord trop large en mobile** : un `<table class="sr-only">` garde sa largeur de contenu (571 px) et les grilles sans colonne explicite suivaient le contenu le plus large ; tableau placé dans un `div.sr-only`, grilles en `grid-cols-1`, tableau défilant focalisable.
+
+## Renouvellement de la session du back-office (27 octobre 2026)
+
+### Fait
+
+- **Contrat synchronisé** (`pnpm contract:sync`) : réponses d'erreur de l'authentification et des utilisateurs
+  (422, 401 de `resend-otp`, 423 de `verify-otp`, 404/409 des utilisateurs, 403 de `logout`, 429 de `refresh`),
+  exemples `forbidden` et `csrfTokenInvalid` de `Forbidden` ; `schema.d.ts` régénéré.
+- **Navigateur** (`src/lib/api/session-refresh.ts`, `browser.ts`) : un `401` d'une route `/v1/admin` déclenche un seul
+  `POST /v1/auth/refresh` (promesse partagée entre les requêtes refusées en même temps), puis la requête, copiée avant
+  le premier envoi, est rejouée une fois avec le jeton CSRF renouvelé. Jamais pour `/v1/auth/*`, jamais en boucle (le
+  `401` d'un rejeu est rendu tel quel). Renouvellement refusé : retour à `/admin/connexion?suite=<page>`
+  (`src/lib/admin/expired-session.ts`, partagé avec le cache TanStack Query), sans message d'erreur.
+- **Chargement d'une page** (`src/proxy.ts`, `src/lib/admin/session-renewal.ts`) : le cookie `mp_at` expire avec le
+  jeton (15 min) ; s'il manque et que `mp_rt` est présent, le proxy renouvelle la session avant le rendu, dépose les
+  nouveaux cookies et les transmet aux Server Components (`requireAdminUser`) ; refus → connexion avec `?suite=`.
+- **Mocks** : `mp_rt` déposé à la connexion, `mp_at` limité à 15 min comme l'API ; `mp_at=expire` fait répondre 401 à
+  toute route du back-office ; `POST /v1/auth/refresh` réussit si `mp_rt` désigne un compte de démonstration, sinon
+  401 et cookies effacés.
+- **Tests** : unitaires (`session-refresh.test.ts`, `browser.test.ts`, `proxy.test.ts`) ; e2e `admin-session.spec.ts`
+  (écran rechargé sans perte, refus → connexion, dans l'écran et au chargement d'une page).
+
+### Décisions
+
+- **CSRF** : `refresh` n'exige ni jeton d'accès ni jeton CSRF (contrat et API) ; le rejeu d'une mutation relit
+  `mp_csrf`, renouvelé avec la session.
+- **204 sans nouveaux cookies** (rotation faite par un autre onglet il y a moins de 10 s) : succès, la requête est
+  rejouée (les cookies de l'autre rotation sont déjà dans le navigateur). Une requête partie avant un renouvellement
+  réussi est rejouée sans en demander un autre.
+- **Côté serveur**, les Server Components ne peuvent pas déposer de cookies : le renouvellement se fait dans le proxy,
+  mémorisé 10 s par jeton de rafraîchissement (préchargements simultanés) ; l'agent utilisateur du navigateur est
+  transmis à l'API.
+- API injoignable pendant un renouvellement : pas de redirection immédiate ; le `401` d'origine suit son traitement
+  habituel.
+
+### Difficultés et solutions
+
+- Les tests e2e qui modifiaient les cookies pendant que le tableau de bord était ouvert déclenchaient parfois un
+  renouvellement dans le navigateur avant celui du proxy : la page est quittée (`about:blank`) avant de retirer `mp_at`.
+
+### Points ouverts
+
+- Renouvellement dans le proxy avec plusieurs instances du site : la mémorisation de 10 s est propre à chaque
+  processus (le délai de grâce de l'API couvre l'essentiel). L'adresse IP vue par l'API pour la session renouvelée par
+  le proxy est celle du serveur du site.
