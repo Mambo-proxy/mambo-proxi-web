@@ -169,7 +169,7 @@ const SEEDS: TemplateSeed[] = [
     name: 'Confirmation d’inscription',
     description: 'Envoyé après une inscription (particulier ou professionnel).',
     subject: 'Bienvenue chez Mambo Proxi',
-    title: 'Bienvenue chez Mambo Proxi !',
+    title: 'Bienvenue chez Mambo Proxi\u202f!',
     paragraphs: [
       'Votre inscription est enregistrée. Vos prochaines demandes seront plus rapides et mieux suivies.',
       'Découvrez dès maintenant nos services, à Douala et environs.',
@@ -279,7 +279,7 @@ const SEEDS: TemplateSeed[] = [
     subject: 'Comment s’est passée votre prestation ?',
     title: 'Votre avis compte, {prénom}.',
     paragraphs: [
-      'Votre prestation « {service} » du {date} est terminée. Pouvez-vous nous dire comment elle s’est passée ? 5 questions, 2 minutes.',
+      'Votre prestation « {service} » du {date} est terminée. Pouvez-vous nous dire comment elle s’est passée\u202f? 5 questions, 2 minutes.',
     ],
     buttonLabel: 'Donner mon avis',
     variables: ['{prénom}', '{service}', '{date}', '{lien}'],
