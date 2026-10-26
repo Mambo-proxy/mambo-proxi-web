@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, ImagePlus, RefreshCw, Trash2, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { useId, useRef, useState, type DragEvent } from 'react';
+import { useReadOnly } from '@/components/admin/shell/permissions';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/field';
 import { Modal } from '@/components/ui/modal';
@@ -100,6 +101,8 @@ export function ImageField({
   contain,
 }: ImageFieldProps) {
   const labelId = useId();
+  // Lecture seule : image affichée sans « Remplacer » / « Retirer » ni zone d'ajout.
+  const readOnly = useReadOnly();
   const [open, setOpen] = useState(false);
   const [dropped, setDropped] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -129,17 +132,21 @@ export function ImageField({
               contain && 'bg-neutral-0 [&_img]:object-contain! [&_img]:p-3',
             )}
           />
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
-              <RefreshCw aria-hidden />
-              Remplacer
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => onChange(null)}>
-              <Trash2 aria-hidden />
-              Retirer
-            </Button>
-          </div>
+          {!readOnly && (
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={() => setOpen(true)}>
+                <RefreshCw aria-hidden />
+                Remplacer
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => onChange(null)}>
+                <Trash2 aria-hidden />
+                Retirer
+              </Button>
+            </div>
+          )}
         </div>
+      ) : readOnly ? (
+        <p className="font-ui text-[14px] leading-5 text-text-muted">Aucune image</p>
       ) : (
         <button
           type="button"

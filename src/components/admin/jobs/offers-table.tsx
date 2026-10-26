@@ -5,6 +5,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import { useState } from 'react';
 import { ConfirmDialog, PublishStatusBadge } from '@/components/admin/editor/editor-ui';
+import { useCan } from '@/components/admin/shell/permissions';
 import { ActionMenu, type ActionMenuItem } from '@/components/admin/ui/action-menu';
 import { adminRoutes } from '@/lib/admin/routes';
 import { cn } from '@/lib/cn';
@@ -19,7 +20,10 @@ export const offerSiteHref = (slug: string) => `/recrutement/${slug}`;
 const iconButton =
   'flex size-8 items-center justify-center rounded-sm text-icon-default hover:bg-neutral-100 hover:text-text-main';
 
-/** Actions d'une offre : aperçu sur le site, modifier, menu (candidatures, publication, archivage, suppression). */
+/**
+ * Actions d'une offre : aperçu sur le site, modifier, menu (candidatures, publication, archivage, suppression).
+ * Sans `content:write` : consultation et candidatures seulement.
+ */
 function OfferActions({
   offer,
   onApplications,
@@ -30,9 +34,9 @@ function OfferActions({
   onDelete: () => void;
 }) {
   const { setStatus } = useOfferActions();
+  const canWrite = useCan()('content:write');
   const published = offer.status === 'PUBLISHED';
-  const items: ActionMenuItem[] = [
-    { label: 'Voir les candidatures', icon: Users, onSelect: onApplications },
+  const writeItems: ActionMenuItem[] = [
     published
       ? {
           label: 'Dépublier',
@@ -54,6 +58,10 @@ function OfferActions({
         ]
       : []),
     { label: 'Supprimer', icon: Trash2, danger: true, onSelect: onDelete },
+  ];
+  const items: ActionMenuItem[] = [
+    { label: 'Voir les candidatures', icon: Users, onSelect: onApplications },
+    ...(canWrite ? writeItems : []),
   ];
   return (
     <div className="flex items-center justify-end gap-2.5">
@@ -80,7 +88,7 @@ function OfferActions({
       )}
       <Link
         href={offerEditorHref(offer.id)}
-        aria-label={`Modifier l’offre « ${offer.title} »`}
+        aria-label={`${canWrite ? 'Modifier' : 'Consulter'} l’offre « ${offer.title} »`}
         className={iconButton}
       >
         <Pencil aria-hidden size={16} />

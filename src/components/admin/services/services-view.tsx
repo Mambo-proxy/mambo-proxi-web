@@ -24,6 +24,7 @@ import { useState } from 'react';
 import { ConfirmDialog, PublishStatusBadge } from '@/components/admin/editor/editor-ui';
 import { DragHandle, SortableItem, SortableList, moveItem } from '@/components/admin/editor/sortable';
 import { topbarActionClass, topbarSecondaryClass } from '@/components/admin/shell/admin-page';
+import { ReadOnlyNotice, useCan } from '@/components/admin/shell/permissions';
 import { ActionMenu, type ActionMenuItem } from '@/components/admin/ui/action-menu';
 import { AdminCard } from '@/components/admin/ui/admin-ui';
 import { EmptyState, StatusTabs } from '@/components/admin/ui/filters';
@@ -82,13 +83,17 @@ function useFilters() {
 
 type Mutations = ReturnType<typeof useServiceMutations>;
 
-/** Actions d'une ligne : aperçu, modifier, menu (monter, descendre, dupliquer, publier, supprimer). */
+/**
+ * Actions d'une ligne : aperçu, modifier, menu (monter, descendre, dupliquer, publier, supprimer). Sans
+ * `content:write` : aperçu et consultation seulement.
+ */
 function RowActions({
   service,
   mutations,
   onMove,
   onDelete,
   canMove,
+  canWrite,
   compact,
 }: {
   service: AdminServiceListItem;
@@ -96,17 +101,13 @@ function RowActions({
   onMove: (offset: -1 | 1) => void;
   onDelete: () => void;
   canMove: { up: boolean; down: boolean };
+  canWrite: boolean;
   /** Cartes (mobile) : aperçu et modification regroupés dans le menu « … ». */
   compact?: boolean;
 }) {
   const published = service.status === 'PUBLISHED';
-  const items: ActionMenuItem[] = [
-    ...(compact
-      ? [
-          { label: 'Modifier', icon: Pencil, href: editHref(service.id) },
-          { label: 'Aperçu (nouvel onglet)', icon: Eye, onSelect: () => void openServicePreview(service.id) },
-        ]
-      : []),
+  const editLabel = canWrite ? 'Modifier' : 'Consulter';
+  const writeItems: ActionMenuItem[] = [
     { label: 'Monter dans la rubrique', icon: ArrowUp, onSelect: () => onMove(-1), disabled: !canMove.up },
     {
       label: 'Descendre dans la rubrique',
@@ -122,6 +123,15 @@ function RowActions({
       ? { label: 'Supprimer (dépublier d’abord)', icon: Trash2, onSelect: () => undefined, disabled: true }
       : { label: 'Supprimer', icon: Trash2, onSelect: onDelete, danger: true },
   ];
+  const items: ActionMenuItem[] = [
+    ...(compact
+      ? [
+          { label: editLabel, icon: Pencil, href: editHref(service.id) },
+          { label: 'Aperçu (nouvel onglet)', icon: Eye, onSelect: () => void openServicePreview(service.id) },
+        ]
+      : []),
+    ...(canWrite ? writeItems : []),
+  ];
   const iconButton =
     'flex size-8 items-center justify-center rounded-sm text-icon-default hover:bg-neutral-100 hover:text-text-main';
   if (compact) return <ActionMenu label={`Actions pour « ${service.name} »`} items={items} />;
@@ -135,10 +145,14 @@ function RowActions({
       >
         <Eye aria-hidden size={16} />
       </button>
-      <Link href={editHref(service.id)} aria-label={`Modifier « ${service.name} »`} className={iconButton}>
+      <Link
+        href={editHref(service.id)}
+        aria-label={`${editLabel} « ${service.name} »`}
+        className={iconButton}
+      >
         <Pencil aria-hidden size={16} />
       </Link>
-      <ActionMenu label={`Autres actions pour « ${service.name} »`} items={items} />
+      {canWrite && <ActionMenu label={`Autres actions pour « ${service.name} »`} items={items} />}
     </div>
   );
 }
@@ -236,6 +250,8 @@ export function ServicesView() {
   const [manageCategories, setManageCategories] = useState(false);
   const [toDelete, setToDelete] = useState<AdminServiceListItem | null>(null);
   const mutations = useServiceMutations();
+  // Sans `content:write` (responsable) : liste en lecture seule (ni ordre, ni menu, ni publication).
+  const canWrite = useCan()('content:write');
 
   const categories = useQuery({
     queryKey: categoriesKey,
@@ -292,6 +308,7 @@ export function ServicesView() {
     <Switch
       id={`menu-${service.id}-${suffix}`}
       checked={service.showInMenu}
+      disabled={!canWrite}
       onChange={(event) =>
         mutations.toggleMenu.mutate({ id: service.id, showInMenu: event.currentTarget.checked })
       }
@@ -308,15 +325,17 @@ export function ServicesView() {
       onMove={(offset) => move(service, offset)}
       onDelete={() => setToDelete(service)}
       canMove={canMove(service)}
+      canWrite={canWrite}
     />
   );
 
   return (
     <div className="flex flex-col gap-6">
+      <ReadOnlyNotice permission="content:write" />
       <p className="flex items-start gap-3 rounded-[14px] bg-orange-50 p-4 font-ui text-[14px] leading-5 text-orange-900">
         <Info aria-hidden size={18} className="mt-px shrink-0 text-text-brand" />
         Chaque service publié obtient automatiquement sa page, sa carte dans la rubrique et son entrée dans le
-        menu. Glissez les lignes pour changer l’ordre d’affichage.
+        menu.{canWrite && ' Glissez les lignes pour changer l’ordre d’affichage.'}
       </p>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -326,14 +345,16 @@ export function ServicesView() {
           value={filters.category}
           onChange={(value) => update({ category: value })}
         />
-        <button
-          type="button"
-          onClick={() => setManageCategories(true)}
-          className={cn(topbarSecondaryClass, 'py-[9px]')}
-        >
-          <LayoutTemplate aria-hidden />
-          Gérer les rubriques
-        </button>
+        {canWrite && (
+          <button
+            type="button"
+            onClick={() => setManageCategories(true)}
+            className={cn(topbarSecondaryClass, 'py-[9px]')}
+          >
+            <LayoutTemplate aria-hidden />
+            Gérer les rubriques
+          </button>
+        )}
       </div>
 
       <AdminCard className="overflow-hidden" aria-busy={list.isFetching}>
@@ -354,12 +375,18 @@ export function ServicesView() {
           <EmptyState
             icon={<Sparkles size={24} />}
             title="Aucun service dans cette rubrique"
-            text="Ajoutez un premier service : il sera créé en brouillon, à publier quand il est prêt."
+            text={
+              canWrite
+                ? 'Ajoutez un premier service : il sera créé en brouillon, à publier quand il est prêt.'
+                : 'Les services de cette rubrique apparaîtront ici.'
+            }
             action={
-              <Link href={adminRoutes.newService} className={cn(topbarActionClass, 'mt-2')}>
-                <Plus aria-hidden />
-                Ajouter un service
-              </Link>
+              canWrite && (
+                <Link href={adminRoutes.newService} className={cn(topbarActionClass, 'mt-2')}>
+                  <Plus aria-hidden />
+                  Ajouter un service
+                </Link>
+              )
             }
           />
         ) : (
@@ -373,6 +400,7 @@ export function ServicesView() {
                   getId={(service) => service.id}
                   getLabel={(service) => service.name}
                   onReorder={(next) => reorderRun(run, next)}
+                  disabled={!canWrite}
                   className={cn(
                     'divide-y divide-border-default',
                     index > 0 && 'border-t border-border-default',
@@ -446,6 +474,7 @@ export function ServicesView() {
                   getId={(service) => service.id}
                   getLabel={(service) => service.name}
                   onReorder={(next) => reorderRun(run, next)}
+                  disabled={!canWrite}
                   renderItem={(service) => (
                     <SortableItem
                       key={service.id}
@@ -496,7 +525,7 @@ export function ServicesView() {
         )}
       </AdminCard>
 
-      <CategoriesDialog open={manageCategories} onClose={() => setManageCategories(false)} />
+      {canWrite && <CategoriesDialog open={manageCategories} onClose={() => setManageCategories(false)} />}
       <ConfirmDialog
         open={!!toDelete}
         onClose={() => setToDelete(null)}

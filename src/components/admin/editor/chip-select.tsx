@@ -2,6 +2,7 @@
 
 import { Check, Plus } from 'lucide-react';
 import { useId, type ComponentProps, type ReactNode } from 'react';
+import { useReadOnly } from '@/components/admin/shell/permissions';
 import { cn } from '@/lib/cn';
 
 const chipBase =
@@ -28,6 +29,7 @@ export function ChipSelect<T extends string>({
   onAdd?: () => void;
 }) {
   const labelId = useId();
+  const readOnly = useReadOnly();
   const visible = onAdd ? options.filter((option) => value.includes(option.value)) : options;
   return (
     <div role="group" aria-labelledby={labelId} className="flex flex-col gap-2">
@@ -49,7 +51,7 @@ export function ChipSelect<T extends string>({
             </ChipToggle>
           );
         })}
-        {onAdd && (
+        {onAdd && !readOnly && (
           <button
             type="button"
             onClick={onAdd}

@@ -3,6 +3,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { CompactField, CompactInput, compactInputClass } from '@/components/admin/magazine/magazine-ui';
+import { ReadOnlyFieldset } from '@/components/admin/shell/permissions';
 import { Button } from '@/components/ui/button';
 import { Icon, iconNames } from '@/components/ui/icon';
 import { Modal } from '@/components/ui/modal';
@@ -50,12 +51,15 @@ export function TrainingDialog({
   onClose,
   training,
   onSaved,
+  readOnly = false,
 }: {
   open: boolean;
   onClose: () => void;
   /** Formation modifiée ; `null` pour en créer une. */
   training: AdminTraining | null;
   onSaved: () => void;
+  /** Sans `content:write` : fiche consultée (champs figés, sans enregistrement). */
+  readOnly?: boolean;
 }) {
   const [draft, setDraft] = useState(() => draftOf(training));
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -132,164 +136,168 @@ export function TrainingDialog({
     <Modal
       open={open}
       onClose={onClose}
-      title={training ? `Modifier « ${training.title} »` : 'Nouvelle formation'}
+      title={training ? (readOnly ? training.title : `Modifier « ${training.title} »`) : 'Nouvelle formation'}
       description="La formation s’affiche dans le catalogue de la page Formation et dans la liste du formulaire de demande."
       maxWidth={680}
       footer={
         <div className="flex flex-wrap justify-end gap-2">
           <Button variant="outline" size="sm" onClick={onClose}>
-            Annuler
+            {readOnly ? 'Fermer' : 'Annuler'}
           </Button>
-          <Button size="sm" loading={save.isPending} onClick={submit}>
-            {training ? 'Enregistrer' : 'Ajouter la formation'}
-          </Button>
+          {!readOnly && (
+            <Button size="sm" loading={save.isPending} onClick={submit}>
+              {training ? 'Enregistrer' : 'Ajouter la formation'}
+            </Button>
+          )}
         </div>
       }
     >
-      <div className="flex flex-col gap-4">
-        <CompactField label="Titre" error={errors.title}>
-          {(control) => (
-            <CompactInput
-              {...control}
-              value={draft.title}
-              placeholder="Accueil et relation client"
-              maxLength={120}
-              onChange={(event) => set('title', event.target.value)}
-            />
-          )}
-        </CompactField>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <CompactField label="Catégorie" error={errors.category}>
-            {(control) => (
-              <select
-                {...control}
-                value={draft.category}
-                onChange={(event) => setCategory(event.target.value as TrainingCategory)}
-                className={compactInputClass}
-              >
-                {(Object.keys(TRAINING_CATEGORY_LABELS) as TrainingCategory[]).map((category) => (
-                  <option key={category} value={category}>
-                    {TRAINING_CATEGORY_LABELS[category]}
-                  </option>
-                ))}
-              </select>
-            )}
-          </CompactField>
-          <CompactField label="Public" help="Affiché sur la carte de la formation.">
+      <ReadOnlyFieldset readOnly={readOnly}>
+        <div className="flex flex-col gap-4">
+          <CompactField label="Titre" error={errors.title}>
             {(control) => (
               <CompactInput
                 {...control}
-                value={draft.audienceLabel}
-                maxLength={80}
-                onChange={(event) => set('audienceLabel', event.target.value)}
+                value={draft.title}
+                placeholder="Accueil et relation client"
+                maxLength={120}
+                onChange={(event) => set('title', event.target.value)}
               />
             )}
           </CompactField>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <CompactField label="Durée" error={errors.duration}>
-            {(control) => (
-              <CompactInput
-                {...control}
-                value={draft.duration}
-                placeholder="1 jour"
-                maxLength={40}
-                onChange={(event) => set('duration', event.target.value)}
-              />
-            )}
-          </CompactField>
-          <CompactField label="Format" error={errors.format}>
-            {(control) => (
-              <CompactInput
-                {...control}
-                list="training-formats"
-                value={draft.format}
-                maxLength={60}
-                onChange={(event) => set('format', event.target.value)}
-              />
-            )}
-          </CompactField>
-          <CompactField label="Lieu" help="Vide pour une formation en ligne.">
-            {(control) => (
-              <CompactInput
-                {...control}
-                value={draft.location}
-                placeholder="Douala"
-                maxLength={80}
-                onChange={(event) => set('location', event.target.value)}
-              />
-            )}
-          </CompactField>
-          <datalist id="training-formats">
-            <option value="Présentiel" />
-            <option value="En ligne" />
-            <option value="Sur site" />
-          </datalist>
-        </div>
-        <div className="flex flex-col gap-2">
-          <span
-            id="training-icon-label"
-            className="font-ui text-[13px] leading-4 font-medium text-neutral-700"
-          >
-            Icône
-          </span>
-          <div role="radiogroup" aria-labelledby="training-icon-label" className="flex flex-wrap gap-1.5">
-            {iconNames.map((name, index) => {
-              const checked = draft.icon === name;
-              return (
-                <button
-                  key={name}
-                  type="button"
-                  role="radio"
-                  aria-checked={checked}
-                  aria-label={name}
-                  title={name}
-                  tabIndex={checked ? 0 : -1}
-                  onClick={() => set('icon', name)}
-                  onKeyDown={(event) => {
-                    const delta =
-                      event.key === 'ArrowRight' || event.key === 'ArrowDown'
-                        ? 1
-                        : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
-                          ? -1
-                          : 0;
-                    if (!delta) return;
-                    event.preventDefault();
-                    const next = (index + delta + iconNames.length) % iconNames.length;
-                    set('icon', iconNames[next]!);
-                    (event.currentTarget.parentElement?.children[next] as HTMLElement | undefined)?.focus();
-                  }}
-                  className={cn(
-                    'flex size-9 items-center justify-center rounded-sm border transition-colors',
-                    checked
-                      ? 'border-brand-primary bg-orange-50 text-text-brand'
-                      : 'border-border-default text-icon-default hover:bg-neutral-50',
-                  )}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <CompactField label="Catégorie" error={errors.category}>
+              {(control) => (
+                <select
+                  {...control}
+                  value={draft.category}
+                  onChange={(event) => setCategory(event.target.value as TrainingCategory)}
+                  className={compactInputClass}
                 >
-                  <Icon name={name} size={18} aria-hidden />
-                </button>
-              );
-            })}
+                  {(Object.keys(TRAINING_CATEGORY_LABELS) as TrainingCategory[]).map((category) => (
+                    <option key={category} value={category}>
+                      {TRAINING_CATEGORY_LABELS[category]}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </CompactField>
+            <CompactField label="Public" help="Affiché sur la carte de la formation.">
+              {(control) => (
+                <CompactInput
+                  {...control}
+                  value={draft.audienceLabel}
+                  maxLength={80}
+                  onChange={(event) => set('audienceLabel', event.target.value)}
+                />
+              )}
+            </CompactField>
           </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <CompactField label="Durée" error={errors.duration}>
+              {(control) => (
+                <CompactInput
+                  {...control}
+                  value={draft.duration}
+                  placeholder="1 jour"
+                  maxLength={40}
+                  onChange={(event) => set('duration', event.target.value)}
+                />
+              )}
+            </CompactField>
+            <CompactField label="Format" error={errors.format}>
+              {(control) => (
+                <CompactInput
+                  {...control}
+                  list="training-formats"
+                  value={draft.format}
+                  maxLength={60}
+                  onChange={(event) => set('format', event.target.value)}
+                />
+              )}
+            </CompactField>
+            <CompactField label="Lieu" help="Vide pour une formation en ligne.">
+              {(control) => (
+                <CompactInput
+                  {...control}
+                  value={draft.location}
+                  placeholder="Douala"
+                  maxLength={80}
+                  onChange={(event) => set('location', event.target.value)}
+                />
+              )}
+            </CompactField>
+            <datalist id="training-formats">
+              <option value="Présentiel" />
+              <option value="En ligne" />
+              <option value="Sur site" />
+            </datalist>
+          </div>
+          <div className="flex flex-col gap-2">
+            <span
+              id="training-icon-label"
+              className="font-ui text-[13px] leading-4 font-medium text-neutral-700"
+            >
+              Icône
+            </span>
+            <div role="radiogroup" aria-labelledby="training-icon-label" className="flex flex-wrap gap-1.5">
+              {iconNames.map((name, index) => {
+                const checked = draft.icon === name;
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    role="radio"
+                    aria-checked={checked}
+                    aria-label={name}
+                    title={name}
+                    tabIndex={checked ? 0 : -1}
+                    onClick={() => set('icon', name)}
+                    onKeyDown={(event) => {
+                      const delta =
+                        event.key === 'ArrowRight' || event.key === 'ArrowDown'
+                          ? 1
+                          : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+                            ? -1
+                            : 0;
+                      if (!delta) return;
+                      event.preventDefault();
+                      const next = (index + delta + iconNames.length) % iconNames.length;
+                      set('icon', iconNames[next]!);
+                      (event.currentTarget.parentElement?.children[next] as HTMLElement | undefined)?.focus();
+                    }}
+                    className={cn(
+                      'flex size-9 items-center justify-center rounded-sm border transition-colors',
+                      checked
+                        ? 'border-brand-primary bg-orange-50 text-text-brand'
+                        : 'border-border-default text-icon-default hover:bg-neutral-50',
+                    )}
+                  >
+                    <Icon name={name} size={18} aria-hidden />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <CompactField label="Description" help="Facultatif : programme, objectifs, prérequis.">
+            {(control) => (
+              <textarea
+                {...control}
+                rows={3}
+                value={draft.description}
+                maxLength={2000}
+                onChange={(event) => set('description', event.target.value)}
+                className={cn(compactInputClass, 'resize-y')}
+              />
+            )}
+          </CompactField>
+          <Switch
+            label="Publiée sur le site"
+            checked={draft.published}
+            onChange={(event) => set('published', event.target.checked)}
+          />
         </div>
-        <CompactField label="Description" help="Facultatif : programme, objectifs, prérequis.">
-          {(control) => (
-            <textarea
-              {...control}
-              rows={3}
-              value={draft.description}
-              maxLength={2000}
-              onChange={(event) => set('description', event.target.value)}
-              className={cn(compactInputClass, 'resize-y')}
-            />
-          )}
-        </CompactField>
-        <Switch
-          label="Publiée sur le site"
-          checked={draft.published}
-          onChange={(event) => set('published', event.target.checked)}
-        />
-      </div>
+      </ReadOnlyFieldset>
     </Modal>
   );
 }

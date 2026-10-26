@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import { JobsView, newOfferHref } from '@/components/admin/jobs/jobs-view';
 import { AdminPage, topbarActionClass } from '@/components/admin/shell/admin-page';
+import { Can } from '@/components/admin/shell/permissions';
 
 export const metadata: Metadata = { title: 'Recrutement' };
 
@@ -18,10 +19,13 @@ export default function JobsPage() {
         </span>
       }
       actions={
-        <Link href={newOfferHref} className={topbarActionClass}>
-          <Plus aria-hidden />
-          Nouvelle offre
-        </Link>
+        // « Nouvelle offre » : permission `content:write`.
+        <Can permission="content:write">
+          <Link href={newOfferHref} className={topbarActionClass}>
+            <Plus aria-hidden />
+            Nouvelle offre
+          </Link>
+        </Can>
       }
     >
       <Suspense>

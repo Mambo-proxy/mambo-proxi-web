@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { MediaThumb } from '@/components/admin/editor/media-picker';
 import { DragHandle, SortableItem, SortableList } from '@/components/admin/editor/sortable';
 import { topbarActionClass } from '@/components/admin/shell/admin-page';
+import { ReadOnlyNotice, useCan } from '@/components/admin/shell/permissions';
 import {
   AdminCard,
   CompactSegmented,
@@ -58,8 +59,11 @@ const listPartnerRequests = () =>
 
 /** Bouton « Ajouter un partenaire » de la barre supérieure (`93:22291`). */
 export function AddPartnerButton() {
+  // Absent sans `content:write`.
+  const canWrite = useCan()('content:write');
   const [open, setOpen] = useState(false);
   const refresh = useRefreshPartners();
+  if (!canWrite) return null;
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className={topbarActionClass}>
@@ -83,6 +87,7 @@ export function PartnersView() {
 
   return (
     <div className="flex flex-col gap-6">
+      <ReadOnlyNotice permission="content:write" />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <StatusTabs
           label="Logos et demandes"
@@ -131,6 +136,8 @@ function PartnersGrid({
 }) {
   const client = useQueryClient();
   const refresh = useRefreshPartners();
+  // Sans `content:write` : logos consultés, ni ordre, ni affichage, ni ajout.
+  const canWrite = useCan()('content:write');
   const [editing, setEditing] = useState<AdminPartner | null>(null);
   const [adding, setAdding] = useState(false);
 
@@ -197,28 +204,32 @@ function PartnersGrid({
         getId={(partner) => partner.id}
         getLabel={(partner) => partner.name}
         onReorder={(list) => reorder.mutate(mergeOrder(partners, list))}
+        disabled={!canWrite}
         className={gridClass}
         after={
-          <li>
-            <button
-              type="button"
-              onClick={() => setAdding(true)}
-              className="flex size-full min-h-[160px] flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-border-strong bg-neutral-50 p-4 text-center transition-colors hover:bg-neutral-100 md:min-h-[236px]"
-            >
-              <Plus aria-hidden size={22} className="mb-1 text-icon-default" />
-              <span className="font-ui text-[14px] leading-5 font-semibold text-text-main">
-                Ajouter un logo
-              </span>
-              <span className="font-ui text-[12px] leading-4 text-text-muted">
-                PNG ou SVG, fond transparent
-              </span>
-            </button>
-          </li>
+          canWrite && (
+            <li>
+              <button
+                type="button"
+                onClick={() => setAdding(true)}
+                className="flex size-full min-h-[160px] flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-border-strong bg-neutral-50 p-4 text-center transition-colors hover:bg-neutral-100 md:min-h-[236px]"
+              >
+                <Plus aria-hidden size={22} className="mb-1 text-icon-default" />
+                <span className="font-ui text-[14px] leading-5 font-semibold text-text-main">
+                  Ajouter un logo
+                </span>
+                <span className="font-ui text-[12px] leading-4 text-text-muted">
+                  PNG ou SVG, fond transparent
+                </span>
+              </button>
+            </li>
+          )
         }
         renderItem={(partner) => (
           <SortableItem key={partner.id} id={partner.id}>
             <PartnerCard
               partner={partner}
+              canWrite={canWrite}
               onEdit={() => setEditing(partner)}
               onToggle={() => toggle.mutate(partner)}
             />
@@ -230,6 +241,7 @@ function PartnersGrid({
         onClose={() => setEditing(null)}
         partner={editing}
         onSaved={refresh}
+        readOnly={!canWrite}
       />
       <PartnerDialog
         open={adding}
@@ -248,10 +260,13 @@ function PartnersGrid({
  */
 function PartnerCard({
   partner,
+  canWrite,
   onEdit,
   onToggle,
 }: {
   partner: AdminPartner;
+  /** Sans `content:write` : interrupteur figé, la fiche s'ouvre en consultation. */
+  canWrite: boolean;
   onEdit: () => void;
   onToggle: () => void;
 }) {
@@ -263,13 +278,14 @@ function PartnerCard({
           label={`Afficher ${partner.name} sur le site`}
           hideLabel
           checked={partner.visible}
+          disabled={!canWrite}
           onChange={onToggle}
         />
       </div>
       <button
         type="button"
         onClick={onEdit}
-        aria-label={`Modifier ${partner.name}`}
+        aria-label={`${canWrite ? 'Modifier' : 'Consulter'} ${partner.name}`}
         className={cn(
           'flex h-[72px] items-center justify-center overflow-hidden rounded-md bg-neutral-50 transition-opacity hover:opacity-80 md:h-[84px]',
           !partner.visible && 'opacity-60',

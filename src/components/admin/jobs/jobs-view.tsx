@@ -4,6 +4,7 @@ import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { ArrowRight, Briefcase, Users } from 'lucide-react';
 import type { Route } from 'next';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { ReadOnlyNotice } from '@/components/admin/shell/permissions';
 import { AdminCard } from '@/components/admin/ui/admin-ui';
 import { EmptyState, FilterSelect, ListPagination, StatusTabs } from '@/components/admin/ui/filters';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -108,6 +109,11 @@ export function JobsView() {
 
       {filters.tab === 'offres' ? (
         <>
+          {/* Offres : `content:write` ; les candidatures restent modifiables avec `applications:write`. */}
+          <ReadOnlyNotice
+            permission="content:write"
+            text="votre rôle permet de consulter les offres d’emploi, pas de les modifier."
+          />
           <AdminCard aria-label="Offres d’emploi" className="overflow-hidden">
             {offers.data ? (
               offers.data.length ? (

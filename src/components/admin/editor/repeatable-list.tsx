@@ -2,6 +2,7 @@
 
 import { Trash2 } from 'lucide-react';
 import { useState, type ComponentProps, type ReactNode } from 'react';
+import { useReadOnly } from '@/components/admin/shell/permissions';
 import { cn } from '@/lib/cn';
 import { AddItemButton } from './editor-ui';
 import { DragHandle, SortableItem, SortableList } from './sortable';
@@ -35,6 +36,7 @@ export function RepeatableList<T>({
   max,
   renderFields,
 }: RepeatableListProps<T>) {
+  const readOnly = useReadOnly();
   const [keys, setKeys] = useState<string[]>(() => value.map(newKey));
   // Valeur remplacée de l'extérieur (chargement, annulation) : clés ajustées au nombre d'éléments.
   if (keys.length !== value.length) {
@@ -69,17 +71,20 @@ export function RepeatableList<T>({
                   index,
                 )}
               </div>
-              <button
-                type="button"
-                aria-label={`Supprimer ${label(entry.item, index)}`}
-                onClick={() => {
-                  setKeys(keys.filter((_, position) => position !== index));
-                  onChange(value.filter((_, position) => position !== index));
-                }}
-                className="flex size-8 shrink-0 items-center justify-center rounded-sm text-icon-default hover:bg-neutral-100 hover:text-text-main"
-              >
-                <Trash2 aria-hidden size={16} />
-              </button>
+              {/* Lecture seule : ni suppression ni ajout (l'ordre est figé par `SortableList`). */}
+              {!readOnly && (
+                <button
+                  type="button"
+                  aria-label={`Supprimer ${label(entry.item, index)}`}
+                  onClick={() => {
+                    setKeys(keys.filter((_, position) => position !== index));
+                    onChange(value.filter((_, position) => position !== index));
+                  }}
+                  className="flex size-8 shrink-0 items-center justify-center rounded-sm text-icon-default hover:bg-neutral-100 hover:text-text-main"
+                >
+                  <Trash2 aria-hidden size={16} />
+                </button>
+              )}
             </SortableItem>
           )}
         />

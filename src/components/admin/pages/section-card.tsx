@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useId, useState } from 'react';
 import { ConfirmDialog } from '@/components/admin/editor/editor-ui';
 import { DragHandle, SortableItem } from '@/components/admin/editor/sortable';
+import { ReadOnlyFieldset } from '@/components/admin/shell/permissions';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { adminRoutes } from '@/lib/admin/routes';
@@ -30,6 +31,7 @@ export function SectionCard({
   path,
   open,
   hasErrors,
+  readOnly = false,
   onToggle,
   onChange,
   onRemove,
@@ -38,6 +40,8 @@ export function SectionCard({
   path: string;
   open: boolean;
   hasErrors: boolean;
+  /** Lecture seule : la section se déplie pour être lue, ses champs et sa visibilité restent figés. */
+  readOnly?: boolean;
   onToggle: () => void;
   onChange: (next: PageSection) => void;
   onRemove: () => void;
@@ -89,6 +93,7 @@ export function SectionCard({
             hideLabel
             label={`Afficher la section « ${label} » sur le site`}
             checked={section.enabled}
+            disabled={readOnly}
             onChange={(event) => onChange({ ...section, enabled: event.target.checked })}
           />
         </span>
@@ -98,11 +103,13 @@ export function SectionCard({
       </div>
       {open && (
         <div id={`${id}-content`} className="mt-4 flex flex-col gap-4">
-          <SectionEditor section={section} onChange={onChange} path={path} />
-          {section.type !== 'hero' || section.variant !== 'legal' ? (
-            <AdvancedFields section={section} onChange={onChange} path={path} />
-          ) : null}
-          {section.type !== 'dynamic' && (
+          <ReadOnlyFieldset readOnly={readOnly}>
+            <SectionEditor section={section} onChange={onChange} path={path} />
+            {section.type !== 'hero' || section.variant !== 'legal' ? (
+              <AdvancedFields section={section} onChange={onChange} path={path} />
+            ) : null}
+          </ReadOnlyFieldset>
+          {section.type !== 'dynamic' && !readOnly && (
             <div className="flex justify-end">
               <Button variant="ghost" size="sm" onClick={() => setConfirming(true)}>
                 <Trash2 aria-hidden />

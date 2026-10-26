@@ -3,6 +3,7 @@
 import { ImagePlus, Star, X } from 'lucide-react';
 import { useId, useState, type DragEvent } from 'react';
 import { MediaPickerDialog, MediaThumb } from '@/components/admin/editor/media-picker';
+import { useReadOnly } from '@/components/admin/shell/permissions';
 import { Visual } from '@/components/ui/visual';
 import type { IllustrationScene, MediaImage } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
@@ -41,6 +42,8 @@ export function VisualsField({
   error?: string | null;
 }) {
   const labelId = useId();
+  // Lecture seule : vignettes affichées sans leurs boutons ni la zone d'ajout.
+  const readOnly = useReadOnly();
   const [open, setOpen] = useState(false);
   const [dropped, setDropped] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -94,7 +97,7 @@ export function VisualsField({
                 <span className="block h-[130px] w-[200px] rounded-md bg-neutral-100" />
               )}
               <span className="sr-only">Photo principale{cover?.alt ? ` : ${cover.alt}` : ''}</span>
-              <div className={tileActions}>
+              <div className={cn(tileActions, readOnly && 'hidden')}>
                 <button
                   type="button"
                   onClick={removeCover}
@@ -129,7 +132,7 @@ export function VisualsField({
                 Visuel {index + 2}
                 {image?.alt ? ` : ${image.alt}` : ''}
               </span>
-              <div className={tileActions}>
+              <div className={cn(tileActions, readOnly && 'hidden')}>
                 <button
                   type="button"
                   onClick={() => makeMain(id)}
@@ -152,7 +155,7 @@ export function VisualsField({
             </li>
           );
         })}
-        {!full && (
+        {!full && !readOnly && (
           <li className="min-w-[180px] flex-1">
             <button
               type="button"

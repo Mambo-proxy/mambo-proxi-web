@@ -15,6 +15,7 @@ import {
   useUploadMedia,
 } from '@/components/admin/editor/media-picker';
 import { AdminPage, topbarActionClass } from '@/components/admin/shell/admin-page';
+import { ReadOnlyFieldset, ReadOnlyNotice, useCan } from '@/components/admin/shell/permissions';
 import { AdminCard } from '@/components/admin/ui/admin-ui';
 import { EmptyState, ListPagination, SearchField } from '@/components/admin/ui/filters';
 import { Button } from '@/components/ui/button';
@@ -71,6 +72,8 @@ function useLibraryParams() {
  */
 export function MediaLibrary() {
   const { q, page, id, set } = useLibraryParams();
+  // Envoi, modification et suppression : `media:write` (absent du rôle responsable).
+  const canWrite = useCan()('media:write');
   const [search, setSearch] = useState(q);
   const [uploading, setUploading] = useState(false);
   const list = useQuery({
@@ -96,13 +99,19 @@ export function MediaLibrary() {
         </span>
       }
       actions={
-        <button type="button" onClick={() => setUploading(true)} className={topbarActionClass}>
-          <Upload aria-hidden />
-          Ajouter une image
-        </button>
+        canWrite && (
+          <button type="button" onClick={() => setUploading(true)} className={topbarActionClass}>
+            <Upload aria-hidden />
+            Ajouter une image
+          </button>
+        )
       }
     >
       <div className="flex flex-col gap-5">
+        <ReadOnlyNotice
+          permission="media:write"
+          text="votre rôle permet de consulter les images, pas d’en ajouter, d’en modifier ni d’en supprimer."
+        />
         <div className="flex flex-wrap items-center justify-between gap-3">
           <SearchField
             label="Rechercher une image"
@@ -140,7 +149,13 @@ export function MediaLibrary() {
               <EmptyState
                 icon={<ImageIcon size={24} />}
                 title={q ? 'Aucune image ne correspond' : 'Aucune image'}
-                text={q ? 'Essayez un autre mot.' : 'Ajoutez une première image.'}
+                text={
+                  q
+                    ? 'Essayez un autre mot.'
+                    : canWrite
+                      ? 'Ajoutez une première image.'
+                      : 'Les images du site apparaîtront ici.'
+                }
               />
             </div>
           ) : (
@@ -191,16 +206,29 @@ export function MediaLibrary() {
           )}
         </AdminCard>
       </div>
-      {opened && <MediaDialog key={opened.id} media={opened} onClose={() => set({ id: null })} />}
-      <UploadDialog open={uploading} onClose={() => setUploading(false)} />
+      {opened && (
+        <MediaDialog key={opened.id} media={opened} readOnly={!canWrite} onClose={() => set({ id: null })} />
+      )}
+      {canWrite && <UploadDialog open={uploading} onClose={() => setUploading(false)} />}
     </AdminPage>
   );
 }
 
 const clamp = (value: number) => Math.min(1, Math.max(0, Math.round(value * 100) / 100));
 
-/** Détail d'une image : aperçu et point focal, texte alternatif, informations, usages, suppression. */
-function MediaDialog({ media, onClose }: { media: Media; onClose: () => void }) {
+/**
+ * Détail d'une image : aperçu et point focal, texte alternatif, informations, usages, suppression. Sans
+ * `media:write` : consultation seulement (point focal affiché, texte alternatif figé).
+ */
+function MediaDialog({
+  media,
+  readOnly = false,
+  onClose,
+}: {
+  media: Media;
+  readOnly?: boolean;
+  onClose: () => void;
+}) {
   const client = useQueryClient();
   const [alt, setAlt] = useState(media.alt ?? '');
   const [focal, setFocal] = useState({ x: media.focalPoint?.x ?? 0.5, y: media.focalPoint?.y ?? 0.5 });
@@ -274,54 +302,89 @@ function MediaDialog({ media, onClose }: { media: Media; onClose: () => void }) 
         description={`${FORMATS[media.mimeType]} · ${formatNumber(media.width)} × ${formatNumber(media.height)} px · ${formatFileSize(media.size)} · ajoutée le ${formatDayMonthYear(media.createdAt)}`}
         maxWidth={820}
         footer={
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={used}
-              onClick={() => setConfirming(true)}
-              className="text-feedback-error"
-            >
-              <Trash2 aria-hidden size={16} />
-              Supprimer
-            </Button>
-            <div className="flex gap-2">
+          readOnly ? (
+            <div className="flex justify-end">
               <Button variant="outline" size="sm" onClick={onClose}>
-                Annuler
-              </Button>
-              <Button
-                size="sm"
-                loading={save.isPending}
-                onClick={() => {
-                  if (!alt.trim()) return setAltError('Décrivez l’image en quelques mots.');
-                  save.mutate();
-                }}
-              >
-                Enregistrer
+                Fermer
               </Button>
             </div>
-          </div>
+          ) : (
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={used}
+                onClick={() => setConfirming(true)}
+                className="text-feedback-error"
+              >
+                <Trash2 aria-hidden size={16} />
+                Supprimer
+              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={onClose}>
+                  Annuler
+                </Button>
+                <Button
+                  size="sm"
+                  loading={save.isPending}
+                  onClick={() => {
+                    if (!alt.trim()) return setAltError('Décrivez l’image en quelques mots.');
+                    save.mutate();
+                  }}
+                >
+                  Enregistrer
+                </Button>
+              </div>
+            </div>
+          )
         }
       >
         <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_280px]">
           <div className="flex flex-col gap-3">
-            <button
-              type="button"
-              onClick={pointAt}
-              onKeyDown={moveWithKeys}
-              aria-label={`Point focal : ${percent(focal.x)} depuis la gauche, ${percent(focal.y)} depuis le haut. Cliquez sur l’image ou utilisez les flèches.`}
-              className="relative block cursor-crosshair overflow-hidden rounded-md border border-border-default bg-neutral-50"
-              style={{ aspectRatio: `${media.width} / ${media.height}` }}
-            >
-              <MediaThumb image={{ ...media, focalPoint: null }} sizes="520px" className="absolute inset-0" />
-              <span
-                aria-hidden
-                className="pointer-events-none absolute flex size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-neutral-0 bg-neutral-900/60 text-neutral-0 shadow-2"
-                style={{ left: `${focal.x * 100}%`, top: `${focal.y * 100}%` }}
+            {readOnly ? (
+              // Lecture seule : image et point focal affichés, sans saisie.
+              <div
+                role="img"
+                aria-label={`${media.alt || media.fileName} · point focal : ${percent(focal.x)} depuis la gauche, ${percent(focal.y)} depuis le haut.`}
+                className="relative block overflow-hidden rounded-md border border-border-default bg-neutral-50"
+                style={{ aspectRatio: `${media.width} / ${media.height}` }}
               >
-                <Crosshair size={14} />
-              </span>
-            </button>
+                <MediaThumb
+                  image={{ ...media, focalPoint: null }}
+                  sizes="520px"
+                  className="absolute inset-0"
+                />
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute flex size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-neutral-0 bg-neutral-900/60 text-neutral-0 shadow-2"
+                  style={{ left: `${focal.x * 100}%`, top: `${focal.y * 100}%` }}
+                >
+                  <Crosshair size={14} />
+                </span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={pointAt}
+                onKeyDown={moveWithKeys}
+                aria-label={`Point focal : ${percent(focal.x)} depuis la gauche, ${percent(focal.y)} depuis le haut. Cliquez sur l’image ou utilisez les flèches.`}
+                className="relative block cursor-crosshair overflow-hidden rounded-md border border-border-default bg-neutral-50"
+                style={{ aspectRatio: `${media.width} / ${media.height}` }}
+              >
+                <MediaThumb
+                  image={{ ...media, focalPoint: null }}
+                  sizes="520px"
+                  className="absolute inset-0"
+                />
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute flex size-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-neutral-0 bg-neutral-900/60 text-neutral-0 shadow-2"
+                  style={{ left: `${focal.x * 100}%`, top: `${focal.y * 100}%` }}
+                >
+                  <Crosshair size={14} />
+                </span>
+              </button>
+            )}
             <p className="font-ui text-[12px] leading-4 text-text-muted">
               Point focal : la partie gardée quand l’image est recadrée (vignettes, bannières, mobile).
             </p>
@@ -332,24 +395,26 @@ function MediaDialog({ media, onClose }: { media: Media; onClose: () => void }) 
             </div>
           </div>
           <div className="flex flex-col gap-5">
-            <Field
-              label="Texte alternatif"
-              required
-              error={altError}
-              help="Ce que montre l’image, lu par les lecteurs d’écran et les moteurs de recherche."
-            >
-              {(control) => (
-                <Input
-                  {...control}
-                  maxLength={200}
-                  value={alt}
-                  onChange={(event) => {
-                    setAlt(event.target.value);
-                    setAltError(null);
-                  }}
-                />
-              )}
-            </Field>
+            <ReadOnlyFieldset readOnly={readOnly}>
+              <Field
+                label="Texte alternatif"
+                required
+                error={altError}
+                help="Ce que montre l’image, lu par les lecteurs d’écran et les moteurs de recherche."
+              >
+                {(control) => (
+                  <Input
+                    {...control}
+                    maxLength={200}
+                    value={alt}
+                    onChange={(event) => {
+                      setAlt(event.target.value);
+                      setAltError(null);
+                    }}
+                  />
+                )}
+              </Field>
+            </ReadOnlyFieldset>
             <section aria-labelledby={`usages-${media.id}`} className="flex flex-col gap-2">
               <h3
                 id={`usages-${media.id}`}

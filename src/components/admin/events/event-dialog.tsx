@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { ImageField } from '@/components/admin/editor/media-picker';
 import { CompactField, CompactInput, compactInputClass } from '@/components/admin/magazine/magazine-ui';
+import { ReadOnlyFieldset } from '@/components/admin/shell/permissions';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { Switch } from '@/components/ui/switch';
@@ -70,12 +71,15 @@ export function EventDialog({
   onClose,
   event,
   onSaved,
+  readOnly = false,
 }: {
   open: boolean;
   onClose: () => void;
   /** Événement modifié ; `null` pour en créer un. */
   event: AdminEvent | null;
   onSaved: () => void;
+  /** Sans `content:write` : fiche consultée (champs figés, sans enregistrement). */
+  readOnly?: boolean;
 }) {
   const [draft, setDraft] = useState(() => draftOf(event));
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -145,191 +149,198 @@ export function EventDialog({
     <Modal
       open={open}
       onClose={onClose}
-      title={event ? `Modifier « ${event.title} »` : 'Nouvel événement'}
+      title={event ? (readOnly ? event.title : `Modifier « ${event.title} »`) : 'Nouvel événement'}
       description="L’événement publié s’affiche dans l’agenda de la rubrique Culture & événementiel, avec son formulaire d’inscription."
       maxWidth={720}
       footer={
         <div className="flex flex-wrap justify-end gap-2">
           <Button variant="outline" size="sm" onClick={onClose}>
-            Annuler
+            {readOnly ? 'Fermer' : 'Annuler'}
           </Button>
-          <Button size="sm" loading={save.isPending} onClick={submit}>
-            {event ? 'Enregistrer' : 'Ajouter l’événement'}
-          </Button>
+          {!readOnly && (
+            <Button size="sm" loading={save.isPending} onClick={submit}>
+              {event ? 'Enregistrer' : 'Ajouter l’événement'}
+            </Button>
+          )}
         </div>
       }
     >
-      <div className="flex flex-col gap-4">
-        <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_200px]">
-          <CompactField label="Titre" error={errors.title}>
-            {(control) => (
-              <CompactInput
-                {...control}
-                value={draft.title}
-                placeholder="Nuit des saveurs camerounaises"
-                maxLength={120}
-                onChange={(change) => set('title', change.target.value)}
-              />
-            )}
-          </CompactField>
-          <CompactField label="Type" error={errors.tag} help="Affiché sur la carte.">
-            {(control) => (
-              <CompactInput
-                {...control}
-                list="event-tags"
-                value={draft.tag}
-                maxLength={40}
-                onChange={(change) => set('tag', change.target.value)}
-              />
-            )}
-          </CompactField>
-          <datalist id="event-tags">
-            {EVENT_TAGS.map((tag) => (
-              <option key={tag} value={tag} />
-            ))}
-          </datalist>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <CompactField label="Date" error={errors.startsAt}>
-            {(control) => (
-              <CompactInput
-                {...control}
-                type="date"
-                value={draft.day}
-                onChange={(change) => set('day', change.target.value)}
-              />
-            )}
-          </CompactField>
-          <CompactField label="Début">
-            {(control) => (
-              <CompactInput
-                {...control}
-                type="time"
-                value={draft.start}
-                onChange={(change) => set('start', change.target.value)}
-              />
-            )}
-          </CompactField>
-          <CompactField label="Fin" error={errors.endsAt} help="Facultatif.">
-            {(control) => (
-              <CompactInput
-                {...control}
-                type="time"
-                value={draft.end}
-                onChange={(change) => set('end', change.target.value)}
-              />
-            )}
-          </CompactField>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <CompactField label="Ville" error={errors.city}>
-            {(control) => (
-              <CompactInput
-                {...control}
-                value={draft.city}
-                maxLength={80}
-                onChange={(change) => set('city', change.target.value)}
-              />
-            )}
-          </CompactField>
-          <CompactField label="Lieu" help="Quartier ou adresse (facultatif).">
-            {(control) => (
-              <CompactInput
-                {...control}
-                value={draft.place}
-                placeholder="Bonapriso"
-                maxLength={120}
-                onChange={(change) => set('place', change.target.value)}
-              />
-            )}
-          </CompactField>
-        </div>
-        <div className="flex flex-col gap-2">
-          <span id="event-scene-label" className="font-ui text-[13px] leading-4 font-medium text-neutral-700">
-            Illustration (tant qu’aucune photo n’est choisie)
-          </span>
-          <div role="radiogroup" aria-labelledby="event-scene-label" className="flex flex-wrap gap-2">
-            {SCENES.map(({ scene, label }, index) => {
-              const checked = draft.illustration === scene;
-              return (
-                <button
-                  key={scene}
-                  type="button"
-                  role="radio"
-                  aria-checked={checked}
-                  aria-label={label}
-                  tabIndex={checked ? 0 : -1}
-                  onClick={() => set('illustration', scene)}
-                  onKeyDown={(key) => {
-                    const delta = key.key === 'ArrowRight' ? 1 : key.key === 'ArrowLeft' ? -1 : 0;
-                    if (!delta) return;
-                    key.preventDefault();
-                    const next = (index + delta + SCENES.length) % SCENES.length;
-                    set('illustration', SCENES[next]!.scene);
-                    (key.currentTarget.parentElement?.children[next] as HTMLElement | undefined)?.focus();
-                  }}
-                  className={cn(
-                    'relative h-12 w-[72px] overflow-hidden rounded-sm border-2 transition-colors',
-                    checked ? 'border-brand-primary' : 'border-transparent hover:border-border-strong',
-                  )}
-                >
-                  <Image
-                    src={`/illustrations/${scene}.svg`}
-                    alt=""
-                    fill
-                    sizes="72px"
-                    unoptimized
-                    className="object-cover"
-                  />
-                </button>
-              );
-            })}
+      <ReadOnlyFieldset readOnly={readOnly}>
+        <div className="flex flex-col gap-4">
+          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_200px]">
+            <CompactField label="Titre" error={errors.title}>
+              {(control) => (
+                <CompactInput
+                  {...control}
+                  value={draft.title}
+                  placeholder="Nuit des saveurs camerounaises"
+                  maxLength={120}
+                  onChange={(change) => set('title', change.target.value)}
+                />
+              )}
+            </CompactField>
+            <CompactField label="Type" error={errors.tag} help="Affiché sur la carte.">
+              {(control) => (
+                <CompactInput
+                  {...control}
+                  list="event-tags"
+                  value={draft.tag}
+                  maxLength={40}
+                  onChange={(change) => set('tag', change.target.value)}
+                />
+              )}
+            </CompactField>
+            <datalist id="event-tags">
+              {EVENT_TAGS.map((tag) => (
+                <option key={tag} value={tag} />
+              ))}
+            </datalist>
           </div>
-        </div>
-        <ImageField
-          label="Photo"
-          help="Facultatif : remplace l’illustration sur la carte de l’agenda."
-          value={draft.image}
-          onChange={(image) => set('image', image)}
-        />
-        <CompactField label="Description" help="Facultatif : programme, accès, ce qui est compris.">
-          {(control) => (
-            <textarea
-              {...control}
-              rows={3}
-              value={draft.description}
-              maxLength={3000}
-              onChange={(change) => set('description', change.target.value)}
-              className={cn(compactInputClass, 'resize-y')}
-            />
-          )}
-        </CompactField>
-        <div className="grid items-end gap-4 sm:grid-cols-2">
-          <CompactField label="Nombre de places" error={errors.capacity} help="Vide : sans limite.">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <CompactField label="Date" error={errors.startsAt}>
+              {(control) => (
+                <CompactInput
+                  {...control}
+                  type="date"
+                  value={draft.day}
+                  onChange={(change) => set('day', change.target.value)}
+                />
+              )}
+            </CompactField>
+            <CompactField label="Début">
+              {(control) => (
+                <CompactInput
+                  {...control}
+                  type="time"
+                  value={draft.start}
+                  onChange={(change) => set('start', change.target.value)}
+                />
+              )}
+            </CompactField>
+            <CompactField label="Fin" error={errors.endsAt} help="Facultatif.">
+              {(control) => (
+                <CompactInput
+                  {...control}
+                  type="time"
+                  value={draft.end}
+                  onChange={(change) => set('end', change.target.value)}
+                />
+              )}
+            </CompactField>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <CompactField label="Ville" error={errors.city}>
+              {(control) => (
+                <CompactInput
+                  {...control}
+                  value={draft.city}
+                  maxLength={80}
+                  onChange={(change) => set('city', change.target.value)}
+                />
+              )}
+            </CompactField>
+            <CompactField label="Lieu" help="Quartier ou adresse (facultatif).">
+              {(control) => (
+                <CompactInput
+                  {...control}
+                  value={draft.place}
+                  placeholder="Bonapriso"
+                  maxLength={120}
+                  onChange={(change) => set('place', change.target.value)}
+                />
+              )}
+            </CompactField>
+          </div>
+          <div className="flex flex-col gap-2">
+            <span
+              id="event-scene-label"
+              className="font-ui text-[13px] leading-4 font-medium text-neutral-700"
+            >
+              Illustration (tant qu’aucune photo n’est choisie)
+            </span>
+            <div role="radiogroup" aria-labelledby="event-scene-label" className="flex flex-wrap gap-2">
+              {SCENES.map(({ scene, label }, index) => {
+                const checked = draft.illustration === scene;
+                return (
+                  <button
+                    key={scene}
+                    type="button"
+                    role="radio"
+                    aria-checked={checked}
+                    aria-label={label}
+                    tabIndex={checked ? 0 : -1}
+                    onClick={() => set('illustration', scene)}
+                    onKeyDown={(key) => {
+                      const delta = key.key === 'ArrowRight' ? 1 : key.key === 'ArrowLeft' ? -1 : 0;
+                      if (!delta) return;
+                      key.preventDefault();
+                      const next = (index + delta + SCENES.length) % SCENES.length;
+                      set('illustration', SCENES[next]!.scene);
+                      (key.currentTarget.parentElement?.children[next] as HTMLElement | undefined)?.focus();
+                    }}
+                    className={cn(
+                      'relative h-12 w-[72px] overflow-hidden rounded-sm border-2 transition-colors',
+                      checked ? 'border-brand-primary' : 'border-transparent hover:border-border-strong',
+                    )}
+                  >
+                    <Image
+                      src={`/illustrations/${scene}.svg`}
+                      alt=""
+                      fill
+                      sizes="72px"
+                      unoptimized
+                      className="object-cover"
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <ImageField
+            label="Photo"
+            help="Facultatif : remplace l’illustration sur la carte de l’agenda."
+            value={draft.image}
+            onChange={(image) => set('image', image)}
+          />
+          <CompactField label="Description" help="Facultatif : programme, accès, ce qui est compris.">
             {(control) => (
-              <CompactInput
+              <textarea
                 {...control}
-                type="number"
-                inputMode="numeric"
-                min={1}
-                value={draft.capacity}
-                onChange={(change) => set('capacity', change.target.value)}
+                rows={3}
+                value={draft.description}
+                maxLength={3000}
+                onChange={(change) => set('description', change.target.value)}
+                className={cn(compactInputClass, 'resize-y')}
               />
             )}
           </CompactField>
+          <div className="grid items-end gap-4 sm:grid-cols-2">
+            <CompactField label="Nombre de places" error={errors.capacity} help="Vide : sans limite.">
+              {(control) => (
+                <CompactInput
+                  {...control}
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  value={draft.capacity}
+                  onChange={(change) => set('capacity', change.target.value)}
+                />
+              )}
+            </CompactField>
+            <Switch
+              label="Afficher « Places limitées »"
+              checked={draft.limited}
+              onChange={(change) => set('limited', change.target.checked)}
+              className="pb-2"
+            />
+          </div>
           <Switch
-            label="Afficher « Places limitées »"
-            checked={draft.limited}
-            onChange={(change) => set('limited', change.target.checked)}
-            className="pb-2"
+            label="Publié dans l’agenda du site"
+            checked={draft.published}
+            onChange={(change) => set('published', change.target.checked)}
           />
         </div>
-        <Switch
-          label="Publié dans l’agenda du site"
-          checked={draft.published}
-          onChange={(change) => set('published', change.target.checked)}
-        />
-      </div>
+      </ReadOnlyFieldset>
     </Modal>
   );
 }

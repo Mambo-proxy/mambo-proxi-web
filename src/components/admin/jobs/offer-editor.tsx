@@ -15,6 +15,7 @@ import {
 } from '@/components/admin/editor/editor-ui';
 import { RepeatableList, SubInput } from '@/components/admin/editor/repeatable-list';
 import { AdminPage, topbarActionClass, topbarSecondaryClass } from '@/components/admin/shell/admin-page';
+import { ReadOnlyFieldset, ReadOnlyNotice, useCan } from '@/components/admin/shell/permissions';
 import { EmptyState } from '@/components/admin/ui/filters';
 import { Button } from '@/components/ui/button';
 import { Field, Input, Select, Textarea } from '@/components/ui/field';
@@ -176,6 +177,8 @@ function OfferForm({ offer }: { offer: JobOffer | null }) {
   const router = useRouter();
   const client = useQueryClient();
   const { setStatus, remove } = useOfferActions();
+  // Sans `content:write` (responsable) : offre consultée, champs figés, ni enregistrement ni publication.
+  const canWrite = useCan()('content:write');
   const [draft, setDraft] = useState(() => draftOf(offer));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [deleting, setDeleting] = useState(false);
@@ -247,302 +250,313 @@ function OfferForm({ offer }: { offer: JobOffer | null }) {
               Voir l’offre
             </a>
           )}
-          <button
-            type="button"
-            onClick={() => save.mutate(undefined)}
-            disabled={save.isPending}
-            className={cn(topbarActionClass, 'disabled:opacity-60')}
-          >
-            <Save aria-hidden />
-            Enregistrer
-          </button>
+          {canWrite && (
+            <button
+              type="button"
+              onClick={() => save.mutate(undefined)}
+              disabled={save.isPending}
+              className={cn(topbarActionClass, 'disabled:opacity-60')}
+            >
+              <Save aria-hidden />
+              Enregistrer
+            </button>
+          )}
         </>
       }
     >
-      <div id={formId}>
-        <EditorLayout
-          aside={
-            <SideCard title="Publication" action={<PublishStatusBadge status={offer?.status ?? 'DRAFT'} />}>
-              <p className="font-ui text-[13px] leading-5 text-text-muted">
-                {offer ? offerMeta(offer) : 'Non publiée'}
-                {offer
-                  ? ` · ${offer.applicationsCount} candidature${offer.applicationsCount > 1 ? 's' : ''}`
-                  : ''}
-              </p>
-              <Field
-                label="Fin de publication"
-                help="Facultatif : l’offre est retirée du site à cette date."
-                error={error('expiresAt')}
-              >
-                {(control) => (
-                  <Input
-                    {...control}
-                    type="date"
-                    value={draft.expiresAt}
-                    onChange={(event) => set('expiresAt', event.target.value)}
-                  />
-                )}
-              </Field>
-              <Field
-                label="Adresse de la page"
-                help={`/recrutement/${draft.slug || '…'} · générée à partir de l’intitulé si vide.`}
-                error={error('slug')}
-              >
-                {(control) => (
-                  <Input
-                    {...control}
-                    value={draft.slug}
-                    maxLength={80}
-                    onChange={(event) => set('slug', event.target.value)}
-                  />
-                )}
-              </Field>
-              <div className="flex flex-col gap-2">
-                {published ? (
-                  <Button
-                    variant="outline"
-                    onClick={() => offer && setStatus.mutate({ id: offer.id, status: 'DRAFT' })}
-                    disabled={setStatus.isPending}
-                  >
-                    Dépublier
-                  </Button>
-                ) : (
-                  <Button onClick={() => save.mutate('PUBLISHED')} disabled={save.isPending}>
-                    Publier l’offre
-                  </Button>
-                )}
-                {offer && (
-                  <button
-                    type="button"
-                    onClick={() => setDeleting(true)}
-                    className="inline-flex items-center justify-center gap-2 rounded-sm py-2 font-ui text-[14px] leading-5 font-semibold text-feedback-error hover:underline"
-                  >
-                    <Trash2 aria-hidden size={16} />
-                    Supprimer l’offre
-                  </button>
-                )}
-              </div>
-            </SideCard>
-          }
-        >
-          <EditorSection
-            number={1}
-            title="Le poste"
-            subtitle="Intitulé, contrat et lieu, affichés en tête de l’offre"
-          >
-            <Field
-              label="Intitulé du poste"
-              required
-              error={error('title')}
-              help={charCountHelp(draft.title, 120)}
-            >
-              {(control) => (
-                <Input
-                  {...control}
-                  value={draft.title}
-                  maxLength={120}
-                  placeholder="Coordinateur·rice de services"
-                  onChange={(event) => set('title', event.target.value)}
-                />
-              )}
-            </Field>
-            <div className="grid gap-4 md:grid-cols-2">
-              <Field label="Type de contrat" required error={error('contractType')}>
-                {(control) => (
-                  <>
+      <ReadOnlyNotice
+        permission="content:write"
+        text="votre rôle permet de consulter cette offre, pas de la modifier."
+        className="mb-5"
+      />
+      <ReadOnlyFieldset readOnly={!canWrite}>
+        <div id={formId}>
+          <EditorLayout
+            aside={
+              <SideCard title="Publication" action={<PublishStatusBadge status={offer?.status ?? 'DRAFT'} />}>
+                <p className="font-ui text-[13px] leading-5 text-text-muted">
+                  {offer ? offerMeta(offer) : 'Non publiée'}
+                  {offer
+                    ? ` · ${offer.applicationsCount} candidature${offer.applicationsCount > 1 ? 's' : ''}`
+                    : ''}
+                </p>
+                <Field
+                  label="Fin de publication"
+                  help="Facultatif : l’offre est retirée du site à cette date."
+                  error={error('expiresAt')}
+                >
+                  {(control) => (
                     <Input
                       {...control}
-                      list={`${formId}-contracts`}
-                      value={draft.contractType}
-                      maxLength={40}
-                      onChange={(event) => set('contractType', event.target.value)}
+                      type="date"
+                      value={draft.expiresAt}
+                      onChange={(event) => set('expiresAt', event.target.value)}
                     />
-                    <datalist id={`${formId}-contracts`}>
-                      {CONTRACT_TYPES.map((type) => (
-                        <option key={type} value={type} />
+                  )}
+                </Field>
+                <Field
+                  label="Adresse de la page"
+                  help={`/recrutement/${draft.slug || '…'} · générée à partir de l’intitulé si vide.`}
+                  error={error('slug')}
+                >
+                  {(control) => (
+                    <Input
+                      {...control}
+                      value={draft.slug}
+                      maxLength={80}
+                      onChange={(event) => set('slug', event.target.value)}
+                    />
+                  )}
+                </Field>
+                {canWrite && (
+                  <div className="flex flex-col gap-2">
+                    {published ? (
+                      <Button
+                        variant="outline"
+                        onClick={() => offer && setStatus.mutate({ id: offer.id, status: 'DRAFT' })}
+                        disabled={setStatus.isPending}
+                      >
+                        Dépublier
+                      </Button>
+                    ) : (
+                      <Button onClick={() => save.mutate('PUBLISHED')} disabled={save.isPending}>
+                        Publier l’offre
+                      </Button>
+                    )}
+                    {offer && (
+                      <button
+                        type="button"
+                        onClick={() => setDeleting(true)}
+                        className="inline-flex items-center justify-center gap-2 rounded-sm py-2 font-ui text-[14px] leading-5 font-semibold text-feedback-error hover:underline"
+                      >
+                        <Trash2 aria-hidden size={16} />
+                        Supprimer l’offre
+                      </button>
+                    )}
+                  </div>
+                )}
+              </SideCard>
+            }
+          >
+            <EditorSection
+              number={1}
+              title="Le poste"
+              subtitle="Intitulé, contrat et lieu, affichés en tête de l’offre"
+            >
+              <Field
+                label="Intitulé du poste"
+                required
+                error={error('title')}
+                help={charCountHelp(draft.title, 120)}
+              >
+                {(control) => (
+                  <Input
+                    {...control}
+                    value={draft.title}
+                    maxLength={120}
+                    placeholder="Coordinateur·rice de services"
+                    onChange={(event) => set('title', event.target.value)}
+                  />
+                )}
+              </Field>
+              <div className="grid gap-4 md:grid-cols-2">
+                <Field label="Type de contrat" required error={error('contractType')}>
+                  {(control) => (
+                    <>
+                      <Input
+                        {...control}
+                        list={`${formId}-contracts`}
+                        value={draft.contractType}
+                        maxLength={40}
+                        onChange={(event) => set('contractType', event.target.value)}
+                      />
+                      <datalist id={`${formId}-contracts`}>
+                        {CONTRACT_TYPES.map((type) => (
+                          <option key={type} value={type} />
+                        ))}
+                      </datalist>
+                    </>
+                  )}
+                </Field>
+                <Field label="Démarrage" error={error('startDate')}>
+                  {(control) => (
+                    <Input
+                      {...control}
+                      value={draft.startDate}
+                      maxLength={60}
+                      placeholder="janvier 2027"
+                      onChange={(event) => set('startDate', event.target.value)}
+                    />
+                  )}
+                </Field>
+                <Field label="Lieu" required error={error('city')} help="Affiché dans la liste des offres.">
+                  {(control) => (
+                    <Input
+                      {...control}
+                      value={draft.city}
+                      maxLength={80}
+                      onChange={(event) => set('city', event.target.value)}
+                    />
+                  )}
+                </Field>
+                <Field label="Pays" required error={error('country')}>
+                  {(control) => (
+                    <Select
+                      {...control}
+                      value={draft.country}
+                      onChange={(event) => set('country', event.target.value)}
+                    >
+                      {COUNTRIES.map((country) => (
+                        <option key={country.value} value={country.value}>
+                          {country.label}
+                        </option>
                       ))}
-                    </datalist>
-                  </>
-                )}
-              </Field>
-              <Field label="Démarrage" error={error('startDate')}>
-                {(control) => (
-                  <Input
-                    {...control}
-                    value={draft.startDate}
-                    maxLength={60}
-                    placeholder="janvier 2027"
-                    onChange={(event) => set('startDate', event.target.value)}
+                    </Select>
+                  )}
+                </Field>
+                <Field
+                  label="Lieu détaillé"
+                  error={error('locationLabel')}
+                  help="Page de l’offre, ex. « Douala, Cameroun »."
+                >
+                  {(control) => (
+                    <Input
+                      {...control}
+                      value={draft.locationLabel}
+                      maxLength={120}
+                      onChange={(event) => set('locationLabel', event.target.value)}
+                    />
+                  )}
+                </Field>
+                <Field
+                  label="Secteurs"
+                  error={error('sectors')}
+                  help="Quartiers séparés par des virgules ; remplacent le lieu sur la page."
+                >
+                  {(control) => (
+                    <Input
+                      {...control}
+                      value={draft.sectors}
+                      placeholder="Bonamoussadi, Makèpè"
+                      onChange={(event) => set('sectors', event.target.value)}
+                    />
+                  )}
+                </Field>
+                <Field label="Temps de travail" error={error('workingTime')}>
+                  {(control) => (
+                    <Input
+                      {...control}
+                      value={draft.workingTime}
+                      maxLength={60}
+                      placeholder="temps plein"
+                      onChange={(event) => set('workingTime', event.target.value)}
+                    />
+                  )}
+                </Field>
+                <Field label="Horaires" error={error('schedule')}>
+                  {(control) => (
+                    <Input
+                      {...control}
+                      value={draft.schedule}
+                      maxLength={120}
+                      placeholder="8 h par jour · 5 jours par semaine"
+                      onChange={(event) => set('schedule', event.target.value)}
+                    />
+                  )}
+                </Field>
+              </div>
+              <fieldset className="flex flex-col gap-2">
+                <legend className="mb-2 font-ui text-[14px] leading-5 font-semibold text-text-main">
+                  Rémunération (FCFA)
+                </legend>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <SubInput
+                    aria-label="Montant minimum"
+                    inputMode="numeric"
+                    placeholder="90 000"
+                    value={draft.salaryMin}
+                    onChange={(event) => set('salaryMin', event.target.value)}
                   />
-                )}
-              </Field>
-              <Field label="Lieu" required error={error('city')} help="Affiché dans la liste des offres.">
-                {(control) => (
-                  <Input
-                    {...control}
-                    value={draft.city}
-                    maxLength={80}
-                    onChange={(event) => set('city', event.target.value)}
+                  <SubInput
+                    aria-label="Montant maximum"
+                    aria-invalid={error('salary.max') ? true : undefined}
+                    inputMode="numeric"
+                    placeholder="120 000 (facultatif)"
+                    value={draft.salaryMax}
+                    onChange={(event) => set('salaryMax', event.target.value)}
                   />
-                )}
-              </Field>
-              <Field label="Pays" required error={error('country')}>
-                {(control) => (
-                  <Select
-                    {...control}
-                    value={draft.country}
-                    onChange={(event) => set('country', event.target.value)}
+                  <select
+                    aria-label="Période"
+                    value={draft.salaryPeriod}
+                    onChange={(event) => set('salaryPeriod', event.target.value as JobSalary['period'])}
+                    className="rounded-sm border border-border-default bg-neutral-0 px-3 py-2.5 font-ui text-[14px] leading-5 text-text-main"
                   >
-                    {COUNTRIES.map((country) => (
-                      <option key={country.value} value={country.value}>
-                        {country.label}
+                    {PERIODS.map((period) => (
+                      <option key={period.value} value={period.value}>
+                        {period.label}
                       </option>
                     ))}
-                  </Select>
-                )}
-              </Field>
+                  </select>
+                </div>
+                <p className="font-ui text-[12px] leading-4 text-text-muted">
+                  {error('salary.max') ?? 'Facultatif : sans montant, la rémunération n’est pas affichée.'}
+                </p>
+              </fieldset>
+            </EditorSection>
+
+            <EditorSection number={2} title="Présentation" subtitle="Texte affiché sous « Le poste »">
               <Field
-                label="Lieu détaillé"
-                error={error('locationLabel')}
-                help="Page de l’offre, ex. « Douala, Cameroun »."
+                label="Présentation du poste"
+                required
+                error={error('summary')}
+                help={charCountHelp(draft.summary, 1000)}
               >
                 {(control) => (
-                  <Input
+                  <Textarea
                     {...control}
-                    value={draft.locationLabel}
-                    maxLength={120}
-                    onChange={(event) => set('locationLabel', event.target.value)}
+                    rows={5}
+                    value={draft.summary}
+                    maxLength={1000}
+                    onChange={(event) => set('summary', event.target.value)}
                   />
                 )}
               </Field>
-              <Field
-                label="Secteurs"
-                error={error('sectors')}
-                help="Quartiers séparés par des virgules ; remplacent le lieu sur la page."
-              >
-                {(control) => (
-                  <Input
-                    {...control}
-                    value={draft.sectors}
-                    placeholder="Bonamoussadi, Makèpè"
-                    onChange={(event) => set('sectors', event.target.value)}
-                  />
-                )}
-              </Field>
-              <Field label="Temps de travail" error={error('workingTime')}>
-                {(control) => (
-                  <Input
-                    {...control}
-                    value={draft.workingTime}
-                    maxLength={60}
-                    placeholder="temps plein"
-                    onChange={(event) => set('workingTime', event.target.value)}
-                  />
-                )}
-              </Field>
-              <Field label="Horaires" error={error('schedule')}>
-                {(control) => (
-                  <Input
-                    {...control}
-                    value={draft.schedule}
-                    maxLength={120}
-                    placeholder="8 h par jour · 5 jours par semaine"
-                    onChange={(event) => set('schedule', event.target.value)}
-                  />
-                )}
-              </Field>
-            </div>
-            <fieldset className="flex flex-col gap-2">
-              <legend className="mb-2 font-ui text-[14px] leading-5 font-semibold text-text-main">
-                Rémunération (FCFA)
-              </legend>
-              <div className="grid gap-3 sm:grid-cols-3">
-                <SubInput
-                  aria-label="Montant minimum"
-                  inputMode="numeric"
-                  placeholder="90 000"
-                  value={draft.salaryMin}
-                  onChange={(event) => set('salaryMin', event.target.value)}
-                />
-                <SubInput
-                  aria-label="Montant maximum"
-                  aria-invalid={error('salary.max') ? true : undefined}
-                  inputMode="numeric"
-                  placeholder="120 000 (facultatif)"
-                  value={draft.salaryMax}
-                  onChange={(event) => set('salaryMax', event.target.value)}
-                />
-                <select
-                  aria-label="Période"
-                  value={draft.salaryPeriod}
-                  onChange={(event) => set('salaryPeriod', event.target.value as JobSalary['period'])}
-                  className="rounded-sm border border-border-default bg-neutral-0 px-3 py-2.5 font-ui text-[14px] leading-5 text-text-main"
-                >
-                  {PERIODS.map((period) => (
-                    <option key={period.value} value={period.value}>
-                      {period.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <p className="font-ui text-[12px] leading-4 text-text-muted">
-                {error('salary.max') ?? 'Facultatif : sans montant, la rémunération n’est pas affichée.'}
-              </p>
-            </fieldset>
-          </EditorSection>
+            </EditorSection>
 
-          <EditorSection number={2} title="Présentation" subtitle="Texte affiché sous « Le poste »">
-            <Field
-              label="Présentation du poste"
-              required
-              error={error('summary')}
-              help={charCountHelp(draft.summary, 1000)}
-            >
-              {(control) => (
-                <Textarea
-                  {...control}
-                  rows={5}
-                  value={draft.summary}
-                  maxLength={1000}
-                  onChange={(event) => set('summary', event.target.value)}
-                />
-              )}
-            </Field>
-          </EditorSection>
-
-          <ListSection
-            number={3}
-            title="Missions"
-            subtitle="Au moins une mission pour publier l’offre"
-            itemName="mission"
-            addLabel="Ajouter une mission"
-            value={draft.missions}
-            onChange={(value) => set('missions', value)}
-            errors={errors}
-            path="missions"
-          />
-          <ListSection
-            number={4}
-            title="Profil recherché"
-            itemName="critère"
-            addLabel="Ajouter un critère"
-            value={draft.profile}
-            onChange={(value) => set('profile', value)}
-            errors={errors}
-            path="profile"
-          />
-          <ListSection
-            number={5}
-            title="Ce que nous offrons"
-            itemName="avantage"
-            addLabel="Ajouter un avantage"
-            value={draft.benefits}
-            onChange={(value) => set('benefits', value)}
-            errors={errors}
-            path="benefits"
-          />
-        </EditorLayout>
-      </div>
+            <ListSection
+              number={3}
+              title="Missions"
+              subtitle="Au moins une mission pour publier l’offre"
+              itemName="mission"
+              addLabel="Ajouter une mission"
+              value={draft.missions}
+              onChange={(value) => set('missions', value)}
+              errors={errors}
+              path="missions"
+            />
+            <ListSection
+              number={4}
+              title="Profil recherché"
+              itemName="critère"
+              addLabel="Ajouter un critère"
+              value={draft.profile}
+              onChange={(value) => set('profile', value)}
+              errors={errors}
+              path="profile"
+            />
+            <ListSection
+              number={5}
+              title="Ce que nous offrons"
+              itemName="avantage"
+              addLabel="Ajouter un avantage"
+              value={draft.benefits}
+              onChange={(value) => set('benefits', value)}
+              errors={errors}
+              path="benefits"
+            />
+          </EditorLayout>
+        </div>
+      </ReadOnlyFieldset>
 
       {offer && (
         <ConfirmDialog

@@ -3,6 +3,7 @@
 import { CircleAlert, CircleCheck, Plus } from 'lucide-react';
 import { useId, type ComponentProps, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
+import { useReadOnly } from '@/components/admin/shell/permissions';
 import { Modal } from '@/components/ui/modal';
 import type { PublishStatus } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
@@ -118,8 +119,13 @@ export function charCountHelp(value: string | null | undefined, max: number, hel
   return help ? `${help} ${count}.` : count;
 }
 
-/** Bouton d'ajout d'un élément de liste (`Ajouter un public`) : bordure pointillée, pleine largeur. */
+/**
+ * Bouton d'ajout d'un élément de liste (`Ajouter un public`) : bordure pointillée, pleine largeur ; absent dans un
+ * formulaire en lecture seule.
+ */
 export function AddItemButton({ children, className, ...props }: ComponentProps<'button'>) {
+  const readOnly = useReadOnly();
+  if (readOnly) return null;
   return (
     <button
       type="button"

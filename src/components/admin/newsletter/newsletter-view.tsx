@@ -6,6 +6,7 @@ import type { Route } from 'next';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { topbarActionClass, topbarSecondaryClass } from '@/components/admin/shell/admin-page';
+import { ReadOnlyNotice, useCan } from '@/components/admin/shell/permissions';
 import { AdminCard } from '@/components/admin/ui/admin-ui';
 import { EmptyState } from '@/components/admin/ui/filters';
 import { change, KpiCard } from '@/components/admin/ui/kpi-card';
@@ -35,8 +36,12 @@ function useSelection() {
   return [selected, select] as const;
 }
 
-/** Actions de la barre supérieure (`94:11755`) : « Exporter les inscrits » et « Nouvel envoi ». */
+/**
+ * Actions de la barre supérieure (`94:11755`) : « Exporter les inscrits » (`contacts:export`) et « Nouvel envoi »
+ * (`newsletter:write`).
+ */
 export function NewsletterHeaderActions() {
+  const can = useCan();
   const [, select] = useSelection();
   const [pending, setPending] = useState(false);
 
@@ -61,19 +66,23 @@ export function NewsletterHeaderActions() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => void exportCsv()}
-        disabled={pending}
-        className={topbarSecondaryClass}
-      >
-        <Download aria-hidden size={16} />
-        Exporter les inscrits
-      </button>
-      <button type="button" onClick={() => select(`${NEW}-${Date.now()}`)} className={topbarActionClass}>
-        <Mail aria-hidden />
-        Nouvel envoi
-      </button>
+      {can('contacts:export') && (
+        <button
+          type="button"
+          onClick={() => void exportCsv()}
+          disabled={pending}
+          className={topbarSecondaryClass}
+        >
+          <Download aria-hidden size={16} />
+          Exporter les inscrits
+        </button>
+      )}
+      {can('newsletter:write') && (
+        <button type="button" onClick={() => select(`${NEW}-${Date.now()}`)} className={topbarActionClass}>
+          <Mail aria-hidden />
+          Nouvel envoi
+        </button>
+      )}
     </>
   );
 }
@@ -83,6 +92,8 @@ export function NewsletterHeaderActions() {
  * compositeur ouvre le prochain envoi programmé ou le dernier brouillon.
  */
 export function NewsletterView() {
+  // Sans `newsletter:write` (responsable) : envois consultés en aperçu, sans compositeur.
+  const canWrite = useCan()('newsletter:write');
   const [selected, select] = useSelection();
   // Brouillon créé depuis « Nouvel envoi » : l'adresse passe à `?envoi=<id>` mais le compositeur garde sa saisie
   // (clé du jeton qui l'a créé).
@@ -100,8 +111,12 @@ export function NewsletterView() {
 
   return (
     <div className="flex flex-col gap-6">
+      <ReadOnlyNotice
+        permission="newsletter:write"
+        text="votre rôle permet de consulter les envois, pas d’en rédiger ni d’en programmer."
+      />
       <NewsletterKpis stats={campaigns.data?.stats} />
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
+      <div className={cn('grid items-start gap-5', canWrite && 'xl:grid-cols-[minmax(0,1fr)_420px]')}>
         <section aria-labelledby="campaigns-title" className="flex min-w-0 flex-col gap-4">
           <h2 id="campaigns-title" className="font-ui text-[16px] leading-6 font-semibold text-text-main">
             Envois
@@ -109,11 +124,14 @@ export function NewsletterView() {
           <CampaignsTable
             campaigns={list}
             error={campaigns.isError && !campaigns.data}
-            selected={current?.id ?? null}
-            onOpen={(campaign) => (isEditable(campaign) ? select(campaign.id) : setPreviewing(campaign.id))}
+            selected={canWrite ? (current?.id ?? null) : null}
+            canWrite={canWrite}
+            onOpen={(campaign) =>
+              canWrite && isEditable(campaign) ? select(campaign.id) : setPreviewing(campaign.id)
+            }
           />
         </section>
-        {list ? (
+        {!canWrite ? null : list ? (
           <div className="xl:sticky xl:top-[107px]">
             <CampaignComposer
               key={key}
@@ -185,11 +203,14 @@ function CampaignsTable({
   campaigns,
   error,
   selected,
+  canWrite,
   onOpen,
 }: {
   campaigns: Campaign[] | undefined;
   error: boolean;
   selected: string | null;
+  /** Sans `newsletter:write` : chaque envoi s'ouvre en aperçu. */
+  canWrite: boolean;
   onOpen: (campaign: Campaign) => void;
 }) {
   return (
@@ -228,7 +249,13 @@ function CampaignsTable({
             ))
           ) : campaigns.length === 0 ? (
             <div className="p-6">
-              <EmptyState icon={<Mail size={24} />} title="Aucun envoi" text="Rédigez votre premier envoi." />
+              <EmptyState
+                icon={<Mail size={24} />}
+                title="Aucun envoi"
+                text={
+                  canWrite ? 'Rédigez votre premier envoi.' : 'Les envois de la newsletter apparaîtront ici.'
+                }
+              />
             </div>
           ) : (
             campaigns.map((campaign) => (
@@ -246,7 +273,7 @@ function CampaignsTable({
                     type="button"
                     onClick={() => onOpen(campaign)}
                     aria-label={
-                      isEditable(campaign)
+                      canWrite && isEditable(campaign)
                         ? `Modifier « ${campaign.subject} »`
                         : `Aperçu de « ${campaign.subject} »`
                     }

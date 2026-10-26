@@ -4,6 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ImageField } from '@/components/admin/editor/media-picker';
 import { RichTextEditor } from '@/components/admin/editor/rich-text-editor';
+import { ReadOnlyFieldset } from '@/components/admin/shell/permissions';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { toast } from '@/components/ui/toaster';
@@ -55,6 +56,8 @@ type ArticleDialogProps = {
   /** Langue ouverte à l'affichage (« Voir les contenus à traduire » ouvre l'anglais). */
   initialLanguage?: EditingLanguage;
   onSaved?: (article: AdminMagazineArticle) => void;
+  /** Sans `content:write` : article consulté (champs figés, sans enregistrement). */
+  readOnly?: boolean;
 };
 
 /**
@@ -69,6 +72,7 @@ export function ArticleDialog({
   editions,
   initialLanguage = 'fr',
   onSaved,
+  readOnly = false,
 }: ArticleDialogProps) {
   const [draft, setDraft] = useState(() => draftOf(article, editionId));
   const [language, setLanguage] = useState<EditingLanguage>(initialLanguage);
@@ -142,17 +146,19 @@ export function ArticleDialog({
     <Modal
       open={open}
       onClose={onClose}
-      title={article ? 'Modifier l’article' : 'Nouvel article'}
+      title={readOnly ? 'Article' : article ? 'Modifier l’article' : 'Nouvel article'}
       description="Le titre et le texte anglais sont publiés sur le site anglais ; sans eux, l’article y est signalé « à traduire »."
       maxWidth={720}
       footer={
         <div className="flex flex-wrap justify-end gap-2">
           <Button variant="outline" size="sm" onClick={onClose}>
-            Annuler
+            {readOnly ? 'Fermer' : 'Annuler'}
           </Button>
-          <Button size="sm" loading={save.isPending} onClick={submit}>
-            {article ? 'Enregistrer' : 'Ajouter l’article'}
-          </Button>
+          {!readOnly && (
+            <Button size="sm" loading={save.isPending} onClick={submit}>
+              {article ? 'Enregistrer' : 'Ajouter l’article'}
+            </Button>
+          )}
         </div>
       }
     >
@@ -162,65 +168,68 @@ export function ArticleDialog({
           onChange={setLanguage}
           labels={{ fr: 'Français', en: translated ? 'English · traduit' : 'English · à traduire' }}
         />
-        <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_200px]">
-          <CompactField label={en ? 'Titre (anglais)' : 'Titre'} error={en ? null : errors.title}>
-            {(control) => (
-              <CompactInput
-                {...control}
-                key={language}
-                lang={language}
-                value={en ? draft.titleEn : draft.title}
-                onChange={(event) => set(en ? 'titleEn' : 'title', event.target.value)}
-                maxLength={160}
-              />
-            )}
-          </CompactField>
-          <CompactField label={en ? 'Thème (anglais)' : 'Thème'} error={en ? null : errors.theme}>
-            {(control) => (
-              <CompactInput
-                {...control}
-                key={language}
-                lang={language}
-                value={en ? draft.themeEn : draft.theme}
-                onChange={(event) => set(en ? 'themeEn' : 'theme', event.target.value)}
-                placeholder={en ? draft.theme : 'Santé et nutrition'}
-                maxLength={60}
-              />
-            )}
-          </CompactField>
-        </div>
-        {editions && (
-          <CompactField label="Édition">
-            {(control) => (
-              <select
-                {...control}
-                value={draft.editionId}
-                onChange={(event) => set('editionId', event.target.value)}
-                className={compactInputClass}
-              >
-                <option value="">Sans édition</option>
-                {editions.map((edition) => (
-                  <option key={edition.id} value={edition.id}>
-                    {edition.name}
-                  </option>
-                ))}
-              </select>
-            )}
-          </CompactField>
-        )}
-        <ImageField
-          label="Photo"
-          value={draft.image}
-          onChange={(image) => set('image', image)}
-          help="JPG ou PNG · 1 600 px conseillé · texte alternatif obligatoire"
-        />
-        <RichTextEditor
-          key={language}
-          label={en ? 'Texte (anglais)' : 'Texte'}
-          value={en ? draft.bodyEn : draft.body}
-          onChange={(value) => set(en ? 'bodyEn' : 'body', value)}
-          minHeight={200}
-        />
+        {/* Le choix de la langue reste possible en lecture seule : seuls les champs sont figés. */}
+        <ReadOnlyFieldset readOnly={readOnly}>
+          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_200px]">
+            <CompactField label={en ? 'Titre (anglais)' : 'Titre'} error={en ? null : errors.title}>
+              {(control) => (
+                <CompactInput
+                  {...control}
+                  key={language}
+                  lang={language}
+                  value={en ? draft.titleEn : draft.title}
+                  onChange={(event) => set(en ? 'titleEn' : 'title', event.target.value)}
+                  maxLength={160}
+                />
+              )}
+            </CompactField>
+            <CompactField label={en ? 'Thème (anglais)' : 'Thème'} error={en ? null : errors.theme}>
+              {(control) => (
+                <CompactInput
+                  {...control}
+                  key={language}
+                  lang={language}
+                  value={en ? draft.themeEn : draft.theme}
+                  onChange={(event) => set(en ? 'themeEn' : 'theme', event.target.value)}
+                  placeholder={en ? draft.theme : 'Santé et nutrition'}
+                  maxLength={60}
+                />
+              )}
+            </CompactField>
+          </div>
+          {editions && (
+            <CompactField label="Édition">
+              {(control) => (
+                <select
+                  {...control}
+                  value={draft.editionId}
+                  onChange={(event) => set('editionId', event.target.value)}
+                  className={compactInputClass}
+                >
+                  <option value="">Sans édition</option>
+                  {editions.map((edition) => (
+                    <option key={edition.id} value={edition.id}>
+                      {edition.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </CompactField>
+          )}
+          <ImageField
+            label="Photo"
+            value={draft.image}
+            onChange={(image) => set('image', image)}
+            help="JPG ou PNG · 1 600 px conseillé · texte alternatif obligatoire"
+          />
+          <RichTextEditor
+            key={language}
+            label={en ? 'Texte (anglais)' : 'Texte'}
+            value={en ? draft.bodyEn : draft.body}
+            onChange={(value) => set(en ? 'bodyEn' : 'body', value)}
+            minHeight={200}
+          />
+        </ReadOnlyFieldset>
       </div>
     </Modal>
   );

@@ -17,6 +17,7 @@ import {
 import { RepeatableList, SubInput } from '@/components/admin/editor/repeatable-list';
 import { useAutosave } from '@/components/admin/editor/use-autosave';
 import { AdminPage, topbarActionClass, topbarSecondaryClass } from '@/components/admin/shell/admin-page';
+import { ReadOnlyFieldset, ReadOnlyNotice, useCan } from '@/components/admin/shell/permissions';
 import { AdminCard } from '@/components/admin/ui/admin-ui';
 import { Field, Input, Select, Textarea } from '@/components/ui/field';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -158,6 +159,8 @@ type EditorFormProps = {
  */
 function EditorForm({ initial, categories }: EditorFormProps) {
   const client = useQueryClient();
+  // Sans `content:write` (responsable) : service consulté, champs figés, ni enregistrement ni publication.
+  const canWrite = useCan()('content:write');
   const [form, setForm] = useState<ServiceForm>(() =>
     initial ? formFromService(initial, categories) : emptyForm(),
   );
@@ -268,7 +271,7 @@ function EditorForm({ initial, categories }: EditorFormProps) {
   const autosave = useAutosave({
     value: form,
     save: patch,
-    enabled: !!serviceId && busy === null,
+    enabled: canWrite && !!serviceId && busy === null,
     initialSavedAt: initial?.updatedAt ?? null,
   });
 
@@ -311,11 +314,11 @@ function EditorForm({ initial, categories }: EditorFormProps) {
   // Création automatique dès que les trois champs exigés par l'API sont remplis (après une pause de saisie).
   const canCreate = Object.keys(requiredErrors(form)).length === 0;
   useEffect(() => {
-    if (serviceId || !canCreate || busy) return;
+    if (!canWrite || serviceId || !canCreate || busy) return;
     const timer = window.setTimeout(() => void ensureCreated(true), 1500);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serviceId, canCreate, busy, form.name, form.categoryId, form.tagline]);
+  }, [canWrite, serviceId, canCreate, busy, form.name, form.categoryId, form.tagline]);
 
   /** Champs exigés manquants : messages sous les champs et focus sur le premier. */
   function checkRequired(): boolean {
@@ -418,7 +421,7 @@ function EditorForm({ initial, categories }: EditorFormProps) {
           >
             Aperçu
           </ActionButton>
-          {published ? (
+          {!canWrite ? null : published ? (
             <ActionButton
               primary
               icon={<CircleCheck aria-hidden />}
@@ -440,51 +443,58 @@ function EditorForm({ initial, categories }: EditorFormProps) {
         </>
       }
     >
+      <ReadOnlyNotice permission="content:write" className="mb-5" />
       <EditorLayout
         aside={
           <>
             <SideCard title="Publication">
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="font-ui text-[14px] leading-5 text-text-muted">Statut</span>
-                  <PublishStatusBadge status={status} />
+              <ReadOnlyFieldset readOnly={!canWrite}>
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-ui text-[14px] leading-5 text-text-muted">Statut</span>
+                    <PublishStatusBadge status={status} />
+                  </div>
+                  {(
+                    [
+                      ['showInMenu', 'Afficher dans le menu'],
+                      ['featuredOnHome', 'Mettre en avant sur l’accueil'],
+                      ['showWhatsapp', 'Bouton WhatsApp sur la page'],
+                    ] as const
+                  ).map(([key, label]) => (
+                    <Switch
+                      key={key}
+                      id={`service-${key}`}
+                      label={label}
+                      checked={form[key]}
+                      onChange={(event) => update({ [key]: event.currentTarget.checked })}
+                      className="w-full flex-row-reverse justify-between"
+                    />
+                  ))}
                 </div>
-                {(
-                  [
-                    ['showInMenu', 'Afficher dans le menu'],
-                    ['featuredOnHome', 'Mettre en avant sur l’accueil'],
-                    ['showWhatsapp', 'Bouton WhatsApp sur la page'],
-                  ] as const
-                ).map(([key, label]) => (
-                  <Switch
-                    key={key}
-                    id={`service-${key}`}
-                    label={label}
-                    checked={form[key]}
-                    onChange={(event) => update({ [key]: event.currentTarget.checked })}
-                    className="w-full flex-row-reverse justify-between"
-                  />
-                ))}
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <ActionButton pending={busy === 'save'} onClick={() => void save()}>
-                  Enregistrer
-                </ActionButton>
-                {published ? (
-                  <ActionButton pending={busy === 'unpublish'} onClick={() => void unpublish()}>
-                    Dépublier
+              </ReadOnlyFieldset>
+              {canWrite && (
+                <div className="grid grid-cols-2 gap-2">
+                  <ActionButton pending={busy === 'save'} onClick={() => void save()}>
+                    Enregistrer
                   </ActionButton>
-                ) : (
-                  <ActionButton primary pending={busy === 'publish'} onClick={() => void publish()}>
-                    Publier
-                  </ActionButton>
-                )}
-              </div>
-              <SavedNote
-                savedAt={serviceId ? autosave.savedAt : null}
-                saving={autosave.pending}
-                error={autosave.error}
-              />
+                  {published ? (
+                    <ActionButton pending={busy === 'unpublish'} onClick={() => void unpublish()}>
+                      Dépublier
+                    </ActionButton>
+                  ) : (
+                    <ActionButton primary pending={busy === 'publish'} onClick={() => void publish()}>
+                      Publier
+                    </ActionButton>
+                  )}
+                </div>
+              )}
+              {canWrite && (
+                <SavedNote
+                  savedAt={serviceId ? autosave.savedAt : null}
+                  saving={autosave.pending}
+                  error={autosave.error}
+                />
+              )}
             </SideCard>
 
             <SideCard
@@ -508,337 +518,339 @@ function EditorForm({ initial, categories }: EditorFormProps) {
           </>
         }
       >
-        <EditorSection
-          number={1}
-          title="Informations générales"
-          subtitle="Ce qui apparaît en haut de la page et sur la carte du service."
-        >
-          <div className="grid gap-[18px] md:grid-cols-2">
-            <Field label="Nom du service" required error={errors.name || null}>
+        <ReadOnlyFieldset readOnly={!canWrite}>
+          <EditorSection
+            number={1}
+            title="Informations générales"
+            subtitle="Ce qui apparaît en haut de la page et sur la carte du service."
+          >
+            <div className="grid gap-[18px] md:grid-cols-2">
+              <Field label="Nom du service" required error={errors.name || null}>
+                {(control) => (
+                  <Input
+                    {...control}
+                    value={form.name}
+                    maxLength={120}
+                    onChange={(event) => {
+                      setForm((current) => withName(current, event.target.value, everPublished));
+                      if (errors.name) setErrors((current) => ({ ...current, name: '' }));
+                    }}
+                  />
+                )}
+              </Field>
+              <Field label="Rubrique" required error={errors.categoryId || null}>
+                {(control) => (
+                  <Select
+                    {...control}
+                    value={form.categoryId}
+                    onChange={(event) => update({ categoryId: event.target.value })}
+                  >
+                    <option value="">Choisir une rubrique</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </Select>
+                )}
+              </Field>
+            </div>
+            <Field
+              label="Phrase d’accroche"
+              required
+              error={errors.tagline || null}
+              help={charCountHelp(form.tagline, TAGLINE_MAX, 'Une phrase courte, affichée sous le titre.')}
+            >
               {(control) => (
                 <Input
                   {...control}
-                  value={form.name}
-                  maxLength={120}
+                  value={form.tagline}
+                  maxLength={TAGLINE_MAX}
                   onChange={(event) => {
-                    setForm((current) => withName(current, event.target.value, everPublished));
-                    if (errors.name) setErrors((current) => ({ ...current, name: '' }));
+                    setForm((current) => withTagline(current, event.target.value));
+                    if (errors.tagline) setErrors((current) => ({ ...current, tagline: '' }));
                   }}
                 />
               )}
             </Field>
-            <Field label="Rubrique" required error={errors.categoryId || null}>
+            <Field label="Description courte (cartes et résultats)" error={errors.summary || null}>
               {(control) => (
-                <Select
+                <Input
                   {...control}
-                  value={form.categoryId}
-                  onChange={(event) => update({ categoryId: event.target.value })}
-                >
-                  <option value="">Choisir une rubrique</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </Select>
+                  value={form.summary}
+                  maxLength={SUMMARY_MAX}
+                  onChange={(event) => update({ summary: event.target.value })}
+                />
               )}
             </Field>
-          </div>
-          <Field
-            label="Phrase d’accroche"
-            required
-            error={errors.tagline || null}
-            help={charCountHelp(form.tagline, TAGLINE_MAX, 'Une phrase courte, affichée sous le titre.')}
+            <VisualsField
+              value={{ coverImageId: form.coverImageId, galleryImageIds: form.galleryImageIds }}
+              onChange={(visuals) => update(visuals)}
+              illustration={form.illustration}
+              media={media}
+              onMedia={(image) => setPicked((current) => ({ ...current, [image.id]: image }))}
+              error={errors.galleryImageIds || errors.coverImageId || null}
+            />
+          </EditorSection>
+
+          <EditorSection
+            number={2}
+            title={frenchTypography('À qui s’adresse ce service ?')}
+            subtitle="Une ligne par public. Affiché sous forme de liste cochée."
           >
-            {(control) => (
-              <Input
-                {...control}
-                value={form.tagline}
-                maxLength={TAGLINE_MAX}
-                onChange={(event) => {
-                  setForm((current) => withTagline(current, event.target.value));
-                  if (errors.tagline) setErrors((current) => ({ ...current, tagline: '' }));
+            <RepeatableList
+              value={form.audiences}
+              onChange={(audiences) => update({ audiences })}
+              createItem={() => ''}
+              addLabel="Ajouter un public"
+              itemName="public"
+              max={12}
+              renderFields={(item, change, index) => (
+                <SubInput
+                  aria-label={`Public ${index + 1}`}
+                  value={item}
+                  maxLength={200}
+                  onChange={(event) => change(event.target.value)}
+                />
+              )}
+            />
+            <ListErrors errors={errors} prefix="audiences" />
+          </EditorSection>
+
+          <EditorSection
+            number={3}
+            title="Ce que Mambo fait concrètement"
+            subtitle="Les étapes du service, dans l’ordre."
+          >
+            <RepeatableList
+              value={form.steps}
+              onChange={(steps) => update({ steps })}
+              createItem={() => ({ title: '', text: '' })}
+              addLabel="Ajouter une étape"
+              itemName="étape"
+              max={10}
+              renderFields={(item, change, index) => (
+                <>
+                  <SubInput
+                    aria-label={`Titre de l’étape ${index + 1}`}
+                    value={item.title}
+                    maxLength={120}
+                    aria-invalid={errors[`steps.${index}.title`] ? true : undefined}
+                    onChange={(event) => change({ ...item, title: event.target.value })}
+                  />
+                  <SubInput
+                    aria-label={`Texte de l’étape ${index + 1}`}
+                    value={item.text}
+                    maxLength={600}
+                    onChange={(event) => change({ ...item, text: event.target.value })}
+                  />
+                </>
+              )}
+            />
+            <ListErrors errors={errors} prefix="steps" />
+          </EditorSection>
+
+          <EditorSection number={4} title="Les avantages pour le bénéficiaire">
+            <RepeatableList
+              value={form.advantages}
+              onChange={(advantages) => update({ advantages })}
+              createItem={() => ({ icon: null, title: '', text: '' })}
+              addLabel="Ajouter un avantage"
+              itemName="avantage"
+              max={8}
+              renderFields={(item, change, index) => (
+                <>
+                  <SubInput
+                    aria-label={`Titre de l’avantage ${index + 1}`}
+                    value={item.title}
+                    maxLength={120}
+                    onChange={(event) => change({ ...item, title: event.target.value })}
+                  />
+                  <SubInput
+                    aria-label={`Texte de l’avantage ${index + 1}`}
+                    value={item.text}
+                    maxLength={600}
+                    onChange={(event) => change({ ...item, text: event.target.value })}
+                  />
+                </>
+              )}
+            />
+            <ListErrors errors={errors} prefix="advantages" />
+          </EditorSection>
+
+          <EditorSection number={5} title="Questions fréquentes" subtitle="Facultatif.">
+            <RepeatableList
+              value={form.faq}
+              onChange={(faq) => update({ faq })}
+              createItem={() => ({ question: '', answer: '' })}
+              addLabel="Ajouter une question"
+              itemName="question"
+              max={20}
+              renderFields={(item, change, index) => (
+                <>
+                  <SubInput
+                    aria-label={`Question ${index + 1}`}
+                    value={item.question}
+                    maxLength={200}
+                    onChange={(event) => change({ ...item, question: event.target.value })}
+                  />
+                  <SubInput
+                    aria-label={`Réponse ${index + 1}`}
+                    value={item.answer}
+                    maxLength={2000}
+                    onChange={(event) => change({ ...item, answer: event.target.value })}
+                  />
+                </>
+              )}
+            />
+            <ListErrors errors={errors} prefix="faq" />
+          </EditorSection>
+
+          <EditorSection
+            number={6}
+            title="Services liés et témoignages"
+            subtitle="Affichés en bas de la page du service."
+          >
+            {services.isPending ? (
+              <Skeleton className="h-20 rounded-md" />
+            ) : (
+              <ChipSelect
+                label="Services liés"
+                options={relatedOptions}
+                value={form.relatedServiceIds}
+                onChange={(relatedServiceIds) => {
+                  if (relatedServiceIds.length > MAX_RELATED) {
+                    setErrors((current) => ({
+                      ...current,
+                      relatedServiceIds: `${MAX_RELATED} services liés au maximum : retirez-en un pour en ajouter un autre.`,
+                    }));
+                    return;
+                  }
+                  update({ relatedServiceIds });
+                }}
+                addLabel="Ajouter un service lié"
+                onAdd={() => {
+                  if (form.relatedServiceIds.length >= MAX_RELATED)
+                    toast.error(
+                      `${MAX_RELATED} services liés au maximum : retirez-en un pour en ajouter un autre.`,
+                    );
+                  else setRelatedPicker(true);
                 }}
               />
             )}
-          </Field>
-          <Field label="Description courte (cartes et résultats)" error={errors.summary || null}>
-            {(control) => (
-              <Input
-                {...control}
-                value={form.summary}
-                maxLength={SUMMARY_MAX}
-                onChange={(event) => update({ summary: event.target.value })}
-              />
-            )}
-          </Field>
-          <VisualsField
-            value={{ coverImageId: form.coverImageId, galleryImageIds: form.galleryImageIds }}
-            onChange={(visuals) => update(visuals)}
-            illustration={form.illustration}
-            media={media}
-            onMedia={(image) => setPicked((current) => ({ ...current, [image.id]: image }))}
-            error={errors.galleryImageIds || errors.coverImageId || null}
-          />
-        </EditorSection>
-
-        <EditorSection
-          number={2}
-          title={frenchTypography('À qui s’adresse ce service ?')}
-          subtitle="Une ligne par public. Affiché sous forme de liste cochée."
-        >
-          <RepeatableList
-            value={form.audiences}
-            onChange={(audiences) => update({ audiences })}
-            createItem={() => ''}
-            addLabel="Ajouter un public"
-            itemName="public"
-            max={12}
-            renderFields={(item, change, index) => (
-              <SubInput
-                aria-label={`Public ${index + 1}`}
-                value={item}
-                maxLength={200}
-                onChange={(event) => change(event.target.value)}
-              />
-            )}
-          />
-          <ListErrors errors={errors} prefix="audiences" />
-        </EditorSection>
-
-        <EditorSection
-          number={3}
-          title="Ce que Mambo fait concrètement"
-          subtitle="Les étapes du service, dans l’ordre."
-        >
-          <RepeatableList
-            value={form.steps}
-            onChange={(steps) => update({ steps })}
-            createItem={() => ({ title: '', text: '' })}
-            addLabel="Ajouter une étape"
-            itemName="étape"
-            max={10}
-            renderFields={(item, change, index) => (
-              <>
-                <SubInput
-                  aria-label={`Titre de l’étape ${index + 1}`}
-                  value={item.title}
-                  maxLength={120}
-                  aria-invalid={errors[`steps.${index}.title`] ? true : undefined}
-                  onChange={(event) => change({ ...item, title: event.target.value })}
-                />
-                <SubInput
-                  aria-label={`Texte de l’étape ${index + 1}`}
-                  value={item.text}
-                  maxLength={600}
-                  onChange={(event) => change({ ...item, text: event.target.value })}
-                />
-              </>
-            )}
-          />
-          <ListErrors errors={errors} prefix="steps" />
-        </EditorSection>
-
-        <EditorSection number={4} title="Les avantages pour le bénéficiaire">
-          <RepeatableList
-            value={form.advantages}
-            onChange={(advantages) => update({ advantages })}
-            createItem={() => ({ icon: null, title: '', text: '' })}
-            addLabel="Ajouter un avantage"
-            itemName="avantage"
-            max={8}
-            renderFields={(item, change, index) => (
-              <>
-                <SubInput
-                  aria-label={`Titre de l’avantage ${index + 1}`}
-                  value={item.title}
-                  maxLength={120}
-                  onChange={(event) => change({ ...item, title: event.target.value })}
-                />
-                <SubInput
-                  aria-label={`Texte de l’avantage ${index + 1}`}
-                  value={item.text}
-                  maxLength={600}
-                  onChange={(event) => change({ ...item, text: event.target.value })}
-                />
-              </>
-            )}
-          />
-          <ListErrors errors={errors} prefix="advantages" />
-        </EditorSection>
-
-        <EditorSection number={5} title="Questions fréquentes" subtitle="Facultatif.">
-          <RepeatableList
-            value={form.faq}
-            onChange={(faq) => update({ faq })}
-            createItem={() => ({ question: '', answer: '' })}
-            addLabel="Ajouter une question"
-            itemName="question"
-            max={20}
-            renderFields={(item, change, index) => (
-              <>
-                <SubInput
-                  aria-label={`Question ${index + 1}`}
-                  value={item.question}
-                  maxLength={200}
-                  onChange={(event) => change({ ...item, question: event.target.value })}
-                />
-                <SubInput
-                  aria-label={`Réponse ${index + 1}`}
-                  value={item.answer}
-                  maxLength={2000}
-                  onChange={(event) => change({ ...item, answer: event.target.value })}
-                />
-              </>
-            )}
-          />
-          <ListErrors errors={errors} prefix="faq" />
-        </EditorSection>
-
-        <EditorSection
-          number={6}
-          title="Services liés et témoignages"
-          subtitle="Affichés en bas de la page du service."
-        >
-          {services.isPending ? (
-            <Skeleton className="h-20 rounded-md" />
-          ) : (
-            <ChipSelect
-              label="Services liés"
-              options={relatedOptions}
-              value={form.relatedServiceIds}
-              onChange={(relatedServiceIds) => {
-                if (relatedServiceIds.length > MAX_RELATED) {
-                  setErrors((current) => ({
-                    ...current,
-                    relatedServiceIds: `${MAX_RELATED} services liés au maximum : retirez-en un pour en ajouter un autre.`,
-                  }));
-                  return;
-                }
-                update({ relatedServiceIds });
-              }}
-              addLabel="Ajouter un service lié"
-              onAdd={() => {
-                if (form.relatedServiceIds.length >= MAX_RELATED)
-                  toast.error(
-                    `${MAX_RELATED} services liés au maximum : retirez-en un pour en ajouter un autre.`,
-                  );
-                else setRelatedPicker(true);
+            <RelatedPickerDialog
+              open={relatedPicker}
+              onClose={() => setRelatedPicker(false)}
+              services={(services.data?.data ?? []).filter((service) => service.id !== serviceId)}
+              selected={form.relatedServiceIds}
+              max={MAX_RELATED}
+              onConfirm={(ids) => {
+                update({ relatedServiceIds: [...form.relatedServiceIds, ...ids].slice(0, MAX_RELATED) });
+                setRelatedPicker(false);
               }}
             />
-          )}
-          <RelatedPickerDialog
-            open={relatedPicker}
-            onClose={() => setRelatedPicker(false)}
-            services={(services.data?.data ?? []).filter((service) => service.id !== serviceId)}
-            selected={form.relatedServiceIds}
-            max={MAX_RELATED}
-            onConfirm={(ids) => {
-              update({ relatedServiceIds: [...form.relatedServiceIds, ...ids].slice(0, MAX_RELATED) });
-              setRelatedPicker(false);
-            }}
-          />
-          {relatedError && (
-            <p role="alert" className="-mt-2 font-ui text-[13px] leading-4 text-feedback-error">
-              {relatedError}
-            </p>
-          )}
-          <ChipSelect
-            label="Témoignages affichés"
-            options={reviewOptions}
-            value={form.featuredReviewIds}
-            onChange={(featuredReviewIds) => update({ featuredReviewIds })}
-            addLabel="Choisir un avis publié"
-            onAdd={() => {
-              if (form.featuredReviewIds.length >= MAX_REVIEWS)
-                toast.error(
-                  `${MAX_REVIEWS} témoignages au maximum : retirez-en un pour en ajouter un autre.`,
-                );
-              else setReviewPicker(true);
-            }}
-          />
-          <ReviewPickerDialog
-            open={reviewPicker}
-            onClose={() => setReviewPicker(false)}
-            selected={form.featuredReviewIds}
-            onConfirm={(ids) => {
-              update({ featuredReviewIds: [...form.featuredReviewIds, ...ids].slice(0, MAX_REVIEWS) });
-              setReviewPicker(false);
-            }}
-          />
-        </EditorSection>
+            {relatedError && (
+              <p role="alert" className="-mt-2 font-ui text-[13px] leading-4 text-feedback-error">
+                {relatedError}
+              </p>
+            )}
+            <ChipSelect
+              label="Témoignages affichés"
+              options={reviewOptions}
+              value={form.featuredReviewIds}
+              onChange={(featuredReviewIds) => update({ featuredReviewIds })}
+              addLabel="Choisir un avis publié"
+              onAdd={() => {
+                if (form.featuredReviewIds.length >= MAX_REVIEWS)
+                  toast.error(
+                    `${MAX_REVIEWS} témoignages au maximum : retirez-en un pour en ajouter un autre.`,
+                  );
+                else setReviewPicker(true);
+              }}
+            />
+            <ReviewPickerDialog
+              open={reviewPicker}
+              onClose={() => setReviewPicker(false)}
+              selected={form.featuredReviewIds}
+              onConfirm={(ids) => {
+                update({ featuredReviewIds: [...form.featuredReviewIds, ...ids].slice(0, MAX_REVIEWS) });
+                setReviewPicker(false);
+              }}
+            />
+          </EditorSection>
 
-        <EditorSection
-          number={7}
-          title="Référencement (SEO)"
-          subtitle="Rempli automatiquement, modifiable si besoin."
-        >
-          <Field
-            label={
-              <>
-                Adresse de la page
-                <span className="sr-only">
-                  {' '}
-                  (fin de l’adresse, après {SITE_HOST}/services/{categorySlug ?? ''}/)
-                </span>
-              </>
-            }
-            error={errors.slug || null}
-            help={
-              everPublished ? 'Changer l’adresse d’une page publiée casse les liens existants.' : undefined
-            }
+          <EditorSection
+            number={7}
+            title="Référencement (SEO)"
+            subtitle="Rempli automatiquement, modifiable si besoin."
           >
-            {(control) => (
-              <div className="flex items-center gap-2.5 rounded-md border border-border-strong bg-neutral-0 px-4 focus-within:border-brand-primary focus-within:ring-1 focus-within:ring-brand-primary focus-within:ring-inset has-aria-invalid:border-feedback-error">
-                <Globe aria-hidden size={18} className="shrink-0 text-icon-default" />
-                <span
-                  aria-hidden
-                  className="min-w-0 shrink truncate font-ui text-[16px] leading-6 whitespace-nowrap text-text-main max-sm:max-w-[45%]"
-                >
-                  {SITE_HOST}/services/{categorySlug ?? '…'}/
-                </span>
-                <input
+            <Field
+              label={
+                <>
+                  Adresse de la page
+                  <span className="sr-only">
+                    {' '}
+                    (fin de l’adresse, après {SITE_HOST}/services/{categorySlug ?? ''}/)
+                  </span>
+                </>
+              }
+              error={errors.slug || null}
+              help={
+                everPublished ? 'Changer l’adresse d’une page publiée casse les liens existants.' : undefined
+              }
+            >
+              {(control) => (
+                <div className="flex items-center gap-2.5 rounded-md border border-border-strong bg-neutral-0 px-4 focus-within:border-brand-primary focus-within:ring-1 focus-within:ring-brand-primary focus-within:ring-inset has-aria-invalid:border-feedback-error">
+                  <Globe aria-hidden size={18} className="shrink-0 text-icon-default" />
+                  <span
+                    aria-hidden
+                    className="min-w-0 shrink truncate font-ui text-[16px] leading-6 whitespace-nowrap text-text-main max-sm:max-w-[45%]"
+                  >
+                    {SITE_HOST}/services/{categorySlug ?? '…'}/
+                  </span>
+                  <input
+                    {...control}
+                    value={form.slug}
+                    maxLength={80}
+                    onChange={(event) => update({ slug: event.target.value })}
+                    onBlur={() => update({ slug: slugify(form.slug) })}
+                    className="-ml-2.5 min-w-[80px] flex-1 bg-transparent py-3.5 font-ui text-[16px] leading-6 text-text-main outline-none"
+                  />
+                </div>
+              )}
+            </Field>
+            <Field
+              label="Titre pour Google"
+              error={errors.seoTitle || null}
+              help={charCountHelp(form.seoTitle, SEO_TITLE_MAX)}
+            >
+              {(control) => (
+                <Input
                   {...control}
-                  value={form.slug}
-                  maxLength={80}
-                  onChange={(event) => update({ slug: event.target.value })}
-                  onBlur={() => update({ slug: slugify(form.slug) })}
-                  className="-ml-2.5 min-w-[80px] flex-1 bg-transparent py-3.5 font-ui text-[16px] leading-6 text-text-main outline-none"
+                  value={form.seoTitle}
+                  maxLength={SEO_TITLE_MAX}
+                  onChange={(event) => update({ seoTitle: event.target.value })}
                 />
-              </div>
-            )}
-          </Field>
-          <Field
-            label="Titre pour Google"
-            error={errors.seoTitle || null}
-            help={charCountHelp(form.seoTitle, SEO_TITLE_MAX)}
-          >
-            {(control) => (
-              <Input
-                {...control}
-                value={form.seoTitle}
-                maxLength={SEO_TITLE_MAX}
-                onChange={(event) => update({ seoTitle: event.target.value })}
-              />
-            )}
-          </Field>
-          <Field
-            label="Description pour Google"
-            error={errors.seoDescription || null}
-            help={charCountHelp(form.seoDescription, SEO_DESCRIPTION_MAX)}
-          >
-            {(control) => (
-              <Textarea
-                {...control}
-                rows={2}
-                className="min-h-[76px]"
-                value={form.seoDescription}
-                maxLength={SEO_DESCRIPTION_MAX}
-                onChange={(event) => update({ seoDescription: event.target.value })}
-              />
-            )}
-          </Field>
-        </EditorSection>
+              )}
+            </Field>
+            <Field
+              label="Description pour Google"
+              error={errors.seoDescription || null}
+              help={charCountHelp(form.seoDescription, SEO_DESCRIPTION_MAX)}
+            >
+              {(control) => (
+                <Textarea
+                  {...control}
+                  rows={2}
+                  className="min-h-[76px]"
+                  value={form.seoDescription}
+                  maxLength={SEO_DESCRIPTION_MAX}
+                  onChange={(event) => update({ seoDescription: event.target.value })}
+                />
+              )}
+            </Field>
+          </EditorSection>
+        </ReadOnlyFieldset>
       </EditorLayout>
     </AdminPage>
   );

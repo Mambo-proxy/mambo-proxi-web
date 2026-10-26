@@ -70,6 +70,8 @@ type PageEditorProps = {
   onOpenSections: (ids: string[]) => void;
   /** Brouillon annulé : l'éditeur est recréé avec la version publiée. */
   onReset: () => void;
+  /** Sans `content:write` : sections consultables (dépliables) mais figées, sans sauvegarde automatique. */
+  readOnly?: boolean;
   ref?: Ref<PageEditorHandle>;
 };
 
@@ -78,7 +80,14 @@ type PageEditorProps = {
  * section »), statut publié / modifications non publiées, sauvegarde automatique du brouillon (`PUT`), aperçu et
  * annulation du brouillon, cartes de section réordonnables (glisser-déposer ou clavier) et dépliables.
  */
-export function PageEditor({ page, openSections, onOpenSections, onReset, ref }: PageEditorProps) {
+export function PageEditor({
+  page,
+  openSections,
+  onOpenSections,
+  onReset,
+  readOnly = false,
+  ref,
+}: PageEditorProps) {
   const [sections, setSections] = useState<PageSection[]>(page.sections);
   const [adding, setAdding] = useState(false);
   const [discarding, setDiscarding] = useState(false);
@@ -107,7 +116,7 @@ export function PageEditor({ page, openSections, onOpenSections, onReset, ref }:
   const autosave = useAutosave({
     value: { sections, seo: page.seo } satisfies PageDraftInput,
     save: (value) => save.mutateAsync(value),
-    enabled: valid,
+    enabled: valid && !readOnly,
     initialSavedAt: page.hasDraft ? page.updatedAt : null,
   });
 
@@ -190,10 +199,11 @@ export function PageEditor({ page, openSections, onOpenSections, onReset, ref }:
               )}
             </div>
             <p className="font-ui text-[12px] leading-4 text-text-muted">
-              {count} section{count > 1 ? 's' : ''} · glissez pour réordonner, cliquez pour modifier
+              {count} section{count > 1 ? 's' : ''} ·{' '}
+              {readOnly ? 'cliquez pour consulter' : 'glissez pour réordonner, cliquez pour modifier'}
             </p>
           </div>
-          {addable.length > 0 && (
+          {addable.length > 0 && !readOnly && (
             <button type="button" onClick={() => setAdding(true)} className={topbarSecondaryClass}>
               <Plus aria-hidden />
               Ajouter une section
@@ -217,7 +227,7 @@ export function PageEditor({ page, openSections, onOpenSections, onReset, ref }:
                 <Eye aria-hidden />
                 Aperçu du brouillon
               </Button>
-              {page.hasDraft && (
+              {page.hasDraft && !readOnly && (
                 <Button variant="ghost" size="sm" onClick={() => setDiscarding(true)}>
                   <RotateCcw aria-hidden />
                   Annuler les modifications
@@ -235,6 +245,7 @@ export function PageEditor({ page, openSections, onOpenSections, onReset, ref }:
             getId={(section) => section.id}
             getLabel={sectionLabel}
             onReorder={setSections}
+            disabled={readOnly}
             className="flex flex-col gap-3.5"
             renderItem={(section, index) => (
               <SectionCard
@@ -243,6 +254,7 @@ export function PageEditor({ page, openSections, onOpenSections, onReset, ref }:
                 path={`sections.${index}`}
                 open={openSections.includes(section.id)}
                 hasErrors={errorSections.has(index)}
+                readOnly={readOnly}
                 onToggle={() => toggle(section.id)}
                 onChange={(next) =>
                   setSections(sections.map((current, position) => (position === index ? next : current)))
@@ -257,7 +269,7 @@ export function PageEditor({ page, openSections, onOpenSections, onReset, ref }:
           />
         ) : (
           <p className="rounded-lg border border-dashed border-border-strong bg-neutral-0 p-6 text-center font-ui text-[14px] leading-5 text-text-muted">
-            Cette page n’a aucune section. Ajoutez-en une pour commencer.
+            Cette page n’a aucune section.{!readOnly && ' Ajoutez-en une pour commencer.'}
           </p>
         )}
       </div>

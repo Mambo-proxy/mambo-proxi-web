@@ -29,6 +29,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from 'react';
+import { useReadOnly } from '@/components/admin/shell/permissions';
 import { cn } from '@/lib/cn';
 
 type HandleProps = Pick<ComponentProps<'button'>, 'aria-describedby'> & Record<string, unknown>;
@@ -36,6 +37,9 @@ type HandleProps = Pick<ComponentProps<'button'>, 'aria-describedby'> & Record<s
 const HandleContext = createContext<{ attributes: HandleProps; listeners: HandleProps | undefined } | null>(
   null,
 );
+
+/** Liste figée (lecture seule) : éléments non déplaçables, poignées retirées. */
+const DisabledContext = createContext(false);
 
 type SortableListProps<T> = {
   items: T[];
@@ -51,6 +55,8 @@ type SortableListProps<T> = {
   renderItem: (item: T, index: number) => ReactNode;
   /** Élément fixe placé après les éléments, dans le même conteneur (tuile « Ajouter un logo »). */
   after?: ReactNode;
+  /** Ordre non modifiable (rôle en lecture seule) ; par défaut, celui du `ReadOnlyFieldset` englobant. */
+  disabled?: boolean;
 };
 
 /**
@@ -68,7 +74,10 @@ export function SortableList<T>({
   as: Tag = 'ul',
   renderItem,
   after,
+  disabled,
 }: SortableListProps<T>) {
+  const readOnly = useReadOnly();
+  const frozen = disabled ?? readOnly;
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -127,10 +136,12 @@ export function SortableList<T>({
         items={ids}
         strategy={layout === 'grid' ? rectSortingStrategy : verticalListSortingStrategy}
       >
-        <Tag className={className}>
-          {items.map((item, index) => renderItem(item, index))}
-          {after}
-        </Tag>
+        <DisabledContext.Provider value={frozen}>
+          <Tag className={className}>
+            {items.map((item, index) => renderItem(item, index))}
+            {after}
+          </Tag>
+        </DisabledContext.Provider>
       </SortableContext>
     </DndContext>
   );
@@ -146,7 +157,11 @@ type SortableItemProps = {
 
 /** Élément d'une `SortableList` ; la poignée (`DragHandle`) placée à l'intérieur sert à le déplacer. */
 export function SortableItem({ id, as: Tag = 'li', className, children }: SortableItemProps) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const disabled = useContext(DisabledContext);
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+    disabled,
+  });
   const style: CSSProperties = {
     transform: CSS.Translate.toString(transform),
     transition,
@@ -167,9 +182,11 @@ export function SortableItem({ id, as: Tag = 'li', className, children }: Sortab
   );
 }
 
-/** Poignée `icon/grip` 18 px : déplace l'élément à la souris, au doigt ou au clavier. */
+/** Poignée `icon/grip` 18 px : déplace l'élément à la souris, au doigt ou au clavier ; absente en lecture seule. */
 export function DragHandle({ label, className }: { label: string; className?: string }) {
   const context = useContext(HandleContext);
+  const disabled = useContext(DisabledContext);
+  if (disabled) return null;
   return (
     <button
       type="button"

@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { ConfirmDialog } from '@/components/admin/editor/editor-ui';
 import { ImageField } from '@/components/admin/editor/media-picker';
 import { CompactField, CompactInput, compactInputClass } from '@/components/admin/magazine/magazine-ui';
+import { ReadOnlyFieldset } from '@/components/admin/shell/permissions';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { Switch } from '@/components/ui/switch';
@@ -49,6 +50,7 @@ export function PartnerDialog({
   partner,
   defaultCategory = null,
   onSaved,
+  readOnly = false,
 }: {
   open: boolean;
   onClose: () => void;
@@ -57,6 +59,8 @@ export function PartnerDialog({
   /** Catégorie proposée à l'ajout (filtre en cours). */
   defaultCategory?: PartnerCategory | null;
   onSaved: () => void;
+  /** Sans `content:write` : fiche consultée (champs figés, ni enregistrement ni suppression). */
+  readOnly?: boolean;
 }) {
   const [draft, setDraft] = useState(() => draftOf(partner, defaultCategory));
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -132,12 +136,12 @@ export function PartnerDialog({
         // La confirmation de suppression s'ouvre par-dessus (fermer la modale déclencherait `onClose`).
         open={open}
         onClose={onClose}
-        title={partner ? `Modifier « ${partner.name} »` : 'Ajouter un partenaire'}
+        title={partner ? (readOnly ? partner.name : `Modifier « ${partner.name} »`) : 'Ajouter un partenaire'}
         description="Le logo s’affiche sur la page Partenaires et sur l’accueil du site, dans la catégorie choisie."
         maxWidth={600}
         footer={
           <div className="flex flex-wrap items-center gap-2">
-            {partner && (
+            {partner && !readOnly && (
               <Button variant="ghost" size="sm" onClick={() => setDeleting(true)} className="mr-auto">
                 <Trash2 aria-hidden />
                 Supprimer
@@ -145,75 +149,79 @@ export function PartnerDialog({
             )}
             <div className="ml-auto flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onClick={onClose}>
-                Annuler
+                {readOnly ? 'Fermer' : 'Annuler'}
               </Button>
-              <Button size="sm" loading={save.isPending} onClick={submit}>
-                {partner ? 'Enregistrer' : 'Ajouter le partenaire'}
-              </Button>
+              {!readOnly && (
+                <Button size="sm" loading={save.isPending} onClick={submit}>
+                  {partner ? 'Enregistrer' : 'Ajouter le partenaire'}
+                </Button>
+              )}
             </div>
           </div>
         }
       >
-        <div className="flex flex-col gap-4">
-          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_220px]">
-            <CompactField label="Nom" error={errors.name}>
+        <ReadOnlyFieldset readOnly={readOnly}>
+          <div className="flex flex-col gap-4">
+            <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_220px]">
+              <CompactField label="Nom" error={errors.name}>
+                {(control) => (
+                  <CompactInput
+                    {...control}
+                    value={draft.name}
+                    placeholder="Saveurs de Douala"
+                    maxLength={120}
+                    onChange={(event) => set('name', event.target.value)}
+                  />
+                )}
+              </CompactField>
+              <CompactField label="Catégorie" error={errors.category}>
+                {(control) => (
+                  <select
+                    {...control}
+                    value={draft.category}
+                    onChange={(event) => set('category', event.target.value as PartnerCategory)}
+                    className={compactInputClass}
+                  >
+                    {(Object.keys(PARTNER_CATEGORY_LABELS) as PartnerCategory[]).map((category) => (
+                      <option key={category} value={category}>
+                        {PARTNER_CATEGORY_LABELS[category]}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </CompactField>
+            </div>
+            <ImageField
+              label="Logo"
+              value={draft.logo}
+              onChange={(image) => set('logo', image)}
+              help="PNG ou SVG, fond transparent"
+              aspectClassName="aspect-[2/1]"
+              contain
+            />
+            <CompactField
+              label="Site du partenaire"
+              help="Facultatif : le logo renvoie vers ce site."
+              error={errors.url}
+            >
               {(control) => (
                 <CompactInput
                   {...control}
-                  value={draft.name}
-                  placeholder="Saveurs de Douala"
-                  maxLength={120}
-                  onChange={(event) => set('name', event.target.value)}
+                  type="url"
+                  inputMode="url"
+                  value={draft.url}
+                  placeholder="https://"
+                  onChange={(event) => set('url', event.target.value)}
                 />
               )}
             </CompactField>
-            <CompactField label="Catégorie" error={errors.category}>
-              {(control) => (
-                <select
-                  {...control}
-                  value={draft.category}
-                  onChange={(event) => set('category', event.target.value as PartnerCategory)}
-                  className={compactInputClass}
-                >
-                  {(Object.keys(PARTNER_CATEGORY_LABELS) as PartnerCategory[]).map((category) => (
-                    <option key={category} value={category}>
-                      {PARTNER_CATEGORY_LABELS[category]}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </CompactField>
+            <Switch
+              label="Logo affiché sur le site"
+              checked={draft.visible}
+              onChange={(event) => set('visible', event.target.checked)}
+            />
           </div>
-          <ImageField
-            label="Logo"
-            value={draft.logo}
-            onChange={(image) => set('logo', image)}
-            help="PNG ou SVG, fond transparent"
-            aspectClassName="aspect-[2/1]"
-            contain
-          />
-          <CompactField
-            label="Site du partenaire"
-            help="Facultatif : le logo renvoie vers ce site."
-            error={errors.url}
-          >
-            {(control) => (
-              <CompactInput
-                {...control}
-                type="url"
-                inputMode="url"
-                value={draft.url}
-                placeholder="https://"
-                onChange={(event) => set('url', event.target.value)}
-              />
-            )}
-          </CompactField>
-          <Switch
-            label="Logo affiché sur le site"
-            checked={draft.visible}
-            onChange={(event) => set('visible', event.target.checked)}
-          />
-        </div>
+        </ReadOnlyFieldset>
       </Modal>
       <ConfirmDialog
         open={deleting}

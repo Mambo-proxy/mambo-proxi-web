@@ -135,6 +135,8 @@ export function navFor(user: Pick<CurrentUser, 'permissions'>): AdminNavGroup[] 
  */
 const SUB_SCREENS: { href: string; label: string; permissions: Permission[] }[] = [
   { href: '/admin/services/nouveau', label: 'Nouveau service', permissions: ['content:write'] },
+  // Création avant la consultation : le premier écran correspondant à l'adresse l'emporte.
+  { href: '/admin/recrutement/offres/nouvelle', label: 'Nouvelle offre', permissions: ['content:write'] },
   { href: '/admin/recrutement/offres', label: 'Offre d’emploi', permissions: ['content:read'] },
   {
     href: '/admin/rendez-vous/disponibilites',

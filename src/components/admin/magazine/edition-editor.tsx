@@ -13,6 +13,7 @@ import { RichTextEditor } from '@/components/admin/editor/rich-text-editor';
 import { DragHandle, SortableItem, SortableList } from '@/components/admin/editor/sortable';
 import { useAdmin } from '@/components/admin/shell/admin-context';
 import { AdminPage, topbarActionClass } from '@/components/admin/shell/admin-page';
+import { ReadOnlyFieldset, ReadOnlyNotice, useCan } from '@/components/admin/shell/permissions';
 import { ActionMenu } from '@/components/admin/ui/action-menu';
 import { EmptyState } from '@/components/admin/ui/filters';
 import { Button } from '@/components/ui/button';
@@ -157,6 +158,8 @@ function EditionForm({ edition }: { edition: AdminMagazineEdition }) {
   const refresh = useRefreshMagazine();
   const router = useRouter();
   const preview = usePreviewEdition();
+  // Sans `content:write` (responsable) : édition consultée, champs et ordre des articles figés.
+  const canWrite = useCan()('content:write');
   const [draft, setDraft] = useState(() => draftOf(edition));
   const [language, setLanguage] = useState<EditingLanguage>('fr');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -311,18 +314,21 @@ function EditionForm({ edition }: { edition: AdminMagazineEdition }) {
       title={heading}
       breadcrumb={<Breadcrumb current={heading} />}
       actions={
-        <button
-          type="button"
-          onClick={() => submit('save')}
-          disabled={save.isPending}
-          className={cn(topbarActionClass, 'disabled:opacity-60')}
-        >
-          <Save aria-hidden />
-          Enregistrer
-        </button>
+        canWrite && (
+          <button
+            type="button"
+            onClick={() => submit('save')}
+            disabled={save.isPending}
+            className={cn(topbarActionClass, 'disabled:opacity-60')}
+          >
+            <Save aria-hidden />
+            Enregistrer
+          </button>
+        )
       }
     >
       <div className="flex flex-col gap-6">
+        <ReadOnlyNotice permission="content:write" />
         <LanguageSwitch
           value={language}
           onChange={setLanguage}
@@ -334,128 +340,136 @@ function EditionForm({ edition }: { edition: AdminMagazineEdition }) {
         <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
           <div className="flex min-w-0 flex-col gap-6">
             <MagazineCard title="Informations de l’édition">
-              <div className="flex flex-col gap-4 sm:flex-row">
-                <CompactField label="Numéro" error={errors.number} className="sm:w-[120px] sm:shrink-0">
-                  {(control) => (
-                    <CompactInput
-                      {...control}
-                      inputMode="numeric"
-                      value={draft.number}
-                      placeholder="Hors-série"
-                      onChange={(event) => set('number', event.target.value.replace(/\D/g, ''))}
-                    />
-                  )}
-                </CompactField>
-                <CompactField
-                  label={en ? 'Titre (anglais)' : 'Titre'}
-                  error={en ? errors.titleEn : errors.title}
-                  className="flex-1"
-                >
-                  {(control) => (
-                    <CompactInput
-                      {...control}
-                      key={language}
-                      lang={language}
-                      value={en ? draft.titleEn : draft.title}
-                      placeholder={en ? draft.title : undefined}
-                      maxLength={120}
-                      onChange={(event) => set(en ? 'titleEn' : 'title', event.target.value)}
-                    />
-                  )}
-                </CompactField>
-              </div>
-              <div className="flex flex-col gap-4 sm:flex-row">
-                <CompactField label={en ? 'Sous-titre (anglais)' : 'Sous-titre'} className="flex-1">
-                  {(control) => (
-                    <CompactInput
-                      {...control}
-                      key={language}
-                      lang={language}
-                      value={en ? draft.subtitleEn : draft.subtitle}
-                      placeholder={en ? draft.subtitle : 'Édition spéciale'}
-                      maxLength={120}
-                      onChange={(event) => set(en ? 'subtitleEn' : 'subtitle', event.target.value)}
-                    />
-                  )}
-                </CompactField>
-                <CompactField
-                  label="Date de publication"
-                  error={errors.publishAt}
-                  className="sm:w-[200px] sm:shrink-0"
-                >
-                  {(control) => (
-                    <CompactInput
-                      {...control}
-                      type="date"
-                      value={draft.publishDate}
-                      onChange={(event) => set('publishDate', event.target.value)}
-                    />
-                  )}
-                </CompactField>
-              </div>
-              <div className="flex flex-wrap items-center gap-4">
-                {draft.cover ? (
-                  <MediaThumb
-                    image={draft.cover}
-                    className="h-28 w-[168px] shrink-0 rounded-md"
-                    sizes="168px"
-                  />
-                ) : (
-                  <span
-                    aria-hidden
-                    className="flex h-28 w-[168px] shrink-0 items-center justify-center rounded-md bg-neutral-100 text-icon-default"
+              <ReadOnlyFieldset readOnly={!canWrite}>
+                <div className="flex flex-col gap-4 sm:flex-row">
+                  <CompactField label="Numéro" error={errors.number} className="sm:w-[120px] sm:shrink-0">
+                    {(control) => (
+                      <CompactInput
+                        {...control}
+                        inputMode="numeric"
+                        value={draft.number}
+                        placeholder="Hors-série"
+                        onChange={(event) => set('number', event.target.value.replace(/\D/g, ''))}
+                      />
+                    )}
+                  </CompactField>
+                  <CompactField
+                    label={en ? 'Titre (anglais)' : 'Titre'}
+                    error={en ? errors.titleEn : errors.title}
+                    className="flex-1"
                   >
-                    <BookOpen size={24} />
-                  </span>
-                )}
-                <div className="flex min-w-[200px] flex-1 flex-col items-start gap-1.5">
-                  <span className="font-ui text-[13px] leading-4 font-medium text-neutral-700">
-                    Image de couverture
-                  </span>
-                  <span className="font-ui text-[13px] leading-4 text-text-muted">
-                    JPG ou PNG · 1 600 px conseillé · texte alternatif obligatoire
-                  </span>
-                  <button type="button" className={compactButtonClass} onClick={() => setCoverOpen(true)}>
-                    {draft.cover ? 'Remplacer l’image' : 'Choisir une image'}
-                  </button>
+                    {(control) => (
+                      <CompactInput
+                        {...control}
+                        key={language}
+                        lang={language}
+                        value={en ? draft.titleEn : draft.title}
+                        placeholder={en ? draft.title : undefined}
+                        maxLength={120}
+                        onChange={(event) => set(en ? 'titleEn' : 'title', event.target.value)}
+                      />
+                    )}
+                  </CompactField>
                 </div>
-              </div>
+                <div className="flex flex-col gap-4 sm:flex-row">
+                  <CompactField label={en ? 'Sous-titre (anglais)' : 'Sous-titre'} className="flex-1">
+                    {(control) => (
+                      <CompactInput
+                        {...control}
+                        key={language}
+                        lang={language}
+                        value={en ? draft.subtitleEn : draft.subtitle}
+                        placeholder={en ? draft.subtitle : 'Édition spéciale'}
+                        maxLength={120}
+                        onChange={(event) => set(en ? 'subtitleEn' : 'subtitle', event.target.value)}
+                      />
+                    )}
+                  </CompactField>
+                  <CompactField
+                    label="Date de publication"
+                    error={errors.publishAt}
+                    className="sm:w-[200px] sm:shrink-0"
+                  >
+                    {(control) => (
+                      <CompactInput
+                        {...control}
+                        type="date"
+                        value={draft.publishDate}
+                        onChange={(event) => set('publishDate', event.target.value)}
+                      />
+                    )}
+                  </CompactField>
+                </div>
+                <div className="flex flex-wrap items-center gap-4">
+                  {draft.cover ? (
+                    <MediaThumb
+                      image={draft.cover}
+                      className="h-28 w-[168px] shrink-0 rounded-md"
+                      sizes="168px"
+                    />
+                  ) : (
+                    <span
+                      aria-hidden
+                      className="flex h-28 w-[168px] shrink-0 items-center justify-center rounded-md bg-neutral-100 text-icon-default"
+                    >
+                      <BookOpen size={24} />
+                    </span>
+                  )}
+                  <div className="flex min-w-[200px] flex-1 flex-col items-start gap-1.5">
+                    <span className="font-ui text-[13px] leading-4 font-medium text-neutral-700">
+                      Image de couverture
+                    </span>
+                    <span className="font-ui text-[13px] leading-4 text-text-muted">
+                      JPG ou PNG · 1 600 px conseillé · texte alternatif obligatoire
+                    </span>
+                    {canWrite && (
+                      <button type="button" className={compactButtonClass} onClick={() => setCoverOpen(true)}>
+                        {draft.cover ? 'Remplacer l’image' : 'Choisir une image'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </ReadOnlyFieldset>
             </MagazineCard>
 
             <MagazineCard
               title="Édito"
               subtitle="Signé par la fondatrice, affiché en ouverture de l’édition."
             >
-              <RichTextEditor
-                key={language}
-                variant="labels"
-                label={en ? 'Édito (anglais)' : 'Édito'}
-                value={en ? draft.editorialEn : draft.editorial}
-                onChange={(value) => set(en ? 'editorialEn' : 'editorial', value)}
-                minHeight={120}
-              />
-              <CompactField label={en ? 'Signature (anglais)' : 'Signature'}>
-                {(control) => (
-                  <CompactInput
-                    {...control}
-                    key={language}
-                    lang={language}
-                    value={en ? draft.signatureEn : draft.signature}
-                    placeholder={en ? draft.signature : undefined}
-                    maxLength={120}
-                    onChange={(event) => set(en ? 'signatureEn' : 'signature', event.target.value)}
-                  />
-                )}
-              </CompactField>
+              <ReadOnlyFieldset readOnly={!canWrite}>
+                <RichTextEditor
+                  key={language}
+                  variant="labels"
+                  label={en ? 'Édito (anglais)' : 'Édito'}
+                  value={en ? draft.editorialEn : draft.editorial}
+                  onChange={(value) => set(en ? 'editorialEn' : 'editorial', value)}
+                  minHeight={120}
+                />
+                <CompactField label={en ? 'Signature (anglais)' : 'Signature'}>
+                  {(control) => (
+                    <CompactInput
+                      {...control}
+                      key={language}
+                      lang={language}
+                      value={en ? draft.signatureEn : draft.signature}
+                      placeholder={en ? draft.signature : undefined}
+                      maxLength={120}
+                      onChange={(event) => set(en ? 'signatureEn' : 'signature', event.target.value)}
+                    />
+                  )}
+                </CompactField>
+              </ReadOnlyFieldset>
             </MagazineCard>
 
             <div ref={articlesRef} className="scroll-mt-[100px]">
               <MagazineCard
                 title="Articles de l’édition"
                 subtitle={
-                  total > 1
-                    ? 'Glissez les articles pour changer l’ordre de lecture.'
-                    : 'Ajoutez les articles de cette édition.'
+                  !canWrite
+                    ? 'Dans l’ordre de lecture.'
+                    : total > 1
+                      ? 'Glissez les articles pour changer l’ordre de lecture.'
+                      : 'Ajoutez les articles de cette édition.'
                 }
               >
                 {total > 0 && (
@@ -464,6 +478,7 @@ function EditionForm({ edition }: { edition: AdminMagazineEdition }) {
                     getId={(article) => article.id}
                     getLabel={(article) => article.title}
                     onReorder={(next) => reorder.mutate(next.map((article) => article.id))}
+                    disabled={!canWrite}
                     className="flex flex-col gap-4"
                     renderItem={(article) => (
                       <SortableItem
@@ -500,11 +515,13 @@ function EditionForm({ edition }: { edition: AdminMagazineEdition }) {
                     )}
                   />
                 )}
-                <div>
-                  <button type="button" className={compactButtonClass} onClick={() => setAddOpen(true)}>
-                    + Ajouter un article
-                  </button>
-                </div>
+                {canWrite && (
+                  <div>
+                    <button type="button" className={compactButtonClass} onClick={() => setAddOpen(true)}>
+                      + Ajouter un article
+                    </button>
+                  </div>
+                )}
               </MagazineCard>
             </div>
           </div>
@@ -513,27 +530,29 @@ function EditionForm({ edition }: { edition: AdminMagazineEdition }) {
             <MagazineCard
               title="Publication"
               action={
-                <ActionMenu
-                  label="Autres actions sur l’édition"
-                  items={[
-                    ...(published
-                      ? [
-                          {
-                            label: 'Repasser en brouillon',
-                            icon: Undo2,
-                            onSelect: () => setConfirm('unpublish'),
-                          },
-                        ]
-                      : []),
-                    {
-                      label: 'Supprimer l’édition',
-                      icon: Trash2,
-                      danger: true,
-                      disabled: edition.status === 'PUBLISHED',
-                      onSelect: () => setConfirm('delete'),
-                    },
-                  ]}
-                />
+                canWrite && (
+                  <ActionMenu
+                    label="Autres actions sur l’édition"
+                    items={[
+                      ...(published
+                        ? [
+                            {
+                              label: 'Repasser en brouillon',
+                              icon: Undo2,
+                              onSelect: () => setConfirm('unpublish'),
+                            },
+                          ]
+                        : []),
+                      {
+                        label: 'Supprimer l’édition',
+                        icon: Trash2,
+                        danger: true,
+                        disabled: edition.status === 'PUBLISHED',
+                        onSelect: () => setConfirm('delete'),
+                      },
+                    ]}
+                  />
+                )
               }
             >
               <div className="flex flex-wrap items-center gap-2">
@@ -549,16 +568,18 @@ function EditionForm({ edition }: { edition: AdminMagazineEdition }) {
                 >
                   Aperçu
                 </button>
-                <button
-                  type="button"
-                  className={cn(compactPrimaryClass, 'flex-1')}
-                  onClick={() => submit(published ? 'save' : 'publish')}
-                  disabled={save.isPending}
-                >
-                  {published ? 'Mettre à jour' : 'Publier'}
-                </button>
+                {canWrite && (
+                  <button
+                    type="button"
+                    className={cn(compactPrimaryClass, 'flex-1')}
+                    onClick={() => submit(published ? 'save' : 'publish')}
+                    disabled={save.isPending}
+                  >
+                    {published ? 'Mettre à jour' : 'Publier'}
+                  </button>
+                )}
               </div>
-              {!published && (
+              {!published && canWrite && (
                 <p className="font-ui text-[12px] leading-4 text-text-muted">
                   {draft.publishDate && draft.publishDate > toLocal(new Date().toISOString(), 'yyyy-MM-dd')
                     ? 'La publication sera programmée à la date choisie.'
@@ -615,6 +636,7 @@ function EditionForm({ edition }: { edition: AdminMagazineEdition }) {
         article={articleDialog?.article ?? null}
         editionId={edition.id}
         initialLanguage={language}
+        readOnly={!canWrite}
       />
       <AddArticlesDialog
         open={addOpen}
@@ -678,6 +700,7 @@ function NewsletterCard({
   onUpdated: (edition: AdminMagazineEdition) => void;
 }) {
   const { user } = useAdmin();
+  const canSend = useCan()('newsletter:write');
   const { newsletter } = edition;
   const [sendAt, setSendAt] = useState(
     newsletter.scheduledAt ? toLocal(newsletter.scheduledAt, "yyyy-MM-dd'T'HH:mm") : '',
@@ -724,6 +747,13 @@ function NewsletterCard({
       {newsletter.sentAt ? (
         <p className="font-ui text-[13px] leading-4 text-text-muted">
           Envoyée le {formatStamp(newsletter.sentAt)} (heure de Douala).
+        </p>
+      ) : !canSend ? (
+        // Sans `newsletter:write` : état de l'envoi seulement (ni test ni programmation).
+        <p className="font-ui text-[13px] leading-4 text-text-muted">
+          {newsletter.scheduledAt
+            ? `Envoi programmé le ${formatStamp(newsletter.scheduledAt)} (heure de Douala).`
+            : 'Envoi pas encore programmé.'}
         </p>
       ) : (
         <>

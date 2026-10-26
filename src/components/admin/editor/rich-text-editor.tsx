@@ -17,6 +17,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { useEffect, useId, useState } from 'react';
+import { useReadOnly } from '@/components/admin/shell/permissions';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/field';
 import { Modal } from '@/components/ui/modal';
@@ -69,10 +70,13 @@ export function RichTextEditor({
   tools = DEFAULT_LABEL_TOOLS,
 }: RichTextEditorProps) {
   const id = useId();
+  // Dans un formulaire en lecture seule : texte non modifiable, barre d'outils retirée.
+  const readOnly = useReadOnly();
   const labelled = variant === 'labels';
   const email = labelled && (tools.includes('image') || tools.includes('button'));
   const editor = useEditor({
     immediatelyRender: false,
+    editable: !readOnly,
     extensions: [
       StarterKit.configure({
         heading: { levels: [2, 3, 4] },
@@ -100,6 +104,7 @@ export function RichTextEditor({
         'aria-labelledby': `${id}-label`,
         ...(help ? { 'aria-describedby': `${id}-help` } : {}),
         ...(error ? { 'aria-invalid': 'true' } : {}),
+        ...(readOnly ? { 'aria-readonly': 'true' } : {}),
         ...(placeholder ? { 'data-placeholder': placeholder } : {}),
         class: labelled
           ? 'rich-text-editor rich-text-editor-compact min-h-(--rte-min) p-4 font-ui text-[14px] leading-[17px] text-text-main outline-none'
@@ -108,6 +113,10 @@ export function RichTextEditor({
     },
     onUpdate: ({ editor: instance }) => onChange(instance.isEmpty ? '' : instance.getHTML()),
   });
+
+  useEffect(() => {
+    if (editor && !editor.isDestroyed && editor.isEditable === readOnly) editor.setEditable(!readOnly);
+  }, [editor, readOnly]);
 
   // Contenu remplacé de l'extérieur (rechargement, annulation des modifications) : synchronisation.
   useEffect(() => {
@@ -122,7 +131,7 @@ export function RichTextEditor({
         <span id={`${id}-label`} className="sr-only">
           {label}
         </span>
-        {editor && <LabelToolbar editor={editor} label={label} tools={tools} />}
+        {editor && !readOnly && <LabelToolbar editor={editor} label={label} tools={tools} />}
         <div
           style={{ ['--rte-min' as string]: `${minHeight}px` }}
           className={cn(
@@ -159,7 +168,7 @@ export function RichTextEditor({
           error && 'border-feedback-error ring-1 ring-feedback-error ring-inset',
         )}
       >
-        {editor && <Toolbar editor={editor} headings={headings} label={label} />}
+        {editor && !readOnly && <Toolbar editor={editor} headings={headings} label={label} />}
         <EditorContent editor={editor} />
       </div>
       {help && !error && (

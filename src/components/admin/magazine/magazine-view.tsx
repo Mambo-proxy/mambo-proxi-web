@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { ConfirmDialog } from '@/components/admin/editor/editor-ui';
 import { MediaThumb } from '@/components/admin/editor/media-picker';
 import { topbarActionClass } from '@/components/admin/shell/admin-page';
+import { ReadOnlyNotice, useCan } from '@/components/admin/shell/permissions';
 import { ActionMenu } from '@/components/admin/ui/action-menu';
 import { AdminCard } from '@/components/admin/ui/admin-ui';
 import { EmptyState, StatusTabs } from '@/components/admin/ui/filters';
@@ -65,8 +66,12 @@ export function usePreviewEdition() {
   });
 }
 
-/** Bouton « Nouvelle édition » de la barre supérieure (`267:1611`) : crée un brouillon et l'ouvre. */
+/**
+ * Bouton « Nouvelle édition » de la barre supérieure (`267:1611`) : crée un brouillon et l'ouvre. Absent sans
+ * `content:write`.
+ */
 export function NewEditionButton() {
+  const canWrite = useCan()('content:write');
   const router = useRouter();
   const create = useMutation({
     mutationFn: () =>
@@ -74,6 +79,7 @@ export function NewEditionButton() {
     onSuccess: (edition) => router.push(magazineEditionRoute(edition.id)),
     onError: (error) => toast.error(errorMessage(error)),
   });
+  if (!canWrite) return null;
   return (
     <button
       type="button"
@@ -97,6 +103,7 @@ export function MagazineView() {
 
   return (
     <div className="flex flex-col gap-6">
+      <ReadOnlyNotice permission="content:write" />
       <StatusTabs
         label="Contenus du magazine"
         tabs={[
@@ -132,6 +139,7 @@ function EditionsTable({
   editions: AdminMagazineEditionSummary[] | undefined;
   error: boolean;
 }) {
+  const canWrite = useCan()('content:write');
   return (
     <AdminCard aria-label="Éditions du magazine" className="overflow-hidden">
       <div role="table" aria-label="Éditions du magazine">
@@ -180,11 +188,15 @@ function EditionsTable({
               <EmptyState
                 icon={<BookOpen size={24} />}
                 title="Aucune édition"
-                text="Créez la première édition du magazine avec « Nouvelle édition »."
+                text={
+                  canWrite
+                    ? 'Créez la première édition du magazine avec « Nouvelle édition ».'
+                    : 'Les éditions du magazine apparaîtront ici.'
+                }
               />
             </div>
           ) : (
-            editions.map((edition) => <EditionRow key={edition.id} edition={edition} />)
+            editions.map((edition) => <EditionRow key={edition.id} edition={edition} canWrite={canWrite} />)
           )}
         </div>
       </div>
@@ -192,7 +204,8 @@ function EditionsTable({
   );
 }
 
-function EditionRow({ edition }: { edition: AdminMagazineEditionSummary }) {
+/** Ligne d'une édition ; sans `content:write` : aperçu et consultation seulement. */
+function EditionRow({ edition, canWrite }: { edition: AdminMagazineEditionSummary; canWrite: boolean }) {
   const refresh = useRefreshMagazine();
   const preview = usePreviewEdition();
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -292,24 +305,31 @@ function EditionRow({ edition }: { edition: AdminMagazineEditionSummary }) {
         >
           <Eye aria-hidden size={16} />
         </button>
-        <Link href={href} aria-label={`Modifier ${name}`} title="Modifier" className={iconButton}>
+        <Link
+          href={href}
+          aria-label={`${canWrite ? 'Modifier' : 'Consulter'} ${name}`}
+          title={canWrite ? 'Modifier' : 'Consulter'}
+          className={iconButton}
+        >
           <Pencil aria-hidden size={16} />
         </Link>
-        <ActionMenu
-          label={`Actions pour ${name}`}
-          items={[
-            edition.status === 'PUBLISHED' || edition.status === 'SCHEDULED'
-              ? { label: 'Repasser en brouillon', icon: Undo2, onSelect: () => status.mutate('unpublish') }
-              : { label: 'Publier maintenant', icon: Upload, onSelect: () => status.mutate('publish') },
-            {
-              label: 'Supprimer',
-              icon: Trash2,
-              danger: true,
-              disabled: edition.status === 'PUBLISHED',
-              onSelect: () => setConfirmDelete(true),
-            },
-          ]}
-        />
+        {canWrite && (
+          <ActionMenu
+            label={`Actions pour ${name}`}
+            items={[
+              edition.status === 'PUBLISHED' || edition.status === 'SCHEDULED'
+                ? { label: 'Repasser en brouillon', icon: Undo2, onSelect: () => status.mutate('unpublish') }
+                : { label: 'Publier maintenant', icon: Upload, onSelect: () => status.mutate('publish') },
+              {
+                label: 'Supprimer',
+                icon: Trash2,
+                danger: true,
+                disabled: edition.status === 'PUBLISHED',
+                onSelect: () => setConfirmDelete(true),
+              },
+            ]}
+          />
+        )}
       </div>
       <ConfirmDialog
         open={confirmDelete}
@@ -377,6 +397,7 @@ function CampaignStats({ stats }: { stats: MagazineCampaignStats }) {
 /** Onglet « Articles » (non maquetté) : tous les articles, leur édition et leurs langues. */
 function ArticlesList({ editions }: { editions: AdminMagazineEditionSummary[] }) {
   const refresh = useRefreshMagazine();
+  const canWrite = useCan()('content:write');
   const [editing, setEditing] = useState<AdminMagazineArticle | null>(null);
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<AdminMagazineArticle | null>(null);
@@ -399,12 +420,14 @@ function ArticlesList({ editions }: { editions: AdminMagazineEditionSummary[] })
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-end">
-        <button type="button" className={topbarActionClass} onClick={() => setCreating(true)}>
-          <Plus aria-hidden />
-          Nouvel article
-        </button>
-      </div>
+      {canWrite && (
+        <div className="flex justify-end">
+          <button type="button" className={topbarActionClass} onClick={() => setCreating(true)}>
+            <Plus aria-hidden />
+            Nouvel article
+          </button>
+        </div>
+      )}
       <AdminCard aria-label="Articles du magazine" className="overflow-hidden">
         {articles.isError && !articles.data ? (
           <div className="p-6">
@@ -425,7 +448,11 @@ function ArticlesList({ editions }: { editions: AdminMagazineEditionSummary[] })
             <EmptyState
               icon={<FileText size={24} />}
               title="Aucun article"
-              text="Ajoutez un premier article au magazine."
+              text={
+                canWrite
+                  ? 'Ajoutez un premier article au magazine.'
+                  : 'Les articles du magazine apparaîtront ici.'
+              }
             />
           </div>
         ) : (
@@ -458,13 +485,20 @@ function ArticlesList({ editions }: { editions: AdminMagazineEditionSummary[] })
                   </span>
                 </div>
                 <ArticleLanguages article={article} />
-                <ActionMenu
-                  label={`Actions pour l’article « ${article.title} »`}
-                  items={[
-                    { label: 'Modifier', icon: Pencil, onSelect: () => setEditing(article) },
-                    { label: 'Supprimer', icon: Trash2, danger: true, onSelect: () => setDeleting(article) },
-                  ]}
-                />
+                {canWrite && (
+                  <ActionMenu
+                    label={`Actions pour l’article « ${article.title} »`}
+                    items={[
+                      { label: 'Modifier', icon: Pencil, onSelect: () => setEditing(article) },
+                      {
+                        label: 'Supprimer',
+                        icon: Trash2,
+                        danger: true,
+                        onSelect: () => setDeleting(article),
+                      },
+                    ]}
+                  />
+                )}
               </li>
             ))}
           </ul>
@@ -478,6 +512,7 @@ function ArticlesList({ editions }: { editions: AdminMagazineEditionSummary[] })
         }}
         article={editing}
         editions={editionOptions}
+        readOnly={!canWrite}
       />
       <ConfirmDialog
         open={deleting !== null}

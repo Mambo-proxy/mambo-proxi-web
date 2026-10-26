@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import { ServicesView } from '@/components/admin/services/services-view';
 import { AdminPage, topbarActionClass } from '@/components/admin/shell/admin-page';
+import { Can } from '@/components/admin/shell/permissions';
 import { adminRoutes } from '@/lib/admin/routes';
 
 export const metadata: Metadata = { title: 'Services' };
@@ -19,10 +20,13 @@ export default function ServicesPage() {
         </span>
       }
       actions={
-        <Link href={adminRoutes.newService} className={topbarActionClass}>
-          <Plus aria-hidden />
-          Ajouter un service
-        </Link>
+        // « Ajouter un service » : permission `content:write`.
+        <Can permission="content:write">
+          <Link href={adminRoutes.newService} className={topbarActionClass}>
+            <Plus aria-hidden />
+            Ajouter un service
+          </Link>
+        </Can>
       }
     >
       <Suspense>

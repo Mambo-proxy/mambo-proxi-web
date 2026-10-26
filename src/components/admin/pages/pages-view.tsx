@@ -8,6 +8,7 @@ import { useRef, useState } from 'react';
 import { AdminCard } from '@/components/admin/ui/admin-ui';
 import { EmptyState } from '@/components/admin/ui/filters';
 import { AdminPage, topbarActionClass, topbarSecondaryClass } from '@/components/admin/shell/admin-page';
+import { ReadOnlyNotice, useCan } from '@/components/admin/shell/permissions';
 import { ButtonLink } from '@/components/ui/button';
 import { Select } from '@/components/ui/field';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -72,6 +73,8 @@ export function PagesView() {
   const editor = useRef<PageEditorHandle>(null);
   const [version, setVersion] = useState(0);
   const storePage = useStorePage();
+  // Sans `content:write` (responsable) : pages consultées, ni brouillon ni publication.
+  const canWrite = useCan()('content:write');
 
   const list = useQuery({
     queryKey: pageListKey,
@@ -143,7 +146,7 @@ export function PagesView() {
             Voir la page
             <span className="sr-only"> (nouvel onglet)</span>
           </a>
-          {!category && (
+          {!category && canWrite && (
             <button
               type="button"
               onClick={() => void onPublish()}
@@ -158,6 +161,7 @@ export function PagesView() {
         </>
       }
     >
+      <ReadOnlyNotice permission="content:write" className="mb-5" />
       <div className="grid items-start gap-5 xl:grid-cols-[260px_minmax(0,1fr)] xl:gap-6">
         <PageList
           entries={entries}
@@ -204,6 +208,7 @@ export function PagesView() {
               openSections={selection.sections}
               onOpenSections={(sections) => selection.update({ sections })}
               onReset={() => setVersion((value) => value + 1)}
+              readOnly={!canWrite}
             />
           )}
         </div>

@@ -8,7 +8,8 @@ import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { ConfirmDialog, PublishStatusBadge } from '@/components/admin/editor/editor-ui';
 import { topbarActionClass } from '@/components/admin/shell/admin-page';
-import { ActionMenu } from '@/components/admin/ui/action-menu';
+import { ReadOnlyNotice, useCan } from '@/components/admin/shell/permissions';
+import { ActionMenu, type ActionMenuItem } from '@/components/admin/ui/action-menu';
 import { AdminCard, ContactAvatar, RequestStatusBadge } from '@/components/admin/ui/admin-ui';
 import { EmptyState, StatusTabs } from '@/components/admin/ui/filters';
 import { Modal } from '@/components/ui/modal';
@@ -46,10 +47,12 @@ function useRefreshEvents() {
   return () => client.invalidateQueries({ queryKey: eventsKey });
 }
 
-/** Bouton « Nouvel événement » de la barre supérieure. */
+/** Bouton « Nouvel événement » de la barre supérieure ; absent sans `content:write`. */
 export function NewEventButton() {
+  const canWrite = useCan()('content:write');
   const [open, setOpen] = useState(false);
   const refresh = useRefreshEvents();
+  if (!canWrite) return null;
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className={topbarActionClass}>
@@ -83,6 +86,7 @@ export function EventsView() {
 
   return (
     <div className="flex flex-col gap-6">
+      <ReadOnlyNotice permission="content:write" />
       <StatusTabs
         label="Période"
         tabs={EVENT_PERIODS.map((item) => ({
@@ -149,6 +153,8 @@ function EventsTable({
   period: EventPeriod;
 }) {
   const refresh = useRefreshEvents();
+  // Sans `content:write` : fiches consultées, inscriptions visibles, ni publication ni suppression.
+  const canWrite = useCan()('content:write');
   const [editing, setEditing] = useState<AdminEvent | null>(null);
   const [deleting, setDeleting] = useState<AdminEvent | null>(null);
   const [viewing, setViewing] = useState<AdminEvent | null>(null);
@@ -228,7 +234,11 @@ function EventsTable({
               <EmptyState
                 icon={<CalendarDays size={24} />}
                 title={period === 'past' ? 'Aucun événement passé' : 'Aucun événement à venir'}
-                text="Ajoutez un événement avec « Nouvel événement »."
+                text={
+                  canWrite
+                    ? 'Ajoutez un événement avec « Nouvel événement ».'
+                    : 'Les événements de l’agenda apparaîtront ici.'
+                }
               />
             </div>
           ) : (
@@ -295,8 +305,8 @@ function EventsTable({
                   </a>
                   <button
                     type="button"
-                    aria-label={`Modifier ${event.title}`}
-                    title="Modifier"
+                    aria-label={`${canWrite ? 'Modifier' : 'Consulter'} ${event.title}`}
+                    title={canWrite ? 'Modifier' : 'Consulter'}
                     className={iconButton}
                     onClick={() => setEditing(event)}
                   >
@@ -310,12 +320,21 @@ function EventsTable({
                         icon: Users,
                         onSelect: () => setViewing(event),
                       },
-                      {
-                        label: event.status === 'PUBLISHED' ? 'Dépublier' : 'Publier',
-                        icon: Power,
-                        onSelect: () => publish.mutate(event),
-                      },
-                      { label: 'Supprimer', icon: Trash2, danger: true, onSelect: () => setDeleting(event) },
+                      ...(canWrite
+                        ? ([
+                            {
+                              label: event.status === 'PUBLISHED' ? 'Dépublier' : 'Publier',
+                              icon: Power,
+                              onSelect: () => publish.mutate(event),
+                            },
+                            {
+                              label: 'Supprimer',
+                              icon: Trash2,
+                              danger: true,
+                              onSelect: () => setDeleting(event),
+                            },
+                          ] satisfies ActionMenuItem[])
+                        : []),
                     ]}
                   />
                 </div>
@@ -329,6 +348,7 @@ function EventsTable({
         onClose={() => setEditing(null)}
         event={editing}
         onSaved={refresh}
+        readOnly={!canWrite}
       />
       <RegistrationsDialog event={viewing} onClose={() => setViewing(null)} />
       <ConfirmDialog

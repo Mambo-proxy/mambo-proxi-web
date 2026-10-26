@@ -19,6 +19,7 @@ import { useState } from 'react';
 import { ConfirmDialog, PublishStatusBadge } from '@/components/admin/editor/editor-ui';
 import { moveItem } from '@/components/admin/editor/sortable';
 import { topbarActionClass } from '@/components/admin/shell/admin-page';
+import { ReadOnlyNotice, useCan } from '@/components/admin/shell/permissions';
 import { ActionMenu } from '@/components/admin/ui/action-menu';
 import { AdminCard, locationLabel, RequestStatusBadge } from '@/components/admin/ui/admin-ui';
 import { EmptyState, StatusTabs } from '@/components/admin/ui/filters';
@@ -58,10 +59,12 @@ function useRefreshTrainings() {
   return () => client.invalidateQueries({ queryKey: trainingsKey });
 }
 
-/** Bouton « Nouvelle formation » de la barre supérieure (`93:22594`). */
+/** Bouton « Nouvelle formation » de la barre supérieure (`93:22594`) ; absent sans `content:write`. */
 export function NewTrainingButton() {
+  const canWrite = useCan()('content:write');
   const [open, setOpen] = useState(false);
   const refresh = useRefreshTrainings();
+  if (!canWrite) return null;
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className={topbarActionClass}>
@@ -91,6 +94,7 @@ export function TrainingsView() {
 
   return (
     <div className="flex flex-col gap-6">
+      <ReadOnlyNotice permission="content:write" />
       <StatusTabs
         label="Catalogue et demandes"
         tabs={[
@@ -152,6 +156,8 @@ const iconButton =
 function TrainingsTable({ trainings, error }: { trainings: AdminTraining[] | undefined; error: boolean }) {
   const client = useQueryClient();
   const refresh = useRefreshTrainings();
+  // Sans `content:write` : fiches consultées, ni ordre, ni publication, ni suppression.
+  const canWrite = useCan()('content:write');
   const [editing, setEditing] = useState<AdminTraining | null>(null);
   const [deleting, setDeleting] = useState<AdminTraining | null>(null);
 
@@ -241,7 +247,11 @@ function TrainingsTable({ trainings, error }: { trainings: AdminTraining[] | und
               <EmptyState
                 icon={<GraduationCap size={24} />}
                 title="Aucune formation"
-                text="Ajoutez une formation avec « Nouvelle formation »."
+                text={
+                  canWrite
+                    ? 'Ajoutez une formation avec « Nouvelle formation ».'
+                    : 'Les formations du catalogue apparaîtront ici.'
+                }
               />
             </div>
           ) : (
@@ -301,41 +311,43 @@ function TrainingsTable({ trainings, error }: { trainings: AdminTraining[] | und
                   </a>
                   <button
                     type="button"
-                    aria-label={`Modifier ${training.title}`}
-                    title="Modifier"
+                    aria-label={`${canWrite ? 'Modifier' : 'Consulter'} ${training.title}`}
+                    title={canWrite ? 'Modifier' : 'Consulter'}
                     className={iconButton}
                     onClick={() => setEditing(training)}
                   >
                     <Pencil aria-hidden size={16} />
                   </button>
-                  <ActionMenu
-                    label={`Actions pour ${training.title}`}
-                    items={[
-                      {
-                        label: 'Monter',
-                        icon: ArrowUp,
-                        disabled: index === 0,
-                        onSelect: () => reorder.mutate(moveItem(trainings, index, -1)),
-                      },
-                      {
-                        label: 'Descendre',
-                        icon: ArrowDown,
-                        disabled: index === trainings.length - 1,
-                        onSelect: () => reorder.mutate(moveItem(trainings, index, 1)),
-                      },
-                      {
-                        label: training.status === 'PUBLISHED' ? 'Dépublier' : 'Publier',
-                        icon: Power,
-                        onSelect: () => publish.mutate(training),
-                      },
-                      {
-                        label: 'Supprimer',
-                        icon: Trash2,
-                        danger: true,
-                        onSelect: () => setDeleting(training),
-                      },
-                    ]}
-                  />
+                  {canWrite && (
+                    <ActionMenu
+                      label={`Actions pour ${training.title}`}
+                      items={[
+                        {
+                          label: 'Monter',
+                          icon: ArrowUp,
+                          disabled: index === 0,
+                          onSelect: () => reorder.mutate(moveItem(trainings, index, -1)),
+                        },
+                        {
+                          label: 'Descendre',
+                          icon: ArrowDown,
+                          disabled: index === trainings.length - 1,
+                          onSelect: () => reorder.mutate(moveItem(trainings, index, 1)),
+                        },
+                        {
+                          label: training.status === 'PUBLISHED' ? 'Dépublier' : 'Publier',
+                          icon: Power,
+                          onSelect: () => publish.mutate(training),
+                        },
+                        {
+                          label: 'Supprimer',
+                          icon: Trash2,
+                          danger: true,
+                          onSelect: () => setDeleting(training),
+                        },
+                      ]}
+                    />
+                  )}
                 </div>
               </div>
             ))
@@ -347,6 +359,7 @@ function TrainingsTable({ trainings, error }: { trainings: AdminTraining[] | und
         onClose={() => setEditing(null)}
         training={editing}
         onSaved={refresh}
+        readOnly={!canWrite}
       />
       <ConfirmDialog
         open={deleting !== null}

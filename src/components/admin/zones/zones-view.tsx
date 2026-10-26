@@ -9,6 +9,7 @@ import { ConfirmDialog } from '@/components/admin/editor/editor-ui';
 import { moveItem } from '@/components/admin/editor/sortable';
 import { compactInputClass } from '@/components/admin/magazine/magazine-ui';
 import { topbarActionClass } from '@/components/admin/shell/admin-page';
+import { ReadOnlyNotice, useCan } from '@/components/admin/shell/permissions';
 import { ActionMenu } from '@/components/admin/ui/action-menu';
 import { AdminCard } from '@/components/admin/ui/admin-ui';
 import { EmptyState, StatusTabs } from '@/components/admin/ui/filters';
@@ -48,10 +49,12 @@ function useRefreshZones() {
   return () => client.invalidateQueries({ queryKey: zonesKey });
 }
 
-/** Bouton « Nouvelle zone » de la barre supérieure (`267:2034`). */
+/** Bouton « Nouvelle zone » de la barre supérieure (`267:2034`) ; absent sans `content:write`. */
 export function NewZoneButton() {
+  const canWrite = useCan()('content:write');
   const [open, setOpen] = useState(false);
   const refresh = useRefreshZones();
+  if (!canWrite) return null;
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className={topbarActionClass}>
@@ -77,6 +80,7 @@ export function ZonesView() {
 
   return (
     <div className="flex flex-col gap-6">
+      <ReadOnlyNotice permission="content:write" />
       <StatusTabs
         label="Zones et quartiers"
         tabs={[
@@ -147,6 +151,8 @@ function ZonesTable({
 }) {
   const client = useQueryClient();
   const refresh = useRefreshZones();
+  // Sans `content:write` : fiches consultées, ni ordre, ni activation, ni suppression.
+  const canWrite = useCan()('content:write');
   const [editing, setEditing] = useState<AdminZone | null>(null);
   const [deleting, setDeleting] = useState<AdminZone | null>(null);
 
@@ -244,7 +250,11 @@ function ZonesTable({
               <EmptyState
                 icon={<MapPin size={24} />}
                 title="Aucune zone"
-                text="Ajoutez une zone avec « Nouvelle zone »."
+                text={
+                  canWrite
+                    ? 'Ajoutez une zone avec « Nouvelle zone ».'
+                    : 'Les zones d’intervention apparaîtront ici.'
+                }
               />
             </div>
           ) : (
@@ -304,49 +314,57 @@ function ZonesTable({
                   </a>
                   <button
                     type="button"
-                    aria-label={`Modifier ${zone.name}`}
-                    title="Modifier"
+                    aria-label={`${canWrite ? 'Modifier' : 'Consulter'} ${zone.name}`}
+                    title={canWrite ? 'Modifier' : 'Consulter'}
                     className={iconButton}
                     onClick={() => setEditing(zone)}
                   >
                     <Pencil aria-hidden size={16} />
                   </button>
-                  <ActionMenu
-                    label={`Actions pour ${zone.name}`}
-                    items={[
-                      {
-                        label: 'Monter',
-                        icon: ArrowUp,
-                        disabled: index === 0,
-                        onSelect: () => reorder.mutate(moveItem(zones, index, -1).map((item) => item.id)),
-                      },
-                      {
-                        label: 'Descendre',
-                        icon: ArrowDown,
-                        disabled: index === zones.length - 1,
-                        onSelect: () => reorder.mutate(moveItem(zones, index, 1).map((item) => item.id)),
-                      },
-                      {
-                        label: zone.active ? 'Désactiver' : 'Activer',
-                        icon: Power,
-                        onSelect: () => toggle.mutate(zone),
-                      },
-                      {
-                        label: 'Supprimer',
-                        icon: Trash2,
-                        danger: true,
-                        disabled: zone.quarters.length > 0,
-                        onSelect: () => setDeleting(zone),
-                      },
-                    ]}
-                  />
+                  {canWrite && (
+                    <ActionMenu
+                      label={`Actions pour ${zone.name}`}
+                      items={[
+                        {
+                          label: 'Monter',
+                          icon: ArrowUp,
+                          disabled: index === 0,
+                          onSelect: () => reorder.mutate(moveItem(zones, index, -1).map((item) => item.id)),
+                        },
+                        {
+                          label: 'Descendre',
+                          icon: ArrowDown,
+                          disabled: index === zones.length - 1,
+                          onSelect: () => reorder.mutate(moveItem(zones, index, 1).map((item) => item.id)),
+                        },
+                        {
+                          label: zone.active ? 'Désactiver' : 'Activer',
+                          icon: Power,
+                          onSelect: () => toggle.mutate(zone),
+                        },
+                        {
+                          label: 'Supprimer',
+                          icon: Trash2,
+                          danger: true,
+                          disabled: zone.quarters.length > 0,
+                          onSelect: () => setDeleting(zone),
+                        },
+                      ]}
+                    />
+                  )}
                 </div>
               </div>
             ))
           )}
         </div>
       </div>
-      <ZoneDialog open={editing !== null} onClose={() => setEditing(null)} zone={editing} onSaved={refresh} />
+      <ZoneDialog
+        open={editing !== null}
+        onClose={() => setEditing(null)}
+        zone={editing}
+        onSaved={refresh}
+        readOnly={!canWrite}
+      />
       <ConfirmDialog
         open={deleting !== null}
         onClose={() => setDeleting(null)}
@@ -382,6 +400,8 @@ function ZoneStatus({ active }: { active: boolean }) {
 /** Onglet « Quartiers » (non maquetté) : chaque quartier, sa zone (modifiable) et sa position sur la carte. */
 function QuartersTable({ zones }: { zones: AdminZone[] | undefined }) {
   const refresh = useRefreshZones();
+  // Sans `content:write` : zone de chaque quartier affichée sans pouvoir la changer.
+  const canWrite = useCan()('content:write');
   const [removing, setRemoving] = useState<{ zone: AdminZone; quarter: ZoneQuarter } | null>(null);
 
   const update = useMutation({
@@ -451,7 +471,7 @@ function QuartersTable({ zones }: { zones: AdminZone[] | undefined }) {
                   <select
                     aria-label={`Zone de ${quarter.name}`}
                     value={zone.id}
-                    disabled={update.isPending}
+                    disabled={!canWrite || update.isPending}
                     onChange={(event) => {
                       const target = zones.find((item) => item.id === event.target.value);
                       if (!target || target.id === zone.id) return;
@@ -482,17 +502,19 @@ function QuartersTable({ zones }: { zones: AdminZone[] | undefined }) {
                 )}
               </td>
               <td className="px-3 py-3 text-right md:px-5">
-                <ActionMenu
-                  label={`Actions pour ${quarter.name}`}
-                  items={[
-                    {
-                      label: 'Retirer de la zone',
-                      icon: Trash2,
-                      danger: true,
-                      onSelect: () => setRemoving({ zone, quarter }),
-                    },
-                  ]}
-                />
+                {canWrite && (
+                  <ActionMenu
+                    label={`Actions pour ${quarter.name}`}
+                    items={[
+                      {
+                        label: 'Retirer de la zone',
+                        icon: Trash2,
+                        danger: true,
+                        onSelect: () => setRemoving({ zone, quarter }),
+                      },
+                    ]}
+                  />
+                )}
               </td>
             </tr>
           ))}
