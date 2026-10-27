@@ -2987,6 +2987,14 @@
     "examples": {}
   },
   {
+    "operationId": "getMediaFile",
+    "method": "GET",
+    "path": "/v1/media/:folder/:file",
+    "status": 200,
+    "contentType": "image/avif",
+    "examples": {}
+  },
+  {
     "operationId": "listCategories",
     "method": "GET",
     "path": "/v1/categories",
@@ -8858,6 +8866,14 @@
     "examples": {}
   },
   {
+    "operationId": "adminGetMedia",
+    "method": "GET",
+    "path": "/v1/admin/media/:id",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {}
+  },
+  {
     "operationId": "adminUpdateMedia",
     "method": "PATCH",
     "path": "/v1/admin/media/:id",
@@ -8871,6 +8887,14 @@
     "path": "/v1/admin/media/:id",
     "status": 204,
     "contentType": null,
+    "examples": {}
+  },
+  {
+    "operationId": "adminReplaceMediaFile",
+    "method": "PUT",
+    "path": "/v1/admin/media/:id/file",
+    "status": 200,
+    "contentType": "application/json",
     "examples": {}
   },
   {

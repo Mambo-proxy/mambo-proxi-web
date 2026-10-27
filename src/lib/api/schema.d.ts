@@ -217,6 +217,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/media/{folder}/{file}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Fichier public d'un média (original assaini ou variante)
+         * @description Adresse des `MediaImage.url` et `variants[].url` (préfixe `MEDIA_PUBLIC_URL`, éventuellement un CDN placé
+         *     devant l'API). Seuls les fichiers de la médiathèque, rangés à part des fichiers privés, sont lisibles ici. Chaque
+         *     fichier a une adresse unique et n'est jamais modifié (un remplacement crée de nouvelles adresses) :
+         *     `Cache-Control: public, max-age=31536000, immutable`. SVG servis avec une CSP `sandbox`.
+         */
+        get: operations["getMediaFile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/categories": {
         parameters: {
             query?: never;
@@ -627,7 +650,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Désinscription en un clic (jeton signé, compatible `List-Unsubscribe-Post`) */
+        /**
+         * Désinscription en un clic (jeton signé, compatible `List-Unsubscribe-Post`)
+         * @description Page du site : JSON `{ token }`. Messagerie (RFC 8058) : `POST` à l'adresse de l'en-tête `List-Unsubscribe`, jeton dans `?token=` et corps `List-Unsubscribe=One-Click`. Le jeton du corps l'emporte sur celui de l'adresse. Idempotente : un abonné déjà désinscrit reçoit la même réponse.
+         */
         post: operations["unsubscribeNewsletter"];
         delete?: never;
         options?: never;
@@ -2791,12 +2817,21 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Médiathèque */
+        /**
+         * Médiathèque
+         * @description Médias les plus récents d'abord. `q` cherche dans le nom du fichier et le texte alternatif (sans tenir compte
+         *     de la casse). `status` et `used` filtrent la liste (`used=false` : images utilisées nulle part).
+         */
         get: operations["adminListMedia"];
         put?: never;
         /**
          * Envoyer une image (JPG, PNG, WebP, SVG assaini ; 10 Mo max)
-         * @description Génère les variantes WebP/AVIF 480/960/1600 en tâche de fond.
+         * @description Type réel contrôlé par signature (JPG, PNG, WebP, SVG), 10 Mo et 50 mégapixels au plus. Image matricielle :
+         *     redressée selon son orientation EXIF puis réenregistrée sans métadonnées (EXIF, GPS) ; `url` est servie
+         *     aussitôt, `blurDataUrl` est calculé à l'envoi, le média est renvoyé `PROCESSING` et les variantes WebP/AVIF
+         *     480/960/1600 (sans agrandissement : seules les largeurs inférieures ou égales à l'original) sont générées en
+         *     tâche de fond (`READY`, ou `FAILED` après 3 échecs). SVG assaini (scripts, gestionnaires d'événements,
+         *     `foreignObject`, feuilles de style et références externes retirés), sans variante, `READY` aussitôt.
          */
         post: operations["adminUploadMedia"];
         delete?: never;
@@ -2812,15 +2847,46 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Détail d'un média (avec ses usages) */
+        get: operations["adminGetMedia"];
         put?: never;
         post?: never;
-        /** Supprimer un média non utilisé */
+        /**
+         * Supprimer un média non utilisé
+         * @description Refusé (409 `media-in-use`) tant qu'un contenu (service, rubrique, page, paramètres, partenaire, événement,
+         *     magazine) l'utilise, brouillons compris. Les fichiers (original et variantes) sont supprimés du stockage.
+         */
         delete: operations["adminDeleteMedia"];
         options?: never;
         head?: never;
-        /** Texte alternatif et point focal */
+        /**
+         * Texte alternatif et point focal
+         * @description `focalPoint: null` retire le point focal (cadrage centré). Le site est revalidé pour les contenus qui
+         *     utilisent l'image.
+         */
         patch: operations["adminUpdateMedia"];
+        trace?: never;
+    };
+    "/v1/admin/media/{id}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Remplacer le fichier d'un média (mêmes contrôles que l'envoi)
+         * @description Le média garde son identifiant, son texte alternatif et son point focal : tous les contenus qui l'utilisent
+         *     affichent la nouvelle image (revalidation du site). Les nouveaux fichiers ont de nouvelles adresses (cache
+         *     immuable) ; les anciens sont supprimés 24 h plus tard. Variantes régénérées en tâche de fond (`PROCESSING`).
+         */
+        put: operations["adminReplaceMediaFile"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/v1/admin/audit-log": {
@@ -5850,6 +5916,40 @@ export interface components {
             };
             content?: never;
         };
+        /** @description Image de plus de 10 Mo. */
+        MediaTooLarge: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                /**
+                 * @example {
+                 *       "type": "https://api.mamboproxi.com/problems/file-too-large",
+                 *       "title": "Fichier trop volumineux",
+                 *       "status": 413,
+                 *       "detail": "L’image dépasse 10 Mo. Réduisez-la avant de l’envoyer."
+                 *     }
+                 */
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
+        /** @description Format non accepté (type réel contrôlé), image illisible ou de plus de 50 mégapixels. */
+        UnsupportedMedia: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                /**
+                 * @example {
+                 *       "type": "https://api.mamboproxi.com/problems/unsupported-file",
+                 *       "title": "Format non accepté",
+                 *       "status": 415,
+                 *       "detail": "Formats acceptés : JPG, PNG, WebP ou SVG."
+                 *     }
+                 */
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
     };
     parameters: {
         /**
@@ -6149,6 +6249,8 @@ export type ResponseConflict = components['responses']['Conflict'];
 export type ResponseTooManyRequests = components['responses']['TooManyRequests'];
 export type ResponseSpamRejected = components['responses']['SpamRejected'];
 export type ResponseNoContent = components['responses']['NoContent'];
+export type ResponseMediaTooLarge = components['responses']['MediaTooLarge'];
+export type ResponseUnsupportedMedia = components['responses']['UnsupportedMedia'];
 export type ParameterDistrict = components['parameters']['District'];
 export type ParameterAssignee = components['parameters']['Assignee'];
 export type ParameterDue = components['parameters']['Due'];
@@ -6574,6 +6676,36 @@ export interface operations {
                 };
             };
             429: components["responses"]["TooManyRequests"];
+        };
+    };
+    getMediaFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Dossier du média (32 caractères hexadécimaux). */
+                folder: string;
+                /** @description `original.(jpg|png|webp|svg)` ou `<largeur>.(avif|webp)` (largeurs 480, 960, 1600). */
+                file: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Contenu du fichier. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/avif": string;
+                    "image/webp": string;
+                    "image/jpeg": string;
+                    "image/png": string;
+                    "image/svg+xml": string;
+                };
+            };
+            404: components["responses"]["NotFound"];
         };
     };
     listCategories: {
@@ -7418,7 +7550,10 @@ export interface operations {
     };
     unsubscribeNewsletter: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Jeton signé de l'e-mail (désinscription en un clic depuis la messagerie). */
+                token?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -11547,6 +11682,8 @@ export interface operations {
             query?: {
                 /** @description Recherche plein texte. */
                 q?: components["parameters"]["Q"];
+                status?: "PROCESSING" | "READY" | "FAILED";
+                used?: boolean;
                 page?: components["parameters"]["Page"];
                 pageSize?: components["parameters"]["PageSize"];
             };
@@ -11568,7 +11705,9 @@ export interface operations {
                     };
                 };
             };
+            400: components["responses"]["InvalidQuery"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminUploadMedia: {
@@ -11598,25 +11737,35 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
-            /** @description Fichier trop volumineux. */
-            413: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
-            /** @description Format non accepté. */
-            415: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["Problem"];
-                };
-            };
+            403: components["responses"]["Forbidden"];
+            413: components["responses"]["MediaTooLarge"];
+            415: components["responses"]["UnsupportedMedia"];
             422: components["responses"]["ValidationError"];
+        };
+    };
+    adminGetMedia: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Média. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Media"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
         };
     };
     adminDeleteMedia: {
@@ -11632,6 +11781,7 @@ export interface operations {
         responses: {
             204: components["responses"]["NoContent"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             /** @description Média encore utilisé. */
             409: {
@@ -11668,7 +11818,7 @@ export interface operations {
                     focalPoint?: {
                         x: number;
                         y: number;
-                    };
+                    } | null;
                 };
             };
         };
@@ -11683,7 +11833,43 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
+        };
+    };
+    adminReplaceMediaFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Média enregistré avec le nouveau fichier. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Media"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            413: components["responses"]["MediaTooLarge"];
+            415: components["responses"]["UnsupportedMedia"];
+            422: components["responses"]["ValidationError"];
         };
     };
     adminListAuditLog: {
