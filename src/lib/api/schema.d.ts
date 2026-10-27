@@ -427,6 +427,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/magazine": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Magazine — édition affichée et éditions publiées
+         * @description Page Magazine du site (`/magazine`) : l'édition affichée (édito signé, articles dans l'ordre de lecture, ancres
+         *     `article-{id}` visées par la recherche) et la liste des éditions publiées, de la plus récente à la plus ancienne.
+         *     Sans paramètre `edition`, l'édition affichée est la dernière publiée (`null` s'il n'y en a aucune). Une édition
+         *     programmée est publiée à sa date (`publishAt`). Avec un jeton d'aperçu du back-office
+         *     (`GET /v1/admin/magazine/editions/{id}/preview-token`), l'édition du jeton est renvoyée quel que soit son statut
+         *     (`isPreview: true`, `Cache-Control: private, no-store`). En anglais, chaque champ non traduit est renvoyé en
+         *     français. Tag de revalidation `page:magazine`.
+         */
+        get: operations["getMagazine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/appointments/availability": {
         parameters: {
             query?: never;
@@ -2096,7 +2122,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Jeton de prévisualisation de l'édition sur le site (30 min) */
+        /**
+         * Jeton de prévisualisation de l'édition sur le site (30 min)
+         * @description L'URL ouvre la page Magazine du site (`/magazine?preview=`), lue par `GET /v1/magazine?preview=`.
+         */
         get: operations["adminGetMagazineEditionPreviewToken"];
         put?: never;
         post?: never;
@@ -2136,7 +2165,10 @@ export interface paths {
          * Programmer l'envoi de l'édition par la newsletter
          * @description Crée (ou reprogramme) une campagne par langue, envoyée aux seuls inscrits confirmés de cette langue ; tant que la
          *     version anglaise est incomplète, les inscrits anglophones reçoivent la version française. L'édition doit être
-         *     publiée, ou programmée avant la date d'envoi (409 sinon).
+         *     publiée, ou programmée avant la date d'envoi (409 sinon) ; une édition dont l'envoi est parti renvoie 409. Les
+         *     campagnes apparaissent dans la liste des envois de la newsletter ; leur contenu (édito, sommaire des articles
+         *     avec liens vers le site) est régénéré à chaque modification de l'édition tant qu'elles ne sont pas parties. La
+         *     dépublication de l'édition annule la programmation.
          */
         post: operations["adminScheduleMagazineNewsletter"];
         delete?: never;
@@ -3912,6 +3944,49 @@ export interface components {
             remainingPlaces?: number | null;
             /** @description Afficher la mention « Places limitées ». */
             limited: boolean;
+        };
+        MagazineArticle: {
+            id: components["schemas"]["Id"];
+            /**
+             * @description Ancre de la carte de l'article (`/magazine#article-{id}`).
+             * @example article-mag_art_2
+             */
+            anchor: string;
+            title: string;
+            /** @example Santé et nutrition */
+            theme: string;
+            excerpt: string | null;
+            body: components["schemas"]["Html"] | null;
+            image: components["schemas"]["MediaImage"] | null;
+        };
+        MagazineEditionSummary: {
+            id: components["schemas"]["Id"];
+            /** @description `null` pour un hors-série. */
+            number: number | null;
+            /**
+             * @description « N° 1 » ou « Hors-série » (« No. 1 », « Special issue » en anglais).
+             * @example N° 1
+             */
+            label: string;
+            title: string;
+            subtitle: string | null;
+            themes: string | null;
+            cover: components["schemas"]["MediaImage"] | null;
+            /** @description Date de publication affichée ; `null` pour un brouillon vu en aperçu. */
+            publishedAt: components["schemas"]["DateTime"] | null;
+            articlesCount: number;
+        };
+        MagazineEdition: components["schemas"]["MagazineEditionSummary"] & {
+            editorial: components["schemas"]["Html"] | null;
+            signature: string | null;
+            /** @description Articles dans l'ordre de lecture. */
+            articles: components["schemas"]["MagazineArticle"][];
+        };
+        Magazine: {
+            edition: components["schemas"]["MagazineEdition"] | null;
+            editions: components["schemas"]["MagazineEditionSummary"][];
+            /** @description `true` : édition vue avec un jeton d'aperçu (brouillon possible). */
+            isPreview: boolean;
         };
         /** @enum {string} */
         AppointmentFormat: "AGENCE" | "TELEPHONE" | "VISIO";
@@ -6078,6 +6153,10 @@ export type JobOfferSummary = components['schemas']['JobOfferSummary'];
 export type JobOfferDetail = components['schemas']['JobOfferDetail'];
 export type JobSalary = components['schemas']['JobSalary'];
 export type Event = components['schemas']['Event'];
+export type MagazineArticle = components['schemas']['MagazineArticle'];
+export type MagazineEditionSummary = components['schemas']['MagazineEditionSummary'];
+export type MagazineEdition = components['schemas']['MagazineEdition'];
+export type Magazine = components['schemas']['Magazine'];
 export type AppointmentFormat = components['schemas']['AppointmentFormat'];
 export type AppointmentReason = components['schemas']['AppointmentReason'];
 export type AvailabilitySlot = components['schemas']['AvailabilitySlot'];
@@ -7078,6 +7157,39 @@ export interface operations {
                     };
                 };
             };
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
+    getMagazine: {
+        parameters: {
+            query?: {
+                /**
+                 * @description Langue des contenus renvoyés : `fr` (par défaut) ou `en`. Un contenu non encore traduit est renvoyé en
+                 *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
+                 */
+                lang?: components["parameters"]["Lang"];
+                /** @description Identifiant d'une édition publiée (sinon la dernière publiée). */
+                edition?: components["schemas"]["Id"];
+                /** @description Jeton de prévisualisation délivré par le back-office ; renvoie le brouillon. */
+                preview?: components["parameters"]["Preview"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Magazine. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Magazine"];
+                };
+            };
+            400: components["responses"]["InvalidQuery"];
+            404: components["responses"]["NotFound"];
             429: components["responses"]["TooManyRequests"];
         };
     };
@@ -10120,6 +10232,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminCreateMagazineEdition: {
@@ -10145,6 +10258,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["ValidationError"];
         };
@@ -10170,6 +10284,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -10186,6 +10301,7 @@ export interface operations {
         responses: {
             204: components["responses"]["NoContent"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
         };
@@ -10215,6 +10331,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["ValidationError"];
@@ -10247,6 +10364,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             422: components["responses"]["ValidationError"];
         };
@@ -10272,6 +10390,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -10302,6 +10421,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             422: components["responses"]["ValidationError"];
         };
@@ -10327,6 +10447,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -10357,7 +10478,9 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
             429: components["responses"]["TooManyRequests"];
         };
     };
@@ -10388,6 +10511,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["ValidationError"];
@@ -10416,7 +10540,9 @@ export interface operations {
                     "application/json": components["schemas"]["AdminMagazineArticle"][];
                 };
             };
+            400: components["responses"]["InvalidQuery"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminCreateMagazineArticle: {
@@ -10442,6 +10568,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             422: components["responses"]["ValidationError"];
         };
     };
@@ -10458,6 +10585,7 @@ export interface operations {
         responses: {
             204: components["responses"]["NoContent"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -10486,6 +10614,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             422: components["responses"]["ValidationError"];
         };

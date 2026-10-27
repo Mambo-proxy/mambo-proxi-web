@@ -5550,6 +5550,64 @@
     }
   },
   {
+    "operationId": "getMagazine",
+    "method": "GET",
+    "path": "/v1/magazine",
+    "status": 200,
+    "contentType": "application/json",
+    "examples": {
+      "default": {
+        "edition": {
+          "id": "mag_n1",
+          "number": 1,
+          "label": "N° 1",
+          "title": "Bien-être et art de vivre à Douala",
+          "subtitle": "Édition de lancement",
+          "themes": "Bien-être global",
+          "cover": null,
+          "publishedAt": "2026-10-01T08:00:00.000Z",
+          "articlesCount": 2,
+          "editorial": "<p>Bienvenue dans le premier numéro du magazine Mambo Proxi.</p>",
+          "signature": "Mireille Bell, fondatrice de Mambo Proxi",
+          "articles": [
+            {
+              "id": "mag_art_2",
+              "anchor": "article-mag_art_2",
+              "title": "Recevoir à la camerounaise : les conseils d'un chef de Bonapriso",
+              "theme": "Art de vivre",
+              "excerpt": "Ndolé, poisson braisé, beignets-haricots : un chef de Bonapriso partage ses astuces pour recevoir douze personnes sans stress.",
+              "body": "<p>Recevoir douze personnes sans stress, c'est possible.</p>",
+              "image": null
+            },
+            {
+              "id": "mag_art_5",
+              "anchor": "article-mag_art_5",
+              "title": "Bien manger au quotidien à Douala",
+              "theme": "Santé et nutrition",
+              "excerpt": "Les conseils de notre chef pour des repas équilibrés avec les produits du marché Sandaga.",
+              "body": null,
+              "image": null
+            }
+          ]
+        },
+        "editions": [
+          {
+            "id": "mag_n1",
+            "number": 1,
+            "label": "N° 1",
+            "title": "Bien-être et art de vivre à Douala",
+            "subtitle": "Édition de lancement",
+            "themes": "Bien-être global",
+            "cover": null,
+            "publishedAt": "2026-10-01T08:00:00.000Z",
+            "articlesCount": 2
+          }
+        ],
+        "isPreview": false
+      }
+    }
+  },
+  {
     "operationId": "getAvailability",
     "method": "GET",
     "path": "/v1/appointments/availability",
