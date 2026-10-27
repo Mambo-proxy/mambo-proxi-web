@@ -18,6 +18,7 @@ import { browserApi } from '@/lib/api/browser';
 import { errorMessage, toApiError } from '@/lib/api/errors';
 import type { Campaign, NewsletterStats } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
+import { formatIsoDate } from '@/lib/format/date';
 import { formatNumber, formatPercent, formatSmallPercent } from '@/lib/format/number';
 import { CampaignComposer, campaignsKey, PreviewDialog } from './campaign-composer';
 import { CampaignStatusBadge, campaignSubline, isEditable, openRate } from './campaign-labels';
@@ -56,7 +57,7 @@ export function NewsletterHeaderActions() {
         parseAs: 'blob',
       });
       if (!response.ok || !blob) throw toApiError(error, response);
-      downloadBlob(blob, `inscrits-newsletter-${new Date().toISOString().slice(0, 10)}.csv`);
+      downloadBlob(blob, `inscrits-newsletter-${formatIsoDate(Date.now())}.csv`);
     } catch (caught) {
       toast.error(errorMessage(caught));
     } finally {

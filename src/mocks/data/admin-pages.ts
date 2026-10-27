@@ -9,6 +9,7 @@ import type {
   UserRef,
 } from '@/lib/api/schema';
 import { daysAgo } from '../admin-utils';
+import { rememberSeedImages } from '../media-refs';
 import operations from './contract-examples.json';
 import { legalPages } from './legal-pages';
 import { pages as sitePages } from './pages';
@@ -171,6 +172,8 @@ function seed(): StoredPage[] {
       // 24 h exactement : toujours « hier » à Douala (fuseau fixe), même juste après minuit.
       stored.updatedAt = daysAgo(1);
     }
+    // Photos des pages : présentes dans la médiathèque de l'API (seed), donc acceptées comme références.
+    rememberSeedImages(stored.published.sections);
     return [stored];
   });
 }

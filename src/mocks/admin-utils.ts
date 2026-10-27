@@ -1,4 +1,3 @@
-import { HttpResponse } from 'msw';
 import type { CurrentUser, UserRef } from '@/lib/api/schema';
 
 /** Texte comparable sans accents ni casse (recherches simulées). */
@@ -28,19 +27,6 @@ export function paginate<T>(list: T[], params: URLSearchParams, defaultPageSize 
   };
 }
 
-const csvCell = (value: unknown) => `"${String(value ?? '').replace(/"/g, '""')}"`;
-
-/** Export CSV (séparateur `;`, BOM UTF-8 pour Excel), comme l'API. */
-export function csvResponse(fileName: string, header: string[], rows: unknown[][]) {
-  const body = [header, ...rows].map((row) => row.map(csvCell).join(';')).join('\r\n');
-  return new HttpResponse(`\uFEFF${body}`, {
-    headers: {
-      'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': `attachment; filename="${fileName}"`,
-    },
-  });
-}
-
 /** Auteur d'une action (`UserRef`) à partir de l'utilisateur de la session simulée. */
 export function actorOf(user: CurrentUser | null): UserRef | null {
   return user ? { id: user.id, name: user.name, initials: user.initials ?? '' } : null;
@@ -51,11 +37,33 @@ export function mockId(prefix: string): string {
   return `${prefix}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
-/** Slug d'URL à partir d'un libellé (« Visites guidées de Douala » → `visites-guidees-de-douala`). */
-export function slugify(value: string): string {
+/** Longueur maximale d'un slug (schéma `Slug` du contrat). */
+const SLUG_MAX_LENGTH = 120;
+
+/**
+ * Slug d'URL tiré d'un libellé, comme l'API (`src/common/text/slug.ts`) : minuscules sans accents, ligatures
+ * dépliées, 120 caractères au plus (« Visites guidées de Douala » → `visites-guidees-de-douala`).
+ */
+export function slugify(value: string, maxLength = SLUG_MAX_LENGTH): string {
   return normalize(value)
+    .replace(/œ/g, 'oe')
+    .replace(/æ/g, 'ae')
+    .replace(/ß/g, 'ss')
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+    .replace(/^-+|-+$/g, '')
+    .slice(0, maxLength)
+    .replace(/-+$/, '');
+}
+
+/** Premier slug libre parmi `base`, `base-2`, `base-3`… (`taken` : slugs déjà utilisés), comme l'API. */
+export function uniqueSlug(base: string, taken: (slug: string) => boolean, fallback = 'contenu'): string {
+  const root = base === '' ? fallback : base;
+  if (!taken(root)) return root;
+  for (let index = 2; ; index += 1) {
+    const suffix = `-${index}`;
+    const candidate = `${root.slice(0, SLUG_MAX_LENGTH - suffix.length).replace(/-+$/, '')}${suffix}`;
+    if (!taken(candidate)) return candidate;
+  }
 }
 
 /** Date ISO décalée de `days` jours et `hours` heures par rapport à maintenant (données de démonstration). */

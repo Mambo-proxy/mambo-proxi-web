@@ -64,10 +64,81 @@ describe('pages & textes simulées', () => {
     expect(discarded.body.sections[0]).toMatchObject({ title: 'Nouveau ==titre==' });
   });
 
-  it('fournit un jeton d’aperçu et répond 404 pour une page inconnue', async () => {
+  it('fournit un jeton d’aperçu de 30 minutes et répond 404 pour une page inconnue', async () => {
     const { body } = await call<PreviewToken>('GET', '/v1/admin/pages/mission/preview-token');
     expect(body.url).toMatch(/\/mission\?preview=apercu_/);
+    const minutes = (new Date(body.expiresAt).getTime() - Date.now()) / 60_000;
+    expect(minutes).toBeGreaterThan(29);
+    expect(minutes).toBeLessThanOrEqual(30);
     const missing = await call<Problem>('GET', '/v1/admin/pages/inconnue');
     expect(missing.status).toBe(404);
+    expect(missing.body.type).toBe('https://api.mamboproxi.com/problems/not-found');
+  });
+
+  it('règles de l’API : sections exigées, source automatique figée, identifiants uniques, images connues', async () => {
+    const noSections = await call<Problem>('PUT', '/v1/admin/pages/contact', { seo: {} });
+    expect(noSections.status).toBe(422);
+    expect(noSections.body).toMatchObject({
+      type: 'https://api.mamboproxi.com/problems/validation-error',
+      errors: [
+        { path: 'sections', code: 'required', message: 'Le brouillon doit contenir la liste des sections.' },
+      ],
+    });
+
+    const { body: contact } = await call<AdminPage>('GET', '/v1/admin/pages/contact');
+    const changed = contact.sections.map((section) =>
+      section.type === 'dynamic' && section.id === 'moyens' ? { ...section, source: 'agency-map' } : section,
+    );
+    const source = await call<Problem>('PUT', '/v1/admin/pages/contact', { sections: changed });
+    expect(source.status).toBe(422);
+    expect(source.body.errors).toEqual([
+      {
+        path: 'sections.1.source',
+        code: 'read_only',
+        message: 'Le contenu de cette section vient d’un autre écran : sa source ne peut pas être modifiée.',
+      },
+    ]);
+
+    const hero = contact.sections[0]!;
+    const twice = await call<Problem>('PUT', '/v1/admin/pages/contact', { sections: [hero, hero] });
+    expect(twice.status).toBe(422);
+    expect(twice.body.errors?.map((error) => error.path)).toEqual(['sections.1.id']);
+    const image = await call<Problem>('PUT', '/v1/admin/pages/contact', {
+      sections: [{ ...hero, visual: { illustration: 'accueil', image: { id: 'med_inconnue' }, alt: '' } }],
+    });
+    expect(image.body.errors).toEqual([
+      {
+        path: 'sections.0.visual.image',
+        code: 'unknown_media',
+        message: 'Cette image n’existe pas dans la médiathèque.',
+      },
+    ]);
+    // Photos des données d'amorçage : connues de la médiathèque.
+    const { body: home } = await call<AdminPage>('GET', '/v1/admin/pages/accueil');
+    expect((await call('PUT', '/v1/admin/pages/accueil', { sections: home.sections })).status).toBe(200);
+  });
+
+  it('assainit le HTML des articles comme l’API', async () => {
+    const { body: page } = await call<AdminPage>('GET', '/v1/admin/pages/cgu');
+    const sections = page.sections.map((section) =>
+      section.type === 'richText'
+        ? {
+            ...section,
+            articles: section.articles.map((article, index) =>
+              index === 0
+                ? {
+                    ...article,
+                    html: '<p onclick="x()"><b>Gras</b> <a href="javascript:alert(1)">piège</a> <a href="/contact" target="_blank">contact</a></p><script>alert(1)</script>',
+                  }
+                : article,
+            ),
+          }
+        : section,
+    );
+    const saved = await call<AdminPage>('PUT', '/v1/admin/pages/cgu', { sections });
+    const article = saved.body.sections.find((section) => section.type === 'richText');
+    expect(article?.type === 'richText' && article.articles[0]?.html).toBe(
+      '<p><strong>Gras</strong> piège <a href="/contact">contact</a></p>',
+    );
   });
 });

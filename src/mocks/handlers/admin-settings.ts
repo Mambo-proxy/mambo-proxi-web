@@ -3,6 +3,7 @@ import type {
   AdminUser,
   EmailTemplate,
   EmailTemplateFields,
+  EmailTemplateKey,
   Problem,
   Role,
   SettingsAnalytics,
@@ -17,9 +18,11 @@ import type {
   SettingsWhatsapp,
   SystemStatus,
 } from '@/lib/api/schema';
-import { jsonBody, mockId } from '../admin-utils';
+import { jsonBody, mockId, normalize } from '../admin-utils';
 import { emailDocument } from '../email-layout';
-import { problem } from '../problem';
+import { unknownMediaErrors } from '../media-refs';
+import { problem, validationProblem } from '../problem';
+import { adminMedia } from './admin-media';
 import { ROLES, can, forbidden } from '../permissions';
 import { sessionUser } from '../session';
 import { adminUsers, syncSessionRole } from '../team';
@@ -136,7 +139,6 @@ type TemplateSeed = Pick<EmailTemplate, 'key' | 'name' | 'description' | 'subjec
   paragraphs: string[];
   buttonLabel?: string;
   variables: string[];
-  canDisable?: boolean;
 };
 
 const SEEDS: TemplateSeed[] = [
@@ -151,7 +153,7 @@ const SEEDS: TemplateSeed[] = [
       'Merci pour votre confiance. Un conseiller étudie votre besoin et vous envoie un devis personnalisé sous 24 h.',
     ],
     buttonLabel: 'Écrire à mon conseiller sur WhatsApp',
-    variables: ['{prénom}', '{référence}', '{service}', '{lien}'],
+    variables: ['{prénom}', '{nom}', '{référence}', '{service}', '{rubrique}', '{quartier}', '{ville}'],
   },
   {
     key: 'contact-ack',
@@ -161,7 +163,7 @@ const SEEDS: TemplateSeed[] = [
     subject: 'Votre message est bien arrivé',
     title: 'Merci {prénom} pour votre message',
     paragraphs: ['Nous vous répondons dans les meilleurs délais, en général dans la journée.'],
-    variables: ['{prénom}', '{référence}'],
+    variables: ['{prénom}', '{nom}', '{référence}'],
   },
   {
     key: 'registration-confirmed',
@@ -175,7 +177,7 @@ const SEEDS: TemplateSeed[] = [
       'Découvrez dès maintenant nos services, à Douala et environs.',
     ],
     buttonLabel: 'Découvrir nos services',
-    variables: ['{prénom}', '{lien}'],
+    variables: ['{prénom}', '{nom}', '{référence}'],
   },
   {
     key: 'application-received',
@@ -185,7 +187,7 @@ const SEEDS: TemplateSeed[] = [
     subject: 'Votre candidature est bien arrivée',
     title: 'Merci {prénom} pour votre candidature',
     paragraphs: ['Nous étudions votre candidature « {offre} » et revenons vers vous sous 15 jours.'],
-    variables: ['{prénom}', '{offre}', '{référence}'],
+    variables: ['{prénom}', '{nom}', '{référence}', '{offre}', '{poste}'],
   },
   {
     key: 'training-request-received',
@@ -197,7 +199,7 @@ const SEEDS: TemplateSeed[] = [
     paragraphs: [
       'Votre demande pour « {formation} » est enregistrée. Nous vous proposons un programme sous 48 h.',
     ],
-    variables: ['{prénom}', '{formation}', '{référence}'],
+    variables: ['{prénom}', '{nom}', '{référence}', '{formation}'],
   },
   {
     key: 'partner-request-received',
@@ -207,7 +209,7 @@ const SEEDS: TemplateSeed[] = [
     subject: 'Votre demande de partenariat',
     title: 'Merci {prénom} pour votre intérêt',
     paragraphs: ['Nous étudions votre proposition et revenons vers vous rapidement.'],
-    variables: ['{prénom}', '{organisation}', '{référence}'],
+    variables: ['{prénom}', '{nom}', '{référence}'],
   },
   {
     key: 'event-registration',
@@ -217,7 +219,7 @@ const SEEDS: TemplateSeed[] = [
     subject: 'Votre inscription à « {événement} »',
     title: 'À bientôt {prénom} !',
     paragraphs: ['Votre place pour « {événement} » le {date} est réservée.'],
-    variables: ['{prénom}', '{événement}', '{date}'],
+    variables: ['{prénom}', '{nom}', '{référence}', '{événement}', '{lieu}', '{date}', '{heure}'],
   },
   {
     key: 'appointment-received',
@@ -227,7 +229,7 @@ const SEEDS: TemplateSeed[] = [
     subject: 'Votre demande de rendez-vous {référence}',
     title: 'Merci {prénom}, nous confirmons votre créneau',
     paragraphs: ['Nous revenons vers vous rapidement pour confirmer le rendez-vous du {date}.'],
-    variables: ['{prénom}', '{date}', '{référence}'],
+    variables: ['{prénom}', '{nom}', '{référence}', '{date}', '{heure}'],
   },
   {
     key: 'appointment-confirmed',
@@ -238,7 +240,7 @@ const SEEDS: TemplateSeed[] = [
     title: 'Votre rendez-vous est confirmé.',
     paragraphs: ['Nous avons hâte d’échanger avec vous. Vous recevrez un rappel la veille.'],
     buttonLabel: 'Ajouter à mon agenda',
-    variables: ['{prénom}', '{date}', '{service}', '{lien}'],
+    variables: ['{prénom}', '{nom}', '{référence}', '{service}', '{date}', '{heure}'],
   },
   {
     key: 'appointment-proposed',
@@ -249,7 +251,7 @@ const SEEDS: TemplateSeed[] = [
     title: '{prénom}, ce créneau vous convient-il ?',
     paragraphs: ['Nous vous proposons le {date}. Confirmez-le ou choisissez-en un autre.'],
     buttonLabel: 'Répondre',
-    variables: ['{prénom}', '{date}', '{lien}'],
+    variables: ['{prénom}', '{nom}', '{référence}', '{date}', '{heure}'],
   },
   {
     key: 'appointment-cancelled',
@@ -259,7 +261,7 @@ const SEEDS: TemplateSeed[] = [
     subject: 'Votre rendez-vous du {date} est annulé',
     title: 'Rendez-vous annulé',
     paragraphs: ['Votre rendez-vous du {date} est annulé. Vous pouvez en reprendre un à tout moment.'],
-    variables: ['{prénom}', '{date}'],
+    variables: ['{prénom}', '{nom}', '{référence}', '{date}', '{heure}'],
   },
   {
     key: 'appointment-reminder',
@@ -269,7 +271,7 @@ const SEEDS: TemplateSeed[] = [
     subject: 'Rappel : rendez-vous demain',
     title: 'À demain, {prénom}',
     paragraphs: ['Nous vous rappelons votre rendez-vous du {date} pour « {service} ».'],
-    variables: ['{prénom}', '{date}', '{service}'],
+    variables: ['{prénom}', '{nom}', '{référence}', '{service}', '{date}', '{heure}'],
   },
   {
     key: 'survey-invitation',
@@ -282,7 +284,7 @@ const SEEDS: TemplateSeed[] = [
       'Votre prestation « {service} » du {date} est terminée. Pouvez-vous nous dire comment elle s’est passée\u202f? 5 questions, 2 minutes.',
     ],
     buttonLabel: 'Donner mon avis',
-    variables: ['{prénom}', '{service}', '{date}', '{lien}'],
+    variables: ['{prénom}', '{nom}', '{référence}', '{service}', '{date}'],
   },
   {
     key: 'survey-reminder',
@@ -293,7 +295,7 @@ const SEEDS: TemplateSeed[] = [
     title: 'Un instant, {prénom} ?',
     paragraphs: ['Votre retour sur « {service} » nous aide à progresser.'],
     buttonLabel: 'Donner mon avis',
-    variables: ['{prénom}', '{service}', '{lien}'],
+    variables: ['{prénom}', '{nom}', '{référence}', '{service}'],
   },
   {
     key: 'newsletter-confirm',
@@ -304,8 +306,7 @@ const SEEDS: TemplateSeed[] = [
     title: 'Plus qu’un clic',
     paragraphs: ['Confirmez votre adresse pour recevoir la newsletter de Mambo Proxi.'],
     buttonLabel: 'Confirmer mon inscription',
-    variables: ['{lien}'],
-    canDisable: false,
+    variables: ['{prénom}', '{nom}'],
   },
   {
     key: 'newsletter-campaign',
@@ -315,8 +316,7 @@ const SEEDS: TemplateSeed[] = [
     subject: '{objet}',
     title: 'Mambo Proxi',
     paragraphs: ['Vous recevez cet e-mail car vous êtes inscrit·e à la newsletter de Mambo Proxi.'],
-    variables: ['{objet}', '{prénom}', '{lien}'],
-    canDisable: false,
+    variables: ['{prénom}', '{nom}', '{objet}'],
   },
   {
     key: 'team-new-request',
@@ -327,7 +327,7 @@ const SEEDS: TemplateSeed[] = [
     title: 'Nouvelle demande de {nom}',
     paragraphs: ['{nom} demande « {service} » à {quartier}.', 'Ouvrez la demande pour la qualifier.'],
     buttonLabel: 'Ouvrir la demande',
-    variables: ['{nom}', '{service}', '{quartier}', '{référence}', '{lien}'],
+    variables: ['{nom}', '{référence}', '{service}', '{quartier}', '{ville}'],
   },
   {
     key: 'team-assignment',
@@ -338,7 +338,7 @@ const SEEDS: TemplateSeed[] = [
     title: 'Une demande vous est assignée',
     paragraphs: ['{nom} demande « {service} ».', 'Ouvrez la demande pour la prendre en charge.'],
     buttonLabel: 'Ouvrir la demande',
-    variables: ['{nom}', '{service}', '{référence}', '{lien}'],
+    variables: ['{nom}', '{référence}', '{service}'],
   },
   {
     key: 'user-invite',
@@ -351,8 +351,7 @@ const SEEDS: TemplateSeed[] = [
       'Vous êtes invité·e à rejoindre le back-office de Mambo Proxi. Le lien est valable 7 jours.',
     ],
     buttonLabel: 'Activer mon accès',
-    variables: ['{prénom}', '{lien}'],
-    canDisable: false,
+    variables: ['{prénom}', '{nom}'],
   },
   {
     key: 'otp-code',
@@ -363,7 +362,6 @@ const SEEDS: TemplateSeed[] = [
     title: 'Votre code de connexion',
     paragraphs: ['Saisissez le code {code}. Il expire dans 10 minutes.'],
     variables: ['{code}'],
-    canDisable: false,
   },
   {
     key: 'password-reset',
@@ -374,23 +372,62 @@ const SEEDS: TemplateSeed[] = [
     title: 'Nouveau mot de passe',
     paragraphs: ['Choisissez un nouveau mot de passe. Le lien est valable 1 heure.'],
     buttonLabel: 'Choisir un mot de passe',
-    variables: ['{lien}'],
-    canDisable: false,
+    variables: [],
   },
 ];
+
+/** Ordre de l'énumération `EmailTemplateKey` du contrat (ordre de la liste renvoyée par l'API). */
+const TEMPLATE_ORDER: EmailTemplateKey[] = [
+  'quote-ack',
+  'team-new-request',
+  'team-assignment',
+  'contact-ack',
+  'appointment-received',
+  'appointment-confirmed',
+  'appointment-proposed',
+  'appointment-cancelled',
+  'appointment-reminder',
+  'survey-invitation',
+  'survey-reminder',
+  'registration-confirmed',
+  'application-received',
+  'training-request-received',
+  'partner-request-received',
+  'event-registration',
+  'newsletter-confirm',
+  'newsletter-campaign',
+  'user-invite',
+  'otp-code',
+  'password-reset',
+];
+
+/**
+ * E-mails indispensables (API : `ESSENTIAL_TEMPLATES`) : sécurité, invitation, double opt-in et gabarit des
+ * campagnes, jamais désactivables et toujours envoyés.
+ */
+const ESSENTIAL_TEMPLATES = new Set<EmailTemplateKey>([
+  'otp-code',
+  'password-reset',
+  'user-invite',
+  'newsletter-confirm',
+  'newsletter-campaign',
+]);
 
 export const adminEmailTemplates: EmailTemplate[] = SEEDS.map((seed) => ({
   preheader: null,
   buttonLabel: null,
   ...seed,
   enabled: true,
-  canDisable: seed.canDisable ?? true,
+  canDisable: !ESSENTIAL_TEMPLATES.has(seed.key!),
   updatedAt: UPDATED,
-}));
+})).sort((a, b) => TEMPLATE_ORDER.indexOf(a.key!) - TEMPLATE_ORDER.indexOf(b.key!));
 
 export { adminUsers };
 
-/** Sauvegarde de la nuit à 03:00, heure de Douala (UTC+1). */
+/**
+ * Sauvegardes simulées : une par nuit à 03:00, heure de Douala (UTC+1) ; l'API renvoie la dernière sauvegarde
+ * réussie (`backup_runs`), `null` tant qu'aucune n'a eu lieu.
+ */
 function lastBackup(now = new Date()): string {
   const backup = new Date(now);
   backup.setUTCHours(2, 0, 0, 0);
@@ -398,118 +435,313 @@ function lastBackup(now = new Date()): string {
   return backup.toISOString();
 }
 
+/** Version de l'API (`package.json`) et serveur d'envoi (`SMTP_HOST`, valeur par défaut de l'API en développement). */
+const API_VERSION = '0.1.0';
+const SMTP_HOST = 'localhost';
+
+/** HTTPS actif si le site et l'API sont servis en `https://` (comme `WEB_URL` et `API_URL` de l'API). */
+function httpsEnabled(request: Request): boolean {
+  const site = typeof location !== 'undefined' && location.origin.startsWith('http') ? location.origin : null;
+  return new URL(request.url).protocol === 'https:' && (site === null || site.startsWith('https://'));
+}
+
 const E164 = /^\+[1-9]\d{6,14}$/;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const URL_PATTERN = /^https?:\/\/\S+\.\S+$/;
+const NETWORKS = ['instagram', 'facebook', 'linkedin', 'tiktok', 'youtube', 'x'];
 type FieldError = NonNullable<Problem['errors']>[number];
 
-/** Contrôles de l'API sur un groupe (messages en français, chemins des champs). */
+/** Champs du contrat de chaque groupe (API : `GROUP_FIELDS`) ; les autres clés envoyées sont ignorées. */
+const GROUP_FIELDS: Record<SettingsGroup, readonly string[]> = {
+  coordonnees: ['phoneFrance', 'phoneCameroon', 'email', 'hoursLabel', 'agency'],
+  whatsapp: ['enabled', 'number', 'message'],
+  reseaux: ['social'],
+  emails: [
+    'teamRecipients',
+    'senderName',
+    'replyTo',
+    'surveyDelayHours',
+    'surveyReminderDays',
+    'appointmentReminderHour',
+  ],
+  seo: ['defaultTitle', 'defaultDescription', 'ogImageId', 'searchConsoleVerification'],
+  analytics: ['ga4MeasurementId', 'ga4PropertyId', 'newsletterTracking'],
+  chiffres: ['keyFigures'],
+  rgpd: ['inactiveContactsRetentionMonths', 'rejectedApplicationsRetentionMonths'],
+  securite: ['maintenanceMode', 'trustedDeviceDays'],
+};
+
+/** Groupe renvoyé comme par l'API : champs du contrat, image de partage relue dans la médiathèque. */
+function groupValue(group: SettingsGroup): Groups[SettingsGroup] {
+  const stored = settings[group] as Record<string, unknown>;
+  const value: Record<string, unknown> = { group };
+  for (const field of GROUP_FIELDS[group]) if (field in stored) value[field] = stored[field];
+  if (group === 'seo') {
+    const media = adminMedia.find((item) => item.id === stored.ogImageId);
+    value.ogImage = media
+      ? {
+          id: media.id,
+          url: media.url,
+          width: media.width,
+          height: media.height,
+          alt: media.alt,
+          focalPoint: media.focalPoint,
+          blurDataUrl: media.blurDataUrl,
+          variants: media.variants,
+        }
+      : null;
+  }
+  return value as Groups[SettingsGroup];
+}
+
+/** Contrôles du schéma `settingsGroupSchema` de l'API pour un groupe (messages en français, chemins des champs). */
 function validate(group: SettingsGroup, value: Record<string, unknown>): FieldError[] {
   const errors: FieldError[] = [];
-  const check = (ok: boolean, path: string, message: string) => {
-    if (!ok) errors.push({ path, message });
+  const check = (ok: boolean, path: string, message: string, code = 'invalid') => {
+    if (!ok) errors.push({ path, code, message });
   };
   const text = (key: string) => (typeof value[key] === 'string' ? (value[key] as string).trim() : '');
+  const integer = (key: string, min: number, max: number, message: string, nullable = false) => {
+    const number = value[key];
+    if (nullable && number === null) return;
+    check(
+      typeof number === 'number' && Number.isInteger(number) && number >= min && number <= max,
+      key,
+      message,
+      'invalid_type',
+    );
+  };
+  const phoneMessage = 'Saisissez un numéro au format +237 6 00 00 00 00.';
+  const optionalPhone = (phone: unknown) =>
+    phone === null || phone === undefined || (typeof phone === 'string' && E164.test(phone.trim()));
   switch (group) {
     case 'coordonnees': {
+      check(E164.test(text('phoneCameroon')), 'phoneCameroon', phoneMessage, 'invalid_format');
+      check(optionalPhone(value.phoneFrance), 'phoneFrance', phoneMessage, 'invalid_format');
+      check(EMAIL.test(text('email')), 'email', 'Saisissez une adresse e-mail valide.', 'invalid_email');
+      check(Boolean(text('hoursLabel')), 'hoursLabel', 'Indiquez les horaires.', 'required');
+      const agency = value.agency;
+      if (typeof agency !== 'object' || agency === null) {
+        check(false, 'agency', 'Ce champ est obligatoire.', 'required');
+        break;
+      }
+      const fields = agency as Record<string, unknown>;
       check(
-        E164.test(text('phoneCameroon')),
-        'phoneCameroon',
-        'Saisissez un numéro au format +237 6 00 00 00 00.',
+        /^[A-Z]{2}$/.test(String(fields.country ?? '')),
+        'agency.country',
+        'Code pays ISO 3166-1 attendu (ex. CM).',
+        'invalid_format',
       );
-      check(EMAIL.test(text('email')), 'email', 'Saisissez une adresse e-mail valide.');
-      check(Boolean(text('hoursLabel')), 'hoursLabel', 'Indiquez les horaires.');
+      check(optionalPhone(fields.phone), 'agency.phone', phoneMessage, 'invalid_format');
       break;
     }
     case 'whatsapp': {
-      check(E164.test(text('number')), 'number', 'Saisissez un numéro au format +237 6 00 00 00 00.');
-      check(text('message').length <= 500, 'message', '500 caractères au maximum.');
+      check(E164.test(text('number')), 'number', phoneMessage, 'invalid_format');
+      check(text('message').length <= 500, 'message', '500 caractères au maximum.', 'too_long');
+      check(typeof value.enabled === 'boolean', 'enabled', 'Indiquez oui ou non.', 'invalid_type');
       break;
     }
     case 'reseaux': {
       const social = (value.social as SettingsReseaux['social'] | undefined) ?? [];
-      social.forEach((item, index) =>
-        check(URL_PATTERN.test(item.url), `social.${index}.url`, 'Saisissez une adresse valide.'),
-      );
+      check(social.length <= 6, 'social', 'Sélectionnez au plus 6 éléments.', 'too_many');
+      social.forEach((item, index) => {
+        check(
+          NETWORKS.includes(item.network),
+          `social.${index}.network`,
+          'Réseau inconnu.',
+          'invalid_choice',
+        );
+        check(
+          URL_PATTERN.test(item.url),
+          `social.${index}.url`,
+          'Saisissez une adresse valide.',
+          'invalid_url',
+        );
+      });
       break;
     }
     case 'emails': {
       const recipients = (value.teamRecipients as string[] | undefined) ?? [];
       check(
-        recipients.length > 0 && recipients.every((email) => EMAIL.test(email)),
+        recipients.length > 0 && recipients.length <= 20 && recipients.every((email) => EMAIL.test(email)),
         'teamRecipients',
         'Indiquez au moins une adresse valide.',
       );
-      check(Boolean(text('senderName')), 'senderName', 'Indiquez le nom de l’expéditeur.');
+      check(Boolean(text('senderName')), 'senderName', 'Indiquez le nom de l’expéditeur.', 'required');
       const replyTo = value.replyTo as string | null | undefined;
-      check(!replyTo || EMAIL.test(replyTo), 'replyTo', 'Saisissez une adresse e-mail valide.');
-      const delay = value.surveyDelayHours as number;
       check(
-        Number.isInteger(delay) && delay >= 0 && delay <= 720,
-        'surveyDelayHours',
-        'Entre 0 et 720 heures.',
+        !replyTo || EMAIL.test(replyTo),
+        'replyTo',
+        'Saisissez une adresse e-mail valide.',
+        'invalid_email',
       );
-      const reminder = value.surveyReminderDays as number | null;
-      check(
-        reminder === null || (Number.isInteger(reminder) && reminder >= 1 && reminder <= 30),
-        'surveyReminderDays',
-        'Entre 1 et 30 jours.',
-      );
-      const hour = value.appointmentReminderHour as number;
-      check(Number.isInteger(hour) && hour >= 0 && hour <= 23, 'appointmentReminderHour', 'Entre 0 et 23 h.');
+      integer('surveyDelayHours', 0, 720, 'Entre 0 et 720 heures.');
+      integer('surveyReminderDays', 1, 30, 'Entre 1 et 30 jours.', true);
+      integer('appointmentReminderHour', 0, 23, 'Entre 0 et 23 h.');
       break;
     }
     case 'seo': {
-      check(Boolean(text('defaultTitle')), 'defaultTitle', 'Indiquez le titre.');
-      check(text('defaultTitle').length <= 60, 'defaultTitle', '60 caractères au maximum.');
-      check(Boolean(text('defaultDescription')), 'defaultDescription', 'Indiquez la description.');
-      check(text('defaultDescription').length <= 160, 'defaultDescription', '160 caractères au maximum.');
+      check(Boolean(text('defaultTitle')), 'defaultTitle', 'Indiquez le titre.', 'required');
+      check(text('defaultTitle').length <= 60, 'defaultTitle', '60 caractères au maximum.', 'too_long');
+      check(
+        Boolean(text('defaultDescription')),
+        'defaultDescription',
+        'Indiquez la description.',
+        'required',
+      );
+      check(
+        text('defaultDescription').length <= 160,
+        'defaultDescription',
+        '160 caractères au maximum.',
+        'too_long',
+      );
       break;
     }
     case 'analytics': {
       const id = value.ga4MeasurementId as string | null | undefined;
-      check(!id || /^G-[A-Z0-9]+$/.test(id), 'ga4MeasurementId', 'Identifiant au format G-XXXXXXXXXX.');
-      break;
-    }
-    case 'rgpd': {
-      const contacts = value.inactiveContactsRetentionMonths as number;
-      const applications = value.rejectedApplicationsRetentionMonths as number;
-      check(contacts >= 6 && contacts <= 120, 'inactiveContactsRetentionMonths', 'Entre 6 et 120 mois.');
       check(
-        applications >= 1 && applications <= 60,
-        'rejectedApplicationsRetentionMonths',
-        'Entre 1 et 60 mois.',
+        !id || /^G-[A-Z0-9]+$/.test(id),
+        'ga4MeasurementId',
+        'Identifiant au format G-XXXXXXXXXX.',
+        'invalid_format',
       );
       break;
     }
-    case 'securite': {
-      const days = (value.trustedDeviceDays as number | undefined) ?? 30;
-      check(Number.isInteger(days) && days >= 0 && days <= 90, 'trustedDeviceDays', 'Entre 0 et 90 jours.');
+    case 'rgpd': {
+      integer('inactiveContactsRetentionMonths', 6, 120, 'Entre 6 et 120 mois.');
+      integer('rejectedApplicationsRetentionMonths', 1, 60, 'Entre 1 et 60 mois.');
       break;
     }
-    case 'chiffres':
+    case 'securite': {
+      check(
+        typeof value.maintenanceMode === 'boolean',
+        'maintenanceMode',
+        'Indiquez oui ou non.',
+        'invalid_type',
+      );
+      if (value.trustedDeviceDays !== undefined) integer('trustedDeviceDays', 0, 90, 'Entre 0 et 90 jours.');
       break;
+    }
+    case 'chiffres': {
+      check(
+        Array.isArray(value.keyFigures),
+        'keyFigures',
+        'Une liste de valeurs est attendue.',
+        'invalid_type',
+      );
+      if (Array.isArray(value.keyFigures))
+        check(value.keyFigures.length <= 8, 'keyFigures', 'Sélectionnez au plus 8 éléments.', 'too_many');
+      break;
+    }
   }
   return errors;
 }
 
+/** Données d'exemple des aperçus, par variable normalisée (`prenom`, `reference`…). */
 const SAMPLE: Record<string, string> = {
-  '{prénom}': 'Aurélie',
-  '{nom}': 'Aurélie Ngo',
-  '{référence}': 'MP-2026-0142',
-  '{service}': 'Entretien du logement',
-  '{quartier}': 'Bonapriso',
-  '{date}': 'jeudi 6 novembre à 10 h',
-  '{offre}': 'Assistant·e de vie',
-  '{formation}': 'Hygiène et sécurité à domicile',
-  '{organisation}': 'DLA Transports',
-  '{événement}': 'Portes ouvertes de l’agence',
-  '{objet}': 'Les nouveautés de novembre',
-  '{code}': '482 913',
-  '{lien}': '#',
+  prenom: 'Aurélie',
+  nom: 'Aurélie Ngo',
+  reference: 'MP-2026-0142',
+  service: 'Entretien du logement',
+  rubrique: 'Services à domicile',
+  quartier: 'Bonapriso',
+  ville: 'Douala',
+  lieu: 'Agence MAMBO Proxi, Douala',
+  date: 'jeudi 6 novembre à 10 h',
+  heure: '10 h',
+  offre: 'Assistant·e de vie',
+  poste: 'Assistant·e de vie',
+  formation: 'Hygiène et sécurité à domicile',
+  evenement: 'Portes ouvertes de l’agence',
+  objet: 'Les nouveautés de novembre',
+  code: '482 913',
 };
 
-const fill = (text: string) => text.replace(/\{[^}]+\}/g, (name) => SAMPLE[name] ?? name);
+/** Variables écrites dans un texte (`{prénom}`, `{{prenom}}` accepté), comme `variablesIn` de l'API. */
+const VARIABLE = /\{\{?\s*([\p{L}\p{N}_.-]+)\s*\}?\}/gu;
+
+/**
+ * Variables inconnues du modèle dans les textes envoyés (une erreur par champ, `unknown_variable`), avec la liste
+ * des variables disponibles, comme l'API. Les noms sont comparés sans accents ni majuscules.
+ */
+function unknownVariableErrors(template: EmailTemplate, fields: EmailTemplateFields): FieldError[] {
+  const variables = template.variables ?? [];
+  const allowed = new Set(variables.map((variable) => normalize(variable.slice(1, -1))));
+  const available =
+    variables.length === 0
+      ? 'Ce modèle n’utilise aucune variable.'
+      : `Variables disponibles : ${variables.join(', ')}.`;
+  const texts: [string, string | null | undefined][] = [
+    ['subject', fields.subject],
+    ['preheader', fields.preheader],
+    ['title', fields.title],
+    ['buttonLabel', fields.buttonLabel],
+    ...(fields.paragraphs ?? []).map((paragraph, index): [string, string] => [
+      `paragraphs.${index}`,
+      paragraph,
+    ]),
+  ];
+  return texts.flatMap(([path, text]) => {
+    if (typeof text !== 'string') return [];
+    const unknown = [...text.matchAll(VARIABLE)]
+      .map((match) => match[1] ?? '')
+      .filter((name) => !allowed.has(normalize(name)));
+    return unknown.length === 0
+      ? []
+      : [
+          {
+            path,
+            code: 'unknown_variable',
+            message: `Variable inconnue : ${unknown.map((name) => `{${name}}`).join(', ')}. ${available}`,
+          },
+        ];
+  });
+}
+
+/** Champs `EmailTemplateFields` (schéma de l'API) : textes coupés, paragraphes vides retirés, longueurs. */
+function templateFields(body: EmailTemplateFields): { fields: EmailTemplateFields; errors: FieldError[] } {
+  const errors: FieldError[] = [];
+  const fields: EmailTemplateFields = {};
+  const required = (key: 'subject' | 'title', message: string) => {
+    const value = body[key];
+    if (value === undefined) return;
+    if (typeof value !== 'string' || !value.trim()) errors.push({ path: key, code: 'required', message });
+    else if (value.trim().length > 150)
+      errors.push({ path: key, code: 'too_long', message: 'Saisissez au plus 150 caractères.' });
+    else fields[key] = value.trim();
+  };
+  required('subject', 'Indiquez l’objet de l’e-mail.');
+  required('title', 'Indiquez le titre.');
+  for (const [key, max] of [
+    ['preheader', 150],
+    ['buttonLabel', 60],
+  ] as const) {
+    const value = body[key];
+    if (value === undefined) continue;
+    if (typeof value === 'string' && value.trim().length > max)
+      errors.push({ path: key, code: 'too_long', message: `Saisissez au plus ${max} caractères.` });
+    else fields[key] = typeof value === 'string' && value.trim() ? value.trim() : null;
+  }
+  if (body.paragraphs !== undefined) {
+    if (body.paragraphs.length > 8)
+      errors.push({ path: 'paragraphs', code: 'too_many', message: '8 paragraphes au maximum.' });
+    body.paragraphs.forEach((paragraph, index) => {
+      if (paragraph.trim().length > 1500)
+        errors.push({
+          path: `paragraphs.${index}`,
+          code: 'too_long',
+          message: 'Saisissez au plus 1500 caractères.',
+        });
+    });
+    fields.paragraphs = body.paragraphs.map((item) => item.trim()).filter(Boolean);
+  }
+  if (body.enabled !== undefined) fields.enabled = body.enabled;
+  return { fields, errors };
+}
+
+/** Variable remplacée par sa donnée d'exemple ; une variable sans valeur disparaît (`interpolate` de l'API). */
+const fill = (text: string) =>
+  text.replace(VARIABLE, (_match, name: string) => SAMPLE[normalize(name)] ?? '');
 const escape = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 /** Rendu d'un modèle avec les données d'exemple (contenu non enregistré possible). */
@@ -551,10 +783,19 @@ export const adminSettingsHandlers = [
   http.get('*/v1/admin/settings/:group', ({ params }) => {
     const group = params.group as SettingsGroup;
     if (!GROUPS.includes(group)) return problem(404, 'Ce groupe de paramètres n’existe pas.');
-    return HttpResponse.json(settings[group]);
+    return HttpResponse.json(groupValue(group));
   }),
 
   http.put('*/v1/admin/settings/:group', async ({ request, params }) => {
+    const body = await jsonBody<Record<string, unknown>>(request);
+    // Corps validé d'abord (schéma du groupe envoyé), comme le `ZodValidationPipe` de l'API.
+    const sent = body.group as SettingsGroup;
+    if (!GROUPS.includes(sent))
+      return validationProblem([
+        { path: 'group', code: 'invalid_union', message: 'Groupe de paramètres inconnu.' },
+      ]);
+    const errors = validate(sent, body);
+    if (errors.length) return validationProblem(errors);
     const group = params.group as SettingsGroup;
     if (!GROUPS.includes(group)) return problem(404, 'Ce groupe de paramètres n’existe pas.');
     // Groupes sensibles : `settings:admin` ; autres groupes : `settings:write`.
@@ -565,22 +806,31 @@ export const adminSettingsHandlers = [
           ? 'Ces paramètres sont réservés aux administrateurs.'
           : 'Votre rôle ne permet pas de modifier les paramètres.',
       );
-    const body = await jsonBody<Record<string, unknown>>(request);
-    if (body.group !== group) return problem(422, 'Le groupe envoyé ne correspond pas à l’adresse.');
-    const errors = validate(group, body);
-    if (errors.length) return problem(422, 'Certains champs sont à corriger.', errors);
-    (settings as Record<SettingsGroup, unknown>)[group] = { ...settings[group], ...body };
-    return HttpResponse.json(settings[group]);
+    if (sent !== group)
+      return validationProblem([
+        { path: 'group', code: 'group_mismatch', message: 'Le groupe envoyé ne correspond pas à l’adresse.' },
+      ]);
+    if (group === 'seo') {
+      const mediaErrors = unknownMediaErrors([{ path: 'ogImageId', id: body.ogImageId as string | null }]);
+      if (mediaErrors.length) return validationProblem(mediaErrors);
+    }
+    // Champs du contrat seulement (`ogImage`, en lecture seule, est ignoré).
+    const fields = Object.fromEntries(
+      GROUP_FIELDS[group].filter((field) => field in body).map((field) => [field, body[field]]),
+    );
+    (settings as Record<SettingsGroup, unknown>)[group] = { ...settings[group], ...fields };
+    return HttpResponse.json(groupValue(group));
   }),
 
-  http.get('*/v1/admin/system-status', () =>
+  // État du site : HTTPS déduit des adresses, dernière sauvegarde de la nuit simulée, version et serveur d'envoi.
+  http.get('*/v1/admin/system-status', ({ request }) =>
     HttpResponse.json({
-      https: true,
+      https: httpsEnabled(request),
       lastBackupAt: lastBackup(),
       lastBackupSize: 48_300_000,
       backupRetentionDays: 30,
-      version: '1.0.0',
-      emailProvider: 'Resend',
+      version: API_VERSION,
+      emailProvider: SMTP_HOST,
     } satisfies SystemStatus),
   ),
 
@@ -591,41 +841,51 @@ export const adminSettingsHandlers = [
     return template ? HttpResponse.json(template) : problem(404, 'Ce modèle n’existe pas.');
   }),
 
+  // Textes (variables du modèle seulement) et activation ; les e-mails indispensables restent actifs.
   http.put('*/v1/admin/email-templates/:key', async ({ request, params }) => {
+    const body = await jsonBody<EmailTemplateFields>(request);
+    const { fields, errors } = templateFields(body);
+    const empty = Object.values(body).every((value) => value === undefined);
+    if (empty) errors.push({ path: '', code: 'invalid', message: 'Aucune modification envoyée.' });
+    if (errors.length) return validationProblem(errors);
     const template = findTemplate(params.key);
     if (!template) return problem(404, 'Ce modèle n’existe pas.');
-    const body = await jsonBody<EmailTemplateFields>(request);
-    const errors: FieldError[] = [];
-    if (body.subject !== undefined && !body.subject.trim())
-      errors.push({ path: 'subject', message: 'Indiquez l’objet de l’e-mail.' });
-    if (body.title !== undefined && !body.title.trim())
-      errors.push({ path: 'title', message: 'Indiquez le titre.' });
-    if (body.paragraphs && body.paragraphs.length > 8)
-      errors.push({ path: 'paragraphs', message: '8 paragraphes au maximum.' });
-    if (errors.length) return problem(422, 'Certains champs sont à corriger.', errors);
-    if (body.enabled === false && !template.canDisable)
-      return problem(422, 'Cet e-mail est indispensable : il ne peut pas être désactivé.');
-    Object.assign(template, body, {
-      paragraphs: body.paragraphs?.map((item) => item.trim()).filter(Boolean) ?? template.paragraphs,
-      updatedAt: new Date().toISOString(),
-    });
+    const ruleErrors = unknownVariableErrors(template, fields);
+    if (fields.enabled === false && !template.canDisable)
+      ruleErrors.push({
+        path: 'enabled',
+        code: 'cannot_disable',
+        message: 'Cet e-mail est indispensable : il ne peut pas être désactivé.',
+      });
+    if (ruleErrors.length) return validationProblem(ruleErrors);
+    Object.assign(template, fields, { updatedAt: new Date().toISOString() });
     return HttpResponse.json(template);
   }),
 
+  // Aperçu avec les données d'exemple (contenu non enregistré facultatif ; corps absent ou vide = modèle enregistré).
   http.post('*/v1/admin/email-templates/:key/preview', async ({ request, params }) => {
+    const text = await request.text();
+    const draft = text ? (JSON.parse(text) as EmailTemplateFields | null) : null;
+    const { fields, errors } = templateFields(draft ?? {});
+    if (errors.length) return validationProblem(errors);
     const template = findTemplate(params.key);
     if (!template) return problem(404, 'Ce modèle n’existe pas.');
-    const text = await request.text();
-    return HttpResponse.json(renderTemplate(template, text ? (JSON.parse(text) as EmailTemplateFields) : {}));
+    const variableErrors = unknownVariableErrors(template, fields);
+    if (variableErrors.length) return validationProblem(variableErrors);
+    return HttpResponse.json(renderTemplate(template, fields));
   }),
 
+  // Envoi de test du modèle enregistré ; refusé (409) pour un modèle désactivé, que l'envoi n'enverrait pas.
   http.post('*/v1/admin/email-templates/:key/test', async ({ request, params }) => {
-    if (!findTemplate(params.key)) return problem(404, 'Ce modèle n’existe pas.');
     const { email } = await jsonBody<{ email?: string }>(request);
-    if (!email || !EMAIL.test(email))
-      return problem(422, 'Adresse e-mail invalide.', [
-        { path: 'email', message: 'Saisissez une adresse e-mail valide.' },
+    if (!email || email.length > 254 || !EMAIL.test(email))
+      return validationProblem([
+        { path: 'email', code: 'invalid_email', message: 'Saisissez une adresse e-mail valide.' },
       ]);
+    const template = findTemplate(params.key);
+    if (!template) return problem(404, 'Ce modèle n’existe pas.');
+    if (!template.enabled)
+      return problem(409, 'Ce modèle est désactivé : activez-le avant d’envoyer un test.');
     return HttpResponse.json({ message: `E-mail de test envoyé à ${email}.` }, { status: 202 });
   }),
 
@@ -642,7 +902,7 @@ export const adminSettingsHandlers = [
     if (!EMAIL.test(email)) errors.push({ path: 'email', message: 'Saisissez une adresse e-mail valide.' });
     if (!body.role || !ROLES.includes(body.role))
       errors.push({ path: 'role', message: 'Choisissez un rôle.' });
-    if (errors.length) return problem(422, 'Certains champs sont à corriger.', errors);
+    if (errors.length) return validationProblem(errors);
     if (adminUsers.some((user) => user.email === email))
       return problem(409, 'Un utilisateur utilise déjà cette adresse.');
     const now = new Date().toISOString();

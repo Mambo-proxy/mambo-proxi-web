@@ -1,6 +1,8 @@
 import { http, HttpResponse } from 'msw';
 import type { Campaign, CampaignFields, CampaignSegment, NewsletterStats } from '@/lib/api/schema';
-import { csvResponse, daysAgo, jsonBody, mockId } from '../admin-utils';
+import { daysAgo, jsonBody, mockId } from '../admin-utils';
+import { doualaDay } from '../assignments';
+import { csvExport } from '../csv';
 import { emailDocument } from '../email-layout';
 import { problem } from '../problem';
 
@@ -253,15 +255,15 @@ export const adminNewsletterHandlers = [
   }),
 
   http.get('*/v1/admin/subscribers/export.csv', () =>
-    csvResponse(
-      `inscrits-newsletter-${new Date().toISOString().slice(0, 10)}.csv`,
+    csvExport(
+      `inscrits-newsletter-${doualaDay(Date.now())}.csv`,
       ['E-mail', 'Nom', 'Pays', 'Statut', 'Inscrit le'],
       Array.from({ length: SEGMENTS[0]!.count }, (_, index) => [
         `inscrit.${index + 1}@email.com`,
         '',
         index % 11 === 0 ? 'FR' : 'CM',
         'Abonné',
-        daysAgo(index % 700).slice(0, 10),
+        doualaDay(daysAgo(index % 700)),
       ]),
     ),
   ),

@@ -1061,3 +1061,50 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
   `totalPages = 0` pour une liste vide.
 - Tests : `admin-requests.test.ts` (nouveau), `admin-contacts.test.ts`, `format.test.ts` ; e2e : lien WhatsApp et
   nom du fichier exporté des demandes (`admin.spec.ts`), nom exact de l'export des contacts.
+
+## Mocks des contenus réalignés sur l'API (27 octobre 2026)
+
+### Fait
+
+- **Erreurs** (`src/mocks/problem.ts`) : `type` `https://api.mamboproxi.com/problems/<code>` et titres de l'API pour
+  tous les mocks (`validation-error` « Certaines informations sont à corriger », `conflict`, `not-found`,
+  `forbidden` « Action non autorisée », `precondition-failed` « Version obsolète »…), `errors` omis s'il est vide ;
+  `validationProblem` (détail de l'API) et `invalidQuery` (400 `invalid-query`). Toutes les erreurs d'un corps sont
+  renvoyées ensemble, avec leur `code`.
+- **Règles communes** (`src/mocks/content-rules.ts`) : ordre (`ids` exigés, sans doublon, identifiants connus,
+  sinon 422 `invalid_order`), `If-Match` (guillemets, `W/`), « Aucune modification envoyée. », longueurs, slug ;
+  aperçus de 30 minutes, `?preview=` placé avant l'ancre. `slugify` / `uniqueSlug` (`admin-utils.ts`) comme
+  `src/common/text/slug.ts`.
+- **Images référencées** (`src/mocks/media-refs.ts`) : image inconnue → 422 `unknown_media` avec le chemin du champ
+  (`coverImageId`, `galleryImageIds.1`, `sections.0.visual.image`, `imageId`, `ogImageId`). Les photos des données
+  d'amorçage (fiches, pages) sont retenues comme présentes dans la médiathèque (le seed de l'API les y dépose ; la
+  médiathèque simulée ne liste que les illustrations).
+- **Services et rubriques** : slug choisi déjà pris → 409 `slug_taken` (unicité sur tout le catalogue), slug tiré
+  du nom suffixé `-2`, `-3`… ; rubrique : même règle (suffixe au lieu d'un 409), slug modifié contrôlé ; plus de
+  suffixe silencieux au changement de rubrique ; accroche obligatoire pour un service en ligne ; rubrique, services
+  liés (pas lui-même), avis mis en avant (publiés) contrôlés ; listes dédoublonnées ; `categoryId` et `coverImageId`
+  dans `AdminService` ; publication : date gardée si elle est passée ; suppression : retiré des services liés des
+  autres fiches ; paramètres de liste invalides → 400.
+- **Pages** : `PUT` sans `sections` → 422 ; source d'une section `dynamic` figée (422 `read_only`) ; type non
+  autorisé accepté pour une section déjà présente dans la version publiée ou le brouillon ; HTML des articles
+  assaini (`src/mocks/rich-text.ts`, sans dépendance, mêmes résultats que `rich-text.spec.ts` de l'API) ; publication
+  d'une page jamais publiée sans brouillon ; abandon sans brouillon renvoyé tel quel.
+- **Zones** : toutes les erreurs du corps (quartier en double : `quarters.<i>.name`), couleur exigée à la
+  création, clé unique, champs inconnus ignorés, ordre contrôlé.
+- **Paramètres** : corps validé selon son groupe, `group_mismatch`, champs du contrat seulement, `ogImage` relue
+  dans la médiathèque ; `system-status` : HTTPS déduit des adresses, version `0.1.0` de l'API, serveur d'envoi
+  `localhost` (valeur par défaut de `SMTP_HOST`).
+- **E-mails** : variables de l'API (ni `{lien}` ni `{organisation}` ; `{nom}`, `{ville}`, `{rubrique}`, `{poste}`,
+  `{lieu}`, `{heure}` en plus), variable inconnue → 422 `unknown_variable` (enregistrement et aperçu), 5 modèles
+  indispensables, `cannot_disable` sur `enabled`, test d'un modèle désactivé → 409, liste dans l'ordre du contrat.
+- Export des inscrits de la newsletter sur `src/mocks/csv.ts` (date de Douala, `no-store`), `csvResponse` supprimé.
+- Tests : `rich-text.test.ts`, `admin-zones.test.ts` (nouveaux), `admin-services.test.ts`, `admin-pages.test.ts`,
+  `admin-settings.test.ts`, `admin-team.test.ts`.
+
+### Décisions
+
+- `requests30d` (services) et `requestsCount` (zones) gardent les chiffres de la maquette : les demandes simulées ne
+  couvrent ni 30 jours de tout le catalogue ni une année, un calcul donnerait des tableaux vides (fidélité).
+  `showFees` reste `false` (valeur du seed ; le contrat n'a pas de groupe de paramètres pour la changer).
+- Pas de redirections 301 simulées : les mocks ne servent pas de redirections.
+- Jetons d'aperçu simulés non signés (seule la durée de 30 minutes est reprise).

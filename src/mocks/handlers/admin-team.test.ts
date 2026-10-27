@@ -68,7 +68,11 @@ describe('permissions du contrat (garde commune)', () => {
       const body = method === 'GET' ? undefined : {};
       const response = await call<{ status: number; title: string }>(method, path, user, body);
       expect(response.status, `${method} ${path} (${user})`).toBe(403);
-      expect(response.body).toMatchObject({ status: 403, title: 'Accès refusé' });
+      expect(response.body).toMatchObject({
+        type: 'https://api.mamboproxi.com/problems/forbidden',
+        status: 403,
+        title: 'Action non autorisée',
+      });
     }
     expect((await call('GET', '/v1/admin/me/tasks', WRITER)).status).toBe(200);
     expect((await call('GET', '/v1/admin/services', WRITER)).status).toBe(200);

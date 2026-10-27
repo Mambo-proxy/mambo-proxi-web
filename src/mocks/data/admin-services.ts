@@ -3,6 +3,7 @@ import type { Category } from '@/components/admin/services/service-utils';
 import { serviceCompleteness } from '@/components/admin/services/completeness';
 import { adminMedia } from '../handlers/admin-media';
 import { daysAgo } from '../admin-utils';
+import { rememberSeedImages } from '../media-refs';
 import { adminReviews } from './admin-reviews';
 import { categorySummaries, services as catalogueServices } from './catalogue';
 import { catalogueSeed } from './catalogue-services';
@@ -286,3 +287,6 @@ function seedCategories(): Category[] {
 /** Données en mémoire (modifiées par les gestionnaires simulés). */
 export const adminServices: AdminService[] = seedServices();
 export const adminCategories: Category[] = seedCategories();
+
+// Photos des fiches : présentes dans la médiathèque de l'API (seed), donc acceptées comme références.
+rememberSeedImages(adminServices);
