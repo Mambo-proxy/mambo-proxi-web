@@ -2979,6 +2979,14 @@
     }
   },
   {
+    "operationId": "downloadFile",
+    "method": "GET",
+    "path": "/v1/files/:token",
+    "status": 200,
+    "contentType": "application/pdf",
+    "examples": {}
+  },
+  {
     "operationId": "listCategories",
     "method": "GET",
     "path": "/v1/categories",

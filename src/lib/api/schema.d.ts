@@ -195,6 +195,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/files/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Télécharger un fichier privé (lien signé de 5 min)
+         * @description Adresse des `SignedUrl` (CV d'une candidature, pièce jointe d'une demande) : le jeton signé (HMAC, 5 minutes)
+         *     tient lieu de session. Fichier envoyé en pièce jointe sous son nom assaini, jamais mis en cache
+         *     (`Cache-Control: private, no-store`). Fichier anonymisé ou supprimé → 404.
+         */
+        get: operations["downloadFile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/categories": {
         parameters: {
             query?: never;
@@ -620,7 +642,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Questionnaire de satisfaction (lien reçu par e-mail) */
+        /**
+         * Questionnaire de satisfaction (lien reçu par e-mail)
+         * @description Lien à usage unique envoyé après le délai `surveyDelayHours` du paramètre `emails` (relance unique après
+         *     `surveyReminderDays`), valable 30 jours après l'envoi. Questions actives dans la langue demandée ; réponse
+         *     `Cache-Control: no-store`. Lien inconnu : 404 ; déjà rempli : 410 `survey-completed` ; expiré : 410
+         *     `survey-expired`.
+         */
         get: operations["getSurvey"];
         put?: never;
         post?: never;
@@ -639,7 +667,14 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Envoi des réponses */
+        /**
+         * Envoi des réponses
+         * @description Chaque réponse porte sur une question active (une seule fois) : STARS 1–5, NPS 0–10, CHOICE parmi les choix
+         *     proposés (français ou traduction), TEXT ; questions obligatoires renseignées (422 sinon, toutes les erreurs
+         *     d'un coup). Un avis « À valider », vérifié, n'est créé que si `publishConsent` est vrai et qu'une note STARS
+         *     est donnée ; sinon les réponses restent consultables dans le suivi de la demande. Lien inconnu, déjà utilisé
+         *     ou expiré : 410. Limité à 5 envois par minute et par adresse, comme les formulaires.
+         */
         post: operations["submitSurvey"];
         delete?: never;
         options?: never;
@@ -1482,7 +1517,12 @@ export interface paths {
         /** Avis (à valider, publiés, masqués) */
         get: operations["adminListReviews"];
         put?: never;
-        /** Ajout manuel d'un témoignage (marqué « non vérifié ») */
+        /**
+         * Ajout manuel d'un témoignage (marqué « non vérifié »)
+         * @description Témoignage transmis à l'agence hors questionnaire : `verified: false`, `publishConsent: true`, statut
+         *     « À valider » par défaut. `date` : date affichée et date de prestation (maintenant si absente). Service
+         *     inconnu : 422 sur `serviceId`.
+         */
         post: operations["adminCreateReview"];
         delete?: never;
         options?: never;
@@ -1517,13 +1557,19 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Supprimer un avis ajouté manuellement */
+        /**
+         * Supprimer un avis ajouté manuellement
+         * @description Un avis vérifié (issu du questionnaire) ne se supprime pas, il se masque (`409`).
+         */
         delete: operations["adminDeleteReview"];
         options?: never;
         head?: never;
         /**
          * Publier, masquer, mettre en avant
-         * @description La publication est refusée (`409`) si le client n'a pas consenti à la publication.
+         * @description La publication est refusée (`409` `no-publish-consent`) si le client n'a pas consenti à la publication. Seul
+         *     un avis publié peut être mis en avant (`409` `conflict`) ; masqué ou remis « À valider », il cesse de l'être.
+         *     Service inconnu : 422 sur `serviceId`. Toute modification d'un avis publié, ou qui cesse de l'être, demande
+         *     la revalidation du site (`reviews`, fiches de services et rubriques qui le citent).
          */
         patch: operations["adminUpdateReview"];
         trace?: never;
@@ -1554,7 +1600,12 @@ export interface paths {
         };
         /** Questions du questionnaire de satisfaction */
         get: operations["adminListSurveyQuestions"];
-        /** Enregistrer la liste des questions (5 maximum actives) */
+        /**
+         * Enregistrer la liste des questions (5 maximum actives)
+         * @description Remplace la liste dans l'ordre du corps : identifiant connu → question mise à jour, sinon créée ; les questions
+         *     absentes sont supprimées (les réponses déjà reçues gardent leur instantané). CHOICE : 2 choix au moins ;
+         *     STARS : 5 libellés ou aucun ; NPS : 2 bornes ou aucune ; TEXT : aucun choix.
+         */
         put: operations["adminReplaceSurveyQuestions"];
         post?: never;
         delete?: never;
@@ -6480,6 +6531,51 @@ export interface operations {
             };
         };
     };
+    downloadFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Contenu du fichier (type réel contrôlé à l'envoi). */
+            200: {
+                headers: {
+                    /** @description `attachment; filename="…"; filename*=UTF-8''…` */
+                    "Content-Disposition"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": string;
+                    "application/msword": string;
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": string;
+                };
+            };
+            404: components["responses"]["NotFound"];
+            /** @description Lien expiré. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "type": "https://api.mamboproxi.com/problems/link-expired",
+                     *       "title": "Lien expiré",
+                     *       "status": 410,
+                     *       "detail": "Ce lien de téléchargement a expiré. Relancez le téléchargement depuis le back-office."
+                     *     }
+                     */
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
+            429: components["responses"]["TooManyRequests"];
+        };
+    };
     listCategories: {
         parameters: {
             query?: {
@@ -6635,6 +6731,7 @@ export interface operations {
                     };
                 };
             };
+            400: components["responses"]["InvalidQuery"];
             429: components["responses"]["TooManyRequests"];
         };
     };
@@ -6678,6 +6775,7 @@ export interface operations {
                     "application/json": components["schemas"]["ReviewSummary"];
                 };
             };
+            400: components["responses"]["InvalidQuery"];
             429: components["responses"]["TooManyRequests"];
         };
     };
@@ -6765,6 +6863,7 @@ export interface operations {
                     "application/json": components["schemas"]["JobOfferSummary"][];
                 };
             };
+            400: components["responses"]["InvalidQuery"];
             429: components["responses"]["TooManyRequests"];
         };
     };
@@ -6796,6 +6895,7 @@ export interface operations {
                     "application/json": components["schemas"]["JobOfferDetail"];
                 };
             };
+            400: components["responses"]["InvalidQuery"];
             404: components["responses"]["NotFound"];
             /** @description Offre pourvue ou expirée. */
             410: {
@@ -8293,6 +8393,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -8929,7 +9030,9 @@ export interface operations {
                     };
                 };
             };
+            400: components["responses"]["InvalidQuery"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminCreateReview: {
@@ -8955,6 +9058,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             422: components["responses"]["ValidationError"];
         };
     };
@@ -8977,6 +9081,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminDeleteReview: {
@@ -8992,7 +9097,25 @@ export interface operations {
         responses: {
             204: components["responses"]["NoContent"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            /** @description Avis vérifié. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "type": "https://api.mamboproxi.com/problems/conflict",
+                     *       "title": "Conflit",
+                     *       "status": 409,
+                     *       "detail": "Seuls les avis ajoutés manuellement peuvent être supprimés. Masquez cet avis."
+                     *     }
+                     */
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
         };
     };
     adminUpdateReview: {
@@ -9024,24 +9147,18 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
-            /** @description Publication impossible sans consentement. */
+            /** @description Publication impossible sans consentement, ou mise en avant d'un avis non publié. */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    /**
-                     * @example {
-                     *       "type": "https://api.mamboproxi.com/problems/no-publish-consent",
-                     *       "title": "Publication impossible",
-                     *       "status": 409,
-                     *       "detail": "Le client n'a pas autorisé la publication de cet avis. Il reste consultable en suivi interne."
-                     *     }
-                     */
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
+            422: components["responses"]["ValidationError"];
         };
     };
     adminReplyReview: {
@@ -9072,7 +9189,9 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
         };
     };
     adminListSurveyQuestions: {
@@ -9094,6 +9213,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminReplaceSurveyQuestions: {
@@ -9119,6 +9239,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             422: components["responses"]["ValidationError"];
         };
     };
@@ -9379,7 +9500,9 @@ export interface operations {
                     "application/json": components["schemas"]["AdminJobOffer"][];
                 };
             };
+            400: components["responses"]["InvalidQuery"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminCreateJob: {
@@ -9405,6 +9528,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             422: components["responses"]["ValidationError"];
         };
     };
@@ -9429,6 +9553,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -9445,6 +9570,7 @@ export interface operations {
         responses: {
             204: components["responses"]["NoContent"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -9473,6 +9599,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             422: components["responses"]["ValidationError"];
         };
@@ -9504,7 +9631,9 @@ export interface operations {
                     };
                 };
             };
+            400: components["responses"]["InvalidQuery"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminGetApplication: {
@@ -9528,6 +9657,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -9558,7 +9688,9 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
         };
     };
     adminGetApplicationCv: {
@@ -9582,6 +9714,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
