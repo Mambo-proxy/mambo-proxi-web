@@ -961,6 +961,11 @@ export interface paths {
          * Demandes (devis, contacts, inscriptions, candidatures…)
          * @description Avec la seule permission `requests:read-assigned`, la liste et les compteurs se limitent aux demandes assignées
          *     à l'utilisateur connecté (`assignee=me` appliqué d'office, autre valeur → `403`).
+         *
+         *     Les demandes anonymisées n'apparaissent plus. `district` et `q` ne tiennent compte ni de la casse ni des
+         *     accents ; `q` cherche dans la référence, le sujet, le nom, l'adresse e-mail et la structure du contact.
+         *     Tri (`sort`) : `createdAt` (défaut `-createdAt`), `updatedAt`, `dueAt`, `reference`, `status`, `type`.
+         *     `counts` : compteurs par statut calculés avec tous les filtres sauf `status` (onglets).
          */
         get: operations["adminListRequests"];
         put?: never;
@@ -978,7 +983,15 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Export CSV (mêmes filtres que la liste) */
+        /**
+         * Export CSV (mêmes filtres que la liste)
+         * @description Toutes les demandes filtrées (périmètre de l'utilisateur, sans pagination), des plus récentes aux plus
+         *     anciennes. Colonnes : Référence ; Type ; Statut ; Client ; E-mail ; Téléphone ; Ville ; Pays ; Service ; Assignée
+         *     à ; Échéance ; Reçue le (libellés des types et statuts, dates ISO 8601 UTC). Chaque cellule est entre
+         *     guillemets ; une cellule qui commence par `=`, `+`, `-`, `@`, une tabulation ou un retour chariot est préfixée
+         *     d'une apostrophe (injection de formules), sauf un nombre ou un numéro de téléphone. Chaque export est inscrit
+         *     au journal d'activité.
+         */
         get: operations["adminExportRequests"];
         put?: never;
         post?: never;
@@ -995,19 +1008,34 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Détail d'une demande */
+        /**
+         * Détail d'une demande
+         * @description `404` pour une demande inconnue, anonymisée ou, avec la seule permission `requests:read-assigned`, qui n'est
+         *     pas assignée à l'utilisateur connecté. `payload` : valeurs propres au formulaire (sans `fields`, renvoyés à
+         *     part) ; libellés de l'historique calculés à la lecture.
+         */
         get: operations["adminGetRequest"];
         put?: never;
         post?: never;
-        /** Anonymiser une demande (RGPD) */
+        /**
+         * Anonymiser une demande (RGPD)
+         * @description Efface le message, les valeurs du formulaire, la structure, l'adresse IP et l'agent utilisateur du
+         *     consentement, le sujet libre des messages de contact, les notes internes, les noms des pièces jointes, les
+         *     réponses libres du questionnaire et le message du rendez-vous lié ; la demande est détachée de la fiche du
+         *     contact (fiche commune anonyme) et un événement `ANONYMIZED` est ajouté. Type, service, statut et dates
+         *     restent pour les statistiques ; la demande n'apparaît plus dans le back-office (`404` ensuite).
+         */
         delete: operations["adminAnonymizeRequest"];
         options?: never;
         head?: never;
         /**
          * Changer le statut ou l'assignation
-         * @description Chaque changement crée un événement d'historique. Le passage à `PRESTATION_REALISEE` d'un devis planifie
-         *     l'invitation au questionnaire (délai paramétrable). Le retour arrière du statut demande la permission
-         *     `requests:revert-status` (administrateurs).
+         * @description Chaque changement de statut ou d'assignation crée un événement d'historique et une ligne du journal
+         *     d'activité ; tous les contrôles précèdent la moindre écriture. Le passage à `PRESTATION_REALISEE` d'un devis
+         *     planifie l'invitation au questionnaire (`surveyDelayHours` du paramètre `emails`, 24 h par défaut ;
+         *     `survey.status = SCHEDULED`, événement `SURVEY_SCHEDULED`) et renseigne `completedAt` ; `CLOTUREE` renseigne
+         *     `closedAt`. Le retour arrière du statut demande la permission `requests:revert-status` (administrateurs) ; il
+         *     efface `completedAt` / `closedAt` et annule l'invitation pas encore envoyée.
          *
          *     Assignation (`assignedToId`, permission `requests:assign`) : la personne doit être un membre actif pouvant traiter
          *     des demandes (`assignable` dans `GET /v1/admin/users/presence`), sinon `422` ; `null` retire l'assignation.
@@ -1017,6 +1045,9 @@ export interface paths {
          *     (désactivable dans les modèles d'e-mails) ; s'assigner soi-même ne notifie pas.
          *
          *     Échéance (`dueAt`) : fixée à la réception (24 h après la demande), modifiable ; `null` = sans échéance.
+         *
+         *     `403` : rôle insuffisant (détail en français selon le cas) ou jeton CSRF absent (`csrf-token-invalid`) ;
+         *     `404` : demande inconnue, anonymisée ou hors du périmètre de l'utilisateur.
          */
         patch: operations["adminUpdateRequest"];
         trace?: never;
@@ -1030,7 +1061,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Ajouter une note interne */
+        /**
+         * Ajouter une note interne
+         * @description Texte sans les espaces de début et de fin ; événement `NOTE_ADDED`. Avec `requests:write-assigned` seulement,
+         *     sur ses propres demandes (les autres : `404`).
+         */
         post: operations["adminAddRequestNote"];
         delete?: never;
         options?: never;
@@ -1047,7 +1082,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Dupliquer une demande (nouvelle référence, statut « Nouvelle ») */
+        /**
+         * Dupliquer une demande (nouvelle référence, statut « Nouvelle »)
+         * @description Copie du contenu, du contact et de l'assignation, échéance à 24 h, événement `DUPLICATED` ; ni notes, ni
+         *     historique, ni pièces jointes, ni questionnaire.
+         */
         post: operations["adminDuplicateRequest"];
         delete?: never;
         options?: never;
@@ -2058,7 +2097,14 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Contacts et inscrits */
+        /**
+         * Contacts et inscrits
+         * @description Fiches effacées exclues. `district` et `q` (nom, adresse e-mail, structure) ne tiennent compte ni de la casse
+         *     ni des accents. Tri (`sort`) : `createdAt` (défaut `-createdAt`), `updatedAt`, `fullName`, `lastActivityAt`.
+         *     `requestsCount` ne compte pas les demandes anonymisées. `stats` porte sur tous les contacts (sans les
+         *     filtres) ; `newThisMonth` = créés dans les 30 derniers jours ; `locations.douala` = ville « Douala » ou
+         *     « Quartier, Douala ».
+         */
         get: operations["adminListContacts"];
         put?: never;
         post?: never;
@@ -2075,7 +2121,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Export CSV des contacts */
+        /**
+         * Export CSV des contacts
+         * @description Contacts filtrés, du plus récent au plus ancien. Colonnes : Nom ; Structure ; E-mail ; Téléphone ; Profil ;
+         *     Ville ; Pays ; Intérêts ; Demandes ; Newsletter (Abonné, En attente, Désinscrit, Non) ; Créé le (date de
+         *     Douala `AAAA-MM-JJ`). Même format et même protection contre l'injection de formules que l'export des demandes ;
+         *     chaque export est inscrit au journal d'activité.
+         */
         get: operations["adminExportContacts"];
         put?: never;
         post?: never;
@@ -2096,7 +2148,13 @@ export interface paths {
         get: operations["adminGetContact"];
         put?: never;
         post?: never;
-        /** Droit à l'effacement (anonymise le contact et ses demandes) */
+        /**
+         * Droit à l'effacement (anonymise le contact et ses demandes)
+         * @description La fiche est vidée (nom « Contact effacé », adresse factice, coordonnées, structure, centres d'intérêt), ses
+         *     demandes sont anonymisées (comme `DELETE /v1/admin/requests/{id}`), le message et les notes de ses
+         *     rendez-vous effacés, son abonnement anonymisé et désinscrit. La fiche n'apparaît plus (`404` ensuite) ;
+         *     l'effacement est inscrit au journal d'activité, sans donnée personnelle.
+         */
         delete: operations["adminEraseContact"];
         options?: never;
         head?: never;
@@ -2110,7 +2168,14 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Export RGPD de toutes les données d'un contact (JSON) */
+        /**
+         * Export RGPD de toutes les données d'un contact (JSON)
+         * @description Droit d'accès et à la portabilité : `exportedAt`, `contact` (fiche `AdminContact` complétée du prénom, du nom,
+         *     du quartier, de la langue et de la dernière activité), `requests` (contenu des formulaires, preuve du
+         *     consentement avec adresse IP et agent utilisateur, historique, pièces jointes décrites, questionnaire) et
+         *     `newsletter` (consentement et confirmation). Les notes internes de l'équipe n'y figurent pas. Chaque export
+         *     est inscrit au journal d'activité.
+         */
         get: operations["adminExportContactData"];
         put?: never;
         post?: never;
@@ -5463,6 +5528,33 @@ export interface components {
                 "application/problem+json": components["schemas"]["Problem"];
             };
         };
+        /**
+         * @description Paramètres de requête invalides (`invalid-query`) : valeur inconnue (type, statut, profil), format (date,
+         *     pays, slug), bornes de la pagination (`page` ≥ 1, `pageSize` de 1 à 100) ou champ de tri non autorisé.
+         */
+        InvalidQuery: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                /**
+                 * @example {
+                 *       "type": "https://api.mamboproxi.com/problems/invalid-query",
+                 *       "title": "Requête invalide",
+                 *       "status": 400,
+                 *       "detail": "Vérifiez les paramètres de la requête.",
+                 *       "errors": [
+                 *         {
+                 *           "path": "pageSize",
+                 *           "code": "too_big",
+                 *           "message": "La valeur doit être inférieure ou égale à 100."
+                 *         }
+                 *       ]
+                 *     }
+                 */
+                "application/problem+json": components["schemas"]["Problem"];
+            };
+        };
         /** @description Session absente ou expirée. */
         Unauthorized: {
             headers: {
@@ -5861,6 +5953,7 @@ export type CtaBandSection = components['schemas']['CtaBandSection'];
 export type DynamicSection = components['schemas']['DynamicSection'];
 export type PageSection = components['schemas']['PageSection'];
 export type ResponseValidationError = components['responses']['ValidationError'];
+export type ResponseInvalidQuery = components['responses']['InvalidQuery'];
 export type ResponseUnauthorized = components['responses']['Unauthorized'];
 export type ResponseForbidden = components['responses']['Forbidden'];
 export type ResponseNotFound = components['responses']['NotFound'];
@@ -7859,7 +7952,9 @@ export interface operations {
                     };
                 };
             };
+            400: components["responses"]["InvalidQuery"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminExportRequests: {
@@ -7890,16 +7985,20 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Fichier CSV (UTF-8 avec BOM, séparateur `;`). */
+            /** @description Fichier CSV (UTF-8 avec BOM, séparateur `;`, lignes CRLF), non mis en cache (`no-store`). */
             200: {
                 headers: {
+                    /** @description `attachment; filename="demandes-AAAA-MM-JJ.csv"` (date de Douala). */
+                    "Content-Disposition"?: string;
                     [name: string]: unknown;
                 };
                 content: {
                     "text/csv": string;
                 };
             };
+            400: components["responses"]["InvalidQuery"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminGetRequest: {
@@ -7923,6 +8022,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -8004,6 +8104,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             422: components["responses"]["ValidationError"];
         };
@@ -8029,6 +8130,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -10189,7 +10291,9 @@ export interface operations {
                     };
                 };
             };
+            400: components["responses"]["InvalidQuery"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminExportContacts: {
@@ -10210,16 +10314,20 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Fichier CSV. */
+            /** @description Fichier CSV (UTF-8 avec BOM, séparateur `;`, lignes CRLF), non mis en cache (`no-store`). */
             200: {
                 headers: {
+                    /** @description `attachment; filename="contacts-AAAA-MM-JJ.csv"` (date de Douala). */
+                    "Content-Disposition"?: string;
                     [name: string]: unknown;
                 };
                 content: {
                     "text/csv": string;
                 };
             };
+            400: components["responses"]["InvalidQuery"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminGetContact: {
@@ -10243,6 +10351,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -10259,6 +10368,7 @@ export interface operations {
         responses: {
             204: components["responses"]["NoContent"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -10273,18 +10383,30 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Données du contact. */
+            /** @description Données du contact, non mises en cache (`no-store`). */
             200: {
                 headers: {
+                    /** @description `attachment; filename="donnees-<id>.json"`. */
+                    "Content-Disposition"?: string;
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
+                        exportedAt: components["schemas"]["DateTime"];
+                        contact: components["schemas"]["AdminContact"];
+                        requests: {
+                            [key: string]: unknown;
+                        }[];
+                        newsletter?: {
+                            [key: string]: unknown;
+                        } | null;
+                    } & {
                         [key: string]: unknown;
                     };
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
