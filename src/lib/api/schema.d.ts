@@ -392,6 +392,15 @@ export interface paths {
         /**
          * Jours et créneaux libres
          * @description Règles hebdomadaires − fermetures exceptionnelles − RDV confirmés ou à confirmer − délai minimal de 24 h. Dimanches fermés par défaut.
+         *
+         *     Heures locales de Douala (UTC+1 toute l'année, sans heure d'été), instants renvoyés en UTC. Chaque plage est
+         *     découpée en créneaux de sa durée (`slotMinutes`) ; un créneau est retiré s'il commence avant le délai minimal
+         *     (`minNoticeHours`) ou après l'horizon (`maxAdvanceDays`), ou s'il chevauche un rendez-vous à confirmer, confirmé
+         *     ou un autre créneau proposé par l'agence. Horaires exceptionnels : une seule plage, aux durée et formats de la
+         *     première règle du jour. `closedReason` : libellé de la fermeture, « Fermé le dimanche » (aucune plage ce jour-là),
+         *     « Complet » (créneaux tous pris), sinon `null`. `format` : créneaux proposés dans ce format seulement. Réponse
+         *     jamais mise en cache (`Cache-Control: no-store`). Dates invalides, `to` avant `from` ou période de plus de
+         *     62 jours : 422.
          */
         get: operations["getAvailability"];
         put?: never;
@@ -445,7 +454,13 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Demande de rendez-vous (statut « À confirmer ») */
+        /**
+         * Demande de rendez-vous (statut « À confirmer »)
+         * @description `startsAt` doit être l'un des créneaux renvoyés par `GET /v1/appointments/availability` pour ce `format` (sinon
+         *     422 sur `startsAt`), encore libre au moment de l'enregistrement (sinon 409 `slot-taken`, y compris quand deux
+         *     demandes visent le même créneau en même temps). Crée ou met à jour la fiche contact, une demande `RENDEZ_VOUS`
+         *     et le rendez-vous de même référence ; e-mail « demande reçue » au client, alerte et notification de l'équipe.
+         */
         post: operations["createAppointment"];
         delete?: never;
         options?: never;
@@ -1555,10 +1570,24 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Rendez-vous sur une période */
+        /**
+         * Rendez-vous sur une période
+         * @description `data` : rendez-vous dont le début affiché (créneau proposé s'il y en a un, sinon créneau demandé) est dans
+         *     `[from, to[`, tous statuts (ou `status`), triés par début. `pending` : rendez-vous « À confirmer » de toutes
+         *     dates, triés par début (200 au plus). Paramètres invalides, ou `to` qui ne suit pas `from` (400 jours au plus) :
+         *     400. Avec la seule permission `appointments:read-assigned`, `assignee` autre que soi : 403.
+         */
         get: operations["adminListAppointments"];
         put?: never;
-        /** Saisie manuelle d'un rendez-vous (confirmé) */
+        /**
+         * Saisie manuelle d'un rendez-vous (confirmé)
+         * @description Statut « Confirmé » d'office, fiche contact créée ou mise à jour par e-mail, nouvelle référence. Le créneau
+         *     n'est pas limité aux disponibilités du site, mais ne doit chevaucher aucun rendez-vous à confirmer, confirmé ou
+         *     proposé (409 `slot-taken`). Format Agence : `location` par défaut = `agencyAddress` des disponibilités ;
+         *     format Visio : `videoLink` par défaut = `defaultVideoLink` (sinon `null`). Assigner quelqu'un d'autre que soi
+         *     demande `appointments:assign` (403) ; personne inconnue, inactive ou qui ne traite pas de rendez-vous : 422.
+         *     `notifyClient` : e-mail de confirmation avec invitation `.ics`. Rappel la veille dans tous les cas.
+         */
         post: operations["adminCreateAppointment"];
         delete?: never;
         options?: never;
@@ -1573,7 +1602,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Détail d'un rendez-vous */
+        /**
+         * Détail d'un rendez-vous
+         * @description Avec la seule permission `appointments:read-assigned`, un rendez-vous assigné à quelqu'un d'autre est introuvable (404).
+         */
         get: operations["adminGetAppointment"];
         put?: never;
         post?: never;
@@ -1587,6 +1619,16 @@ export interface paths {
          *     `cancel` → e-mail d'annulation. `complete` → statut « Terminé ».
          *     `assign` (permission `appointments:assign`) → assigne le rendez-vous (`null` = retirer) ; la personne assignée
          *     reçoit une notification `ASSIGNMENT` et l'e-mail `team-assignment`, comme pour les demandes.
+         *
+         *     Règles : `confirm` seulement « À confirmer » ou « Autre créneau proposé » (le rendez-vous passe alors sur le
+         *     créneau proposé), sinon 409 ; lieu et lien de visio par défaut comme pour la saisie manuelle. `propose` (report,
+         *     possible aussi pour un rendez-vous confirmé) : créneau à venir (422 sinon), libre (409 `slot-taken`) ; le lien
+         *     d'acceptation vaut jusqu'au début du créneau proposé (7 jours au plus) ; le rappel d'un rendez-vous confirmé est
+         *     retiré jusqu'à l'acceptation. `cancel` et `propose` sur un rendez-vous annulé ou terminé : 409 ; `complete`
+         *     seulement « Confirmé » (409 sinon). `message` (proposition, annulation) figure dans l'e-mail au client. Le
+         *     rappel de la veille (heure `appointmentReminderHour` du groupe `emails`) est programmé à chaque confirmation et
+         *     retiré à l'annulation, au report et à la fin. Toute action sauf `assign` : `appointments:write`, ou
+         *     `appointments:write-assigned` pour ses rendez-vous (403 sinon).
          */
         patch: operations["adminActOnAppointment"];
         trace?: never;
@@ -1600,7 +1642,14 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Le client accepte le créneau proposé (lien de l'e-mail) */
+        /**
+         * Le client accepte le créneau proposé (lien de l'e-mail)
+         * @description Jeton du lien de l'e-mail `appointment-proposed` (valable jusqu'au début du créneau proposé, 7 jours au plus).
+         *     Le rendez-vous passe sur le créneau proposé, au statut « Confirmé » : invitation d'agenda par e-mail et rappel
+         *     la veille. Une seconde ouverture du même lien renvoie la même réponse. 409 : rendez-vous annulé ou terminé
+         *     entre-temps, ou créneau pris (`slot-taken`) ; 410 : lien inconnu, remplacé par une nouvelle proposition ou
+         *     expiré.
+         */
         post: operations["acceptAppointmentProposal"];
         delete?: never;
         options?: never;
@@ -1617,7 +1666,13 @@ export interface paths {
         };
         /** Règles de disponibilité et fermetures */
         get: operations["adminGetAvailability"];
-        /** Enregistrer les règles et fermetures */
+        /**
+         * Enregistrer les règles et fermetures
+         * @description Remplace toutes les plages et fermetures (une ligne connue garde son `id`, les autres sont recréées). Contrôles
+         *     (422) : fin après début ; deux plages d'un même jour sans chevauchement ; une seule exception par date ; une
+         *     journée non fermée indique ses horaires (une journée fermée n'en garde pas). `agencyAddress` et
+         *     `defaultVideoLink` absents : valeurs enregistrées conservées. Les rendez-vous déjà pris ne sont pas modifiés.
+         */
         put: operations["adminSaveAvailability"];
         post?: never;
         delete?: never;
@@ -9097,7 +9152,9 @@ export interface operations {
                     };
                 };
             };
+            400: components["responses"]["InvalidQuery"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminCreateAppointment: {
@@ -9123,7 +9180,24 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
-            409: components["responses"]["Conflict"];
+            403: components["responses"]["Forbidden"];
+            /** @description Le créneau chevauche un autre rendez-vous. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "type": "https://api.mamboproxi.com/problems/slot-taken",
+                     *       "title": "Créneau indisponible",
+                     *       "status": 409,
+                     *       "detail": "Ce créneau chevauche le rendez-vous MP-2026-0142 (jeudi 12 novembre 2026 à 14:00). Choisissez une autre heure."
+                     *     }
+                     */
+                    "application/problem+json": components["schemas"]["Problem"];
+                };
+            };
             422: components["responses"]["ValidationError"];
         };
     };
@@ -9148,6 +9222,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -9176,6 +9251,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["ValidationError"];
@@ -9219,9 +9295,19 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /**
+                     * @example {
+                     *       "type": "https://api.mamboproxi.com/problems/proposal-expired",
+                     *       "title": "Proposition expirée",
+                     *       "status": 410,
+                     *       "detail": "Cette proposition a expiré ou n’est plus valable. Choisissez un nouveau créneau."
+                     *     }
+                     */
                     "application/problem+json": components["schemas"]["Problem"];
                 };
             };
+            422: components["responses"]["ValidationError"];
+            429: components["responses"]["TooManyRequests"];
         };
     };
     adminGetAvailability: {
@@ -9243,6 +9329,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminSaveAvailability: {
@@ -9268,6 +9355,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             422: components["responses"]["ValidationError"];
         };
     };
