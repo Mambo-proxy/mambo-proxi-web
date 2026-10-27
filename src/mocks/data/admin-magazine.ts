@@ -132,7 +132,7 @@ export const magazineEditions: MagazineEditionRecord[] = [
     readers: null,
     newsletterScheduledAt: null,
     newsletterSentAt: null,
-    updatedAt: daysAgo(1, 2),
+    updatedAt: daysAgo(1),
   },
   {
     id: 'mag_hs1',

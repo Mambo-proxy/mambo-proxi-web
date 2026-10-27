@@ -143,6 +143,7 @@ const SEEDS: Seed[] = [
 
 /** Heures de la journée (heure de Douala) auxquelles les actions sont réparties. */
 const HOURS = [8, 9, 10, 11, 14, 15, 16, 17, 18];
+const DOUALA_OFFSET = 3_600_000;
 const IPS = ['102.244.18.7', '154.72.160.33', '41.202.219.71'];
 
 function seed(): AuditLogEntry[] {
@@ -151,9 +152,10 @@ function seed(): AuditLogEntry[] {
     const template = SEEDS[(index * 7) % SEEDS.length]!;
     // ~1,6 entrée par jour sur 45 jours ; les plus récentes il y a quelques heures.
     const day = Math.floor(index / 1.6);
-    const date = new Date(now - day * 86_400_000);
-    date.setUTCHours(HOURS[index % HOURS.length]! - 1, (index * 13) % 60, 0, 0);
-    const createdAt = Math.min(date.getTime(), now - (index + 1) * 600_000);
+    // Jour calendaire de Douala (UTC+1, sans heure d'été) : décalé d'une heure, puis ramené en UTC.
+    const date = new Date(now + DOUALA_OFFSET - day * 86_400_000);
+    date.setUTCHours(HOURS[index % HOURS.length]!, (index * 13) % 60, 0, 0);
+    const createdAt = Math.min(date.getTime() - DOUALA_OFFSET, now - (index + 1) * 600_000);
     return {
       id: `aud_${String(index + 1).padStart(3, '0')}`,
       actor: template.actor,

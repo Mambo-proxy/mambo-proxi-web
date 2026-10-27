@@ -168,7 +168,8 @@ function seed(): StoredPage[] {
         hosting.html =
           '<p>Le site est hébergé en France. Nom, adresse et coordonnées de l’hébergeur : à compléter à la mise en ligne.</p>';
       stored.draft = draft;
-      stored.updatedAt = daysAgo(1, 2);
+      // 24 h exactement : toujours « hier » à Douala (fuseau fixe), même juste après minuit.
+      stored.updatedAt = daysAgo(1);
     }
     return [stored];
   });
