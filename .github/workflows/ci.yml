@@ -1,9 +1,26 @@
 name: CI
 
+# Lancée à la demande seulement (onglet Actions ou `gh workflow run ci.yml -f …`), job par job : la suite complète
+# est longue. Un job en échec se relance seul avec `gh run rerun <id> --failed`.
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch:
+    inputs:
+      qualite:
+        description: 'Qualité et build (lint, types, format, tests unitaires, build)'
+        type: boolean
+        default: true
+      e2e:
+        description: 'Bout en bout (Playwright, axe)'
+        type: boolean
+        default: true
+      e2e_filtre:
+        description: 'Arguments Playwright (ex. « e2e/admin.spec.ts --project=desktop-1440 » ou « -g export ») ; vide = toute la suite'
+        type: string
+        default: ''
+      lighthouse:
+        description: 'Performance (Lighthouse, mobile)'
+        type: boolean
+        default: true
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -12,6 +29,7 @@ concurrency:
 jobs:
   quality:
     name: Qualité et build
+    if: inputs.qualite
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -38,6 +56,8 @@ jobs:
     name: Bout en bout (Playwright, axe)
     runs-on: ubuntu-latest
     needs: quality
+    # Après « Qualité et build » s'il est lancé, seul sinon.
+    if: ${{ !cancelled() && inputs.e2e && needs.quality.result != 'failure' }}
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -47,7 +67,10 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm test:e2e
+      # Filtre passé par l'environnement (pas d'interpolation dans le script) ; découpé en arguments à dessein.
+      - run: pnpm test:e2e $E2E_FILTRE
+        env:
+          E2E_FILTRE: ${{ inputs.e2e_filtre }}
       - uses: actions/upload-artifact@v6
         if: failure()
         with:
@@ -59,6 +82,7 @@ jobs:
     name: Performance (Lighthouse, mobile)
     runs-on: ubuntu-latest
     needs: quality
+    if: ${{ !cancelled() && inputs.lighthouse && needs.quality.result != 'failure' }}
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
