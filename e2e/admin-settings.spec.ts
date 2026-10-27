@@ -131,7 +131,7 @@ test.describe('back-office : paramètres', () => {
     });
     await expect(page.getByRole('group', { name: 'Aperçu dans Google' })).toContainText('mamboproxi.com');
     await page.getByRole('tab', { name: 'Sécurité & sauvegardes' }).click();
-    await expect(page.getByText('Chaque nuit à 03:00')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('Chaque nuit à 02:00')).toBeVisible({ timeout: 15_000 });
     const maintenance = page.getByRole('switch', { name: 'Mode maintenance' });
     // Au centre de l'écran : en mobile, la navigation basse couvre le bas de la fenêtre.
     await maintenance.evaluate((element) => element.scrollIntoView({ block: 'center' }));
