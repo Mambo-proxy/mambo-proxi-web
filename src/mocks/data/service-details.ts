@@ -211,8 +211,8 @@ function provisional(service: ServiceSummary, all: ServiceSummary[], lang: Lang)
   const en = lang === 'en';
   return {
     tagline: en
-      ? `${service.summary} You entrust us with your request, we take care of the rest.`
-      : `${service.summary} Vous nous confiez votre demande, nous nous occupons du reste.`,
+      ? `${service.summary} We take care of the rest.`
+      : `${service.summary} Nous nous occupons du reste.`,
     cities,
     offers: null,
     audiences: AUDIENCES[lang][service.category.slug] ?? [],

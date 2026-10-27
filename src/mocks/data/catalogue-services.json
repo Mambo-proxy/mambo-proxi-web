@@ -217,7 +217,7 @@
   "ficheServiceExemple": {
     "_note": "Contenu complet de la fiche « Chef privé » (maquette fiche-service-chef-prive). Les 18 autres fiches suivent la même structure ; leur contenu détaillé sera fourni par la cliente (cahier §11) — en attendant, générer un contenu court et neutre par service, marqué `aCompleter: true` dans le seed, sans inventer de prix.",
     "slug": "chef-prive",
-    "accroche": "Un chef à domicile pour vos dîners, réceptions et grandes occasions. Vous profitez de vos invités, nous nous occupons du reste.",
+    "accroche": "Un chef à domicile pour vos dîners et grandes occasions. Vous profitez de vos invités, nous nous occupons du reste.",
     "villes": [
       "Douala",
       "Yaoundé",

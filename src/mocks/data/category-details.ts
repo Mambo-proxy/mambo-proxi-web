@@ -166,7 +166,7 @@ export const categoryDetails: Record<string, DetailFields> = {
       text: 'Choisissez votre formule : nous confirmons votre créneau sous 24 h.',
     },
     seo: {
-      title: 'Services à domicile à Douala : entretien du logement, véhicule, linge',
+      title: 'Services à domicile à Douala : ménage, véhicule, linge',
       description:
         'Une intervenante Mambo Proxi chez vous, selon la formule choisie : entretien du logement, nettoyage du véhicule, collecte du linge. Devis gratuit.',
       ogImageUrl: null,
@@ -365,7 +365,7 @@ export const categoryDetails: Record<string, DetailFields> = {
       text: 'Dites-nous ce que vous imaginez : nous vous proposons un devis gratuit sous 24 h.',
     },
     seo: {
-      title: 'Expérience : chef privé, location de voiture, photographe au Cameroun',
+      title: 'Expérience : chef privé, voiture, photographe au Cameroun',
       description:
         'Des prestataires de confiance réservés pour vous au Cameroun : location de voiture, chef privé, massage, photographe, événementiel.',
       ogImageUrl: null,
@@ -539,7 +539,7 @@ export const categoryDetails: Record<string, DetailFields> = {
       text: 'Expliquez-nous votre projet immobilier : devis gratuit et réponse sous 24 h.',
     },
     seo: {
-      title: 'Immobilier : recherche de logement et gestion locative au Cameroun',
+      title: 'Immobilier : logement et gestion locative au Cameroun',
       description:
         'Achat et vente, recherche de logement, location, logement temporaire et gestion locative : une équipe sur place à Douala, même pendant votre absence.',
       ogImageUrl: null,
@@ -1170,7 +1170,7 @@ export const categoryDetailsEn: Partial<Record<string, DetailFields>> = {
       text: 'Tell us what you have in mind: we send you a free quote within 24 hours.',
     },
     seo: {
-      title: 'Experience: private chef, car rental, photographer in Cameroon',
+      title: 'Experience: private chef, car hire, photographer in Cameroon',
       description:
         'Trusted providers booked for you in Cameroon: car rental, private chef, massage, photographer, events.',
       ogImageUrl: null,
@@ -1346,7 +1346,7 @@ export const categoryDetailsEn: Partial<Record<string, DetailFields>> = {
       text: 'Tell us about your property project: free quote and reply within 24 hours.',
     },
     seo: {
-      title: 'Real estate: buying, renting and property management in Cameroon',
+      title: 'Real estate: buying, renting and management in Cameroon',
       description:
         'Buying and selling, home search, rentals, temporary housing and property management: a team on the ground in Douala, even while you are away.',
       ogImageUrl: null,
@@ -1519,7 +1519,7 @@ export const categoryDetailsEn: Partial<Record<string, DetailFields>> = {
       text: 'Meals, groceries or parcels: describe your need, we reply within 24 hours.',
     },
     seo: {
-      title: 'Local services in Douala: meals, groceries, parcels and laundry',
+      title: 'Local services in Douala: meals, groceries and parcels',
       description:
         'Meal delivery, grocery delivery, parcel and mail collection, dry cleaning and laundry: we look after your loved ones in Douala.',
       ogImageUrl: null,
