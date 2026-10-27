@@ -82,9 +82,11 @@ test.describe('back-office : contacts & inscrits', () => {
     await expect(table(page).getByRole('button', { name: 'Saveurs de Douala', exact: true })).toBeVisible({
       timeout: 15_000,
     });
+    // Nom de l'API : date du jour à Douala (UTC+1).
+    const douala = new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 10);
     const download = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Exporter (CSV)' }).click();
-    expect((await download).suggestedFilename()).toMatch(/^contacts-\d{4}-\d{2}-\d{2}\.csv$/);
+    expect((await download).suggestedFilename()).toBe(`contacts-${douala}.csv`);
   });
 });
 

@@ -18,6 +18,7 @@ import { browserApi } from '@/lib/api/browser';
 import { errorMessage, toApiError } from '@/lib/api/errors';
 import type { AdminContactListItem, ContactProfile, ContactStats } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
+import { formatIsoDate } from '@/lib/format/date';
 import { formatNumber, formatPercent } from '@/lib/format/number';
 import { ContactPanel, EraseContactDialog, exportContactData, useEraseContact } from './contact-panel';
 import { INTEREST_OPTIONS, interestsLabel, NewsletterBadge } from './contact-labels';
@@ -90,7 +91,8 @@ export function ExportContactsButton() {
         parseAs: 'blob',
       });
       if (!response.ok || !blob) throw toApiError(error, response);
-      downloadBlob(blob, `contacts-${new Date().toISOString().slice(0, 10)}.csv`);
+      // Nom de l'API (`contacts-AAAA-MM-JJ.csv`, date de Douala) : `Content-Disposition` n'est pas lisible en CORS.
+      downloadBlob(blob, `contacts-${formatIsoDate(Date.now())}.csv`);
     } catch (caught) {
       toast.error(errorMessage(caught));
     } finally {

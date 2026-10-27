@@ -105,6 +105,11 @@ export function formatPublishedAgo(
   return `le ${formatDate(date, timeZone)}`;
 }
 
+/** « 2026-10-06 » : jour calendaire (fuseau de l'agence par défaut), noms des fichiers exportés comme l'API. */
+export function formatIsoDate(date: DateInput, timeZone = DEFAULT_TIME_ZONE): string {
+  return format(inZone(date, timeZone), 'yyyy-MM-dd');
+}
+
 /** « 3 oct. » (tableaux du back-office). */
 export function formatDayMonth(date: DateInput, timeZone = DEFAULT_TIME_ZONE): string {
   return format(inZone(date, timeZone), 'd MMM', { locale: fr });

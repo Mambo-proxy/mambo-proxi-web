@@ -1123,7 +1123,11 @@ export interface paths {
         put?: never;
         /**
          * Créer un service (brouillon)
-         * @description Seuls le nom, la rubrique et l'accroche sont nécessaires ; le slug et le SEO sont pré-remplis.
+         * @description Seuls le nom, la rubrique et l'accroche sont nécessaires ; le slug et le SEO sont pré-remplis : slug tiré du
+         *     nom (`-2`, `-3`… s'il est déjà pris), titre Google « Nom | MAMBO Proxi », description Google reprise de la
+         *     description courte ou de l'accroche. Un `slug` envoyé et déjà utilisé par un autre service → `409`. Le
+         *     service est créé en brouillon, à la fin de sa rubrique. Rubrique, images (médias existants de la
+         *     médiathèque), services liés, avis mis en avant (avis publiés) inconnus → `422` avec le chemin du champ.
          */
         post: operations["adminCreateService"];
         delete?: never;
@@ -1145,7 +1149,11 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Ordre d'affichage dans une rubrique */
+        /**
+         * Ordre d'affichage dans une rubrique
+         * @description `ids` : services d'une même rubrique dans l'ordre voulu (`scope` : slug de cette rubrique, facultatif) ; les
+         *     services non listés gardent leur rang. Identifiant inconnu, en double ou d'une autre rubrique → `422`.
+         */
         patch: operations["adminReorderServices"];
         trace?: never;
     };
@@ -1166,7 +1174,13 @@ export interface paths {
         head?: never;
         /**
          * Enregistrer (sauvegarde automatique ou manuelle)
-         * @description Mise à jour partielle. Si le service est publié, les modifications sont en ligne immédiatement (revalidation). En-tête `If-Match` facultatif pour éviter d'écraser une version plus récente.
+         * @description Mise à jour partielle. Si le service est publié, les modifications sont en ligne immédiatement (revalidation)
+         *     et l'accroche ne peut pas être vidée (`422`). En-tête `If-Match` facultatif pour éviter d'écraser une version
+         *     plus récente (valeur `version` de la dernière réponse ; différente → `412`). Les listes envoyées
+         *     (`galleryImageIds`, `relatedServiceIds`, `featuredReviewIds`, `offers`) remplacent les listes enregistrées ;
+         *     une offre renvoyée avec son `id` le garde. Changement de rubrique : le service passe à la fin de la nouvelle
+         *     rubrique. Slug déjà utilisé → `409`. Service publié dont l'adresse change (slug ou rubrique) : redirection
+         *     301 de l'ancienne adresse (`GET /v1/site/redirects`).
          */
         patch: operations["adminUpdateService"];
         trace?: never;
@@ -1200,7 +1214,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Dépublier (repasse en brouillon) */
+        /**
+         * Dépublier (repasse en brouillon)
+         * @description Le service disparaît du site, de sa rubrique, du menu, du formulaire de devis et du plan du site.
+         */
         post: operations["adminUnpublishService"];
         delete?: never;
         options?: never;
@@ -1217,7 +1234,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Dupliquer (copie en brouillon) */
+        /**
+         * Dupliquer (copie en brouillon)
+         * @description Copie en brouillon : « (copie) » ajouté au nom, slug `<slug>-copie` (`-2`… si besoin), hors menu et hors
+         *     accueil, à la fin de la rubrique ; galerie, services liés, avis mis en avant et offres recopiés.
+         */
         post: operations["adminDuplicateService"];
         delete?: never;
         options?: never;
@@ -1232,7 +1253,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Jeton de prévisualisation de la page complète (30 min) */
+        /**
+         * Jeton de prévisualisation de la page complète (30 min)
+         * @description Jeton signé valable 30 minutes, quel que soit le statut du service ; `url` = adresse de la fiche sur le site
+         *     avec `?preview=<jeton>`. `GET /v1/services/{slug}?preview=<jeton>` renvoie alors la fiche (en-tête
+         *     `Cache-Control: private, no-store`).
+         */
         get: operations["adminGetServicePreviewToken"];
         put?: never;
         post?: never;
@@ -1249,7 +1275,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Indicateur de complétude (7 critères) */
+        /**
+         * Indicateur de complétude (7 critères)
+         * @description Critères : informations générales (nom, rubrique, accroche, description courte), au moins un public, une
+         *     étape, un avantage, une question avec sa réponse, un service lié, photo principale d'au moins 1 600 px de
+         *     large ; `percent` = critères remplis / 7, arrondi.
+         */
         get: operations["adminGetServiceCompleteness"];
         put?: never;
         post?: never;
@@ -1269,7 +1300,12 @@ export interface paths {
         /** Rubriques (tous statuts) */
         get: operations["adminListCategories"];
         put?: never;
-        /** Créer une rubrique */
+        /**
+         * Créer une rubrique
+         * @description Rubrique créée en brouillon (sauf `status` envoyé), à la fin de la liste ; slug tiré du nom (`-2`… s'il est
+         *     déjà pris), `heroTitle` et `heroLead` repris du nom et de la description s'ils sont absents. `slug` envoyé
+         *     déjà utilisé → `409`.
+         */
         post: operations["adminCreateCategory"];
         delete?: never;
         options?: never;
@@ -1309,7 +1345,12 @@ export interface paths {
         delete: operations["adminDeleteCategory"];
         options?: never;
         head?: never;
-        /** Modifier une rubrique */
+        /**
+         * Modifier une rubrique
+         * @description Mise à jour partielle (statut compris : publier, dépublier, archiver). `offerSections` remplace les carrousels
+         *     d'offres. Slug déjà utilisé → `409`. Rubrique publiée dont le slug change : redirections 301 de la page
+         *     rubrique et de ses fiches publiées.
+         */
         patch: operations["adminUpdateCategory"];
         trace?: never;
     };
@@ -1339,7 +1380,14 @@ export interface paths {
         };
         /** Page avec son brouillon */
         get: operations["adminGetPage"];
-        /** Enregistrer le brouillon (sauvegarde automatique) */
+        /**
+         * Enregistrer le brouillon (sauvegarde automatique)
+         * @description Enregistre le brouillon sans modifier la version en ligne. Une section d'un type absent de
+         *     `allowedSectionTypes` n'est acceptée que si elle existe déjà dans la page (même `id` et même `type`, ex.
+         *     sections automatiques `dynamic`, dont la `source` ne peut pas changer) ; identifiants de sections uniques ;
+         *     images référencées connues de la médiathèque. Le HTML des articles (`richText`) est assaini côté serveur
+         *     (liste blanche du schéma `Html`). Sinon `422` avec le chemin du champ (`sections.3.items.0.title`).
+         */
         put: operations["adminSavePageDraft"];
         post?: never;
         delete?: never;
@@ -1357,7 +1405,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Publier les modifications */
+        /**
+         * Publier les modifications
+         * @description Le brouillon (sections et SEO) devient la version en ligne. Sans brouillon, la page est renvoyée telle quelle.
+         */
         post: operations["adminPublishPage"];
         delete?: never;
         options?: never;
@@ -1374,7 +1425,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Abandonner le brouillon */
+        /**
+         * Abandonner le brouillon
+         * @description La version publiée est rétablie dans l'éditeur ; le site n'est pas modifié.
+         */
         post: operations["adminDiscardPageDraft"];
         delete?: never;
         options?: never;
@@ -1389,7 +1443,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Jeton d'aperçu du brouillon */
+        /**
+         * Jeton d'aperçu du brouillon
+         * @description Jeton signé valable 30 minutes ; `GET /v1/pages/{key}?preview=<jeton>` renvoie alors le brouillon
+         *     (`isPreview: true`, en-tête `Cache-Control: private, no-store`), même pour une page jamais publiée.
+         */
         get: operations["adminGetPagePreviewToken"];
         put?: never;
         post?: never;
@@ -2001,7 +2059,10 @@ export interface paths {
         /** Zones d'intervention, quartiers, délais et tarifs indicatifs */
         get: operations["adminListZones"];
         put?: never;
-        /** Créer une zone */
+        /**
+         * Créer une zone
+         * @description Clé (`key`) tirée du nom, unique (`-2`… si besoin). Mêmes règles que la modification pour les quartiers et le contour.
+         */
         post: operations["adminCreateZone"];
         delete?: never;
         options?: never;
@@ -2439,7 +2500,12 @@ export interface paths {
         };
         /** Modèle d'e-mail */
         get: operations["adminGetEmailTemplate"];
-        /** Modifier un modèle (objet, titre, paragraphes, bouton, activation) */
+        /**
+         * Modifier un modèle (objet, titre, paragraphes, bouton, activation)
+         * @description Seules les variables du modèle (`variables`) sont acceptées dans les textes, sinon `422`
+         *     (`unknown_variable`) ; paragraphes vides retirés. Désactiver un modèle dont `canDisable` vaut `false` →
+         *     `422`.
+         */
         put: operations["adminSaveEmailTemplate"];
         post?: never;
         delete?: never;
@@ -2457,7 +2523,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Aperçu avec des données d'exemple (contenu non enregistré possible) */
+        /**
+         * Aperçu avec des données d'exemple (contenu non enregistré possible)
+         * @description Rendu du gabarit (HTML React Email et texte brut) avec les données d'exemple du modèle et les coordonnées des
+         *     paramètres ; les champs envoyés remplacent ceux du modèle enregistré, sans l'enregistrer.
+         */
         post: operations["adminPreviewEmailTemplate"];
         delete?: never;
         options?: never;
@@ -2474,7 +2544,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Envoi de test */
+        /**
+         * Envoi de test
+         * @description Envoi du modèle enregistré, avec les données d'exemple, à l'adresse indiquée. Modèle désactivé → `409`.
+         */
         post: operations["adminTestEmailTemplate"];
         delete?: never;
         options?: never;
@@ -2703,7 +2776,7 @@ export interface components {
         PublishStatus: "DRAFT" | "PUBLISHED" | "ARCHIVED";
         /** Format: date-time */
         DateTime: string;
-        /** @description HTML assaini côté serveur (balises autorisées : p, h2, h3, h4, strong, em, a, ul, ol, li, br, blockquote). */
+        /** @description HTML assaini côté serveur (balises autorisées : p, h2, h3, h4, strong, em, a, ul, ol, li, br, blockquote ; b et i deviennent strong et em). Seul attribut conservé : `href` des liens, en http(s), mailto, tel ou relatif au site (`/contact`, `#article`) ; les autres liens sont retirés (texte gardé), comme les balises non autorisées (`script`, `style`, `iframe` avec leur contenu). */
         Html: string;
         /** @description Corps d'un e-mail, assaini côté serveur : balises de `Html`, plus `img` (`src` d'une image de la médiathèque, `alt`) et les boutons d'appel à l'action `<a data-button href="…">`. Variable disponible `{prénom}`. */
         EmailHtml: string;
@@ -4366,8 +4439,17 @@ export interface components {
             seoDescription?: string | null;
             publishedAt?: components["schemas"]["DateTime"] | null;
             completenessDetail: components["schemas"]["Completeness"];
-            /** @description Valeur à renvoyer dans `If-Match`. */
+            /**
+             * @description Valeur à renvoyer dans `If-Match`.
+             * @example v3
+             */
             version: string;
+            categoryId?: components["schemas"]["Id"];
+            coverImageId?: components["schemas"]["Id"] | null;
+            reviewsTitle?: string | null;
+            relatedTitle?: string | null;
+            ctaTitle?: string | null;
+            ctaText?: string | null;
         };
         Completeness: {
             percent: number;
@@ -8187,7 +8269,9 @@ export interface operations {
                     };
                 };
             };
+            400: components["responses"]["InvalidQuery"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminCreateService: {
@@ -8213,6 +8297,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["ValidationError"];
         };
@@ -8232,6 +8317,7 @@ export interface operations {
         responses: {
             204: components["responses"]["NoContent"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             422: components["responses"]["ValidationError"];
         };
     };
@@ -8256,6 +8342,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -8272,6 +8359,7 @@ export interface operations {
         responses: {
             204: components["responses"]["NoContent"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             /** @description Service publié — le dépublier d'abord. */
             409: {
@@ -8311,6 +8399,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
             /** @description Version obsolète (modifiée ailleurs). */
@@ -8346,6 +8435,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             422: components["responses"]["ValidationError"];
         };
@@ -8371,6 +8461,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -8395,6 +8486,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -8419,6 +8511,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -8443,6 +8536,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -8465,6 +8559,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminCreateCategory: {
@@ -8490,6 +8585,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
             422: components["responses"]["ValidationError"];
         };
@@ -8509,6 +8605,8 @@ export interface operations {
         responses: {
             204: components["responses"]["NoContent"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["ValidationError"];
         };
     };
     adminGetCategory: {
@@ -8532,6 +8630,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -8548,6 +8647,8 @@ export interface operations {
         responses: {
             204: components["responses"]["NoContent"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             /** @description La rubrique contient encore des services. */
             409: {
                 headers: {
@@ -8584,7 +8685,9 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
             422: components["responses"]["ValidationError"];
         };
     };
@@ -8607,6 +8710,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminGetPage: {
@@ -8630,6 +8734,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -8658,6 +8763,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             422: components["responses"]["ValidationError"];
         };
@@ -8683,6 +8789,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -8707,6 +8814,8 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
         };
     };
     adminGetPagePreviewToken: {
@@ -8730,6 +8839,8 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
         };
     };
     adminListReviews: {
@@ -10042,6 +10153,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminCreateZone: {
@@ -10067,6 +10179,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             422: components["responses"]["ValidationError"];
         };
     };
@@ -10085,6 +10198,8 @@ export interface operations {
         responses: {
             204: components["responses"]["NoContent"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            422: components["responses"]["ValidationError"];
         };
     };
     adminDeleteZone: {
@@ -10100,6 +10215,7 @@ export interface operations {
         responses: {
             204: components["responses"]["NoContent"];
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
         };
@@ -10129,6 +10245,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             422: components["responses"]["ValidationError"];
         };
@@ -10784,6 +10901,7 @@ export interface operations {
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
         };
     };
     adminSaveSettings: {
@@ -10812,6 +10930,7 @@ export interface operations {
             };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             422: components["responses"]["ValidationError"];
         };
     };
@@ -10834,6 +10953,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminListEmailTemplates: {
@@ -10855,6 +10975,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
     adminGetEmailTemplate: {
@@ -10878,6 +10999,7 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
         };
     };
@@ -10906,6 +11028,8 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
             422: components["responses"]["ValidationError"];
         };
     };
@@ -10934,6 +11058,9 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            422: components["responses"]["ValidationError"];
         };
     };
     adminTestEmailTemplate: {
@@ -10963,6 +11090,10 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+            422: components["responses"]["ValidationError"];
         };
     };
     adminListUsers: {

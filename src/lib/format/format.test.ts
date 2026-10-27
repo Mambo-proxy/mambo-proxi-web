@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { formatDate, formatDateTime, formatPublishedAgo, formatRelative, formatTime } from './date';
+import {
+  formatDate,
+  formatDateTime,
+  formatIsoDate,
+  formatPublishedAgo,
+  formatRelative,
+  formatTime,
+} from './date';
 import {
   formatFileSize,
   formatNumber,
@@ -63,6 +70,12 @@ describe('dates (fuseau Africa/Douala par défaut)', () => {
     expect(formatTime('2026-10-06T13:00:00.000Z')).toBe(`14${NBSP}h`);
     expect(formatDateTime(date)).toBe(`6 octobre 2026 à 14${NBSP}h${NBSP}30`);
     expect(formatTime(date, 'Europe/Paris')).toBe(`15${NBSP}h${NBSP}30`);
+  });
+
+  it('jour calendaire de Douala (noms des fichiers exportés)', () => {
+    expect(formatIsoDate(date)).toBe('2026-10-06');
+    // 23:30 UTC = 00:30 le lendemain à Douala.
+    expect(formatIsoDate('2026-10-06T23:30:00.000Z')).toBe('2026-10-07');
   });
 
   it('formate une date relative', () => {

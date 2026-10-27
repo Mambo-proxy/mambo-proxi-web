@@ -1038,3 +1038,26 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
 - Renouvellement dans le proxy avec plusieurs instances du site : la mémorisation de 10 s est propre à chaque
   processus (le délai de grâce de l'API couvre l'essentiel). L'adresse IP vue par l'API pour la session renouvelée par
   le proxy est celle du serveur du site.
+
+## Mocks des demandes et des contacts réalignés sur l'API (27 octobre 2026)
+
+### Fait
+
+- **Exports CSV** (`src/mocks/csv.ts`, copie de `src/common/csv/csv.ts` de l'API) : UTF-8 avec BOM, `;`, CRLF, cellules
+  entre guillemets, neutralisation des formules (`= + - @`, tabulation, retour chariot) sauf nombres et téléphones,
+  `Content-Disposition` et `Cache-Control: no-store`. Demandes : type en libellé (« Devis »), fichier
+  `demandes-AAAA-MM-JJ.csv` (date de Douala). Contacts : « Créé le » en date de Douala. Les exports ignorent `q`
+  (contrat). Le site nomme les fichiers avec la date de Douala (`formatIsoDate`) : `Content-Disposition` n'est pas
+  exposé en CORS par l'API.
+- **Tri `sort`** des listes (`src/mocks/list-sort.ts`) : champs du contrat, `null` en dernier en croissant et en
+  premier en décroissant (PostgreSQL), champ inconnu → `400`.
+- **Demandes** : `whatsappUrl` construit comme l'API (recalculé à la duplication) ; un retour en arrière du statut
+  efface `completedAt` / `closedAt` et annule le questionnaire programmé ; questionnaire programmé une seule fois ;
+  la copie repart sans dates de réalisation ni pièces jointes ; titre de la notification d'assignation
+  (service, sinon sujet, sinon type).
+- **Contacts** : effacement → demandes du contact retirées (404 au détail), rendez-vous rattachés à la fiche vidée
+  sans message ni notes ; `Subscriber.source = footer` ; fiche avec `RequestListItem` complets (`dueAt`,
+  `isOverdue`) et rendez-vous du contact ; export RGPD avec `requests` et `newsletter`, sans notes internes ;
+  `totalPages = 0` pour une liste vide.
+- Tests : `admin-requests.test.ts` (nouveau), `admin-contacts.test.ts`, `format.test.ts` ; e2e : lien WhatsApp et
+  nom du fichier exporté des demandes (`admin.spec.ts`), nom exact de l'export des contacts.

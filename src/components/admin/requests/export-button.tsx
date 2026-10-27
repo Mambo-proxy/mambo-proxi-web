@@ -7,6 +7,7 @@ import { toast } from '@/components/ui/toaster';
 import { browserApi } from '@/lib/api/browser';
 import { errorMessage, toApiError } from '@/lib/api/errors';
 import { downloadBlob } from '@/lib/admin/download';
+import { formatIsoDate } from '@/lib/format/date';
 import { useExportQuery } from './requests-view';
 
 /** Bouton secondaire « Exporter » de la barre supérieure (`87:10931`) : CSV des demandes filtrées. */
@@ -22,7 +23,8 @@ export function ExportRequestsButton() {
         parseAs: 'blob',
       });
       if (!response.ok || !data) throw toApiError(error, response);
-      downloadBlob(data, `demandes-${new Date().toISOString().slice(0, 10)}.csv`);
+      // Nom de l'API (`demandes-AAAA-MM-JJ.csv`, date de Douala) : `Content-Disposition` n'est pas lisible en CORS.
+      downloadBlob(data, `demandes-${formatIsoDate(Date.now())}.csv`);
     } catch (caught) {
       toast.error(errorMessage(caught));
     } finally {

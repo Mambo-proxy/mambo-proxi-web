@@ -423,6 +423,21 @@ function slugify(value: string) {
     .replace(/^\.|\.$/g, '');
 }
 
+/**
+ * Lien WhatsApp vers le client, message pré-rempli avec la référence, construit comme l'API (exemple du contrat) ;
+ * `null` sans téléphone. L'apostrophe est encodée (`%27`).
+ */
+export function requestWhatsappUrl(
+  phone: string | null,
+  firstName: string,
+  reference: string,
+): string | null {
+  const digits = phone?.replace(/\D/g, '') ?? '';
+  if (digits === '') return null;
+  const text = `Bonjour ${firstName}, c'est Mambo Proxi au sujet de votre demande ${reference}.`;
+  return `https://wa.me/${digits}?text=${encodeURIComponent(text).replace(/'/g, '%27')}`;
+}
+
 function toDetail(seed: Seed, index: number): RequestDetail {
   const number = 142 - index;
   const reference = `MP-2026-${String(number).padStart(4, '0')}`;
@@ -497,7 +512,7 @@ function toDetail(seed: Seed, index: number): RequestDetail {
     attachments: [],
     consentAt: received,
     survey: null,
-    whatsappUrl: null,
+    whatsappUrl: requestWhatsappUrl(contact.phone ?? null, seed.firstName, reference),
     completedAt: null,
     closedAt: null,
     updatedAt: received,

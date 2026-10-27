@@ -71,6 +71,11 @@ test.describe('back-office : demandes', () => {
       'href',
       /^mailto:aurelie\.k@email\.com/,
     );
+    // Lien construit par l'API (`whatsappUrl`) : message pré-rempli avec la référence.
+    await expect(panel.getByRole('link', { name: /WhatsApp/ })).toHaveAttribute(
+      'href',
+      /^https:\/\/wa\.me\/237\d+\?text=Bonjour%20Aur%C3%A9lie%2C%20c%27est%20Mambo%20Proxi%20au%20sujet%20de%20votre%20demande%20MP-2026-0142\.$/,
+    );
 
     await panel.getByRole('button', { name: 'En cours' }).click();
     await expect(panel.getByRole('button', { name: 'En cours' })).toHaveAttribute('aria-pressed', 'true');
@@ -96,6 +101,13 @@ test.describe('back-office : demandes', () => {
         .first(),
     ).toBeVisible();
     await expect(page.getByText(/^Patrick E\./).locator('visible=true')).toHaveCount(0);
+  });
+
+  test('export CSV : fichier daté du jour à Douala, comme l’API', async ({ page }) => {
+    const douala = new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 10);
+    const download = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Exporter', exact: true }).click();
+    expect((await download).suggestedFilename()).toBe(`demandes-${douala}.csv`);
   });
 
   test('détail ouvert depuis l’adresse (lien partagé)', async ({ page }) => {
