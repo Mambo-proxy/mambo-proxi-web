@@ -92,7 +92,8 @@ const orNull = (value: string) => value.trim() || null;
 function toBody(form: CategoryForm): CategoryFields {
   return {
     name: form.name.trim(),
-    slug: slugify(form.slug || form.name),
+    // Adresse laissée vide : l'API la tire du nom (suffixée `-2`… si elle est prise) ; choisie et prise : 409.
+    ...(form.slug.trim() ? { slug: slugify(form.slug) } : {}),
     tagline: form.tagline.trim(),
     description: form.description.trim(),
     icon: form.icon.trim(),

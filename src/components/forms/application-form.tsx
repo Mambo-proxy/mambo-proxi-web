@@ -12,7 +12,7 @@ import { Dropzone } from '@/components/ui/dropzone';
 import { Field, Input, PhoneInput, Select, Textarea } from '@/components/ui/field';
 import { toast } from '@/components/ui/toaster';
 import { browserApi } from '@/lib/api/browser';
-import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
+import { ApiError, formErrorMessage, toApiError } from '@/lib/api/errors';
 import type { JobApplicationInput } from '@/lib/api/schema';
 import { CONSENT_TEXT, fieldRules, trimmed } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
@@ -29,7 +29,10 @@ const schema = z.object({
   fullName: fieldRules.fullName,
   email: fieldRules.email,
   phone: fieldRules.phone,
-  city: trimmed(z.maxLength(80, 'Ce nom de ville est trop long.')),
+  city: trimmed(
+    z.minLength(1, 'Merci d’indiquer votre ville.'),
+    z.maxLength(80, 'Ce nom de ville est trop long.'),
+  ),
   cv: z.custom<File>((value) => value instanceof File, { message: 'Merci de joindre votre CV.' }),
   message: trimmed(z.maxLength(3000, 'Ce message est trop long (3 000 caractères au plus).')),
   consent: fieldRules.consent,
@@ -107,8 +110,11 @@ export function ApplicationForm({ jobs, initialJob }: ApplicationFormProps) {
         for (const [path, message] of Object.entries(caught.fieldErrors)) {
           if (path in form.getValues()) form.setError(path as keyof FormInput, { message });
         }
+        // CV trop lourd (413 `file-too-large`) ou d'un format refusé (415 `unsupported-file`) : sous la zone de dépôt.
+        if (caught.status === 413 || caught.status === 415)
+          form.setError('cv', { message: caught.problem.detail ?? caught.problem.title });
       }
-      toast.error(errorMessage(caught));
+      toast.error(formErrorMessage(caught, (path) => path in form.getValues()));
     }
   }
 
@@ -176,7 +182,7 @@ export function ApplicationForm({ jobs, initialJob }: ApplicationFormProps) {
             <Field label="Téléphone / WhatsApp" required error={errors.phone?.message}>
               {(control) => <PhoneInput icon={Smartphone} {...control} {...form.register('phone')} />}
             </Field>
-            <Field label="Ville" error={errors.city?.message}>
+            <Field label="Ville" required error={errors.city?.message}>
               {(control) => (
                 <Input
                   icon={MapPin}

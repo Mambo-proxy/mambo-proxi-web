@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import type { SitemapEntry } from '@/lib/api/schema';
+import type { Redirect, SitemapEntry } from '@/lib/api/schema';
 import { categories, services } from '../data/catalogue';
 import { jobs } from './jobs';
 
@@ -52,4 +52,10 @@ const sitemap: SitemapEntry[] = [
   })),
 ];
 
-export const siteHandlers = [http.get('*/v1/sitemap', () => HttpResponse.json(sitemap))];
+/** Redirections simulées : aucune (le proxy les lit à chaque minute ; l'exemple du contrat redirigerait un service). */
+const redirects: Redirect[] = [];
+
+export const siteHandlers = [
+  http.get('*/v1/sitemap', () => HttpResponse.json(sitemap)),
+  http.get('*/v1/site/redirects', () => HttpResponse.json(redirects)),
+];

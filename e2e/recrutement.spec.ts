@@ -98,6 +98,8 @@ test.describe('recrutement', () => {
     await form.getByLabel(/Nom et prénom/).fill('Brice Ngono');
     await form.getByRole('textbox', { name: 'E-mail' }).fill('brice@exemple.fr');
     await form.getByLabel(/Téléphone/).fill('+237 6 99 11 22 33');
+    // Ville obligatoire (comme l'API : `city` de `POST /v1/job-applications`).
+    await form.getByLabel(/^Ville/).fill('Douala');
     await form.locator('input[type="file"]').setInputFiles({
       name: 'cv-brice-ngono.pdf',
       mimeType: 'application/pdf',

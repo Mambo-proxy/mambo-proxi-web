@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Copy, FileText, Info, Mail, Phone, ShieldX, X } from 'lucide-react';
+import { Copy, Download, FileText, Info, Mail, Paperclip, Phone, ShieldX, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useCan } from '@/components/admin/shell/permissions';
 import { sidebarCountsKey } from '@/components/admin/shell/sidebar';
@@ -23,6 +23,7 @@ import { errorMessage } from '@/lib/api/errors';
 import type { RequestDetail, RequestStatus } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { formatStamp } from '@/lib/format/date';
+import { formatFileSize } from '@/lib/format/number';
 import { formatPhone } from '@/lib/phone';
 import { whatsappUrl } from '@/lib/whatsapp';
 import { AssignmentField, DueBadge, presenceKey } from './assignment';
@@ -60,9 +61,35 @@ function quoteMailto(request: RequestDetail) {
 }
 
 /**
+ * Pièce jointe (CV…) : `GET /v1/admin/requests/{id}/attachments/{attachmentId}` renvoie une URL signée de 5 minutes
+ * vers `GET /v1/files/{token}`, qui répond en `Content-Disposition: attachment` : le navigateur télécharge le fichier
+ * sans quitter le back-office. Fichier absent ou demande anonymisée : 404 ; lien périmé : 410.
+ */
+function useAttachmentDownload(requestId: string) {
+  return useMutation({
+    mutationFn: async (attachmentId: string) => {
+      const signed = await data(
+        browserApi.GET('/v1/admin/requests/{id}/attachments/{attachmentId}', {
+          params: { path: { id: requestId, attachmentId } },
+        }),
+      );
+      const link = document.createElement('a');
+      link.href = signed.url;
+      link.download = signed.fileName;
+      link.rel = 'noopener';
+      document.body.append(link);
+      link.click();
+      link.remove();
+      return signed;
+    },
+    onError: (error) => toast.error(errorMessage(error)),
+  });
+}
+
+/**
  * Panneau « Détail de la demande » (`87:11129`) : référence, service, carte client, actions rapides
  * (WhatsApp avec la référence, e-mail, appel), informations, besoin exprimé, statut en 4 étapes, notes internes,
- * historique, « Préparer le devis » et menu (dupliquer, copier la référence, anonymiser). Échéance et assignation
+ * pièces jointes (téléchargement par lien signé), historique, « Préparer le devis » et menu (dupliquer, copier la référence, anonymiser). Échéance et assignation
  * (sélecteur des personnes assignables, « M’assigner ») selon les permissions : `requests:assign` pour assigner,
  * `requests:revert-status` pour revenir à un statut précédent, `requests:write` pour dupliquer,
  * `requests:anonymize` pour anonymiser. À droite de la liste à partir de 1280 px, en panneau superposé en dessous.
@@ -104,8 +131,10 @@ export function RequestPanel({ id, onClose }: { id: string; onClose: () => void 
       client.setQueryData(detailKey, updated);
       toast.success(
         updated.status === 'PRESTATION_REALISEE' && updated.survey?.status === 'SCHEDULED'
-          ? 'Statut mis à jour : le questionnaire de satisfaction partira dans 24 h.'
-          : `Statut mis à jour : ${REQUEST_STATUS_LABELS[updated.status]}.`,
+          ? updated.survey.scheduledFor
+            ? `Statut mis à jour\u00A0: le questionnaire de satisfaction partira le ${formatStamp(updated.survey.scheduledFor)}.`
+            : 'Statut mis à jour\u00A0: le questionnaire de satisfaction est programmé.'
+          : `Statut mis à jour\u00A0: ${REQUEST_STATUS_LABELS[updated.status]}.`,
       );
       refreshLists();
     },
@@ -143,6 +172,8 @@ export function RequestPanel({ id, onClose }: { id: string; onClose: () => void 
       refreshLists();
     },
   });
+
+  const download = useAttachmentDownload(id);
 
   const remove = useMutation({
     mutationFn: () => data(browserApi.DELETE('/v1/admin/requests/{id}', { params: { path: { id } } })),
@@ -297,6 +328,42 @@ export function RequestPanel({ id, onClose }: { id: string; onClose: () => void 
                   «&nbsp;{request.message}&nbsp;»
                 </p>
               </div>
+            )}
+
+            {request.attachments.length > 0 && (
+              <section aria-labelledby={`attachments-${id}`} className="flex flex-col gap-2">
+                <h3
+                  id={`attachments-${id}`}
+                  className="font-ui text-[14px] leading-5 font-semibold text-text-main"
+                >
+                  Pièces jointes
+                </h3>
+                <ul className="flex flex-col divide-y divide-border-default rounded-md border border-border-default">
+                  {request.attachments.map((attachment) => (
+                    <li key={attachment.id} className="flex items-center gap-3 px-3.5 py-2.5">
+                      <Paperclip aria-hidden size={16} className="shrink-0 text-icon-default" />
+                      <span className="flex min-w-0 flex-1 flex-col font-ui">
+                        <span className="truncate text-[14px] leading-5 font-semibold text-text-main">
+                          {attachment.fileName}
+                        </span>
+                        <span className="text-[12px] leading-4 text-text-muted">
+                          {formatFileSize(attachment.size)}
+                        </span>
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        loading={download.isPending && download.variables === attachment.id}
+                        onClick={() => download.mutate(attachment.id)}
+                      >
+                        <Download aria-hidden />
+                        Télécharger
+                        <span className="sr-only"> {attachment.fileName}</span>
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             )}
 
             <fieldset className="flex flex-col gap-3">

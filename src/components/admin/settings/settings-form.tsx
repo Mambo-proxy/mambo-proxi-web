@@ -139,6 +139,16 @@ export function useSettingsGroup<G extends EditableGroup>(group: G) {
     value,
     isError: query.isError && !query.data,
     update: (patch: Partial<GroupValues[G]>) => form.update(group, patch),
-    error: (path: string) => form.errors[`${group}.${path}`] ?? null,
+    error: (path: string) => fieldError(form.errors, `${group}.${path}`),
   };
+}
+
+/**
+ * Erreur d'un champ : la sienne, sinon la première d'un de ses sous-champs (l'API renvoie des chemins en notation
+ * pointée : `agency.addressLines.0`, `teamRecipients.1`).
+ */
+function fieldError(errors: Record<string, string>, path: string): string | null {
+  if (errors[path]) return errors[path];
+  const nested = Object.keys(errors).find((key) => key.startsWith(`${path}.`));
+  return nested ? errors[nested]! : null;
 }

@@ -2,6 +2,8 @@ import { timingSafeEqual } from 'node:crypto';
 import { revalidateTag } from 'next/cache';
 import { NextResponse, type NextRequest } from 'next/server';
 import { z } from 'zod';
+import { cacheTags } from '@/lib/api/tags';
+import { invalidateSiteRedirects } from '@/lib/site-redirects';
 
 const bodySchema = z.object({
   tags: z.array(z.string().min(1).max(256)).min(1).max(100),
@@ -38,5 +40,7 @@ export async function POST(request: NextRequest) {
 
   const tags = [...new Set(parsed.data.tags)];
   for (const tag of tags) revalidateTag(tag, { expire: 0 });
+  // Redirections lues par le proxy hors du cache de données : liste mémorisée vidée.
+  if (tags.includes(cacheTags.redirects)) invalidateSiteRedirects();
   return NextResponse.json({ revalidated: tags, now: new Date().toISOString() });
 }

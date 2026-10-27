@@ -15,7 +15,7 @@ test.describe('back-office : journal d’activité', () => {
   test('actions par jour, filtres dans l’adresse', async ({ page, pageErrors }) => {
     await openActivity(page);
     await expect(page.getByRole('region', { name: 'Aujourd’hui' })).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText(/^Affichage de 1 à 25 sur \d+ actions$/)).toBeVisible();
+    await expect(page.getByText(/^Affichage de 1 à 20 sur \d+ actions$/)).toBeVisible();
     await expectNoHorizontalScroll(page);
     await expectAccessible(page);
 
@@ -24,7 +24,7 @@ test.describe('back-office : journal d’activité', () => {
       await expect(page).toHaveURL(/actor=usr_equipe/, { timeout: 3000 });
     }).toPass({ timeout: 20_000 });
     await page.getByRole('combobox', { name: 'Type de contenu' }).selectOption('Demande');
-    await expect(page).toHaveURL(/entity=Demande/);
+    await expect(page).toHaveURL(/entity=Request/);
     const rows = page.getByRole('listitem').filter({ hasText: /^\d{2}:\d{2}/ });
     await expect(rows.first()).toContainText('Équipe Douala');
     await expect(page.getByText('Mireille Bell ·')).toHaveCount(0);
@@ -32,7 +32,7 @@ test.describe('back-office : journal d’activité', () => {
   });
 
   test('détail d’une modification', async ({ page }) => {
-    await openActivity(page, '?entity=Demande&periode=tout');
+    await openActivity(page, '?entity=Request&periode=tout');
     const details = page.getByRole('button', { name: 'Détails' }).first();
     await expect(details).toBeVisible({ timeout: 15_000 });
     await details.click();
@@ -42,7 +42,7 @@ test.describe('back-office : journal d’activité', () => {
   });
 
   test('aucune activité pour une période vide', async ({ page }) => {
-    await openActivity(page, '?entity=Magazine&periode=7j&actor=usr_equipe');
+    await openActivity(page, '?entity=MagazineEdition&periode=7j&actor=usr_equipe');
     await expect(page.getByText('Aucune activité')).toBeVisible({ timeout: 15_000 });
   });
 });

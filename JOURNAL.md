@@ -1108,3 +1108,84 @@ Les maquettes Figma ont été refondues : recentrage sur Douala et les services 
   `showFees` reste `false` (valeur du seed ; le contrat n'a pas de groupe de paramètres pour la changer).
 - Pas de redirections 301 simulées : les mocks ne servent pas de redirections.
 - Jetons d'aperçu simulés non signés (seule la durée de 30 minutes est reprise).
+
+## Site public branché sur l'API réelle (27 octobre 2026)
+
+### Fait
+
+- **Couche commune** vérifiée contre l'API (`app.setup.ts`, `modules/auth`, `common/revalidation`) : cookies `mp_at`,
+  `mp_rt`, `mp_csrf` et en-tête `X-CSRF-Token` identiques ; CORS (`WEB_URL` seule origine, `credentials`) ; erreurs
+  problem+json lues par `status` ; étiquettes de `tags.ts` = `CACHE_TAGS` de l'API (magazine : `page:magazine`,
+  partenaires et formations : aussi `page:partenaires`, `page:formation`) ; `/api/revalidate` conforme au worker
+  (`Bearer`, lots de 100).
+- `browserApi` envoie `Accept-Language` = langue de la page (`<html lang>`) : accusés de réception, e-mails et
+  confirmation de la newsletter dans la langue du site consulté (l'API lit `lang` du corps, sinon cet en-tête).
+- `API_INTERNAL_URL` / `NEXT_PUBLIC_API_URL` vides (copiés de `.env.example`) retombent sur la valeur par défaut au
+  lieu d'une adresse vide.
+- **Médias** : `<Visual>` sert les variantes AVIF / WebP (480, 960, 1600) de l'API dans un `<picture>` (pas de
+  réencodage par l'optimiseur, qui refuse les adresses locales en développement) ; image de l'API sans variante
+  (SVG, traitement en cours) non optimisée ; logos des partenaires sur la variante 480. `img-src` des CSP : origine de
+  l'API et `NEXT_PUBLIC_MEDIA_URL` ; `images.remotePatterns` : `{API}/v1/media/**` et `NEXT_PUBLIC_MEDIA_URL`.
+- **Magazine** sur `GET /v1/magazine` (`?edition=`, aperçu `?preview=` sans cache) : la page `magazine` reste le
+  cadre (maquette) ; titre du héros (« Mambo Proxi — Édition n° 1 »), couverture et sur-titre de l'édito tirés de
+  l'édition ; pour la dernière édition, texte de l'édito et thèmes de la page inchangés ; pour une autre édition,
+  édito et signature de l'édition, thèmes masqués. Nouvelle section « Les articles » (non maquettée, cartes illustrées,
+  ancres `article-{id}`, texte dépliable) et sélecteur des éditions à partir de deux, avant le bandeau d'abonnement.
+  Mock `GET /v1/magazine` (`src/mocks/handlers/magazine.ts`) construit sur les éditions du back-office simulé.
+- **Formulaires** : ville obligatoire dans la candidature (`city` exigé par l'API) ; quartier de l'inscription limité
+  à 55 caractères (`city` « quartier, ville » ≤ 80) ; message de l'erreur hors champ affiché
+  (`formErrorMessage` : `startsAt`, `eventSlug`, `antiSpam.*`, réponses du questionnaire) ; devis : `needs.<champ>`
+  signalé sous le champ, retour à l'étape 2 ; rendez-vous : créneau pris (409) ou retiré (422 `startsAt`) → retour au
+  choix du créneau et disponibilités rechargées, erreurs HTTP des disponibilités signalées ; candidature : 413/415 sous
+  la zone de dépôt du CV ; questionnaire : 429/5xx → « réessayer » au lieu de « lien non valide ».
+- e2e `recrutement.spec.ts` : ville saisie avant l'envoi.
+
+### Points ouverts (API)
+
+- ~~Recherche : les articles d'une édition ancienne pointent vers `/magazine#article-{id}`~~ : corrigé dans l'API
+  (`/magazine?edition={id}#article-{id}`).
+- ~~Seed : édito des éditions tronqué et signature « Nom, fonction »~~ : corrigé dans l'API (édito complet, signature
+  « Nom — Fonction »).
+- ~~Redirections du back-office non appliquées par le site~~ : appliquées par le proxy (`src/lib/site-redirects.ts`) :
+  liste lue en mémoire 60 s (le cache de données de Next n'est pas garanti dans le proxy), vidée par `/api/revalidate`
+  à l'étiquette `redirects` ; correspondance avec et sans `/en` (adresses traduites comprises), destination dans la
+  langue demandée, 301 ou 302 selon `permanent`, chaînes suivies et boucles ignorées ; jamais de lecture pour
+  `/_next`, `/api`, `/admin`, `/dev` et les fichiers. Mocks : gestionnaire dédié, liste vide.
+
+## Back-office branché sur l'API réelle (27 octobre 2026)
+
+### Fait
+
+Chaque appel des écrans `/admin` relu contre le contrôleur et le service de l'API (routes, paramètres, corps, réponses,
+erreurs) ; toutes les routes appelées existent. Corrections :
+
+- **Connexion** : conforme (mot de passe, code, renvoi, 423/429, réinitialisation, invitation) ; case « Faire confiance
+  à cet appareil » sans durée en dur (`securite.trustedDeviceDays`, réglable). Permissions lues dans `CurrentUser`.
+- **Journal** : `entity` technique de l'API (`Request`, `Service`…) traduit par une table du site, 20 par page ; mock
+  réaligné (noms techniques, 20 par défaut), test et e2e adaptés.
+- **Recherche** : liens `/admin/contacts?id=` (mock corrigé), `/admin/pages?page=`, `/admin/demandes?id=`,
+  `/admin/rendez-vous?id=`, `/admin/recrutement?candidature=` lus par les écrans.
+- **Tableau de bord** : « Visites du site » = pages vues de la mesure interne ; `visits: null` → « — » et texte neutre.
+- **Magazine** : ordre de l'API conservé, `readers: null` → « — » ; 409 à la programmation → édition relue.
+- **Demandes** : pièces jointes (`GET …/attachments/{id}`, lien signé de 5 min) ; date du questionnaire tirée de
+  `survey.scheduledFor`. **Contacts** : origine traduite. **Rendez-vous** : erreurs en notation pointée
+  (`rules.0.endTime`), lien de fiche contact `?id=` (avec `contacts:read`), 422 affichés, pas de lien de visio promis.
+  **Avis** : règles des questions (5 libellés, 2 bornes) et erreurs générales affichées.
+- **Recrutement** : CV, 404 en message, 410 → nouveau lien. **Partenaires / Formations** : onglets de demandes masqués
+  sans permission sur les demandes (403 évités). **Newsletter** : segments par étiquette distingués, 422 de la
+  programmation sur l'objet ou le contenu.
+- **Médiathèque** : « En traitement » / « Échec du traitement », rafraîchissement toutes les 3 s, remplacement du
+  fichier (`PUT /v1/admin/media/{id}/file`, mock minimal), 413/415/422 sous le champ, 409 `media-in-use`.
+- **Services, zones, pages, paramètres** : erreurs à chemins pointés rattachées aux champs ; rubrique sans adresse →
+  slug laissé à l'API ; Paramètres en lecture seule pour le responsable ; modèles d'e-mails (« [TEST] » ajouté par l'API),
+  utilisateurs (409), sauvegarde quotidienne à 02:00.
+
+### Points ouverts
+
+- API : `AdminApplication.jobTitle` ajouté (intitulé conservé quand l'offre est supprimée) et filtre `spontaneous`
+  limité aux candidatures sans offre : après `pnpm contract:sync`, afficher `jobTitle` dans le back-office et l'ajouter
+  aux candidatures simulées.
+- Non branchés (fonctions sans écran) : `POST /v1/admin/campaigns/{id}/send-now`, `GET/DELETE /v1/admin/subscribers`.
+- Mocks du magazine non réalignés (ordre, `languages`, 409 après envoi) : sans effet sur le fonctionnement.
+- À essayer sur l'API réelle : téléchargements (pièces jointes, CV) depuis l'origine du site, envoi puis traitement
+  d'une image (worker et Redis), 412 entre deux onglets, compte responsable et rédacteur.

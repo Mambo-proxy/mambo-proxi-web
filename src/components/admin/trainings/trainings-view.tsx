@@ -81,7 +81,10 @@ export function NewTrainingButton() {
  * catalogue (ordre, publication), demandes de formation récentes.
  */
 export function TrainingsView() {
-  const [tab, setTab] = useTab();
+  const [selectedTab, setTab] = useTab();
+  // `GET /v1/admin/training-requests` exige `requests:read` : sans elle, ni onglet ni demandes récentes.
+  const canReadRequests = useCan()('requests:read');
+  const tab: Tab = canReadRequests ? selectedTab : 'catalogue';
   const trainings = useQuery({
     queryKey: trainingsKey,
     queryFn: () => data(browserApi.GET('/v1/admin/trainings')),
@@ -90,46 +93,51 @@ export function TrainingsView() {
     queryKey: trainingRequestsKey,
     queryFn: () =>
       data(browserApi.GET('/v1/admin/training-requests', { params: { query: { pageSize: 50 } } })),
+    enabled: canReadRequests,
   });
 
   return (
     <div className="flex flex-col gap-6">
       <ReadOnlyNotice permission="content:write" />
-      <StatusTabs
-        label="Catalogue et demandes"
-        tabs={[
-          { value: 'catalogue', label: 'Catalogue', count: trainings.data?.length },
-          { value: 'demandes', label: 'Demandes de formation', count: requests.data?.meta.total },
-        ]}
-        value={tab}
-        onChange={setTab}
-      />
+      {canReadRequests && (
+        <StatusTabs
+          label="Catalogue et demandes"
+          tabs={[
+            { value: 'catalogue', label: 'Catalogue', count: trainings.data?.length },
+            { value: 'demandes', label: 'Demandes de formation', count: requests.data?.meta.total },
+          ]}
+          value={tab}
+          onChange={setTab}
+        />
+      )}
       {tab === 'catalogue' ? (
         <>
           <TrainingsTable trainings={trainings.data} error={trainings.isError && !trainings.data} />
-          <section aria-labelledby="training-requests-recent" className="flex flex-col gap-4">
-            <div className="flex items-center justify-between gap-3">
-              <h2
-                id="training-requests-recent"
-                className="font-ui text-[16px] leading-6 font-semibold text-text-main"
-              >
-                Demandes de formation récentes
-              </h2>
-              <button
-                type="button"
-                onClick={() => setTab('demandes')}
-                className="inline-flex items-center gap-1.5 font-ui text-[14px] leading-5 font-semibold text-text-brand hover:underline"
-              >
-                Tout voir
-                <ArrowRight aria-hidden size={16} />
-              </button>
-            </div>
-            <TrainingRequestsTable
-              label="Demandes de formation récentes"
-              requests={requests.data?.data.slice(0, 3)}
-              error={requests.isError && !requests.data}
-            />
-          </section>
+          {canReadRequests && (
+            <section aria-labelledby="training-requests-recent" className="flex flex-col gap-4">
+              <div className="flex items-center justify-between gap-3">
+                <h2
+                  id="training-requests-recent"
+                  className="font-ui text-[16px] leading-6 font-semibold text-text-main"
+                >
+                  Demandes de formation récentes
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setTab('demandes')}
+                  className="inline-flex items-center gap-1.5 font-ui text-[14px] leading-5 font-semibold text-text-brand hover:underline"
+                >
+                  Tout voir
+                  <ArrowRight aria-hidden size={16} />
+                </button>
+              </div>
+              <TrainingRequestsTable
+                label="Demandes de formation récentes"
+                requests={requests.data?.data.slice(0, 3)}
+                error={requests.isError && !requests.data}
+              />
+            </section>
+          )}
         </>
       ) : (
         <TrainingRequestsTable

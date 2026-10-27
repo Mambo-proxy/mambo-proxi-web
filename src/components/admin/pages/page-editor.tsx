@@ -108,8 +108,11 @@ export function PageEditor({
       data(browserApi.PUT('/v1/admin/pages/{key}', { params: { path: { key: page.key } }, body: input })),
     onSuccess: (saved) => storePage(saved),
     onError: (error, input) => {
-      if (error instanceof ApiError && error.status === 422)
-        setServer({ for: JSON.stringify(input.sections), errors: error.fieldErrors });
+      const fieldErrors = error instanceof ApiError && error.status === 422 ? error.fieldErrors : {};
+      if (Object.keys(fieldErrors).length)
+        setServer({ for: JSON.stringify(input.sections), errors: fieldErrors });
+      // Erreur sans champ de section à signaler (droits, page inconnue, réseau…) : message de l'API.
+      if (sectionsWithErrors(fieldErrors).length === 0) toast.error(errorMessage(error));
     },
   });
 

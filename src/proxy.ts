@@ -6,6 +6,7 @@ import { getApiBaseUrl } from '@/lib/api/config';
 import { transport } from '@/lib/api/transport';
 import { adminCsp } from '@/lib/security/headers';
 import { JS_CLASS_SCRIPT, cspHash } from '@/lib/security/inline-scripts';
+import { findSiteRedirect } from '@/lib/site-redirects';
 
 /** Cookies de session déposés par l'API (jeton d'accès 15 min, jeton de rafraîchissement). */
 export const SESSION_COOKIES = ['mp_at', 'mp_rt'] as const;
@@ -113,14 +114,17 @@ function localeOf(pathname: string): string {
 }
 
 /**
- * Proxy (anciennement « middleware ») : protège `/admin`, oriente le site public vers sa langue et affiche la page de
- * maintenance de cette langue (statut 503) quand elle est activée. Les membres de l'équipe connectés continuent de
- * voir le site.
+ * Proxy (anciennement « middleware ») : protège `/admin`, applique les redirections du back-office (301 ou 302, dans
+ * la langue de l'adresse demandée), oriente le site public vers sa langue et affiche la page de maintenance de cette
+ * langue (statut 503) quand elle est activée. Les membres de l'équipe connectés continuent de voir le site.
  */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (pathname === '/admin' || pathname.startsWith('/admin/')) return admin(request);
   if (pathname === '/dev' || pathname.startsWith('/dev/')) return NextResponse.next();
+
+  const redirect = await findSiteRedirect(request.nextUrl);
+  if (redirect) return NextResponse.redirect(redirect.url, redirect.status);
 
   const locale = localeOf(pathname);
   const maintenancePath = `/${locale}/maintenance`;

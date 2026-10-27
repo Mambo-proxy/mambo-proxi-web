@@ -1,17 +1,30 @@
 'use client';
 
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronRight, Crosshair, ExternalLink, ImageIcon, Images, Trash2, Upload } from 'lucide-react';
+import {
+  ChevronRight,
+  Crosshair,
+  ExternalLink,
+  ImageIcon,
+  Images,
+  RefreshCw,
+  Trash2,
+  Upload,
+} from 'lucide-react';
 import type { Route } from 'next';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useState, type KeyboardEvent, type MouseEvent } from 'react';
+import { useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import { ConfirmDialog, StatusPill } from '@/components/admin/editor/editor-ui';
 import {
   imageFileError,
+  MEDIA_ACCEPT,
+  MediaStatusPill,
   MediaThumb,
   MediaUploadFields,
   mediaListKey,
+  pollWhileProcessing,
+  uploadFieldErrors,
   useUploadMedia,
 } from '@/components/admin/editor/media-picker';
 import { AdminPage, topbarActionClass } from '@/components/admin/shell/admin-page';
@@ -85,6 +98,8 @@ export function MediaLibrary() {
         }),
       ),
     placeholderData: keepPreviousData,
+    // Image envoyée ou remplacée : `PROCESSING` jusqu'à la création des variantes, la liste est relue.
+    refetchInterval: pollWhileProcessing,
   });
   const items = list.data?.data;
   const meta = list.data?.meta;
@@ -184,9 +199,12 @@ export function MediaLibrary() {
                         <span className="truncate font-ui text-[12px] leading-4 tracking-[0.01em] text-text-muted">
                           {FORMATS[media.mimeType]} · {formatFileSize(media.size)}
                         </span>
-                        <StatusPill tone={media.usages.length ? 'success' : 'neutral'} className="self-start">
-                          {usageLabel(media)}
-                        </StatusPill>
+                        <span className="flex flex-wrap gap-1.5">
+                          <StatusPill tone={media.usages.length ? 'success' : 'neutral'}>
+                            {usageLabel(media)}
+                          </StatusPill>
+                          <MediaStatusPill status={media.status} />
+                        </span>
                       </span>
                     </button>
                   </li>
@@ -255,6 +273,38 @@ function MediaDialog({
     },
   });
 
+  const fileInput = useRef<HTMLInputElement>(null);
+  // Remplacement du fichier : même identifiant, texte alternatif et point focal ; variantes recréées.
+  const replace = useMutation({
+    mutationFn: (file: File) =>
+      data(
+        browserApi.PUT('/v1/admin/media/{id}/file', {
+          params: { path: { id: media.id } },
+          body: { file: file as unknown as string },
+          bodySerializer: () => {
+            const form = new FormData();
+            form.append('file', file);
+            return form;
+          },
+        }),
+      ),
+    onSuccess: (updated) => {
+      void client.invalidateQueries({ queryKey: mediaListKey });
+      toast.success(
+        updated.status === 'PROCESSING'
+          ? 'Fichier remplacé. Les variantes sont en cours de création.'
+          : 'Fichier remplacé.',
+      );
+    },
+    onError: (error) => toast.error(uploadFieldErrors(error).file ?? errorMessage(error)),
+  });
+
+  function replaceWith(file: File) {
+    const error = imageFileError(file);
+    if (error) return toast.error(error);
+    replace.mutate(file);
+  }
+
   const remove = useMutation({
     mutationFn: () => data(browserApi.DELETE('/v1/admin/media/{id}', { params: { path: { id: media.id } } })),
     onSuccess: () => {
@@ -265,6 +315,9 @@ function MediaDialog({
     },
     onError: (error) => {
       setConfirming(false);
+      // 409 `media-in-use` : usages relus (l'image a pu être ajoutée à un contenu entre-temps).
+      if (error instanceof ApiError && error.status === 409)
+        void client.invalidateQueries({ queryKey: mediaListKey });
       toast.error(errorMessage(error));
     },
   });
@@ -310,16 +363,40 @@ function MediaDialog({
             </div>
           ) : (
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={used}
-                onClick={() => setConfirming(true)}
-                className="text-feedback-error"
-              >
-                <Trash2 aria-hidden size={16} />
-                Supprimer
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={used}
+                  onClick={() => setConfirming(true)}
+                  className="text-feedback-error"
+                >
+                  <Trash2 aria-hidden size={16} />
+                  Supprimer
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  loading={replace.isPending}
+                  onClick={() => fileInput.current?.click()}
+                >
+                  <RefreshCw aria-hidden size={16} />
+                  Remplacer le fichier
+                </Button>
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept={MEDIA_ACCEPT}
+                  className="sr-only"
+                  tabIndex={-1}
+                  aria-hidden
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    event.target.value = '';
+                    if (file) replaceWith(file);
+                  }}
+                />
+              </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={onClose}>
                   Annuler
@@ -384,6 +461,14 @@ function MediaDialog({
                   <Crosshair size={14} />
                 </span>
               </button>
+            )}
+            {media.status !== 'READY' && (
+              <p className="flex flex-wrap items-center gap-2 font-ui text-[12px] leading-4 text-text-muted">
+                <MediaStatusPill status={media.status} />
+                {media.status === 'PROCESSING'
+                  ? 'Les variantes pour le site sont en cours de création ; l’image reste utilisable.'
+                  : 'Les variantes n’ont pas pu être créées : remplacez le fichier.'}
+              </p>
             )}
             <p className="font-ui text-[12px] leading-4 text-text-muted">
               Point focal : la partie gardée quand l’image est recadrée (vignettes, bannières, mobile).
@@ -499,7 +584,9 @@ function UploadDialog({ open, onClose }: { open: boolean; onClose: () => void })
       toast.success('Image ajoutée à la médiathèque.');
       onClose();
     } catch (error) {
-      setFileError(errorMessage(error));
+      const fields = uploadFieldErrors(error);
+      setFileError(fields.file);
+      setAltError(fields.alt);
     }
   }
 

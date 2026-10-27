@@ -64,6 +64,14 @@ export default async function SurveyPage({ params }: Params) {
       return (
         <Unavailable title="Ce questionnaire n’est plus disponible" message={detail ?? 'Ce lien a expiré.'} />
       );
+    // Lien inconnu : 404 (ou 400/422 pour un jeton mal formé). Trop de requêtes (429) ou API indisponible : à réessayer.
+    if (response.status === 429 || response.status >= 500)
+      return (
+        <Unavailable
+          title="Le questionnaire n’a pas pu être chargé"
+          message="Merci de réessayer dans quelques instants."
+        />
+      );
     return (
       <Unavailable
         title="Ce lien n’est pas valide"

@@ -5568,7 +5568,7 @@
           "publishedAt": "2026-10-01T08:00:00.000Z",
           "articlesCount": 2,
           "editorial": "<p>Bienvenue dans le premier numéro du magazine Mambo Proxi.</p>",
-          "signature": "Mireille Bell, fondatrice de Mambo Proxi",
+          "signature": "Mireille Bell — Fondatrice de Mambo Proxi",
           "articles": [
             {
               "id": "mag_art_2",
@@ -8068,8 +8068,8 @@
         "updatedAt": "2026-10-04T09:00:00.000Z",
         "editorial": "<p>Chers lecteurs, chères lectrices,</p><p>Ce premier numéro de Mambo Proxi est bien plus qu’un magazine : c’est une histoire de vie que je partage avec vous.</p>",
         "editorialEn": "<p>Dear readers,</p><p>This first issue of Mambo Proxi is much more than a magazine: it is a life story that I am sharing with you.</p>",
-        "signature": "Mireille Bell, fondatrice de Mambo Proxi",
-        "signatureEn": "Mireille Bell, founder of Mambo Proxi",
+        "signature": "Mireille Bell — Fondatrice de Mambo Proxi",
+        "signatureEn": "Mireille Bell — Founder of Mambo Proxi",
         "articles": [
           {
             "id": "art_bien_manger",

@@ -13,7 +13,7 @@ import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { toast } from '@/components/ui/toaster';
 import { useStaggerIn } from '@/components/ui/use-stagger-in';
 import { browserApi } from '@/lib/api/browser';
-import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
+import { ApiError, formErrorMessage, toApiError } from '@/lib/api/errors';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
 import { CONSENT_TEXT, fieldRules, trimmed } from '@/lib/forms/schemas';
@@ -65,7 +65,8 @@ function schemaFor(profile: Profile) {
     email: fieldRules.email,
     phone: fieldRules.phone,
     city: z.string().check(z.minLength(1, 'Merci de choisir votre ville.')),
-    quarter: trimmed(z.maxLength(60, 'Ce nom de quartier est trop long.')),
+    // L'API limite `city` (« quartier, ville ») à 80 caractères : 55 pour le quartier laisse la place à la ville.
+    quarter: trimmed(z.maxLength(55, 'Ce nom de quartier est trop long.')),
     interests: z.array(z.string()),
     newsletter: z.boolean(),
     consent: fieldRules.consent,
@@ -177,7 +178,7 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
           if (path in form.getValues()) form.setError(path as keyof FormInput, { message });
         }
       }
-      toast.error(errorMessage(caught));
+      toast.error(formErrorMessage(caught, (path) => path in form.getValues()));
     }
   }
 

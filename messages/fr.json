@@ -350,6 +350,18 @@
       "retry": "Réessayer"
     }
   },
+  "magazine": {
+    "issue": "Édition n° {number}",
+    "specialIssue": "Hors-série",
+    "heroTitle": "Mambo Proxi — {issue}",
+    "editoEyebrow": "Édito · {subtitle} — {title}",
+    "editoEyebrowShort": "Édito — {title}",
+    "articlesEyebrow": "Les articles",
+    "articlesTitle": "À lire dans ce numéro.",
+    "readArticle": "Lire l’article",
+    "editions": "Éditions du magazine",
+    "preview": "Aperçu : cette édition n’est pas encore publiée sur le site."
+  },
   "search": {
     "open": "Rechercher sur le site",
     "dialogTitle": "Recherche sur le site",

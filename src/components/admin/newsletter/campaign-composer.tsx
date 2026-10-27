@@ -19,7 +19,7 @@ import { Modal } from '@/components/ui/modal';
 import { toast } from '@/components/ui/toaster';
 import { data } from '@/lib/admin/query';
 import { browserApi } from '@/lib/api/browser';
-import { errorMessage } from '@/lib/api/errors';
+import { ApiError, errorMessage } from '@/lib/api/errors';
 import type { Campaign, CampaignFields, CampaignSegment } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { formatNumber } from '@/lib/format/number';
@@ -28,18 +28,22 @@ import { isEmptyHtml } from './campaign-labels';
 
 export const campaignsKey = ['campaigns'] as const;
 
-type Draft = { subject: string; html: string; segment: CampaignSegment['kind'] };
+type Draft = { subject: string; html: string; segment: CampaignSegment };
+
+/** Clé d'un segment : son type, plus ses étiquettes pour un segment `TAGS` (un segment par étiquette). */
+const segmentKey = (segment: CampaignSegment) =>
+  segment.kind === 'TAGS' ? `TAGS:${[...(segment.tags ?? [])].sort().join(',')}` : segment.kind;
 
 const draftOf = (campaign: Campaign | null): Draft => ({
   subject: campaign?.subject && campaign.subject !== 'Brouillon sans titre' ? campaign.subject : '',
   html: campaign?.html ?? '',
-  segment: campaign?.segment?.kind ?? 'ALL',
+  segment: campaign?.segment ?? { kind: 'ALL' },
 });
 
 const bodyOf = (draft: Draft): CampaignFields => ({
   subject: draft.subject.trim() || 'Brouillon sans titre',
   html: draft.html,
-  segment: { kind: draft.segment },
+  segment: draft.segment.kind === 'TAGS' ? draft.segment : { kind: draft.segment.kind },
 });
 
 /**
@@ -142,6 +146,8 @@ export function CampaignComposer({
 
   const scheduled = campaign?.status === 'PROGRAMMEE';
   const allSegment = segments.data?.find((item) => item.segment.kind === 'ALL');
+  const draftSegment = segmentKey(draft.segment);
+  const selectedSegment = segments.data?.find((item) => segmentKey(item.segment) === draftSegment);
 
   return (
     <AdminCard aria-labelledby="campaign-composer" className="flex flex-col gap-5 p-6">
@@ -195,10 +201,11 @@ export function CampaignComposer({
         </legend>
         <div className="flex flex-wrap gap-2">
           {(segments.data ?? []).map((item) => {
-            const selected = draft.segment === item.segment.kind;
+            const key = segmentKey(item.segment);
+            const selected = key === draftSegment;
             return (
               <label
-                key={item.segment.kind}
+                key={key}
                 className={cn(
                   'inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-2 font-ui text-[14px] leading-5 font-medium transition-colors has-focus-visible:ring-2 has-focus-visible:ring-brand-primary has-focus-visible:ring-offset-2',
                   selected
@@ -209,9 +216,9 @@ export function CampaignComposer({
                 <input
                   type="radio"
                   name="campaign-segment"
-                  value={item.segment.kind}
+                  value={key}
                   checked={selected}
-                  onChange={() => setDraft((current) => ({ ...current, segment: item.segment.kind }))}
+                  onChange={() => setDraft((current) => ({ ...current, segment: item.segment }))}
                   className="sr-only"
                 />
                 {selected && <Check aria-hidden size={14} />}
@@ -220,10 +227,9 @@ export function CampaignComposer({
             );
           })}
         </div>
-        {draft.segment !== 'ALL' && (
+        {draft.segment.kind !== 'ALL' && (
           <p className="font-ui text-[12px] leading-4 text-text-muted">
-            {formatNumber(segments.data?.find((item) => item.segment.kind === draft.segment)?.count ?? 0)}{' '}
-            inscrits sur {formatNumber(allSegment?.count ?? 0)}.
+            {formatNumber(selectedSegment?.count ?? 0)} inscrits sur {formatNumber(allSegment?.count ?? 0)}.
           </p>
         )}
       </fieldset>
@@ -304,11 +310,15 @@ export function CampaignComposer({
         open={dialog === 'schedule'}
         id={campaignId}
         current={campaign?.scheduledAt ?? null}
-        recipients={segments.data?.find((item) => item.segment.kind === draft.segment)?.count ?? null}
+        recipients={selectedSegment?.count ?? null}
         onClose={() => setDialog(null)}
         onScheduled={() => {
           setDialog(null);
           void refresh();
+        }}
+        onContentErrors={(next) => {
+          setDialog(null);
+          setErrors(next);
         }}
       />
       <ConfirmDialog
@@ -381,6 +391,7 @@ function ScheduleDialog({
   recipients,
   onClose,
   onScheduled,
+  onContentErrors,
 }: {
   open: boolean;
   id: string | null;
@@ -388,6 +399,8 @@ function ScheduleDialog({
   recipients: number | null;
   onClose: () => void;
   onScheduled: () => void;
+  /** 422 sur l'objet ou le contenu (`subject`, `html`) : erreurs affichées dans le compositeur. */
+  onContentErrors: (errors: { subject?: string; html?: string }) => void;
 }) {
   const [parts, setParts] = useState(() => dateParts(current));
   const [error, setError] = useState<string | null>(null);
@@ -412,8 +425,15 @@ function ScheduleDialog({
       onScheduled();
     },
     onError: (caught) => {
-      setError(errorMessage(caught));
-      toast.error(errorMessage(caught));
+      const fields = caught instanceof ApiError ? caught.fieldErrors : {};
+      if (fields.subject || fields.html) {
+        onContentErrors({ subject: fields.subject, html: fields.html });
+        toast.error(fields.subject ?? fields.html!);
+        return;
+      }
+      const message = fields.scheduledAt ?? errorMessage(caught);
+      setError(message);
+      toast.error(message);
     },
   });
 

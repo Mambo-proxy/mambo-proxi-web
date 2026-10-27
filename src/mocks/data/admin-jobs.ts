@@ -318,6 +318,7 @@ function fromSeed(seed: Seed, index: number): AdminApplication {
     reference: `MP-2026-${String(150 - index).padStart(4, '0')}`,
     status: seed.status,
     job: offer ? { id: offer.id, title: offer.title ?? '' } : null,
+    jobTitle: offer ? (offer.title ?? '') : null,
     contact,
     message: seed.message ?? null,
     cv: {

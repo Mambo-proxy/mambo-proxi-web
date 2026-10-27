@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, ImagePlus, RefreshCw, Trash2, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { useId, useRef, useState, type DragEvent } from 'react';
+import { StatusPill } from '@/components/admin/editor/editor-ui';
 import { useReadOnly } from '@/components/admin/shell/permissions';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/field';
@@ -11,15 +12,37 @@ import { Modal } from '@/components/ui/modal';
 import { Spinner } from '@/components/ui/spinner';
 import { data } from '@/lib/admin/query';
 import { browserApi } from '@/lib/api/browser';
-import { errorMessage } from '@/lib/api/errors';
+import { ApiError, errorMessage } from '@/lib/api/errors';
 import type { Media, MediaImage } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { formatFileSize } from '@/lib/format/number';
 
 export const mediaListKey = ['media'] as const;
 
-const ACCEPT = 'image/jpeg,image/png,image/webp,image/svg+xml';
+/** Types acceptés par la médiathèque (le type réel est contrôlé par l'API : 415 sinon). */
+export const MEDIA_ACCEPT = 'image/jpeg,image/png,image/webp,image/svg+xml';
 const MAX_SIZE = 10 * 1024 * 1024;
+
+/** Intervalle de rafraîchissement d'une liste tant qu'une image est en traitement (variantes en cours). */
+const PROCESSING_POLL_MS = 3000;
+
+/**
+ * `refetchInterval` d'une liste de la médiathèque : l'API répond `PROCESSING` (sans variantes) juste après un envoi
+ * ou un remplacement ; la liste est relue jusqu'à ce que chaque image soit prête (ou en échec).
+ */
+export function pollWhileProcessing(query: { state: { data?: { data: Media[] } } }): number | false {
+  return query.state.data?.data.some((media) => media.status === 'PROCESSING') ? PROCESSING_POLL_MS : false;
+}
+
+/** État du traitement d'une image (rien quand elle est prête). */
+export function MediaStatusPill({ status, className }: { status: Media['status']; className?: string }) {
+  if (status === 'READY') return null;
+  return (
+    <StatusPill tone={status === 'PROCESSING' ? 'warning' : 'muted'} className={className}>
+      {status === 'PROCESSING' ? 'En traitement' : 'Échec du traitement'}
+    </StatusPill>
+  );
+}
 
 /** `Media` (médiathèque) → `MediaImage` (référence enregistrée dans un contenu). */
 export function toMediaImage(media: Media): MediaImage {
@@ -224,6 +247,7 @@ export function MediaPickerDialog({ open, onClose, onSelect, initialFile }: Medi
     queryFn: () =>
       data(browserApi.GET('/v1/admin/media', { params: { query: { q: q || undefined, pageSize: 48 } } })),
     enabled: open && tab === 'library',
+    refetchInterval: pollWhileProcessing,
   });
 
   function pick(candidate: File) {
@@ -251,7 +275,9 @@ export function MediaPickerDialog({ open, onClose, onSelect, initialFile }: Medi
       const media = await upload.mutateAsync({ file, alt: alt.trim() });
       onSelect(toMediaImage(media));
     } catch (error) {
-      setFileError(errorMessage(error));
+      const fields = uploadFieldErrors(error);
+      setFileError(fields.file);
+      setAltError(fields.alt);
     }
   }
 
@@ -350,6 +376,7 @@ export function MediaPickerDialog({ open, onClose, onSelect, initialFile }: Medi
                         <span className="truncate px-0.5 font-ui text-[12px] leading-4 text-text-main">
                           {media.alt || media.fileName}
                         </span>
+                        <MediaStatusPill status={media.status} className="self-start" />
                         {active && (
                           <span
                             aria-hidden
@@ -385,9 +412,19 @@ export function MediaPickerDialog({ open, onClose, onSelect, initialFile }: Medi
   );
 }
 
+/**
+ * Erreurs d'un envoi à afficher sous les champs : 422 par champ (`file`, `alt`), sinon message de l'API (413 trop
+ * volumineux, 415 type réel non accepté…) sous la zone d'envoi.
+ */
+export function uploadFieldErrors(error: unknown): { file: string | null; alt: string | null } {
+  const fields = error instanceof ApiError ? error.fieldErrors : {};
+  const alt = fields.alt ?? null;
+  return { file: fields.file ?? (alt ? null : errorMessage(error)), alt };
+}
+
 /** Format ou taille refusés : message en français, `null` si l'image est acceptée. */
 export function imageFileError(file: File): string | null {
-  if (!ACCEPT.split(',').includes(file.type))
+  if (!MEDIA_ACCEPT.split(',').includes(file.type))
     return 'Format non accepté. Formats acceptés : JPG, PNG, WebP ou SVG.';
   if (file.size > MAX_SIZE) return `L’image dépasse ${formatFileSize(MAX_SIZE)}.`;
   return null;
@@ -416,7 +453,7 @@ export function MediaUploadFields({
       <input
         ref={inputRef}
         type="file"
-        accept={ACCEPT}
+        accept={MEDIA_ACCEPT}
         className="sr-only"
         tabIndex={-1}
         aria-hidden

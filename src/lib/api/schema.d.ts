@@ -2710,7 +2710,7 @@ export interface paths {
         put?: never;
         /**
          * Envoi de test
-         * @description Envoi du modèle enregistré, avec les données d'exemple, à l'adresse indiquée. Modèle désactivé → `409`.
+         * @description Envoi du modèle enregistré, avec les données d'exemple, à l'adresse indiquée, objet préfixé « [TEST] ». Modèle désactivé → `409`.
          */
         post: operations["adminTestEmailTemplate"];
         delete?: never;
@@ -3456,7 +3456,8 @@ export interface components {
             /**
              * @description Adresse interne française, comme partout dans le contrat ; le site la convertit dans la langue de la page
              *     (`SiteLink`). Services `/services/{rubrique}/{service}`, rubriques `/services/{rubrique}`, offres
-             *     `/recrutement/{slug}`, formations `/formation#{slug}`, articles `/magazine#article-{id}`, pages : leur adresse.
+             *     `/recrutement/{slug}`, formations `/formation#{slug}`, articles `/magazine#article-{id}` (dernière édition publiée) ou
+             *     `/magazine?edition={editionId}#article-{id}` (édition plus ancienne), pages : leur adresse.
              * @example /services/experience/chef-prive
              */
             href: string;
@@ -4041,6 +4042,12 @@ export interface components {
         };
         /** @enum {string} */
         ContactPreference: "WHATSAPP" | "TELEPHONE" | "EMAIL";
+        /**
+         * @description Langue de l'envoi (facultative) : celle des e-mails envoyés à la personne (accusé de réception, suites).
+         *     Absente, l'API retient la première langue prise en charge de l'en-tête `Accept-Language`, sinon `fr`.
+         * @enum {string}
+         */
+        SubmissionLanguage: "fr" | "en";
         QuoteRequestInput: {
             categorySlug: components["schemas"]["Slug"];
             serviceSlug?: components["schemas"]["Slug"] | null;
@@ -4053,6 +4060,7 @@ export interface components {
             contactPreference: components["schemas"]["ContactPreference"];
             consent: components["schemas"]["Consent"];
             antiSpam: components["schemas"]["AntiSpam"];
+            lang?: components["schemas"]["SubmissionLanguage"];
         };
         ContactMessageInput: {
             /** @enum {string} */
@@ -4071,6 +4079,7 @@ export interface components {
             message: string;
             consent: components["schemas"]["Consent"];
             antiSpam: components["schemas"]["AntiSpam"];
+            lang?: components["schemas"]["SubmissionLanguage"];
         };
         AppointmentInput: {
             reason: components["schemas"]["AppointmentReason"];
@@ -4080,6 +4089,7 @@ export interface components {
             message?: string | null;
             consent: components["schemas"]["Consent"];
             antiSpam: components["schemas"]["AntiSpam"];
+            lang?: components["schemas"]["SubmissionLanguage"];
         };
         RegistrationInput: {
             /** @enum {string} */
@@ -4105,6 +4115,7 @@ export interface components {
             newsletter: boolean;
             consent: components["schemas"]["Consent"];
             antiSpam: components["schemas"]["AntiSpam"];
+            lang?: components["schemas"]["SubmissionLanguage"];
         };
         TrainingRequestInput: {
             /** @description Formation choisie dans le catalogue ou `autre`. */
@@ -4118,6 +4129,7 @@ export interface components {
             message?: string | null;
             consent: components["schemas"]["Consent"];
             antiSpam: components["schemas"]["AntiSpam"];
+            lang?: components["schemas"]["SubmissionLanguage"];
         };
         /** @enum {string} */
         PartnershipType: "PRESTATAIRE_EXPERIENCE" | "IMMOBILIER" | "ENTREPRISE_PRESTATAIRE" | "AUTRE";
@@ -4130,6 +4142,7 @@ export interface components {
             presentation?: string | null;
             consent: components["schemas"]["Consent"];
             antiSpam: components["schemas"]["AntiSpam"];
+            lang?: components["schemas"]["SubmissionLanguage"];
         };
         EventRegistrationInput: {
             eventSlug: components["schemas"]["Slug"];
@@ -4137,6 +4150,7 @@ export interface components {
             contact: components["schemas"]["ContactIdentity"];
             consent: components["schemas"]["Consent"];
             antiSpam: components["schemas"]["AntiSpam"];
+            lang?: components["schemas"]["SubmissionLanguage"];
         };
         /** @description Corps `multipart/form-data`. Les objets sont envoyés sous forme de champs à plat. */
         JobApplicationInput: {
@@ -4155,6 +4169,7 @@ export interface components {
             honeypot?: string;
             /** Format: date-time */
             startedAt: string;
+            lang?: components["schemas"]["SubmissionLanguage"];
         };
         NewsletterSubscriptionInput: {
             name?: string | null;
@@ -4985,10 +5000,17 @@ export interface components {
             requestId: components["schemas"]["Id"];
             reference: components["schemas"]["Reference"];
             status: components["schemas"]["ApplicationStatus"];
+            /** @description Offre visée ; `null` pour une candidature spontanée ou quand l'offre a été supprimée depuis. */
             job?: {
                 id: components["schemas"]["Id"];
                 title: string;
             } | null;
+            /**
+             * @description Intitulé du poste visé : celui de l'offre, ou celui conservé à l'envoi quand l'offre a été supprimée ;
+             *     `null` pour une candidature spontanée (déposée sans offre).
+             * @example Chef cuisinier à domicile (H/F)
+             */
+            jobTitle: string | null;
             contact: components["schemas"]["ContactSummary"];
             message?: string | null;
             cv: components["schemas"]["Attachment"];
@@ -5112,7 +5134,9 @@ export interface components {
             /** @description HTML de l'édito, signé, affiché en ouverture de l'édition. */
             editorial?: string | null;
             editorialEn?: string | null;
+            /** @description Nom et fonction séparés par un tiret cadratin : « Mireille Bell — Fondatrice de Mambo Proxi ». */
             signature?: string | null;
+            /** @description Version anglaise, même format (« Mireille Bell — Founder of Mambo Proxi »). */
             signatureEn?: string | null;
         };
         MagazineEditionInput: components["schemas"]["MagazineEditionFields"] & Record<string, never>;
@@ -6166,6 +6190,7 @@ export type SurveyQuestion = components['schemas']['SurveyQuestion'];
 export type PublicSurvey = components['schemas']['PublicSurvey'];
 export type SurveyAnswer = components['schemas']['SurveyAnswer'];
 export type ContactPreference = components['schemas']['ContactPreference'];
+export type SubmissionLanguage = components['schemas']['SubmissionLanguage'];
 export type QuoteRequestInput = components['schemas']['QuoteRequestInput'];
 export type ContactMessageInput = components['schemas']['ContactMessageInput'];
 export type AppointmentInput = components['schemas']['AppointmentInput'];
@@ -9855,7 +9880,10 @@ export interface operations {
         parameters: {
             query?: {
                 status?: components["schemas"]["ApplicationStatus"];
-                /** @description Identifiant de l'offre, ou `spontaneous`. */
+                /**
+                 * @description Identifiant de l'offre, ou `spontaneous` : candidatures déposées sans offre (celles dont l'offre a été
+                 *     supprimée depuis en sont exclues).
+                 */
                 job?: string;
                 page?: components["parameters"]["Page"];
                 pageSize?: components["parameters"]["PageSize"];

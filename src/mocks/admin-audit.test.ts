@@ -21,10 +21,10 @@ describe('journal d’activité simulé', () => {
     expect(all.body.meta.total).toBe(72);
     const dates = all.body.data.map((entry) => entry.createdAt);
     expect(dates).toEqual([...dates].sort().reverse());
-    const team = await list('?actor=usr_equipe&entity=Demande');
+    const team = await list('?actor=usr_equipe&entity=Request');
     expect(team.body.data.length).toBeGreaterThan(0);
     expect(
-      team.body.data.every((entry) => entry.actor?.id === 'usr_equipe' && entry.entity === 'Demande'),
+      team.body.data.every((entry) => entry.actor?.id === 'usr_equipe' && entry.entity === 'Request'),
     ).toBe(true);
     const recent = await list(`?from=${new Date(Date.now() - 7 * 86_400_000).toISOString()}`);
     expect(recent.body.meta.total).toBeLessThan(all.body.meta.total);

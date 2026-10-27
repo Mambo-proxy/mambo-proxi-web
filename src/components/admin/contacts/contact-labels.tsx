@@ -24,3 +24,21 @@ export function NewsletterBadge({ status }: { status: SubscriberStatus | null | 
   if (status === 'DESINSCRIT') return <StatusPill tone="muted">Désinscrit</StatusPill>;
   return <StatusPill tone="neutral">Non</StatusPill>;
 }
+
+/** Origine de la fiche (`source` : formulaire qui l'a créée, en code) ; valeur inconnue affichée telle quelle. */
+const SOURCE_LABELS: Record<string, string> = {
+  devis: 'Formulaire de devis',
+  contact: 'Formulaire de contact',
+  inscription: 'Formulaire d’inscription',
+  formation: 'Inscription à une formation',
+  partenariat: 'Demande de partenariat',
+  evenement: 'Inscription à un événement',
+  'rendez-vous': 'Rendez-vous',
+  candidature: 'Candidature',
+  newsletter: 'Inscription à la newsletter',
+};
+
+export function sourceLabel(source: string | null | undefined): string {
+  if (!source) return '—';
+  return SOURCE_LABELS[source] ?? source;
+}

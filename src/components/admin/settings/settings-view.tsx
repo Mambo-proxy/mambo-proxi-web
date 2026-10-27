@@ -5,7 +5,7 @@ import type { Route } from 'next';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useAdmin } from '@/components/admin/shell/admin-context';
-import { useCan } from '@/components/admin/shell/permissions';
+import { ReadOnlyNotice, useCan } from '@/components/admin/shell/permissions';
 import { AdminPage, topbarActionClass } from '@/components/admin/shell/admin-page';
 import { StatusTabs } from '@/components/admin/ui/filters';
 import { cn } from '@/lib/cn';
@@ -71,6 +71,11 @@ export function SettingsView() {
             tabs={tabs.map((item) => ({ value: item.value, label: item.label }))}
             value={tab}
             onChange={select}
+          />
+          {/* Responsable : `settings:read` sans `settings:write` (l'API refuse toute écriture, 403) : cartes figées par `SettingsCard`. */}
+          <ReadOnlyNotice
+            permission={['settings:write', 'settings:admin']}
+            text="votre rôle permet de consulter les paramètres, pas de les modifier."
           />
           <div role="tabpanel" aria-label={tabs.find((item) => item.value === tab)?.label}>
             {tab === 'coordonnees' && (

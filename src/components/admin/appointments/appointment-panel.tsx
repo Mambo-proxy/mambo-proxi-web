@@ -53,16 +53,24 @@ const quickAction =
 const relatedLink =
   'flex items-center gap-2.5 rounded-md border border-border-default px-3.5 py-3 font-ui text-[14px] leading-5 font-semibold text-text-main hover:bg-neutral-50 [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-icon-default';
 
-/** Liens vers les écrans liés : demandes du contact, fiche contact, partenariat ou candidature selon le motif. */
-function relatedLinks(appointment: Appointment) {
+/**
+ * Liens vers les écrans liés : demandes du contact (toutes dates), fiche contact (`?id=`, permission
+ * `contacts:read`), partenariat ou candidature selon le motif.
+ */
+function relatedLinks(appointment: Appointment, canReadContacts: boolean) {
   const links: { href: string; label: string; icon: typeof FileText }[] = [
     {
-      href: `${adminRoutes.requests}?q=${encodeURIComponent(appointment.contact.email)}`,
+      href: `${adminRoutes.requests}?q=${encodeURIComponent(appointment.contact.email)}&period=all`,
       label: 'Demandes de ce contact',
       icon: FileText,
     },
-    { href: `${adminRoutes.contacts}/${appointment.contact.id}`, label: 'Fiche contact', icon: Contact },
   ];
+  if (canReadContacts)
+    links.push({
+      href: `${adminRoutes.contacts}?id=${encodeURIComponent(appointment.contact.id)}`,
+      label: 'Fiche contact',
+      icon: Contact,
+    });
   if (appointment.reason === 'PARTENARIAT')
     links.push({
       href: adminRoutes.partners,
@@ -381,7 +389,7 @@ export function AppointmentPanel({
             </form>
 
             <nav aria-label="Écrans liés" className="flex flex-col gap-2">
-              {relatedLinks(appointment).map((link) => (
+              {relatedLinks(appointment, can('contacts:read')).map((link) => (
                 <Link key={link.label} href={link.href as Route} prefetch={false} className={relatedLink}>
                   <link.icon aria-hidden />
                   {link.label}

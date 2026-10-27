@@ -350,6 +350,18 @@
       "retry": "Try again"
     }
   },
+  "magazine": {
+    "issue": "Issue {number}",
+    "specialIssue": "Special issue",
+    "heroTitle": "Mambo Proxi — {issue}",
+    "editoEyebrow": "Editorial · {subtitle} — {title}",
+    "editoEyebrowShort": "Editorial — {title}",
+    "articlesEyebrow": "The articles",
+    "articlesTitle": "In this issue.",
+    "readArticle": "Read the article",
+    "editions": "Magazine issues",
+    "preview": "Preview: this issue is not yet published on the site."
+  },
   "search": {
     "open": "Search the site",
     "dialogTitle": "Site search",

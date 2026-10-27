@@ -2,12 +2,26 @@
 
 import { useState, type ComponentProps, type ReactNode } from 'react';
 import { EditorSection } from '@/components/admin/editor/editor-ui';
+import { ReadOnlyFieldset, useCan } from '@/components/admin/shell/permissions';
 import { Input } from '@/components/ui/field';
 import { cn } from '@/lib/cn';
 
-/** Carte de Paramètres (`94:11866`) : carte-section de l'éditeur, padding 24. */
-export function SettingsCard({ className, ...props }: ComponentProps<typeof EditorSection>) {
-  return <EditorSection className={cn('md:p-6', className)} {...props} />;
+/**
+ * Carte de Paramètres (`94:11866`) : carte-section de l'éditeur, padding 24. Sans `settings:write` ni
+ * `settings:admin` (responsable), champs et interrupteurs figés : l'API refuse l'enregistrement (403). `alwaysEnabled` :
+ * carte qui gère elle-même la lecture seule (modèles d'e-mails consultables, aperçu compris).
+ */
+export function SettingsCard({
+  className,
+  alwaysEnabled = false,
+  ...props
+}: ComponentProps<typeof EditorSection> & { alwaysEnabled?: boolean }) {
+  const canWrite = useCan()('settings:write', 'settings:admin');
+  return (
+    <ReadOnlyFieldset readOnly={!canWrite && !alwaysEnabled}>
+      <EditorSection className={cn('md:p-6', className)} {...props} />
+    </ReadOnlyFieldset>
+  );
 }
 
 /** Grille de champs : 2 colonnes (écart 16) dès 640 px, rangées espacées de 18. */

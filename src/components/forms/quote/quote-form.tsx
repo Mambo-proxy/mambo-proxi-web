@@ -11,7 +11,7 @@ import { Field, Input, PhoneInput, Select, Textarea } from '@/components/ui/fiel
 import { Icon } from '@/components/ui/icon';
 import { toast } from '@/components/ui/toaster';
 import { browserApi } from '@/lib/api/browser';
-import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
+import { ApiError, formErrorMessage, toApiError } from '@/lib/api/errors';
 import type { CategorySummary, QuoteField, QuoteRequestInput, ServiceSummary } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
@@ -227,13 +227,21 @@ export function QuoteForm({
       }
       router.push(`/devis/confirmation?ref=${encodeURIComponent(accepted.reference)}`);
     } catch (caught) {
+      const shown = (path: string) =>
+        path.startsWith('needs.') || FIELD_NAMES.has(path.replace(/^contact\./, '') as keyof QuoteFormInput);
       if (caught instanceof ApiError) {
         for (const [path, message] of Object.entries(caught.fieldErrors)) {
+          // Champ dynamique obligatoire manquant (`needs.<nom>`) : signalé sous le champ, à l'étape 2.
+          if (path.startsWith('needs.')) {
+            form.setError(path as `needs.${string}`, { message });
+            setStep(2);
+            continue;
+          }
           const name = path.replace(/^contact\./, '') as keyof QuoteFormInput;
           if (FIELD_NAMES.has(name)) form.setError(name, { message });
         }
       }
-      toast.error(errorMessage(caught));
+      toast.error(formErrorMessage(caught, shown));
     }
   }
 

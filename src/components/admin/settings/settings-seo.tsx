@@ -113,7 +113,7 @@ function AnalyticsCard() {
   return (
     <SettingsCard
       title="Mesure d’audience"
-      subtitle="Google Analytics 4 : visites du site et carte du tableau de bord"
+      subtitle="Google Analytics 4 : statistiques détaillées des visites"
     >
       {!value ? (
         <Skeleton className="h-[150px] w-full rounded-md" />

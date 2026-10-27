@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
+import { isRemoteMedia, variantUrl } from '@/lib/media/image';
 import type { Route } from 'next';
 import { SiteLink as Link } from '@/i18n/site-link';
 import type { DynamicSection, Partner } from '@/lib/api/schema';
@@ -28,7 +29,8 @@ export function PartnersStrip({ section, partners }: { section: DynamicSection; 
             >
               {partner.logo ? (
                 <Image
-                  src={partner.logo.url}
+                  src={variantUrl(partner.logo, 480)}
+                  unoptimized={isRemoteMedia(partner.logo.url)}
                   alt={partner.name}
                   width={partner.logo.width}
                   height={partner.logo.height}

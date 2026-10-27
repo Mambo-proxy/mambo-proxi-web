@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Lock, Mail, Pencil, Reply, Users } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
+import { useCan } from '@/components/admin/shell/permissions';
 import { EmptyState } from '@/components/admin/ui/filters';
 import { Field, Input, Select } from '@/components/ui/field';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -91,11 +92,13 @@ export function EmailFamiliesCard() {
   const templates = useEmailTemplates();
   const { value: emails } = useSettingsGroup('emails');
   const toggle = useToggleTemplates();
+  // Modèles consultables en lecture seule ; activation : `settings:write`.
+  const canWrite = useCan()('settings:write');
   const [editing, setEditing] = useState<EmailTemplateKey | null>(null);
   const list = templates.data;
 
   return (
-    <SettingsCard title="E-mails automatiques" subtitle="Envoyés sans action de votre part">
+    <SettingsCard alwaysEnabled title="E-mails automatiques" subtitle="Envoyés sans action de votre part">
       {!list ? (
         <Skeleton className="h-[280px] w-full rounded-md" />
       ) : (
@@ -111,6 +114,7 @@ export function EmailFamiliesCard() {
                   label={`Envoyer « ${family.name} »`}
                   hideLabel
                   checked={familyEnabled(family, list)}
+                  disabled={!canWrite}
                   onChange={(event) =>
                     toggle.mutate({ keys: family.keys, enabled: event.target.checked, label: family.name })
                   }
@@ -132,6 +136,7 @@ export function EmailsTab() {
   const { value, update, error, isError } = useSettingsGroup('emails');
   const templates = useEmailTemplates();
   const toggle = useToggleTemplates();
+  const canWrite = useCan()('settings:write');
   const [editing, setEditing] = useState<EmailTemplateKey | null>(null);
   const audiences = Object.keys(AUDIENCE_LABELS) as (keyof typeof AUDIENCE_LABELS)[];
 
@@ -245,6 +250,7 @@ export function EmailsTab() {
       </SettingsCard>
 
       <SettingsCard
+        alwaysEnabled
         title="Modèles d’e-mails"
         subtitle="Objet, texte et bouton de chaque e-mail ; les e-mails de sécurité sont toujours envoyés"
       >
@@ -272,6 +278,7 @@ export function EmailsTab() {
                             label={`Envoyer « ${item.name} »`}
                             hideLabel
                             checked={Boolean(item.enabled)}
+                            disabled={!canWrite}
                             onChange={(event) =>
                               toggle.mutate({
                                 keys: [item.key!],

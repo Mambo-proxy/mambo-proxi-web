@@ -2,6 +2,7 @@ import Image from 'next/image';
 import type { CSSProperties } from 'react';
 import type { Visual as VisualData } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
+import { isRemoteMedia, mediaSources } from '@/lib/media/image';
 
 type Scene = VisualData['illustration'];
 
@@ -50,9 +51,36 @@ const PRIORITY_PROPS = { preload: true, fetchPriority: 'high' } as const;
 export function Visual({ visual, sizes, priority = false, className }: VisualProps) {
   const style: CSSProperties = { backgroundColor: FALLBACK[visual.illustration] };
   const image = visual.image;
+  const sources = image ? mediaSources(image) : null;
+  const objectPosition = image?.focalPoint
+    ? `${(image.focalPoint.x ?? 0.5) * 100}% ${(image.focalPoint.y ?? 0.5) * 100}%`
+    : undefined;
   return (
     <div className={cn('relative overflow-hidden', className)} style={style}>
-      {image ? (
+      {image && sources ? (
+        // Image de la médiathèque : variantes AVIF / WebP produites par l'API, choisies par le navigateur.
+        <picture>
+          {sources.avif && <source type="image/avif" srcSet={sources.avif} sizes={sizes} />}
+          {sources.webp && <source type="image/webp" srcSet={sources.webp} sizes={sizes} />}
+          <img
+            src={image.url}
+            alt={visual.alt ?? image.alt ?? ''}
+            width={image.width || undefined}
+            height={image.height || undefined}
+            sizes={sizes}
+            loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : undefined}
+            decoding="async"
+            className="absolute inset-0 size-full object-cover"
+            style={{
+              objectPosition,
+              ...(image.blurDataUrl
+                ? { backgroundImage: `url(${image.blurDataUrl})`, backgroundSize: 'cover' }
+                : {}),
+            }}
+          />
+        </picture>
+      ) : image ? (
         <Image
           src={image.url}
           alt={visual.alt ?? image.alt ?? ''}
@@ -61,14 +89,10 @@ export function Visual({ visual, sizes, priority = false, className }: VisualPro
           {...(priority ? PRIORITY_PROPS : {})}
           placeholder={image.blurDataUrl ? 'blur' : 'empty'}
           blurDataURL={image.blurDataUrl ?? undefined}
+          // Fichier de l'API sans variante (SVG, traitement en cours) : servi tel quel.
+          unoptimized={isRemoteMedia(image.url)}
           className="object-cover"
-          style={
-            image.focalPoint
-              ? {
-                  objectPosition: `${(image.focalPoint.x ?? 0.5) * 100}% ${(image.focalPoint.y ?? 0.5) * 100}%`,
-                }
-              : undefined
-          }
+          style={objectPosition ? { objectPosition } : undefined}
         />
       ) : (
         <Image

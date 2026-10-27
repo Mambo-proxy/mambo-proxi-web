@@ -9,13 +9,27 @@ import { tilesOrigin } from '../geo/tiles';
 
 const isDev = process.env.NODE_ENV === 'development';
 
-/** Origine de l'API (requêtes du navigateur, images servies par le stockage). */
-function apiOrigin(): string {
+function originOf(url: string | undefined): string {
+  if (!url) return '';
   try {
-    return new URL(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000').origin;
+    return new URL(url).origin;
   } catch {
     return '';
   }
+}
+
+/** Origine de l'API (requêtes du navigateur, images servies par le stockage). */
+function apiOrigin(): string {
+  return originOf(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000');
+}
+
+/**
+ * Origine des images de la médiathèque (`MEDIA_PUBLIC_URL` de l'API) si elle diffère de l'API (CDN) :
+ * `NEXT_PUBLIC_MEDIA_URL`. Listée dans `img-src` avec l'API, pour le développement en `http` (`https:` couvre la
+ * production).
+ */
+function mediaOrigin(): string {
+  return originOf(process.env.NEXT_PUBLIC_MEDIA_URL);
 }
 
 const TURNSTILE = 'https://challenges.cloudflare.com';
@@ -51,7 +65,7 @@ export function publicCsp(): string {
     'default-src': ["'self'"],
     'script-src': ["'self'", "'unsafe-inline'", isDev && "'unsafe-eval'", TURNSTILE, GOOGLE_TAG_MANAGER],
     'style-src': ["'self'", "'unsafe-inline'"],
-    'img-src': ["'self'", 'data:', 'blob:', 'https:', MAP_TILES],
+    'img-src': ["'self'", 'data:', 'blob:', 'https:', apiOrigin(), mediaOrigin(), MAP_TILES],
     'font-src': ["'self'"],
     'connect-src': ["'self'", apiOrigin(), TURNSTILE, ...GOOGLE_ANALYTICS],
     'frame-src': [TURNSTILE],
@@ -79,7 +93,7 @@ export function adminCsp(nonce: string, inlineScriptHashes: string[]): string {
     ],
     // Les attributs `style` (positions calculées, animations) imposent `unsafe-inline` pour les styles.
     'style-src': ["'self'", "'unsafe-inline'"],
-    'img-src': ["'self'", 'data:', 'blob:', 'https:', MAP_TILES],
+    'img-src': ["'self'", 'data:', 'blob:', 'https:', apiOrigin(), mediaOrigin(), MAP_TILES],
     'font-src': ["'self'"],
     'connect-src': ["'self'", apiOrigin()],
     'object-src': ["'none'"],

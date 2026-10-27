@@ -72,7 +72,10 @@ export function toInput(draft: DraftQuestion): SurveyQuestionInput {
   };
 }
 
-/** Contrôles avant envoi (mêmes règles que l'API) : intitulé, au moins deux choix, 5 questions actives au plus. */
+/**
+ * Contrôles avant envoi (mêmes règles que l'API) : intitulé, au moins deux choix, libellés des 5 notes ou des 2 bornes
+ * tous renseignés ou tous vides, 5 questions actives au plus.
+ */
 export function validateDraft(questions: DraftQuestion[]): {
   fields: Record<string, string>;
   general?: string;
@@ -82,6 +85,11 @@ export function validateDraft(questions: DraftQuestion[]): {
     if (!question.label.trim()) fields[`${index}.label`] = 'Saisissez l’intitulé de la question.';
     if (question.kind === 'CHOICE' && question.options.filter((option) => option.trim()).length < 2)
       fields[`${index}.options`] = 'Proposez au moins deux choix de réponse.';
+    const filled = question.options.filter((option) => option.trim()).length;
+    if (question.kind === 'STARS' && filled > 0 && filled !== 5)
+      fields[`${index}.options`] = 'Indiquez un libellé pour chacune des 5 notes, ou aucun.';
+    if (question.kind === 'NPS' && filled > 0 && filled !== 2)
+      fields[`${index}.options`] = 'Indiquez les deux bornes de l’échelle (gauche, droite), ou aucune.';
   });
   const active = questions.filter((question) => question.active).length;
   return {
@@ -183,6 +191,11 @@ function OptionsFields({
           </label>
         ))}
       </div>
+      {error && (
+        <p role="alert" className="text-[13px] leading-4 text-feedback-error">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -357,7 +370,9 @@ function SurveyForm({ initial }: { initial: AdminSurveyQuestion[] }) {
     onError: (error) => {
       const fields = error instanceof ApiError ? error.fieldErrors : {};
       setErrors(fields);
-      if (!Object.keys(fields).length) setGeneral(errorMessage(error));
+      // Erreur sur la liste entière (chemin vide : trop de questions actives) ou sur un champ non affiché.
+      const shown = Object.keys(fields).some((path) => /^\d+\.(label|options)$/.test(path));
+      setGeneral(fields[''] ?? (shown ? null : errorMessage(error)));
       const first = Object.keys(fields)[0];
       const question = first ? questions[Number(first.split('.')[0])] : undefined;
       if (question) setExpanded(question.key);

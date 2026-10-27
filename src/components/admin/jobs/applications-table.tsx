@@ -37,7 +37,7 @@ function CvButton({ application, compact }: { application: AdminApplication; com
   );
 }
 
-const jobTitle = (application: AdminApplication) => application.job?.title ?? 'Candidature spontanée';
+const jobTitle = (application: AdminApplication) => application.jobTitle ?? 'Candidature spontanée';
 
 /**
  * Candidatures (« Dernières candidatures » `93:22046` et onglet Candidatures) : tableau en desktop, cartes en mobile.

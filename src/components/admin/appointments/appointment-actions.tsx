@@ -38,7 +38,8 @@ const SUCCESS: Record<AppointmentAction['action'], string> = {
 
 /**
  * Action sur un rendez-vous (`PATCH /v1/admin/appointments/{id}`) : met à jour le détail, les listes, le compteur
- * de la barre latérale et le tableau de bord. Les erreurs de validation (422) sont affichées par le formulaire.
+ * de la barre latérale et le tableau de bord. Les erreurs de validation (422) de la proposition sont affichées par
+ * son formulaire ; celles des autres actions (assignation refusée…) et les conflits (409) par un message.
  */
 export function useAppointmentAction() {
   const client = useQueryClient();
@@ -52,9 +53,15 @@ export function useAppointmentAction() {
       void client.invalidateQueries({ queryKey: ['dashboard'] });
       toast.success(SUCCESS[action.action]);
     },
-    onError: (error) => {
-      if (!(error instanceof ApiError && (error.status === 422 || error.status === 401)))
-        toast.error(errorMessage(error));
+    onError: (error, { action }) => {
+      if (error instanceof ApiError && error.status === 401) return;
+      // Seul le formulaire « Autre créneau » affiche ses erreurs de champ (`proposedStartsAt`).
+      if (error instanceof ApiError && error.status === 422) {
+        if (action.action === 'propose') return;
+        toast.error(Object.values(error.fieldErrors)[0] ?? errorMessage(error));
+        return;
+      }
+      toast.error(errorMessage(error));
     },
   });
 }

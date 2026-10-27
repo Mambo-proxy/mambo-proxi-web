@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowRight, ArrowUpRight, ChevronRight, CircleCheck, Eye, Globe } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
@@ -134,9 +134,13 @@ function CardPreview({ form, cover }: { form: ServiceForm; cover: MediaImage | n
 
 /** Erreurs de validation d'une liste (`steps.1.title` …), affichées sous la section concernée. */
 function ListErrors({ errors, prefix }: { errors: Record<string, string>; prefix: string }) {
-  const messages = Object.entries(errors)
-    .filter(([path, message]) => message && (path === prefix || path.startsWith(`${prefix}.`)))
-    .map(([, message]) => message);
+  const messages = [
+    ...new Set(
+      Object.entries(errors)
+        .filter(([path, message]) => message && (path === prefix || path.startsWith(`${prefix}.`)))
+        .map(([, message]) => message),
+    ),
+  ];
   if (!messages.length) return null;
   return (
     <ul role="alert" className="flex flex-col gap-1 font-ui text-[13px] leading-4 text-feedback-error">
@@ -179,16 +183,23 @@ function EditorForm({ initial, categories }: EditorFormProps) {
     initial?.coverImage ? { [initial.coverImage.id]: initial.coverImage } : {},
   );
 
-  // Visuels de galerie : le contrat ne renvoie que leurs identifiants, retrouvés dans la médiathèque.
-  const unresolved = [form.coverImageId, ...form.galleryImageIds].some((id) => id && !picked[id]);
-  const library = useQuery({
-    queryKey: ['media', 'service-gallery'],
-    queryFn: () => data(browserApi.GET('/v1/admin/media', { params: { query: { pageSize: 100 } } })),
-    enabled: unresolved,
+  // Visuels de galerie : le contrat ne renvoie que leurs identifiants, relus un à un dans la médiathèque.
+  const unresolved = [form.coverImageId, ...form.galleryImageIds].filter(
+    (id): id is string => !!id && !picked[id],
+  );
+  const library = useQueries({
+    queries: unresolved.map((id) => ({
+      queryKey: ['media', 'detail', id],
+      queryFn: () => data(browserApi.GET('/v1/admin/media/{id}', { params: { path: { id } } })),
+      staleTime: 5 * 60_000,
+    })),
   });
+  const resolved = library.flatMap((query) => (query.data ? [query.data] : []));
+  const resolvedKey = resolved.map((item) => `${item.id}:${item.url}`).join('|');
   const media = useMemo(
-    () => ({ ...Object.fromEntries((library.data?.data ?? []).map((item) => [item.id, item])), ...picked }),
-    [library.data, picked],
+    () => ({ ...Object.fromEntries(resolved.map((item) => [item.id, item])), ...picked }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [resolvedKey, picked],
   );
 
   const services = useQuery({
@@ -221,10 +232,9 @@ function EditorForm({ initial, categories }: EditorFormProps) {
   function update(changes: Partial<ServiceForm>) {
     setForm((current) => ({ ...current, ...changes }));
     const keys = Object.keys(changes);
-    if (keys.some((key) => errors[key]))
-      setErrors((current) =>
-        Object.fromEntries(Object.entries(current).filter(([key]) => !keys.includes(key))),
-      );
+    const touched = (path: string) => keys.includes(path.split('.')[0]!);
+    if (Object.keys(errors).some(touched))
+      setErrors((current) => Object.fromEntries(Object.entries(current).filter(([path]) => !touched(path))));
   }
 
   function store(service: AdminService) {
@@ -237,7 +247,13 @@ function EditorForm({ initial, categories }: EditorFormProps) {
 
   function showErrors(error: unknown) {
     if (error instanceof ApiError && Object.keys(error.fieldErrors).length) {
-      setErrors(error.fieldErrors);
+      // Chemins pointés de l'API (`galleryImageIds.1`, `relatedServiceIds.0`…) : message aussi rattaché au champ.
+      const fields = { ...error.fieldErrors };
+      for (const [path, message] of Object.entries(error.fieldErrors)) {
+        const parent = path.split('.')[0]!;
+        fields[parent] ??= message;
+      }
+      setErrors(fields);
       focusFirstError();
     }
   }
@@ -777,6 +793,7 @@ function EditorForm({ initial, categories }: EditorFormProps) {
                 setReviewPicker(false);
               }}
             />
+            <ListErrors errors={errors} prefix="featuredReviewIds" />
           </EditorSection>
 
           <EditorSection

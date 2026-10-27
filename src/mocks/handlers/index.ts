@@ -26,6 +26,7 @@ import { contractHandlers } from './contract';
 import { eventHandlers } from './events';
 import { formHandlers } from './forms';
 import { jobHandlers } from './jobs';
+import { magazineHandlers } from './magazine';
 import { newsletterHandlers } from './newsletter';
 import { pageHandlers } from './pages';
 import { reviewHandlers } from './reviews';
@@ -72,6 +73,7 @@ export const handlers = [
   ...pageHandlers,
   ...trainingHandlers,
   ...jobHandlers,
+  ...magazineHandlers,
   ...reviewHandlers,
   ...searchHandlers,
   ...surveyHandlers,

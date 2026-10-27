@@ -8,7 +8,7 @@ const DEFAULT_API_URL = 'http://localhost:4000';
  * (ex. `http://api:4000` dans Docker) ; le navigateur utilise toujours l'URL publique.
  */
 export function getApiBaseUrl(): string {
-  const publicUrl = process.env.NEXT_PUBLIC_API_URL ?? DEFAULT_API_URL;
-  if (typeof window === 'undefined') return process.env.API_INTERNAL_URL ?? publicUrl;
+  const publicUrl = process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL;
+  if (typeof window === 'undefined') return process.env.API_INTERNAL_URL || publicUrl;
   return publicUrl;
 }

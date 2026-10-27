@@ -343,7 +343,7 @@ export const adminCoreHandlers = [
         id: contact.id,
         title: contact.fullName,
         subtitle: contact.email,
-        href: `/admin/contacts/${contact.id}`,
+        href: `/admin/contacts?id=${contact.id}`,
       }));
     const groups = [
       { kind: 'requests' as const, label: 'Demandes', items: requests },

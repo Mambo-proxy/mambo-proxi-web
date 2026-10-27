@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Field, Textarea } from '@/components/ui/field';
 import { toast } from '@/components/ui/toaster';
 import { browserApi } from '@/lib/api/browser';
-import { errorMessage, toApiError } from '@/lib/api/errors';
+import { formErrorMessage, toApiError } from '@/lib/api/errors';
 import type { SurveyQuestion } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
@@ -206,7 +206,7 @@ export function SurveyForm({ token, questions }: { token: string; questions: Sur
       router.push('/questionnaire/merci');
     } catch (caught) {
       setSending(false);
-      toast.error(errorMessage(caught));
+      toast.error(formErrorMessage(caught, () => false));
     }
   }
 

@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { isRemoteMedia, variantUrl } from '@/lib/media/image';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -83,7 +84,8 @@ export function PartnersGrid({ section, partners, initialFilter }: PartnersGridP
             <>
               {partner.logo ? (
                 <Image
-                  src={partner.logo.url}
+                  src={variantUrl(partner.logo, 480)}
+                  unoptimized={isRemoteMedia(partner.logo.url)}
                   alt={partner.logo.alt ?? partner.name}
                   width={partner.logo.width ?? 160}
                   height={partner.logo.height ?? 48}

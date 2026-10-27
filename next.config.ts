@@ -13,6 +13,28 @@ const formatOnly = `./${path
   .split(path.sep)
   .join('/')}`;
 
+/**
+ * Images de la médiathèque servies par l'API (`GET /v1/media/{dossier}/{fichier}`, `MEDIA_PUBLIC_URL`) ou par le CDN
+ * placé devant (`NEXT_PUBLIC_MEDIA_URL`). `<Visual>` sert d'abord les variantes AVIF / WebP de l'API ; ces motifs
+ * couvrent les autres usages de `next/image` avec une adresse de l'API.
+ */
+function mediaPatterns(): URL[] {
+  const patterns: URL[] = [];
+  for (const [base, path] of [
+    [process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000', '/v1/media/**'],
+    [process.env.NEXT_PUBLIC_MEDIA_URL, '/**'],
+  ] as const) {
+    if (!base) continue;
+    try {
+      const url = new URL(base);
+      patterns.push(new URL(`${url.origin}${url.pathname.replace(/\/+$/, '')}${path}`));
+    } catch {
+      // Adresse invalide : ignorée.
+    }
+  }
+  return patterns;
+}
+
 const nextConfig: NextConfig = {
   reactCompiler: true,
   poweredByHeader: false,
@@ -40,6 +62,7 @@ const nextConfig: NextConfig = {
   },
   images: {
     formats: ['image/avif', 'image/webp'],
+    remotePatterns: mediaPatterns(),
   },
   async headers() {
     return [

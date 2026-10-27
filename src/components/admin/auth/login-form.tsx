@@ -236,7 +236,7 @@ function OtpStep({
         id="trust-device"
         checked={trustDevice}
         onChange={(event) => setTrustDevice(event.target.checked)}
-        label="Faire confiance à cet appareil pendant 30 jours"
+        label="Faire confiance à cet appareil (pas de code à la prochaine connexion)"
         labelClassName="text-text-main"
       />
       <Button type="submit" fullWidth loading={pending}>

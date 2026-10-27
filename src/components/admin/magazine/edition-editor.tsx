@@ -700,6 +700,7 @@ function NewsletterCard({
   onUpdated: (edition: AdminMagazineEdition) => void;
 }) {
   const { user } = useAdmin();
+  const client = useQueryClient();
   const canSend = useCan()('newsletter:write');
   const { newsletter } = edition;
   const [sendAt, setSendAt] = useState(
@@ -724,6 +725,9 @@ function NewsletterCard({
     onError: (caught) => {
       setError(caught instanceof ApiError ? (caught.fieldErrors.scheduledAt ?? null) : null);
       toast.error(errorMessage(caught));
+      // 409 : envoi déjà parti (ou édition non publiable) — l'état affiché est relu.
+      if (caught instanceof ApiError && caught.status === 409)
+        void client.invalidateQueries({ queryKey: magazineEditionKey(edition.id) });
     },
   });
 

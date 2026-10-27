@@ -71,7 +71,7 @@ export function ApplicationDialog({ id, onClose }: { id: string | null; onClose:
       title={application ? application.contact.fullName : 'Candidature'}
       description={
         application
-          ? `${application.job?.title ?? 'Candidature spontanée'} · reçue le ${formatStamp(application.createdAt)} · ${application.reference}`
+          ? `${application.jobTitle ?? 'Candidature spontanée'} · reçue le ${formatStamp(application.createdAt)} · ${application.reference}`
           : undefined
       }
       maxWidth={560}

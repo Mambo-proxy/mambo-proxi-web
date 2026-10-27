@@ -87,6 +87,20 @@ function coordinateError(errors: Record<string, string>, quarters: ZoneQuarter[]
 }
 
 /**
+ * Message d'erreur de l'API sur la liste des quartiers : `quarters` ou un quartier (`quarters.3.name` : quartier en
+ * double…), avec son nom ; les coordonnées sont signalées à part (`coordinateError`).
+ */
+function quarterListError(errors: Record<string, string>, quarters: ZoneQuarter[]) {
+  if (errors.quarters) return errors.quarters;
+  const entry = Object.entries(errors).find(
+    ([path]) => /^quarters\.\d+/.test(path) && !/^quarters\.\d+\.coordinates/.test(path),
+  );
+  if (!entry) return null;
+  const name = quarters[Number(entry[0].split('.')[1])]?.name;
+  return name ? `${name}\u00A0: ${entry[1]}` : entry[1];
+}
+
+/**
  * Zone d'intervention (non maquetté, même langage que les éditeurs du back-office) : nom, couleur, textes du site
  * en français et en anglais, délai moyen, tarif indicatif (masqué sur le site), quartiers et leur position (clic
  * sur la carte ou latitude / longitude), contour GeoJSON collé ou importé (contrôlé avant l'envoi).
@@ -241,6 +255,9 @@ export function ZoneDialog({
   );
   const placingQuarter = draft.quarters.find((item) => item.name === placing);
   const apiCoordinateError = coordinateError(errors, draft.quarters);
+  const quartersError = quarterListError(errors, draft.quarters);
+  const feeError =
+    errors.fee || Object.entries(errors).find(([path]) => path.startsWith('fee.'))?.[1] || null;
   const areaError =
     errors.area || Object.entries(errors).find(([path]) => path.startsWith('area.'))?.[1] || null;
 
@@ -422,7 +439,7 @@ export function ZoneDialog({
             <CompactField
               label="Tarif indicatif (FCFA)"
               help="Masqué sur le site : les prix sont donnés sur devis."
-              error={errors.fee}
+              error={feeError}
             >
               {(control) => (
                 <CompactInput
@@ -510,7 +527,7 @@ export function ZoneDialog({
                   aria-label="Ajouter un quartier"
                   placeholder="Nom du quartier"
                   value={quarter}
-                  aria-invalid={errors.quarters ? true : undefined}
+                  aria-invalid={quartersError ? true : undefined}
                   onChange={(event) => setQuarter(event.target.value)}
                   onKeyDown={(event) => {
                     if (event.key !== 'Enter') return;
@@ -523,9 +540,9 @@ export function ZoneDialog({
                 </button>
               </div>
             )}
-            {readOnly ? null : errors.quarters ? (
+            {readOnly ? null : quartersError ? (
               <p role="alert" className="font-ui text-[13px] leading-4 text-feedback-error">
-                {errors.quarters}
+                {quartersError}
               </p>
             ) : (
               <p className="font-ui text-[12px] leading-4 text-text-muted">

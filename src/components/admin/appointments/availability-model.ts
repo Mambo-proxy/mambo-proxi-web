@@ -148,16 +148,20 @@ export function validateForm(form: AvailabilityForm): Record<string, string> {
   return errors;
 }
 
-/** Erreurs de l'API (`rules[2].endTime`, `exceptions[0].date`) → clés du formulaire. */
+/**
+ * Erreurs de l'API → clés du formulaire. Chemins en notation pointée (`rules.2.endTime`, `exceptions.0.date`,
+ * `rules.1.formats.0`) ; la notation entre crochets (`rules[2].endTime`) est aussi acceptée.
+ */
 export function mapServerErrors(
   fieldErrors: Record<string, string>,
   origins: [number, number][],
   form: AvailabilityForm,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
-  for (const [path, message] of Object.entries(fieldErrors)) {
-    const rule = /^rules\[(\d+)\]\.(startTime|endTime|formats)$/.exec(path);
-    const exception = /^exceptions\[(\d+)\]\.(date|startTime|endTime)$/.exec(path);
+  for (const [rawPath, message] of Object.entries(fieldErrors)) {
+    const path = rawPath.replace(/\[(\d+)\]/g, '.$1');
+    const rule = /^rules\.(\d+)\.(startTime|endTime|formats)(?:\.\d+)?$/.exec(path);
+    const exception = /^exceptions\.(\d+)\.(date|startTime|endTime)$/.exec(path);
     if (rule) {
       const origin = origins[Number(rule[1])];
       const field = rule[2] === 'startTime' ? 'start' : rule[2] === 'endTime' ? 'end' : 'formats';

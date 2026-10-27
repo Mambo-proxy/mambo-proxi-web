@@ -45,3 +45,16 @@ export function errorMessage(error: unknown): string {
   if (error instanceof ApiError) return error.problem.detail ?? error.problem.title;
   return FALLBACK_MESSAGE;
 }
+
+/**
+ * Message d'un envoi de formulaire refusé : si l'API signale une erreur sur un champ que le formulaire n'affiche pas
+ * (`startsAt`, `eventSlug`, `needs.<champ>`, `antiSpam.startedAt`…), son message, sinon le `detail` de la réponse
+ * (« Vérifiez les champs signalés… » n'aurait aucun champ signalé à l'écran).
+ */
+export function formErrorMessage(error: unknown, isShown: (path: string) => boolean): string {
+  if (error instanceof ApiError) {
+    const hidden = (error.problem.errors ?? []).find((item) => !isShown(item.path));
+    if (hidden) return hidden.message;
+  }
+  return errorMessage(error);
+}

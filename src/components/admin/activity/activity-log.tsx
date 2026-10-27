@@ -18,25 +18,48 @@ import type { AuditLogEntry } from '@/lib/api/schema';
 import { formatClock, formatWeekdayDate } from '@/lib/format/date';
 import { activityDay, diffLines, PERIODS, periodStart, type Period } from './activity-model';
 
-const PAGE_SIZE = 25;
+/** Taille de page par défaut de l'API (`GET /v1/admin/audit-log`). */
+const PAGE_SIZE = 20;
 
-/** Types de contenus du journal (filtre « Tous les contenus »), valeurs de `entity` de l'API. */
-const ENTITIES = [
-  'Avis',
-  'Candidature',
-  'Demande',
-  'Formation',
-  'Magazine',
-  'Média',
-  'Newsletter',
-  'Page',
-  'Paramètres',
-  'Partenaire',
-  'Rendez-vous',
-  'Service',
-  'Système',
-  'Utilisateur',
-];
+/**
+ * Types de contenus du journal (filtre « Tous les contenus ») : `entity` est le nom technique enregistré par l'API
+ * (`Request`, `Service`…), affiché avec un libellé français.
+ */
+const ENTITY_LABELS: Record<string, string> = {
+  Appointment: 'Rendez-vous',
+  Availability: 'Disponibilités',
+  Campaign: 'Newsletter',
+  Category: 'Rubrique',
+  Contact: 'Contact',
+  EmailTemplate: 'Modèle d’e-mail',
+  Event: 'Événement',
+  JobApplication: 'Candidature',
+  JobOffer: 'Offre d’emploi',
+  MagazineArticle: 'Article du magazine',
+  MagazineEdition: 'Magazine',
+  Media: 'Média',
+  Page: 'Page',
+  Partner: 'Partenaire',
+  Request: 'Demande',
+  Review: 'Avis',
+  Service: 'Service',
+  Setting: 'Paramètres',
+  Subscriber: 'Inscrit',
+  SurveyQuestion: 'Questionnaire',
+  System: 'Système',
+  Training: 'Formation',
+  User: 'Utilisateur',
+  Zone: 'Zone d’intervention',
+};
+
+const ENTITIES = Object.keys(ENTITY_LABELS).sort((a, b) =>
+  (ENTITY_LABELS[a] ?? a).localeCompare(ENTITY_LABELS[b] ?? b, 'fr'),
+);
+
+/** Libellé d'un type de contenu ; nom technique tel quel s'il est inconnu. */
+function entityLabel(entity: string): string {
+  return ENTITY_LABELS[entity] ?? entity;
+}
 
 /** Filtres et page dans l'adresse (`?actor=&entity=&periode=&page=`), sans requête au serveur. */
 function useActivityParams() {
@@ -139,7 +162,7 @@ export function ActivityLog() {
               <option value="">Tous les contenus</option>
               {ENTITIES.map((item) => (
                 <option key={item} value={item}>
-                  {item}
+                  {entityLabel(item)}
                 </option>
               ))}
             </FilterSelect>
@@ -253,7 +276,7 @@ function EntryRow({ entry }: { entry: AuditLogEntry }) {
             <span className="font-semibold">{entry.actor?.name ?? 'Automatique'}</span> · {entry.label}
           </p>
           <div className="flex flex-wrap items-center gap-2">
-            <StatusPill tone="neutral">{entry.entity}</StatusPill>
+            <StatusPill tone="neutral">{entityLabel(entry.entity)}</StatusPill>
             {hasDetails && (
               <button
                 type="button"

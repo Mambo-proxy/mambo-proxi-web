@@ -61,10 +61,12 @@ export function EmailTestDialog({
   open,
   onClose,
   send,
+  description = 'Un exemplaire de l’e-mail est envoyé à l’adresse indiquée.',
 }: {
   open: boolean;
   onClose: () => void;
   send: (email: string) => Promise<{ message: string }>;
+  description?: string;
 }) {
   const { user } = useAdmin();
   const [email, setEmail] = useState(user?.email ?? '');
@@ -93,7 +95,7 @@ export function EmailTestDialog({
       open={open}
       onClose={onClose}
       title="Envoyer un test"
-      description="L’e-mail de test porte la mention [TEST] dans l’objet."
+      description={description}
       maxWidth={460}
       footer={
         <div className="flex justify-end gap-2">

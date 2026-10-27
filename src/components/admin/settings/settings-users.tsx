@@ -132,7 +132,11 @@ export function UsersTab({
       toast.success(`${user.name} n’a plus accès au back-office.`);
       setRemoving(null);
     },
-    onError: (error) => toast.error(errorMessage(error)),
+    onError: (error) => {
+      // 409 : dernier administrateur actif, ou historique dans les demandes (le désactiver plutôt).
+      setRemoving(null);
+      toast.error(errorMessage(error));
+    },
   });
 
   function itemsFor(user: AdminUser): ActionMenuItem[] {
@@ -142,7 +146,8 @@ export function UsersTab({
       {
         label: user.status === 'INVITE' ? 'Renvoyer l’invitation' : 'Réinitialiser le mot de passe',
         icon: user.status === 'INVITE' ? Mail : KeyRound,
-        disabled: user.status === 'DESACTIVE',
+        // Son propre compte : l'API fermerait aussi la session en cours (« Mot de passe oublié » à la connexion).
+        disabled: self || user.status === 'DESACTIVE',
         onSelect: () => reset.mutate(user),
       },
       {
@@ -357,7 +362,9 @@ function InviteDialog({ open, onClose }: { open: boolean; onClose: () => void })
       onClose();
     },
     onError: (error) => {
-      if (error instanceof ApiError) setErrors(error.fieldErrors);
+      if (error instanceof ApiError)
+        // 409 : adresse déjà utilisée par un autre compte.
+        setErrors(error.status === 409 ? { email: errorMessage(error) } : error.fieldErrors);
       toast.error(errorMessage(error));
     },
   });

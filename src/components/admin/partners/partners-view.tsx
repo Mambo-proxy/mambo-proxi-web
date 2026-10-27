@@ -80,10 +80,18 @@ export function AddPartnerButton() {
  * par catégorie, grille de logos réordonnable (poignée, interrupteur d'affichage), tuile « Ajouter un logo ».
  */
 export function PartnersView() {
-  const [tab, setTab] = useTab();
+  const [selectedTab, setTab] = useTab();
   const [filter, setFilter] = useState<Filter>('TOUS');
+  // `GET /v1/admin/requests` exige `requests:read` (ou `requests:read-assigned`) : sans elle (rédacteur), pas
+  // d'onglet des demandes.
+  const canReadRequests = useCan()('requests:read', 'requests:read-assigned');
+  const tab: Tab = canReadRequests ? selectedTab : 'logos';
   const partners = useQuery({ queryKey: partnersKey, queryFn: listPartners });
-  const requests = useQuery({ queryKey: partnerRequestsKey, queryFn: listPartnerRequests });
+  const requests = useQuery({
+    queryKey: partnerRequestsKey,
+    queryFn: listPartnerRequests,
+    enabled: canReadRequests,
+  });
 
   return (
     <div className="flex flex-col gap-6">
@@ -93,7 +101,15 @@ export function PartnersView() {
           label="Logos et demandes"
           tabs={[
             { value: 'logos', label: 'Logos affichés', count: partners.data?.length },
-            { value: 'demandes', label: 'Demandes de partenariat', count: requests.data?.meta.total },
+            ...(canReadRequests
+              ? [
+                  {
+                    value: 'demandes' as const,
+                    label: 'Demandes de partenariat',
+                    count: requests.data?.meta.total,
+                  },
+                ]
+              : []),
           ]}
           value={tab}
           onChange={setTab}

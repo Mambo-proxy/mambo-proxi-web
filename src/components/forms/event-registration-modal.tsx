@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Field, Input, PhoneInput, Select } from '@/components/ui/field';
 import { Modal } from '@/components/ui/modal';
 import { browserApi } from '@/lib/api/browser';
-import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
+import { ApiError, formErrorMessage, toApiError } from '@/lib/api/errors';
 import type { Event } from '@/lib/api/schema';
 import { formatWeekdayDate } from '@/lib/format/date';
 import { CONSENT_TEXT, fieldRules } from '@/lib/forms/schemas';
@@ -73,7 +73,7 @@ export function EventRegistrationModal({
           if (field in schema.shape) form.setError(field, { message });
         }
       }
-      setFailure(errorMessage(caught));
+      setFailure(formErrorMessage(caught, (path) => path.replace(/^contact\./, '') in schema.shape));
     }
   }
 

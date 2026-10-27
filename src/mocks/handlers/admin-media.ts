@@ -124,6 +124,11 @@ export const adminMediaHandlers = [
     return HttpResponse.json(media, { status: 201 });
   }),
 
+  http.get('*/v1/admin/media/:id', ({ params }) => {
+    const media = adminMedia.find((item) => item.id === params.id);
+    return media ? HttpResponse.json(media) : problem(404, 'Ce média n’existe plus.');
+  }),
+
   http.patch('*/v1/admin/media/:id', async ({ request, params }) => {
     const media = adminMedia.find((item) => item.id === params.id);
     if (!media) return problem(404, 'Ce média n’existe plus.');
@@ -134,6 +139,26 @@ export const adminMediaHandlers = [
       ]);
     if (body.alt !== undefined) media.alt = body.alt!.trim();
     if (body.focalPoint !== undefined) media.focalPoint = body.focalPoint;
+    return HttpResponse.json(media);
+  }),
+
+  // Remplacement du fichier : même identifiant, texte alternatif et point focal (contrat).
+  http.put('*/v1/admin/media/:id/file', async ({ request, params }) => {
+    const media = adminMedia.find((item) => item.id === params.id);
+    if (!media) return problem(404, 'Ce média n’existe plus.');
+    const file = (await request.formData()).get('file');
+    if (!(file instanceof File)) return problem(422, 'Choisissez une image.');
+    if (!ACCEPTED.includes(file.type as (typeof ACCEPTED)[number]))
+      return problem(415, 'Format non accepté. Formats acceptés : JPG, PNG, WebP ou SVG.');
+    if (file.size > 10 * 1024 * 1024) return problem(413, 'L’image dépasse 10 Mo.');
+    Object.assign(media, await dimensions(file), {
+      url: URL.createObjectURL(file),
+      fileName: file.name,
+      mimeType: file.type as Media['mimeType'],
+      size: file.size,
+      variants: [],
+      status: 'READY',
+    });
     return HttpResponse.json(media);
   }),
 

@@ -18,7 +18,7 @@ import { errorMessage } from '@/lib/api/errors';
 import type { AdminContactListItem } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { formatDate, formatStamp } from '@/lib/format/date';
-import { interestsLabel, NewsletterBadge } from './contact-labels';
+import { interestsLabel, NewsletterBadge, sourceLabel } from './contact-labels';
 
 /** Export RGPD (`GET /v1/admin/contacts/{id}/export`) : fichier JSON de toutes les données du contact. */
 export async function exportContactData(contact: Pick<AdminContactListItem, 'id' | 'fullName'>) {
@@ -178,7 +178,7 @@ export function ContactPanel({ id, onClose }: { id: string; onClose: () => void 
                 ['Localisation', locationLabel(contact.city, contact.country)],
                 ['Structure', contact.organization ?? '—'],
                 ['Intérêts', interestsLabel(contact.interests)],
-                ['Origine', contact.source ?? '—'],
+                ['Origine', sourceLabel(contact.source)],
               ].map(([label, value]) => (
                 <div key={label} className="flex items-baseline justify-between gap-4">
                   <dt className={dt}>{label}</dt>

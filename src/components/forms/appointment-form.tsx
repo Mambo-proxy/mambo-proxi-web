@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Field, Input, PhoneInput, Textarea } from '@/components/ui/field';
 import { toast } from '@/components/ui/toaster';
 import { browserApi } from '@/lib/api/browser';
-import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
+import { ApiError, formErrorMessage, toApiError } from '@/lib/api/errors';
 import type { AppointmentFormat, AppointmentReason, Availability } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { formatClock, formatDateTime, formatWeekdayDate } from '@/lib/format/date';
@@ -118,6 +118,8 @@ export function AppointmentForm() {
   const [step, setStep] = useState<'choose' | 'details' | 'sent'>('choose');
   const [reference, setReference] = useState<string | null>(null);
   const [availability, setAvailability] = useState<{ key: string; data: Availability } | null>(null);
+  // Relance du chargement des disponibilités (créneau pris entre-temps par un autre visiteur).
+  const [reloads, setReloads] = useState(0);
 
   const query = {
     from: dayKey(latest([startOfMonth(month), today])),
@@ -133,8 +135,10 @@ export function AppointmentForm() {
     let cancelled = false;
     browserApi
       .GET('/v1/appointments/availability', { params: { query: JSON.parse(queryKey) } })
-      .then(({ data }) => {
-        if (!cancelled && data) setAvailability({ key: queryKey, data });
+      .then(({ data, error, response }) => {
+        if (cancelled) return;
+        if (!response.ok || !data) throw toApiError(error, response);
+        setAvailability({ key: queryKey, data });
       })
       .catch(() => {
         if (!cancelled) toast.error('Les disponibilités n’ont pas pu être chargées. Merci de réessayer.');
@@ -142,7 +146,7 @@ export function AppointmentForm() {
     return () => {
       cancelled = true;
     };
-  }, [queryKey]);
+  }, [queryKey, reloads]);
 
   const form = useForm<FormInput, unknown, FormOutput>({
     resolver: zodResolver(schema),
@@ -193,13 +197,22 @@ export function AppointmentForm() {
       setReference(data.reference);
       setStep('sent');
     } catch (caught) {
+      const shown = (path: string) => path.replace(/^contact\./, '') in schema.shape;
       if (caught instanceof ApiError) {
         for (const [path, message] of Object.entries(caught.fieldErrors)) {
           const name = path.replace(/^contact\./, '') as keyof FormInput;
-          if (name in schema.shape) form.setError(name, { message });
+          if (shown(path)) form.setError(name, { message });
+        }
+        // Créneau pris entre-temps (409 `slot-taken`) ou plus proposé (422 `startsAt`) : retour au choix du créneau,
+        // disponibilités rechargées.
+        if (caught.status === 409 || 'startsAt' in caught.fieldErrors) {
+          setSlot(null);
+          setStep('choose');
+          setAvailability(null);
+          setReloads((count) => count + 1);
         }
       }
-      toast.error(errorMessage(caught));
+      toast.error(formErrorMessage(caught, shown));
     }
   }
 

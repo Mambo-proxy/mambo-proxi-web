@@ -563,8 +563,8 @@ export function DashboardView() {
               value={dashboard.visits ? formatNumber(dashboard.visits.total) : '—'}
               legend={
                 dashboard.visits
-                  ? `${range === '7d' ? 'sur 7 jours' : range === '12m' ? 'sur 12 mois' : 'sur 30 jours'} · source Google Analytics`
-                  : 'Google Analytics non configuré (Paramètres › Référencement)'
+                  ? `pages vues ${range === '7d' ? 'sur 7 jours' : range === '12m' ? 'sur 12 mois' : 'sur 30 jours'} · mesure d’audience du site`
+                  : 'aucune mesure d’audience disponible pour l’instant'
               }
             />
           </div>

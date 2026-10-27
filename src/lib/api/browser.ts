@@ -54,6 +54,20 @@ const send = withSessionRefresh({
   prepareReplay: withCsrfToken,
 });
 
+/**
+ * Langue de la page (`<html lang>`, `fr` ou `en`) transmise à l'API par `Accept-Language` : messages de réponse et
+ * e-mails (accusés de réception, confirmation de la newsletter) dans la langue du site consulté, et non dans celle du
+ * navigateur. En-tête autorisé par le CORS de l'API.
+ */
+const language: Middleware = {
+  onRequest({ request }) {
+    if (typeof document === 'undefined' || request.headers.has('Accept-Language')) return undefined;
+    const lang = document.documentElement.lang;
+    if (lang) request.headers.set('Accept-Language', lang);
+    return request;
+  },
+};
+
 /** Client utilisé par les composants client (formulaires du site, back-office). Cookies de session inclus. */
 export const browserApi = createClient<paths>({
   baseUrl: getApiBaseUrl(),
@@ -61,4 +75,4 @@ export const browserApi = createClient<paths>({
   fetch: send,
 });
 
-browserApi.use(csrf);
+browserApi.use(csrf, language);

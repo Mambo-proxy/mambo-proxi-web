@@ -27,7 +27,8 @@ function BackupsCard() {
   const value = status.data;
   const rows = value
     ? [
-        ['Fréquence', 'Chaque nuit à 03:00'],
+        // Tâche `database-backup` de l'API : 2 h, heure de Douala.
+        ['Fréquence', 'Chaque nuit à 02:00'],
         [
           'Dernière sauvegarde',
           value.lastBackupAt ? backupMoment(value.lastBackupAt) : 'Aucune pour l’instant',

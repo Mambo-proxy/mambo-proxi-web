@@ -93,6 +93,8 @@ function AvailabilityFormView({ initial }: { initial: AvailabilityConfig }) {
     onError: (error) => {
       if (error instanceof ApiError && error.status === 422 && Object.keys(error.fieldErrors).length) {
         setErrors(mapServerErrors(error.fieldErrors, origins, form));
+        // Message général en plus : une erreur sans champ affiché (durée, nombre de plages…) reste visible.
+        toast.error(errorMessage(error));
         focusFirstError();
       } else toast.error(errorMessage(error));
     },

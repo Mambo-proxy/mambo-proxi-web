@@ -17,6 +17,30 @@ pnpm dev                # http://localhost:3000
 
 > Le projet est en cours de réalisation par phases. Les commandes de test, les mocks et la configuration (`.env.example`) sont documentés ici au fil des phases.
 
+## Lancer le site sur l'API réelle
+
+1. Démarrer l'API (`../mambo-proxi-api`, voir son README) avec `WEB_URL=http://localhost:3000` (seule origine
+   autorisée par son CORS, cookies et liens des e-mails) et le même `REVALIDATE_SECRET` que le site.
+2. Dans `.env.local` du site :
+
+   ```bash
+   NEXT_PUBLIC_API_MOCKING=            # vide : plus de mocks MSW
+   NEXT_PUBLIC_API_URL=http://localhost:4000
+   API_INTERNAL_URL=                   # ex. http://api:4000 si le serveur Next joint l'API par un réseau interne
+   NEXT_PUBLIC_SITE_URL=http://localhost:3000
+   REVALIDATE_SECRET=<même valeur que l'API>
+   NEXT_PUBLIC_MEDIA_URL=              # seulement si les médias sont servis par un CDN distinct de l'API
+   ```
+
+3. `pnpm build && pnpm start` (les variables `NEXT_PUBLIC_*` sont lues au build), ou `pnpm dev`.
+
+- Le site et l'API doivent partager le même site au sens des cookies (`localhost` en local, `COOKIE_DOMAIN` de l'API
+  en production) : le back-office lit le cookie `mp_csrf` pour l'en-tête `X-CSRF-Token`.
+- Revalidation : le worker de l'API envoie `POST {WEB_URL}/api/revalidate` (`Authorization: Bearer
+REVALIDATE_SECRET`, `{ "tags": [...] }`, 100 étiquettes au plus) ; étiquettes de `src/lib/api/tags.ts`.
+- Images de la médiathèque : variantes AVIF / WebP (480, 960, 1600) servies telles quelles par `<Visual>` ;
+  `{NEXT_PUBLIC_API_URL}/v1/media/**` et `NEXT_PUBLIC_MEDIA_URL` sont dans `images.remotePatterns` et la CSP.
+
 ## Carte des zones (OpenStreetMap)
 
 La carte des zones d'intervention (accueil, `/zones-d-intervention`, `/contact`, aperçu et saisie du back-office) utilise

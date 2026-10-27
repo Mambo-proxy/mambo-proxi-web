@@ -69,11 +69,15 @@ function validate(values: Values): Partial<Record<keyof Values, string>> {
   if (!isDateKey(values.date)) errors.date = 'Indiquez la date du rendez-vous.';
   if (parseTime(values.time) === null) errors.time = 'Indiquez l’heure du rendez-vous.';
   if (values.videoLink.trim()) {
+    // L'API n'accepte que des liens http(s).
+    let protocol = '';
     try {
-      new URL(values.videoLink.trim());
+      protocol = new URL(values.videoLink.trim()).protocol;
     } catch {
-      errors.videoLink = 'Indiquez une adresse complète (https://…).';
+      // Adresse illisible : signalée ci-dessous.
     }
+    if (protocol !== 'https:' && protocol !== 'http:')
+      errors.videoLink = 'Indiquez une adresse complète (https://…).';
   }
   return errors;
 }
@@ -342,7 +346,9 @@ function NewAppointmentForm({
           <Field
             label="Lien de visio"
             error={errors.videoLink}
-            help={'Facultatif\u00A0: un lien est créé automatiquement s’il est vide.'}
+            help={
+              'Facultatif\u00A0: s’il est vide, le lien de visio par défaut des disponibilités est utilisé.'
+            }
           >
             {(control) => (
               <Input

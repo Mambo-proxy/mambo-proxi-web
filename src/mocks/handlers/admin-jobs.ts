@@ -44,7 +44,8 @@ function withCounts(offer: StoredJobOffer): AdminJobOffer {
 /** Candidature avec l'intitulé à jour de l'offre visée (conservé si l'offre a été supprimée). */
 function withJobTitle(application: AdminApplication): AdminApplication {
   const offer = application.job ? findJob(application.job.id) : null;
-  return offer ? { ...application, job: { id: offer.id, title: offer.title ?? '' } } : application;
+  if (!offer) return { ...application, jobTitle: application.job?.title ?? null };
+  return { ...application, job: { id: offer.id, title: offer.title ?? '' }, jobTitle: offer.title ?? '' };
 }
 
 /** Ordre de la liste : publiées (plus récentes d'abord), puis brouillons, puis archivées. */

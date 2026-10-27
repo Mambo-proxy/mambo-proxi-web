@@ -22,7 +22,7 @@ const SEEDS: Seed[] = [
   {
     actor: EQUIPE,
     action: 'request.status',
-    entity: 'Demande',
+    entity: 'Request',
     entityId: 'req_0142',
     label: 'A passé la demande MP-2026-0142 (Chef privé) en « Devis envoyé »',
     diff: { statut: ['Nouvelle', 'Devis envoyé'] },
@@ -37,20 +37,20 @@ const SEEDS: Seed[] = [
   {
     actor: null,
     action: 'survey.send',
-    entity: 'Avis',
+    entity: 'Review',
     label: 'Questionnaire de satisfaction envoyé automatiquement (MP-2026-0131)',
   },
   {
     actor: EQUIPE,
     action: 'appointment.confirm',
-    entity: 'Rendez-vous',
+    entity: 'Appointment',
     label: 'A confirmé le rendez-vous d’Aurélie K. (jeudi 10 h)',
     diff: { statut: ['Demandé', 'Confirmé'] },
   },
   {
     actor: MIREILLE,
     action: 'review.publish',
-    entity: 'Avis',
+    entity: 'Review',
     label: 'A publié l’avis de Patrick E. (5 / 5)',
   },
   {
@@ -64,47 +64,47 @@ const SEEDS: Seed[] = [
   {
     actor: EQUIPE,
     action: 'request.note',
-    entity: 'Demande',
+    entity: 'Request',
     entityId: 'req_0139',
     label: 'A ajouté une note interne à la demande MP-2026-0139',
   },
   {
     actor: MIREILLE,
     action: 'settings.update',
-    entity: 'Paramètres',
+    entity: 'Setting',
     label: 'A modifié les coordonnées de l’agence',
     diff: { horaires: ['Lun – Sam · 8h – 19h', 'Lun – Sam · 8h – 20h'] },
   },
   {
     actor: null,
     action: 'backup.done',
-    entity: 'Système',
+    entity: 'System',
     label: 'Sauvegarde automatique de la nuit (46 Mo)',
   },
   {
     actor: EQUIPE,
     action: 'application.status',
-    entity: 'Candidature',
+    entity: 'JobApplication',
     label: 'A présélectionné la candidature de Brice N. (Assistant·e de vie)',
     diff: { statut: ['Reçue', 'Présélectionnée'] },
   },
   {
     actor: MIREILLE,
     action: 'campaign.schedule',
-    entity: 'Newsletter',
+    entity: 'Campaign',
     entityId: 'cmp_novembre',
     label: 'A programmé l’envoi « Novembre : sorties culturelles et nouveaux services »',
   },
   {
     actor: MIREILLE,
     action: 'partner.update',
-    entity: 'Partenaire',
+    entity: 'Partner',
     label: 'A réordonné les logos des partenaires (Immobilier)',
   },
   {
     actor: EQUIPE,
     action: 'request.status',
-    entity: 'Demande',
+    entity: 'Request',
     entityId: 'req_0128',
     label: 'A passé la demande MP-2026-0128 (Entretien du logement) en « Prestation réalisée »',
     diff: { statut: ['En cours', 'Prestation réalisée'] },
@@ -112,31 +112,31 @@ const SEEDS: Seed[] = [
   {
     actor: MIREILLE,
     action: 'training.publish',
-    entity: 'Formation',
+    entity: 'Training',
     label: 'A publié la formation « Hygiène et sécurité à domicile »',
   },
   {
     actor: MIREILLE,
     action: 'user.login',
-    entity: 'Utilisateur',
+    entity: 'User',
     label: 'S’est connectée (code vérifié)',
   },
   {
     actor: EQUIPE,
     action: 'user.login',
-    entity: 'Utilisateur',
+    entity: 'User',
     label: 'S’est connectée (appareil de confiance)',
   },
   {
     actor: MIREILLE,
     action: 'media.upload',
-    entity: 'Média',
+    entity: 'Media',
     label: 'A ajouté l’image « Plage de Kribi »',
   },
   {
     actor: MIREILLE,
     action: 'magazine.publish',
-    entity: 'Magazine',
+    entity: 'MagazineEdition',
     label: 'A publié l’édition n° 12 du magazine',
   },
 ];
@@ -189,6 +189,6 @@ export const adminAuditHandlers = [
         (!from || item.createdAt >= from) &&
         (!to || item.createdAt <= to),
     );
-    return HttpResponse.json(paginate(list, params, 25));
+    return HttpResponse.json(paginate(list, params, 20));
   }),
 ];
