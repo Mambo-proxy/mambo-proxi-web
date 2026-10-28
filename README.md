@@ -35,11 +35,49 @@ pnpm dev                # http://localhost:3000
 3. `pnpm build && pnpm start` (les variables `NEXT_PUBLIC_*` sont lues au build), ou `pnpm dev`.
 
 - Le site et l'API doivent partager le même site au sens des cookies (`localhost` en local, `COOKIE_DOMAIN` de l'API
-  en production) : le back-office lit le cookie `mp_csrf` pour l'en-tête `X-CSRF-Token`.
+  en production) : le back-office lit le cookie `mp_csrf` pour l'en-tête `X-CSRF-Token`. Sinon : relais
+  (section suivante).
 - Revalidation : le worker de l'API envoie `POST {WEB_URL}/api/revalidate` (`Authorization: Bearer
 REVALIDATE_SECRET`, `{ "tags": [...] }`, 100 étiquettes au plus) ; étiquettes de `src/lib/api/tags.ts`.
 - Images de la médiathèque : variantes AVIF / WebP (480, 960, 1600) servies telles quelles par `<Visual>` ;
   `{NEXT_PUBLIC_API_URL}/v1/media/**` et `NEXT_PUBLIC_MEDIA_URL` sont dans `images.remotePatterns` et la CSP.
+
+## Back-office sur un autre domaine que l'API (relais)
+
+Tant que le site (`https://mambo-proxi-web.vercel.app`) et l'API (`https://13-38-208-248.sslip.io`) n'ont pas de
+domaine commun, les cookies de session et `mp_csrf` ne peuvent pas être partagés. `API_RELAY_TARGET` active un relais
+same-origin : `next.config.ts` réécrit `/v1/*` vers l'API (avant les pages, hors proxy), et le navigateur envoie les
+routes à cookies (`/v1/admin/*`, `/v1/auth/*`) sur l'origine du site. Les cookies posés par l'API (sans `Domain`)
+deviennent ceux du site et `mp_csrf` est lisible. Le reste (lectures publiques, formulaires, CV, mesure d'audience)
+appelle toujours l'API en direct ; le serveur Next (pages, proxy, renouvellement de session) aussi, avec les cookies
+de la requête, et repose les cookies renouvelés sur le domaine du site (attribut `Domain` retiré).
+
+Variables du projet Vercel (Production et Preview), puis redéploiement (lues au build) :
+
+```bash
+NEXT_PUBLIC_API_MOCKING=                                 # vide
+NEXT_PUBLIC_API_URL=https://13-38-208-248.sslip.io
+API_INTERNAL_URL=                                        # vide (pas de réseau interne sur Vercel)
+API_RELAY_TARGET=https://13-38-208-248.sslip.io
+NEXT_PUBLIC_SITE_URL=https://mambo-proxi-web.vercel.app  # = WEB_URL de l'API
+REVALIDATE_SECRET=<même valeur que l'API>
+```
+
+Côté API : `WEB_URL=https://mambo-proxi-web.vercel.app` et `COOKIE_DOMAIN` **vide** (un domaine `sslip.io` serait
+refusé par le navigateur sur le domaine du site).
+
+Limites :
+
+- **Taille des envois** : la réécriture externe est traitée par le CDN de Vercel (pas une fonction : la limite de
+  4,5 Mo des fonctions ne s'applique pas ; délai maximal 120 s). Les envois de la médiathèque (10 Mo, relayés car
+  authentifiés) sont à vérifier une fois déployé ; les CV (5 Mo, formulaire public) partent directement à l'API.
+- **Adresse IP** : derrière Vercel puis Caddy, l'API voit pour les routes relayées l'adresse de Vercel
+  (`trust proxy` = 1, Caddy remplace `X-Forwarded-For`) : limites de débit de la connexion et du back-office
+  partagées entre les membres de l'équipe, adresse des journaux d'audit et des sessions = Vercel. Correction côté API
+  (non faite) : lire `x-real-ip` / `x-vercel-forwarded-for` seulement pour les requêtes venant de Vercel (en-tête secret
+  ajouté par le relais), ou `trusted_proxies` dans Caddy.
+- Réponses relayées non mises en cache par le CDN (`x-vercel-enable-rewrite-caching: 0`).
+- À retirer une fois le domaine commun en place (`API_RELAY_TARGET` vide, `COOKIE_DOMAIN=.mamboproxi.com`).
 
 ## Carte des zones (OpenStreetMap)
 

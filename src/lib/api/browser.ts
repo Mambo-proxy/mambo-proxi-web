@@ -1,6 +1,6 @@
 import createClient, { type Middleware } from 'openapi-fetch';
 import { redirectToLogin } from '@/lib/admin/expired-session';
-import { getApiBaseUrl } from './config';
+import { getApiBaseUrl, isApiRelay, isRelayedRoute } from './config';
 import type { paths } from './schema';
 import { withSessionRefresh, type RefreshOutcome } from './session-refresh';
 import { transport } from './transport';
@@ -32,11 +32,34 @@ const csrf: Middleware = {
 };
 
 /**
+ * Relais same-origin (`isApiRelay`) : une route à cookies part sur l'origine du site (`/v1/…`, réécrit vers l'API par
+ * `next.config.ts`), pour que les cookies de session soient ceux du site et que `mp_csrf` soit lisible. Le corps est
+ * recopié (au plus 10 Mo, médiathèque) : une requête ne peut pas reprendre le flux d'une autre sans `duplex`.
+ */
+async function throughRelay(request: Request): Promise<Request> {
+  if (!isApiRelay || typeof window === 'undefined') return request;
+  const url = new URL(request.url);
+  if (url.origin === window.location.origin || !isRelayedRoute(url.pathname)) return request;
+  return new Request(new URL(`${url.pathname}${url.search}`, window.location.origin), {
+    method: request.method,
+    headers: request.headers,
+    body: request.body ? await request.arrayBuffer() : undefined,
+    credentials: 'include',
+    cache: request.cache,
+    redirect: request.redirect,
+    signal: request.signal,
+  });
+}
+
+/** Transport du navigateur, relais compris. */
+const relayedTransport = async (request: Request) => transport(await throughRelay(request));
+
+/**
  * `POST /v1/auth/refresh` : seul le cookie `mp_rt` compte (ni jeton d'accès ni jeton CSRF, selon le contrat). Un
  * `204` sans nouveaux cookies (rotation faite par un autre onglet il y a moins de 10 s) est aussi un succès.
  */
 async function refreshSession(): Promise<RefreshOutcome> {
-  const response = await transport(
+  const response = await relayedTransport(
     new Request(`${getApiBaseUrl()}/v1/auth/refresh`, { method: 'POST', credentials: 'include' }),
   );
   if (response.ok) return 'refreshed';
@@ -48,7 +71,7 @@ async function refreshSession(): Promise<RefreshOutcome> {
  * de la requête, avec le jeton CSRF renouvelé. Renouvellement refusé : retour à l'écran de connexion.
  */
 const send = withSessionRefresh({
-  send: (request) => transport(request),
+  send: relayedTransport,
   refresh: refreshSession,
   onExpired: redirectToLogin,
   prepareReplay: withCsrfToken,

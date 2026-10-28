@@ -1,4 +1,4 @@
-import { getApiBaseUrl, isApiMocking } from '@/lib/api/config';
+import { getApiBaseUrl, isApiMocking, isApiRelay } from '@/lib/api/config';
 import { transport } from '@/lib/api/transport';
 
 /**
@@ -24,8 +24,16 @@ export function resetSessionRenewals() {
   renewals.clear();
 }
 
+/**
+ * Relais same-origin : les cookies renouvelés sont déposés par le site, donc sur son seul domaine. Un attribut
+ * `Domain` (`COOKIE_DOMAIN` de l'API) désignerait le domaine de l'API et serait refusé par le navigateur.
+ */
+function hostOnly(setCookie: string): string {
+  return isApiRelay ? setCookie.replace(/;\s*domain=[^;]*/gi, '') : setCookie;
+}
+
 function setCookiesOf(response: Response): string[] {
-  const cookies = response.headers.getSetCookie();
+  const cookies = response.headers.getSetCookie().map(hostOnly);
   const mocked = isApiMocking ? response.headers.get(MOCK_SET_COOKIE_HEADER) : null;
   return mocked ? [...cookies, ...(JSON.parse(mocked) as string[])] : cookies;
 }

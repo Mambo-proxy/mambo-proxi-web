@@ -1189,3 +1189,29 @@ erreurs) ; toutes les routes appelées existent. Corrections :
 - Mocks du magazine non réalignés (ordre, `languages`, 409 après envoi) : sans effet sur le fonctionnement.
 - À essayer sur l'API réelle : téléchargements (pièces jointes, CV) depuis l'origine du site, envoi puis traitement
   d'une image (worker et Redis), 412 entre deux onglets, compte responsable et rédacteur.
+
+## Relais same-origin de l'API pour le back-office (28 octobre 2026)
+
+### Fait
+
+- `API_RELAY_TARGET` (lue au build) : réécriture `beforeFiles` `/v1/:path*` → API dans `next.config.ts`, drapeau
+  `NEXT_PUBLIC_API_RELAY` publié pour le navigateur, réponses relayées non mises en cache par le CDN de Vercel.
+- `browserApi` : les routes à cookies (`/v1/admin`, `/v1/auth`, renouvellement compris) partent sur l'origine du site ;
+  corps recopié (une requête ne reprend pas le flux d'une autre sans `duplex`).
+- Proxy : `/v1/` exclu du `matcher` (ni langue, ni redirections, ni maintenance, ni copie du corps limitée à 10 Mo).
+- Renouvellement au chargement d'une page : attribut `Domain` retiré des cookies reposés en mode relais.
+- README (« Back-office sur un autre domaine que l'API (relais) ») et `.env.example`.
+
+### Décisions
+
+- Relais limité aux routes à cookies : les formulaires publics, CV et la mesure d'audience restent directs, pour que
+  l'API voie l'IP du visiteur (limites de débit par adresse) et que rien ne dépende des limites du relais. CSP
+  `connect-src` inchangée (origine de l'API toujours nécessaire), médias et liens signés absolus vers l'API.
+- Serveur Next toujours en direct (`API_INTERNAL_URL` ou `NEXT_PUBLIC_API_URL`), cookies de la requête transmis.
+
+### Points ouverts
+
+- Routes relayées vues par l'API avec l'IP de Vercel : limites de débit partagées par l'équipe, IP des journaux
+  d'audit fausse. Correction à faire dans l'API (en-tête de Vercel accepté seulement avec un secret partagé).
+- À vérifier une fois déployé : `Set-Cookie` transmis par Vercel, envoi d'un média de 10 Mo, en-tête `Host` reçu par
+  Caddy.

@@ -141,11 +141,13 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     {
-      // Ni fichiers statiques, ni images optimisées, ni routes techniques, ni fichiers publics (extension).
-      // Les préchargements passent aussi par le proxy : sans la réécriture de langue (`/x` → `/fr/x`), ils
-      // recevaient un 404 que la navigation réutilisait ensuite.
+      // Ni fichiers statiques, ni images optimisées, ni routes techniques, ni fichiers publics (extension), ni le
+      // relais de l'API (`/v1/*`, `API_RELAY_TARGET`) : aucune langue, redirection, maintenance ni copie du corps
+      // (le proxy en garde 10 Mo en mémoire, un envoi de média de 10 Mo serait tronqué). Les préchargements passent
+      // aussi par le proxy : sans la réécriture de langue (`/x` → `/fr/x`), ils recevaient un 404 que la navigation
+      // réutilisait ensuite.
       source:
-        '/((?!_next/static|_next/image|api/|health|sitemap\\.xml|robots\\.txt|opengraph-image|icon\\.svg|.*\\.[a-zA-Z0-9]+$).*)',
+        '/((?!_next/static|_next/image|api/|v1/|health|sitemap\\.xml|robots\\.txt|opengraph-image|icon\\.svg|.*\\.[a-zA-Z0-9]+$).*)',
     },
   ],
 };
