@@ -68,7 +68,14 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Sections publiées d'une page éditoriale */
+        /**
+         * Sections publiées d'une page éditoriale
+         * @description En anglais (`lang=en`), chaque section française est remplacée par sa version anglaise de même `id` si elle
+         *     existe, sinon servie en français (jamais d'erreur ni de section manquante) ; seuls les textes viennent de
+         *     l'anglais, les champs non textuels (images, liens, réglages d'affichage, `enabled`, ordre des sections)
+         *     sont toujours ceux du français (règles de `PageTranslationInput`). Titre et SEO (`title`, `description`)
+         *     anglais avec repli sur le français.
+         */
         get: operations["getPage"];
         put?: never;
         post?: never;
@@ -1489,6 +1496,9 @@ export interface paths {
          *     sections automatiques `dynamic`, dont la `source` ne peut pas changer) ; identifiants de sections uniques ;
          *     images référencées connues de la médiathèque. Le HTML des articles (`richText`) est assaini côté serveur
          *     (liste blanche du schéma `Html`). Sinon `422` avec le chemin du champ (`sections.3.items.0.title`).
+         *     Version anglaise facultative (`translations.en`, voir `PageTranslationInput`) : mêmes `id` que les
+         *     sections françaises, seuls les textes sont traduits ; une empreinte des textes français de chaque section
+         *     traduite est mémorisée pour signaler les traductions périmées (`translationStatus`).
          */
         put: operations["adminSavePageDraft"];
         post?: never;
@@ -1509,7 +1519,9 @@ export interface paths {
         put?: never;
         /**
          * Publier les modifications
-         * @description Le brouillon (sections et SEO) devient la version en ligne. Sans brouillon, la page est renvoyée telle quelle.
+         * @description Le brouillon (sections, SEO et version anglaise) devient la version en ligne, dans les deux langues. Sans
+         *     brouillon, la page est renvoyée telle quelle. L'étiquette de revalidation `page:<key>` couvre le français et
+         *     l'anglais.
          */
         post: operations["adminPublishPage"];
         delete?: never;
@@ -1548,7 +1560,9 @@ export interface paths {
         /**
          * Jeton d'aperçu du brouillon
          * @description Jeton signé valable 30 minutes ; `GET /v1/pages/{key}?preview=<jeton>` renvoie alors le brouillon
-         *     (`isPreview: true`, en-tête `Cache-Control: private, no-store`), même pour une page jamais publiée.
+         *     (`isPreview: true`, en-tête `Cache-Control: private, no-store`), même pour une page jamais publiée. Le même
+         *     jeton vaut pour les deux langues : `GET /v1/pages/{key}?preview=<jeton>&lang=en` renvoie le brouillon
+         *     anglais (recomposé section par section sur le brouillon français, comme la version publiée).
          */
         get: operations["adminGetPagePreviewToken"];
         put?: never;
@@ -4792,10 +4806,87 @@ export interface components {
             sections: components["schemas"]["PageSection"][];
             allowedSectionTypes: components["schemas"]["PageSectionType"][];
             seo: components["schemas"]["Seo"];
+            /** @description Versions traduites, éditées à la main dans le back-office. */
+            translations: {
+                /**
+                 * @description Version anglaise : brouillon anglais s'il existe, sinon version anglaise publiée ; `null` si la
+                 *     page n'a jamais été traduite. Chaque section y est déjà recomposée sur la section française
+                 *     actuelle (brouillon s'il existe) : champs non textuels du français, textes anglais (repli sur le
+                 *     français pour un texte non traduit), visuels résolus. Seules les sections françaises qui ont un
+                 *     équivalent anglais sont listées, dans l'ordre du français.
+                 */
+                en: components["schemas"]["PageTranslation"] | null;
+            };
+            translationStatus: {
+                en: components["schemas"]["PageTranslationStatus"];
+            };
+        };
+        PageTranslation: {
+            /** @description Titre anglais de la page (`null` = titre français). */
+            title: string | null;
+            sections: components["schemas"]["PageSection"][];
+            seo: components["schemas"]["Seo"];
+        };
+        /**
+         * @description État de la traduction, calculé à la lecture par rapport aux textes français actuels (brouillon s'il existe).
+         *     Seules les sections françaises qui contiennent au moins un texte sont prises en compte (une section
+         *     automatique `dynamic` sans texte n'a rien à traduire).
+         *     - `missingSectionIds` : sections françaises sans section anglaise de même `id`.
+         *     - `outdatedSectionIds` : sections dont les textes français ont changé depuis l'enregistrement de leur
+         *       version anglaise (empreinte des textes français mémorisée à chaque enregistrement anglais). Un changement
+         *       des seuls champs non textuels (image, lien interne, réglage d'affichage, `enabled`…) ne rend pas une
+         *       section périmée. Une traduction antérieure à ce suivi (sans empreinte) est comparée à la version
+         *       française publiée : elle est à jour tant que les textes français publiés n'ont pas changé.
+         *     - `state` : `MISSING` si la page n'a aucune traduction ou s'il manque au moins une section, sinon
+         *       `OUTDATED` si au moins une section est périmée, sinon `UP_TO_DATE`.
+         */
+        PageTranslationStatus: {
+            /** @enum {string} */
+            state: "MISSING" | "OUTDATED" | "UP_TO_DATE";
+            missingSectionIds: string[];
+            outdatedSectionIds: string[];
+        };
+        /**
+         * @description Version anglaise du brouillon. Les sections reprennent les `id`, l'ordre et le `type` des sections
+         *     françaises du même envoi (`sections`) ; une section française sans équivalent anglais est permise (à
+         *     traduire, le site affiche alors le français). Une section anglaise sans section française de même `id`,
+         *     d'un autre `type`, en double ou dans un autre ordre → `422` sur `translations.en.sections.N.id` (ou
+         *     `.type`).
+         *
+         *     **Seuls les textes sont pris de la version anglaise** ; tout le reste est recopié de la section française
+         *     à l'enregistrement, puis de nouveau à chaque lecture (une modification ultérieure d'une image ou d'un lien
+         *     en français s'applique donc aux deux langues) :
+         *     - textes : toutes les valeurs de type chaîne de la section, à toute profondeur (titres, chapôs, libellés
+         *       de boutons `label`/`labelMobile`, textes alternatifs `alt`, éléments de listes, `html` des articles…),
+         *       **sauf** les champs techniques `id`, `type`, `variant`, `tone`, `layout`, `icon`, `href`,
+         *       `illustration`, `image`, `imageId`, `source`, `categorySlug`, `anchor`, `kind`, `key`, `number` et
+         *       `adminLabel`, toujours ceux du français ;
+         *     - booléens et nombres (`enabled`, `columns`, `reverse`, `showWhatsapp`, `external`, `progress`, `value`,
+         *       `limit`…) : toujours ceux du français ;
+         *     - listes : structure du français — l'élément N de la liste anglaise traduit l'élément N de la liste
+         *       française ; nombre et ordre des éléments sont ceux du français (éléments anglais en trop ignorés) ;
+         *     - un texte anglais absent, `null` ou vide laisse le texte français ; un texte absent en français n'est
+         *       pas ajouté par la traduction.
+         *
+         *     Les limites de longueur des champs s'appliquent aux textes anglais (`422` sur
+         *     `translations.en.sections.N.<champ>`), le HTML des articles est assaini. Pour `seo`, seuls `title` et
+         *     `description` sont traduits.
+         */
+        PageTranslationInput: {
+            title?: string | null;
+            sections: components["schemas"]["PageSection"][];
+            seo?: components["schemas"]["Seo"];
         };
         PageDraftInput: {
             sections: components["schemas"]["PageSection"][];
             seo?: components["schemas"]["Seo"];
+            /**
+             * @description Traductions du brouillon. Absent : le brouillon anglais existant n'est pas modifié (il est recomposé
+             *     sur les nouvelles sections françaises à la lecture). Présent : remplace le brouillon anglais.
+             */
+            translations?: {
+                en?: components["schemas"]["PageTranslationInput"];
+            };
         };
         /**
          * @description Libellés — À valider, Publié, Masqué.
@@ -6077,7 +6168,7 @@ export interface components {
         IdPath: components["schemas"]["Id"];
         SlugPath: components["schemas"]["Slug"];
         PageKeyPath: components["schemas"]["PageKey"];
-        /** @description Jeton de prévisualisation délivré par le back-office ; renvoie le brouillon. */
+        /** @description Jeton de prévisualisation délivré par le back-office ; renvoie le brouillon (dans la langue `lang`). */
         Preview: string;
         SettingsGroupPath: components["schemas"]["SettingsGroup"];
         EmailTemplateKeyPath: components["schemas"]["EmailTemplateKey"];
@@ -6242,6 +6333,9 @@ export type CategoryPatch = components['schemas']['CategoryPatch'];
 export type AdminCategory = components['schemas']['AdminCategory'];
 export type AdminPageSummary = components['schemas']['AdminPageSummary'];
 export type AdminPage = components['schemas']['AdminPage'];
+export type PageTranslation = components['schemas']['PageTranslation'];
+export type PageTranslationStatus = components['schemas']['PageTranslationStatus'];
+export type PageTranslationInput = components['schemas']['PageTranslationInput'];
 export type PageDraftInput = components['schemas']['PageDraftInput'];
 export type ReviewStatus = components['schemas']['ReviewStatus'];
 export type AdminReview = components['schemas']['AdminReview'];
@@ -6468,7 +6562,7 @@ export interface operations {
                  *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
                  */
                 lang?: components["parameters"]["Lang"];
-                /** @description Jeton de prévisualisation délivré par le back-office ; renvoie le brouillon. */
+                /** @description Jeton de prévisualisation délivré par le back-office ; renvoie le brouillon (dans la langue `lang`). */
                 preview?: components["parameters"]["Preview"];
             };
             header?: never;
@@ -6849,7 +6943,7 @@ export interface operations {
                  *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
                  */
                 lang?: components["parameters"]["Lang"];
-                /** @description Jeton de prévisualisation délivré par le back-office ; renvoie le brouillon. */
+                /** @description Jeton de prévisualisation délivré par le back-office ; renvoie le brouillon (dans la langue `lang`). */
                 preview?: components["parameters"]["Preview"];
             };
             header?: never;
@@ -6911,7 +7005,7 @@ export interface operations {
                  *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
                  */
                 lang?: components["parameters"]["Lang"];
-                /** @description Jeton de prévisualisation délivré par le back-office ; renvoie le brouillon. */
+                /** @description Jeton de prévisualisation délivré par le back-office ; renvoie le brouillon (dans la langue `lang`). */
                 preview?: components["parameters"]["Preview"];
             };
             header?: never;
@@ -7111,7 +7205,7 @@ export interface operations {
                  *     français. Le paramètre fait partie de l'adresse : chaque langue est mise en cache séparément.
                  */
                 lang?: components["parameters"]["Lang"];
-                /** @description Jeton de prévisualisation délivré par le back-office ; renvoie le brouillon. */
+                /** @description Jeton de prévisualisation délivré par le back-office ; renvoie le brouillon (dans la langue `lang`). */
                 preview?: components["parameters"]["Preview"];
             };
             header?: never;
@@ -7195,7 +7289,7 @@ export interface operations {
                 lang?: components["parameters"]["Lang"];
                 /** @description Identifiant d'une édition publiée (sinon la dernière publiée). */
                 edition?: components["schemas"]["Id"];
-                /** @description Jeton de prévisualisation délivré par le back-office ; renvoie le brouillon. */
+                /** @description Jeton de prévisualisation délivré par le back-office ; renvoie le brouillon (dans la langue `lang`). */
                 preview?: components["parameters"]["Preview"];
             };
             header?: never;

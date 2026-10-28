@@ -1,3 +1,4 @@
+import { applyEnglishTexts, translatableFields } from '@/components/admin/pages/page-translation';
 import type {
   AdminPage,
   AdminPageSummary,
@@ -5,30 +6,45 @@ import type {
   PageKey,
   PageSection,
   PageSectionType,
+  PageTranslationStatus,
   Seo,
   UserRef,
 } from '@/lib/api/schema';
 import { daysAgo } from '../admin-utils';
 import { rememberSeedImages } from '../media-refs';
 import operations from './contract-examples.json';
-import { legalPages } from './legal-pages';
-import { pages as sitePages } from './pages';
+import { legalPages, legalPagesEn } from './legal-pages';
+import { pages as sitePages, pagesEn as sitePagesEn } from './pages';
 
 /**
  * Pages & textes du back-office : pour chaque page, la version publiée et le brouillon éventuel. Les contenus sont
  * repris des données du site public simulé (exemples du contrat pour l'accueil et « Nos services », `pages.ts`,
- * `legal-pages.ts`), pour que les textes du back-office soient ceux du site.
+ * `legal-pages.ts`), pour que les textes du back-office soient ceux du site ; la version anglaise de départ est
+ * celle des pages anglaises simulées.
  */
 
 type Group = NonNullable<AdminPageSummary['group']>;
+
+/**
+ * Version anglaise enregistrée (comme `translations.en` dans l'API) : sections traduites (textes anglais posés sur
+ * la section française), titre, SEO et empreinte des textes français traduits, par section.
+ */
+export type StoredEnglish = {
+  title: string | null;
+  sections: PageSection[];
+  seo: { title: string | null; description: string | null };
+  sourceHashes: Record<string, string>;
+};
+
+export type StoredVersion = { sections: PageSection[]; seo: Seo; en: StoredEnglish | null };
 
 export type StoredPage = {
   key: PageKey;
   title: string;
   path: string;
   group: Group;
-  published: { sections: PageSection[]; seo: Seo };
-  draft: { sections: PageSection[]; seo: Seo } | null;
+  published: StoredVersion;
+  draft: StoredVersion | null;
   publishedAt: string | null;
   updatedAt: string;
   updatedBy: UserRef | null;
@@ -140,6 +156,45 @@ const ORDER: { key: PageKey; path: string; group: Group; source: () => Page | un
 
 const clone = <T>(value: T): T => structuredClone(value);
 
+/** Page anglaise simulée (exemples `…En` du contrat, `pagesEn`, `legalPagesEn`). */
+function englishSource(key: PageKey): Page | undefined {
+  if (key === 'accueil') return contractPages.accueilEn;
+  if (key === 'services') return contractPages.servicesEn;
+  return sitePagesEn[key] ?? (legalPagesEn as Partial<Record<PageKey, Page>>)[key];
+}
+
+/**
+ * Empreinte des textes d'une section (chemins et textes triés) ; `null` si elle n'a rien à traduire. Version
+ * simplifiée du sha256 de l'API : seule l'égalité compte.
+ */
+export function sectionTextHash(section: PageSection): string | null {
+  const texts = translatableFields(section)
+    .map((field): [string, string] => [field.path, field.french])
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+  return texts.length === 0 ? null : JSON.stringify(texts);
+}
+
+/** Version anglaise de départ : sections de la page anglaise simulée de même `id` et de même type, à jour. */
+function seedEnglish(english: Page | undefined, french: PageSection[]): StoredEnglish | null {
+  if (!english) return null;
+  const byId = new Map(english.sections.map((section) => [section.id, section]));
+  const sections: PageSection[] = [];
+  const sourceHashes: Record<string, string> = {};
+  for (const section of french) {
+    const match = byId.get(section.id);
+    const hash = sectionTextHash(section);
+    if (match?.type !== section.type || hash === null) continue;
+    sections.push(applyEnglishTexts(section, match) as PageSection);
+    sourceHashes[section.id] = hash;
+  }
+  return {
+    title: english.title,
+    sections,
+    seo: { title: english.seo.title ?? null, description: english.seo.description ?? null },
+    sourceHashes,
+  };
+}
+
 function seed(): StoredPage[] {
   return ORDER.flatMap(({ key, path, group, source }) => {
     const page = source();
@@ -154,7 +209,7 @@ function seed(): StoredPage[] {
       title: page.title,
       path,
       group,
-      published: { sections, seo: clone(page.seo) },
+      published: { sections, seo: clone(page.seo), en: seedEnglish(clone(englishSource(key)), sections) },
       draft: null,
       publishedAt: page.updatedAt,
       updatedAt: page.updatedAt,
@@ -218,14 +273,65 @@ export function toSummary(page: StoredPage): AdminPageSummary {
   };
 }
 
-/** Page avec son brouillon s'il existe (toutes les sections, y compris masquées). */
+/**
+ * État de la traduction anglaise (comme l'API) : sections françaises avec du texte sans section anglaise de même
+ * `id` et de même type (`missing`), ou dont les textes français ont changé depuis l'enregistrement de leur version
+ * anglaise (`outdated`).
+ */
+export function translationStatus(
+  french: PageSection[],
+  english: StoredEnglish | null,
+): PageTranslationStatus {
+  const translated = new Map(english?.sections.map((section) => [section.id, section]));
+  const missingSectionIds: string[] = [];
+  const outdatedSectionIds: string[] = [];
+  for (const section of french) {
+    const hash = sectionTextHash(section);
+    if (hash === null) continue;
+    if (translated.get(section.id)?.type !== section.type) missingSectionIds.push(section.id);
+    else if (english?.sourceHashes[section.id] !== hash) outdatedSectionIds.push(section.id);
+  }
+  const state =
+    english === null || missingSectionIds.length > 0
+      ? 'MISSING'
+      : outdatedSectionIds.length > 0
+        ? 'OUTDATED'
+        : 'UP_TO_DATE';
+  return { state, missingSectionIds, outdatedSectionIds };
+}
+
+/** Sections anglaises recomposées sur les sections françaises actuelles (seules les sections traduites). */
+function englishSections(french: PageSection[], english: StoredEnglish): PageSection[] {
+  const translated = new Map(english.sections.map((section) => [section.id, section]));
+  return french.flatMap((section) => {
+    const match = translated.get(section.id);
+    return match?.type === section.type ? [applyEnglishTexts(section, match) as PageSection] : [];
+  });
+}
+
+/** Page avec son brouillon s'il existe (toutes les sections, y compris masquées) et sa version anglaise. */
 export function toAdminPage(page: StoredPage): AdminPage {
   const current = page.draft ?? page.published;
+  const english = current.en;
   return {
     ...toSummary(page),
     sections: clone(current.sections),
     seo: clone(current.seo),
     allowedSectionTypes: page.group === 'legales' ? LEGAL_TYPES : CONTENT_TYPES,
+    translations: {
+      en: english
+        ? {
+            title: english.title,
+            sections: clone(englishSections(current.sections, english)),
+            seo: {
+              ...clone(current.seo),
+              title: english.seo.title ?? current.seo.title ?? null,
+              description: english.seo.description ?? current.seo.description ?? null,
+            },
+          }
+        : null,
+    },
+    translationStatus: { en: translationStatus(current.sections, english) },
   };
 }
 

@@ -1215,3 +1215,39 @@ erreurs) ; toutes les routes appelées existent. Corrections :
   d'audit fausse. Correction à faire dans l'API (en-tête de Vercel accepté seulement avec un secret partagé).
 - À vérifier une fois déployé : `Set-Cookie` transmis par Vercel, envoi d'un média de 10 Mo, en-tête `Host` reçu par
   Caddy.
+
+## Version anglaise des pages dans le back-office (28 octobre 2026)
+
+### Fait
+
+- Pages & textes : onglets « Français | English » sous l'en-tête de la page. Badge de l'onglet anglais d'après
+  `translationStatus.en` (« À traduire » si `MISSING`, « À revoir » si `OUTDATED`), recalculé pendant l'édition.
+- Onglet anglais : titre de la page et SEO (`title`, `description`), puis les mêmes sections dans le même ordre,
+  sans poignée, interrupteur, ajout ni suppression ; seuls les textes sont modifiables, avec le texte français
+  rappelé sous chaque champ (« identique au français, à traduire » tant qu'il n'est pas traduit). Section non
+  traduite pré-remplie avec le français et marquée « À traduire » ; section périmée marquée « À revoir ».
+- Enregistrement : `translations.en` part dans le même `PUT` que les sections françaises, seulement après une saisie
+  en anglais (un envoi remplace le brouillon anglais et recalcule les empreintes) ; sections traduites seulement,
+  recomposées sur la section française actuelle. Erreurs 422 `translations.en.sections.N.champ` rattachées au champ
+  de la section française de même `id` (onglet anglais ouvert sur les sections concernées).
+- Publication : si la version anglaise n'est pas à jour, confirmation « La version anglaise n'est pas à jour : N
+  sections à traduire, M à revoir. Publier quand même ? ». Aperçu dans la langue de l'onglet actif (même jeton,
+  adresse anglaise `/en/…?preview=`).
+- Mocks : version anglaise de départ reprise des pages anglaises simulées, `translations.en` et
+  `translationStatus.en` renvoyés, `translations.en` accepté au `PUT` (règles d'`id`, empreintes simplifiées).
+- Tests : `page-translation.test.ts` (champs à traduire, envoi, erreurs, état, aperçu), cas anglais dans
+  `src/mocks/admin-pages.test.ts` ; `e2e/admin-pages.spec.ts` confirme l'avertissement de publication.
+
+### Décisions
+
+- Éditeur générique des champs texte guidé par la règle de l'API (`page-translation.ts` reprend `NON_TEXT_KEYS` et
+  `applyEnglishTexts`) plutôt qu'un mode « traduction » dans chaque éditeur de section : les éditeurs français mêlent
+  textes, liens, visuels et réglages dans les mêmes composants ; la règle unique garantit que l'onglet anglais
+  propose exactement les textes que l'API reprend de l'anglais (y compris libellés de boutons et textes alternatifs).
+
+### Points ouverts
+
+- Une section « À revoir » dont la traduction reste valable ne peut être marquée revue qu'en modifiant un de ses
+  textes anglais (l'API garde l'empreinte si les textes anglais sont inchangés).
+- Le site ne lit pas encore `?preview=` sur les pages éditoriales (seul le Magazine le fait) : l'aperçu, français
+  comme anglais, montre la version publiée tant que ce n'est pas branché.

@@ -1,9 +1,18 @@
 import { http, HttpResponse, type HttpHandler } from 'msw';
 import { validateSections } from '@/components/admin/pages/page-model';
-import type { PageDraftInput, PageSection, PreviewToken } from '@/lib/api/schema';
+import { applyEnglishTexts } from '@/components/admin/pages/page-translation';
+import type { PageDraftInput, PageSection, PageTranslationInput, PreviewToken } from '@/lib/api/schema';
 import { actorOf, jsonBody, mockId } from '../admin-utils';
 import { PREVIEW_TOKEN_TTL_MS, previewUrl } from '../content-rules';
-import { adminPages, findAdminPage, toAdminPage, toSummary, type StoredPage } from '../data/admin-pages';
+import {
+  adminPages,
+  findAdminPage,
+  sectionTextHash,
+  toAdminPage,
+  toSummary,
+  type StoredEnglish,
+  type StoredPage,
+} from '../data/admin-pages';
 import { unknownMediaErrors, visualReferences } from '../media-refs';
 import { problem, validationProblem, type FieldErrors } from '../problem';
 import { sanitizeRichText } from '../rich-text';
@@ -54,6 +63,88 @@ function draftErrors(page: StoredPage, sections: PageSection[]): FieldErrors {
   return errors;
 }
 
+/**
+ * Version anglaise du brouillon (`translations.en`, comme `englishDraft` de l'API) : `id` alignés sur les sections
+ * françaises de l'envoi (même type, sans doublon, dans l'ordre), textes anglais posés sur la section française puis
+ * validés comme elle ; empreinte des textes français gardée si les textes anglais de la section n'ont pas changé.
+ */
+function englishDraft(
+  french: PageSection[],
+  input: PageTranslationInput,
+  previous: StoredEnglish | null,
+): { value: StoredEnglish; errors: FieldErrors } {
+  const errors: FieldErrors = [];
+  const basePath = 'translations.en.sections';
+  const rank = new Map(french.map((section, index) => [section.id, index]));
+  const before = new Map(previous?.sections.map((section) => [section.id, section]));
+  const seen = new Set<string>();
+  const sections: PageSection[] = [];
+  const sourceHashes: Record<string, string> = {};
+  let last = -1;
+  (Array.isArray(input.sections) ? input.sections : []).forEach((section, index) => {
+    const path = `${basePath}.${index}`;
+    const position = rank.get(section.id);
+    const source = position === undefined ? undefined : french[position];
+    if (seen.has(section.id))
+      errors.push({
+        path: `${path}.id`,
+        code: 'duplicate',
+        message: 'Cette section est déjà traduite plus haut.',
+      });
+    else if (position === undefined || source === undefined)
+      errors.push({
+        path: `${path}.id`,
+        code: 'unknown_section',
+        message: 'Cette section n’existe pas dans la version française.',
+      });
+    else if (position < last)
+      errors.push({
+        path: `${path}.id`,
+        code: 'section_order',
+        message: 'Les sections anglaises doivent suivre l’ordre des sections françaises.',
+      });
+    else if (section.type !== source.type)
+      errors.push({
+        path: `${path}.type`,
+        code: 'type_mismatch',
+        message: 'La section anglaise doit être du même type que la section française.',
+      });
+    seen.add(section.id);
+    if (source === undefined || errors.some((error) => error.path.startsWith(`${path}.`))) return;
+    last = position ?? last;
+    const translated = sanitized([applyEnglishTexts(source, section) as PageSection])[0] ?? source;
+    const fieldErrors = Object.entries(validateSections([translated]));
+    if (fieldErrors.length > 0) {
+      errors.push(
+        ...fieldErrors.map(([field, message]) => ({ path: field.replace(/^sections\.0/, path), message })),
+      );
+      return;
+    }
+    sections.push(translated);
+    const previousSection = before.get(section.id);
+    const unchanged =
+      previousSection !== undefined &&
+      sectionTextHash(applyEnglishTexts(source, previousSection) as PageSection) ===
+        sectionTextHash(translated);
+    const hash = unchanged
+      ? (previous?.sourceHashes[section.id] ?? sectionTextHash(source))
+      : sectionTextHash(source);
+    if (hash !== null) sourceHashes[section.id] = hash;
+  });
+  if ((input.title?.length ?? 0) > 160)
+    errors.push({ path: 'translations.en.title', code: 'too_long', message: '160 caractères au maximum.' });
+  const seo = input.seo ?? previous?.seo ?? { title: null, description: null };
+  return {
+    value: {
+      title: input.title ?? null,
+      sections,
+      seo: { title: seo.title ?? null, description: seo.description ?? null },
+      sourceHashes,
+    },
+    errors,
+  };
+}
+
 /** HTML des articles assaini à l'enregistrement (liste blanche du schéma `Html`), comme l'API. */
 const sanitized = (sections: PageSection[]): PageSection[] =>
   sections.map((section) =>
@@ -96,9 +187,18 @@ export const adminPageHandlers: HttpHandler[] = [
     if (!page) return notFound();
     const errors = draftErrors(page, body.sections);
     if (errors.length > 0) return validationProblem(errors);
+    // Version anglaise : remplacée si elle est envoyée, sinon celle du brouillon (ou publiée) est gardée.
+    let english = page.draft?.en ?? page.published.en;
+    const input = body.translations?.en;
+    if (input) {
+      const result = englishDraft(body.sections, input, english);
+      if (result.errors.length > 0) return validationProblem(result.errors);
+      english = result.value;
+    }
     page.draft = {
       sections: sanitized(body.sections),
       seo: body.seo ?? page.draft?.seo ?? page.published.seo,
+      en: english,
     };
     page.updatedAt = new Date().toISOString();
     page.updatedBy = actorOf(sessionUser(request));

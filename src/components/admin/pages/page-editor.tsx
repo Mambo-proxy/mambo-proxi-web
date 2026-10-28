@@ -30,7 +30,29 @@ import {
   validateSections,
   type FieldErrors,
 } from './page-model';
+import {
+  buildEnglishInput,
+  editEnglish,
+  englishDraftOf,
+  englishPageErrors,
+  englishPreviewUrl,
+  englishSectionsWithErrors,
+  englishView,
+  localTranslationStatus,
+  sectionTranslationState,
+  splitDraftErrors,
+  translationBadge,
+  type EnglishDraft,
+} from './page-translation';
 import { SectionCard, sectionToggleId, TopBarCard } from './section-card';
+import {
+  EnglishPageFields,
+  EnglishSectionCard,
+  LanguageTabs,
+  languagePanelId,
+  languageTabId,
+  type EditorLanguage,
+} from './translation-editor';
 
 export const pageListKey = ['admin-pages'] as const;
 export const pageKey = (key: string) => ['admin-pages', key] as const;
@@ -92,9 +114,17 @@ export function PageEditor({
   const [adding, setAdding] = useState(false);
   const [discarding, setDiscarding] = useState(false);
   const [server, setServer] = useState<{ for: string; errors: FieldErrors } | null>(null);
+  const [lang, setLang] = useState<EditorLanguage>('fr');
+  const [english, setEnglish] = useState<EnglishDraft>(() => englishDraftOf(page));
+  // `translations.en` n'est envoyé qu'après une saisie en anglais : un envoi remplace le brouillon anglais.
+  const [englishTouched, setEnglishTouched] = useState(false);
+  const [touchedSections, setTouchedSections] = useState<string[]>([]);
   const storePage = useStorePage();
 
-  const serialized = JSON.stringify(sections);
+  const value: PageDraftInput = englishTouched
+    ? { sections, seo: page.seo, translations: { en: buildEnglishInput(sections, english, page.seo) } }
+    : { sections, seo: page.seo };
+  const serialized = JSON.stringify(value);
   const localErrors = useMemo(() => validateSections(sections), [sections]);
   const errors = useMemo(
     () => ({ ...(server?.for === serialized ? server.errors : {}), ...localErrors }),
@@ -102,22 +132,45 @@ export function PageEditor({
   );
   const valid = Object.keys(localErrors).length === 0;
   const errorSections = new Set(sectionsWithErrors(errors));
+  const englishErrorSections = new Set(englishSectionsWithErrors(errors));
+  const englishInvalid = englishErrorSections.size > 0 || englishPageErrors(errors).length > 0;
+  const translation = localTranslationStatus(
+    sections,
+    english,
+    page.translationStatus.en,
+    new Set(touchedSections),
+  );
 
   const save = useMutation({
     mutationFn: (input: PageDraftInput) =>
       data(browserApi.PUT('/v1/admin/pages/{key}', { params: { path: { key: page.key } }, body: input })),
-    onSuccess: (saved) => storePage(saved),
+    onSuccess: (saved) => {
+      storePage(saved);
+      // État de la traduction recalculé par l'API à l'enregistrement : il fait foi de nouveau.
+      setTouchedSections([]);
+    },
     onError: (error, input) => {
       const fieldErrors = error instanceof ApiError && error.status === 422 ? error.fieldErrors : {};
+      const split = splitDraftErrors(fieldErrors, input);
       if (Object.keys(fieldErrors).length)
-        setServer({ for: JSON.stringify(input.sections), errors: fieldErrors });
+        setServer({ for: JSON.stringify(input), errors: { ...split.french, ...split.english } });
+      const englishSections = englishSectionsWithErrors(split.english);
+      if (Object.keys(split.english).length > 0 && sectionsWithErrors(split.french).length === 0) {
+        // Erreurs de la version anglaise seulement : onglet anglais, sections concernées ouvertes.
+        setLang('en');
+        const ids = englishSections
+          .map((index) => input.sections[index]?.id)
+          .filter((id): id is string => Boolean(id));
+        if (ids.length) onOpenSections([...new Set([...openSections, ...ids])]);
+      }
       // Erreur sans champ de section à signaler (droits, page inconnue, réseau…) : message de l'API.
-      if (sectionsWithErrors(fieldErrors).length === 0) toast.error(errorMessage(error));
+      if (sectionsWithErrors(split.french).length === 0 && Object.keys(split.english).length === 0)
+        toast.error(errorMessage(error));
     },
   });
 
   const autosave = useAutosave({
-    value: { sections, seo: page.seo } satisfies PageDraftInput,
+    value,
     save: (value) => save.mutateAsync(value),
     enabled: valid && !readOnly,
     initialSavedAt: page.hasDraft ? page.updatedAt : null,
@@ -154,12 +207,20 @@ export function PageEditor({
       const token = await data(
         browserApi.GET('/v1/admin/pages/{key}/preview-token', { params: { path: { key: page.key } } }),
       );
-      if (preview) preview.location.href = token.url;
-      else window.open(token.url, '_blank', 'noopener');
+      // Même jeton pour les deux langues : aperçu dans la langue de l'onglet actif.
+      const url = lang === 'en' ? englishPreviewUrl(token.url) : token.url;
+      if (preview) preview.location.href = url;
+      else window.open(url, '_blank', 'noopener');
     } catch (error) {
       preview?.close();
       toast.error(errorMessage(error));
     }
+  }
+
+  function editEnglishText(section: PageSection, path: string, text: string) {
+    setEnglish((draft) => editEnglish(draft, section, path, text));
+    setEnglishTouched(true);
+    setTouchedSections((ids) => (ids.includes(section.id) ? ids : [...ids, section.id]));
   }
 
   const toggle = (id: string) =>
@@ -203,16 +264,22 @@ export function PageEditor({
             </div>
             <p className="font-ui text-[12px] leading-4 text-text-muted">
               {count} section{count > 1 ? 's' : ''} ·{' '}
-              {readOnly ? 'cliquez pour consulter' : 'glissez pour réordonner, cliquez pour modifier'}
+              {readOnly
+                ? 'cliquez pour consulter'
+                : lang === 'en'
+                  ? 'seuls les textes se traduisent, le reste suit la version française'
+                  : 'glissez pour réordonner, cliquez pour modifier'}
             </p>
           </div>
-          {addable.length > 0 && !readOnly && (
+          {addable.length > 0 && !readOnly && lang === 'fr' && (
             <button type="button" onClick={() => setAdding(true)} className={topbarSecondaryClass}>
               <Plus aria-hidden />
               Ajouter une section
             </button>
           )}
         </div>
+
+        <LanguageTabs value={lang} onChange={setLang} badge={translationBadge(translation)} />
 
         {(pending || autosave.pending || autosave.error || !valid) && (
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-md border border-orange-200 bg-orange-50 px-4 py-2.5">
@@ -221,14 +288,20 @@ export function PageEditor({
                 <SavedNote savedAt={autosave.savedAt} saving={autosave.pending} error={autosave.error} />
               ) : (
                 <p aria-live="polite" className="font-ui text-[12px] leading-4 text-text-main">
-                  Corrigez les champs signalés : le brouillon sera enregistré ensuite.
+                  Corrigez les champs signalés{lang === 'en' ? ' dans la version française' : ''} : le
+                  brouillon sera enregistré ensuite.
+                </p>
+              )}
+              {englishInvalid && lang === 'fr' && (
+                <p className="font-ui text-[12px] leading-4 text-text-main">
+                  La version anglaise contient des champs à corriger (onglet English).
                 </p>
               )}
             </div>
             <div className="flex flex-wrap gap-2">
               <Button variant="ghost" size="sm" onClick={() => void preview()}>
                 <Eye aria-hidden />
-                Aperçu du brouillon
+                {lang === 'en' ? 'Aperçu en anglais' : 'Aperçu du brouillon'}
               </Button>
               {page.hasDraft && !readOnly && (
                 <Button variant="ghost" size="sm" onClick={() => setDiscarding(true)}>
@@ -240,40 +313,85 @@ export function PageEditor({
           </div>
         )}
 
-        {page.key === 'accueil' && <TopBarCard />}
-
-        {count > 0 ? (
-          <SortableList
-            items={sections}
-            getId={(section) => section.id}
-            getLabel={sectionLabel}
-            onReorder={setSections}
-            disabled={readOnly}
+        {lang === 'en' ? (
+          <div
+            role="tabpanel"
+            id={languagePanelId('en')}
+            aria-labelledby={languageTabId('en')}
             className="flex flex-col gap-3.5"
-            renderItem={(section, index) => (
-              <SectionCard
-                key={section.id}
-                section={section}
-                path={`sections.${index}`}
-                open={openSections.includes(section.id)}
-                hasErrors={errorSections.has(index)}
-                readOnly={readOnly}
-                onToggle={() => toggle(section.id)}
-                onChange={(next) =>
-                  setSections(sections.map((current, position) => (position === index ? next : current)))
-                }
-                onRemove={() => {
-                  setSections(sections.filter((_, position) => position !== index));
-                  onOpenSections(openSections.filter((open) => open !== section.id));
-                  toast.success(`Section « ${sectionLabel(section)} » supprimée du brouillon.`);
-                }}
-              />
+          >
+            <EnglishPageFields
+              draft={english}
+              frenchTitle={page.title}
+              frenchSeo={page.seo}
+              readOnly={readOnly}
+              onChange={(next) => {
+                setEnglish(next);
+                setEnglishTouched(true);
+              }}
+            />
+            {count > 0 && (
+              <ul className="flex flex-col gap-3.5">
+                {sections.map((section, index) => (
+                  <EnglishSectionCard
+                    key={section.id}
+                    french={section}
+                    english={englishView(section, english)}
+                    index={index}
+                    open={openSections.includes(section.id)}
+                    hasErrors={englishErrorSections.has(index)}
+                    state={sectionTranslationState(section.id, translation)}
+                    readOnly={readOnly}
+                    onToggle={() => toggle(section.id)}
+                    onEdit={(path, text) => editEnglishText(section, path, text)}
+                  />
+                ))}
+              </ul>
             )}
-          />
+          </div>
         ) : (
-          <p className="rounded-lg border border-dashed border-border-strong bg-neutral-0 p-6 text-center font-ui text-[14px] leading-5 text-text-muted">
-            Cette page n’a aucune section.{!readOnly && ' Ajoutez-en une pour commencer.'}
-          </p>
+          <div
+            role="tabpanel"
+            id={languagePanelId('fr')}
+            aria-labelledby={languageTabId('fr')}
+            className="flex flex-col gap-3.5"
+          >
+            {page.key === 'accueil' && <TopBarCard />}
+
+            {count > 0 ? (
+              <SortableList
+                items={sections}
+                getId={(section) => section.id}
+                getLabel={sectionLabel}
+                onReorder={setSections}
+                disabled={readOnly}
+                className="flex flex-col gap-3.5"
+                renderItem={(section, index) => (
+                  <SectionCard
+                    key={section.id}
+                    section={section}
+                    path={`sections.${index}`}
+                    open={openSections.includes(section.id)}
+                    hasErrors={errorSections.has(index)}
+                    readOnly={readOnly}
+                    onToggle={() => toggle(section.id)}
+                    onChange={(next) =>
+                      setSections(sections.map((current, position) => (position === index ? next : current)))
+                    }
+                    onRemove={() => {
+                      setSections(sections.filter((_, position) => position !== index));
+                      onOpenSections(openSections.filter((open) => open !== section.id));
+                      toast.success(`Section « ${sectionLabel(section)} » supprimée du brouillon.`);
+                    }}
+                  />
+                )}
+              />
+            ) : (
+              <p className="rounded-lg border border-dashed border-border-strong bg-neutral-0 p-6 text-center font-ui text-[14px] leading-5 text-text-muted">
+                Cette page n’a aucune section.{!readOnly && ' Ajoutez-en une pour commencer.'}
+              </p>
+            )}
+          </div>
         )}
       </div>
 

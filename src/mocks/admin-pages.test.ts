@@ -118,6 +118,59 @@ describe('pages & textes simulées', () => {
     expect((await call('PUT', '/v1/admin/pages/accueil', { sections: home.sections })).status).toBe(200);
   });
 
+  it('version anglaise : statut, enregistrement avec le brouillon, sections périmées, erreurs', async () => {
+    const { body: contact } = await call<AdminPage>('GET', '/v1/admin/pages/contact');
+    expect(contact.translations.en).toBeNull();
+    expect(contact.translationStatus.en).toEqual({
+      state: 'MISSING',
+      missingSectionIds: ['hero', 'rendez-vous'],
+      outdatedSectionIds: [],
+    });
+
+    const [hero, , appointment] = contact.sections;
+    const saved = await call<AdminPage>('PUT', '/v1/admin/pages/contact', {
+      sections: contact.sections,
+      translations: {
+        en: {
+          title: 'Contact',
+          sections: [
+            { ...hero, title: 'Let’s talk about ==your project.==', visual: null, enabled: false },
+            { ...appointment, title: 'Book an appointment' },
+          ],
+        },
+      },
+    });
+    expect(saved.status).toBe(200);
+    expect(saved.body.translationStatus.en.state).toBe('UP_TO_DATE');
+    // Champs non textuels repris du français.
+    expect(saved.body.translations.en?.sections[0]).toMatchObject({
+      title: 'Let’s talk about ==your project.==',
+      enabled: true,
+    });
+
+    // Texte français modifié sans l'anglais : section à revoir, traduction gardée.
+    const french = contact.sections.map((section) =>
+      section.id === 'hero' ? { ...section, title: 'Écrivez-nous' } : section,
+    );
+    const outdated = await call<AdminPage>('PUT', '/v1/admin/pages/contact', { sections: french });
+    expect(outdated.body.translationStatus.en).toMatchObject({
+      state: 'OUTDATED',
+      outdatedSectionIds: ['hero'],
+    });
+    expect(outdated.body.translations.en?.sections[0]).toMatchObject({
+      title: 'Let’s talk about ==your project.==',
+    });
+
+    const refused = await call<Problem>('PUT', '/v1/admin/pages/contact', {
+      sections: french,
+      translations: { en: { sections: [appointment, hero] } },
+    });
+    expect(refused.status).toBe(422);
+    expect(refused.body.errors?.map((error) => [error.path, error.code])).toEqual([
+      ['translations.en.sections.1.id', 'section_order'],
+    ]);
+  });
+
   it('assainit le HTML des articles comme l’API', async () => {
     const { body: page } = await call<AdminPage>('GET', '/v1/admin/pages/cgu');
     const sections = page.sections.map((section) =>

@@ -140,6 +140,10 @@ test.describe('back-office : pages & textes', () => {
     await preview.close();
 
     await page.getByRole('button', { name: 'Publier les modifications' }).click();
+    // Texte français modifié : la version anglaise est à revoir, publication confirmée malgré l'avertissement.
+    const warning = page.getByRole('dialog', { name: 'Version anglaise incomplète' });
+    await expect(warning).toContainText('La version anglaise n’est pas à jour');
+    await warning.getByRole('button', { name: 'Publier quand même' }).click();
     await expect(
       page.getByText('Page « Accueil » publiée : le site affiche la nouvelle version.'),
     ).toBeVisible();

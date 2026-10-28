@@ -5,6 +5,7 @@ import { ArrowUpRight, ChevronRight, CircleCheck, FileText, LayoutTemplate } fro
 import type { Route } from 'next';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useRef, useState } from 'react';
+import { ConfirmDialog } from '@/components/admin/editor/editor-ui';
 import { AdminCard } from '@/components/admin/ui/admin-ui';
 import { EmptyState } from '@/components/admin/ui/filters';
 import { AdminPage, topbarActionClass, topbarSecondaryClass } from '@/components/admin/shell/admin-page';
@@ -21,6 +22,7 @@ import { cn } from '@/lib/cn';
 import { formatAgo } from '@/lib/format/date';
 import { PageEditor, pageKey, pageListKey, useStorePage, type PageEditorHandle } from './page-editor';
 import { CATEGORY_PAGES, CATEGORY_PAGES_AFTER } from './page-model';
+import { publishWarning } from './page-translation';
 
 const DEFAULT_PAGE = 'accueil';
 
@@ -72,6 +74,8 @@ export function PagesView() {
   const selection = useSelection();
   const editor = useRef<PageEditorHandle>(null);
   const [version, setVersion] = useState(0);
+  // Version anglaise incomplète : avertissement avant publication (sans bloquer).
+  const [warning, setWarning] = useState<{ key: PageKey; message: string } | null>(null);
   const storePage = useStorePage();
   // Sans `content:write` (responsable) : pages consultées, ni brouillon ni publication.
   const canWrite = useCan()('content:write');
@@ -117,6 +121,11 @@ export function PagesView() {
     const latest = await page.refetch();
     if (!latest.data?.hasDraft) {
       toast.info('Aucune modification à publier : la page est à jour.');
+      return;
+    }
+    const message = publishWarning(latest.data.translationStatus.en);
+    if (message) {
+      setWarning({ key: latest.data.key, message });
       return;
     }
     publish.mutate(latest.data.key);
@@ -213,6 +222,17 @@ export function PagesView() {
           )}
         </div>
       </div>
+      <ConfirmDialog
+        open={warning !== null}
+        onClose={() => setWarning(null)}
+        onConfirm={() => {
+          if (warning) publish.mutate(warning.key);
+          setWarning(null);
+        }}
+        title="Version anglaise incomplète"
+        description={warning?.message ?? ''}
+        confirmLabel="Publier quand même"
+      />
     </AdminPage>
   );
 }
