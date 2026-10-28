@@ -362,6 +362,10 @@
     "editions": "Magazine issues",
     "preview": "Preview: this issue is not yet published on the site."
   },
+  "draftPreview": {
+    "draft": "Draft preview — not published",
+    "expired": "Preview link expired — published version shown"
+  },
   "search": {
     "open": "Search the site",
     "dialogTitle": "Site search",

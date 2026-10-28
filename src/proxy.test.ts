@@ -213,3 +213,21 @@ describe('proxy — langues', () => {
     expect(response.headers.get('x-middleware-rewrite')).toBeNull();
   });
 });
+
+describe('proxy — aperçu des brouillons', () => {
+  beforeEach(() => maintenance(false));
+
+  it('adresse d’aperçu du back-office → route d’aperçu dynamique, ni cache ni indexation', async () => {
+    const response = await proxy(request('/en/about-us?preview=jeton'));
+    expect(response.headers.get('x-middleware-rewrite')).toBe(
+      'http://localhost:3000/en/apercu/qui-sommes-nous?preview=jeton',
+    );
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('x-robots-tag')).toBe('noindex, nofollow');
+  });
+
+  it('sans jeton, la page prérendue habituelle', async () => {
+    const response = await proxy(request('/qui-sommes-nous'));
+    expect(response.headers.get('x-middleware-rewrite')).toBe('http://localhost:3000/fr/qui-sommes-nous');
+  });
+});

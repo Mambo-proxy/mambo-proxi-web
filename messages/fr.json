@@ -362,6 +362,10 @@
     "editions": "Éditions du magazine",
     "preview": "Aperçu : cette édition n’est pas encore publiée sur le site."
   },
+  "draftPreview": {
+    "draft": "Aperçu du brouillon — non publié",
+    "expired": "Lien d’aperçu expiré — version publiée affichée"
+  },
   "search": {
     "open": "Rechercher sur le site",
     "dialogTitle": "Recherche sur le site",

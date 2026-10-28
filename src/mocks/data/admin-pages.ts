@@ -346,3 +346,50 @@ export function toPublicPage(page: StoredPage): Page {
     updatedAt: page.publishedAt ?? page.updatedAt,
   };
 }
+
+/**
+ * Jeton d'aperçu simulé d'une page (`GET /v1/admin/pages/{key}/preview-token`) : `apercu_<clé>.<expiration en ms>`,
+ * vérifié comme celui de l'API (page du jeton, expiration). Sans le préfixe `apercu-` des éditions du Magazine.
+ */
+export function pagePreviewToken(key: PageKey, expiresAt: number): string {
+  return `apercu_${key}.${String(expiresAt)}`;
+}
+
+/** Jeton d'aperçu simulé valide pour cette page, non expiré. */
+export function isPagePreviewToken(token: string | null, key: string, now = Date.now()): boolean {
+  const match = token ? /^apercu_([a-z0-9-]+)\.(\d+)$/.exec(token) : null;
+  return Boolean(match && match[1] === key && Number(match[2]) > now);
+}
+
+/**
+ * Brouillon tel que le lit le site avec un jeton d'aperçu (`GET /v1/pages/{key}?preview=`) : brouillon, ou version
+ * publiée s'il n'y en a pas, sections visibles ; en anglais, chaque section traduite remplace la section française
+ * (les autres restent en français), comme l'API.
+ */
+export function toPreviewPage(page: StoredPage, lang: 'fr' | 'en'): Page {
+  const current = page.draft ?? page.published;
+  const english = lang === 'en' ? current.en : null;
+  const translated = new Map(
+    english ? englishSections(current.sections, english).map((section) => [section.id, section]) : [],
+  );
+  return {
+    key: page.key,
+    title: english?.title || page.title,
+    sections: clone(
+      current.sections
+        .filter((section) => section.enabled)
+        .map((section) => translated.get(section.id) ?? section),
+    ),
+    seo: {
+      ...clone(current.seo),
+      ...(english
+        ? {
+            title: english.seo.title ?? current.seo.title ?? null,
+            description: english.seo.description ?? current.seo.description ?? null,
+          }
+        : {}),
+    },
+    isPreview: true,
+    updatedAt: page.updatedAt,
+  };
+}

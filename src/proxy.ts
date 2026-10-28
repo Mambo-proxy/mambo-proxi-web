@@ -6,6 +6,7 @@ import { getApiBaseUrl } from '@/lib/api/config';
 import { transport } from '@/lib/api/transport';
 import { adminCsp } from '@/lib/security/headers';
 import { JS_CLASS_SCRIPT, cspHash } from '@/lib/security/inline-scripts';
+import { previewRewrite } from '@/lib/preview-routes';
 import { findSiteRedirect } from '@/lib/site-redirects';
 
 /** Cookies de session déposés par l'API (jeton d'accès 15 min, jeton de rafraîchissement). */
@@ -116,7 +117,8 @@ function localeOf(pathname: string): string {
 /**
  * Proxy (anciennement « middleware ») : protège `/admin`, applique les redirections du back-office (301 ou 302, dans
  * la langue de l'adresse demandée), oriente le site public vers sa langue et affiche la page de maintenance de cette
- * langue (statut 503) quand elle est activée. Les membres de l'équipe connectés continuent de voir le site.
+ * langue (statut 503) quand elle est activée. Les membres de l'équipe connectés continuent de voir le site. Les
+ * adresses d'aperçu de brouillon sont réécrites vers la route d'aperçu.
  */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -133,6 +135,15 @@ export async function proxy(request: NextRequest) {
     const response = NextResponse.rewrite(new URL(maintenancePath, request.url), { status: 503 });
     response.headers.set('Retry-After', '3600');
     response.headers.set('Cache-Control', 'no-store');
+    return response;
+  }
+  // Aperçu d'un brouillon (`…?preview=<jeton>`, bouton « Aperçu » du back-office) : route d'aperçu dynamique, jamais
+  // mise en cache ni indexée ; les pages elles-mêmes restent prérendues.
+  const preview = previewRewrite(new URL(request.url));
+  if (preview) {
+    const response = NextResponse.rewrite(preview);
+    response.headers.set('Cache-Control', 'private, no-store');
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     return response;
   }
   return intl(request);

@@ -2,11 +2,12 @@ import { http, HttpResponse, type HttpHandler } from 'msw';
 import { validateSections } from '@/components/admin/pages/page-model';
 import { applyEnglishTexts } from '@/components/admin/pages/page-translation';
 import type { PageDraftInput, PageSection, PageTranslationInput, PreviewToken } from '@/lib/api/schema';
-import { actorOf, jsonBody, mockId } from '../admin-utils';
+import { actorOf, jsonBody } from '../admin-utils';
 import { PREVIEW_TOKEN_TTL_MS, previewUrl } from '../content-rules';
 import {
   adminPages,
   findAdminPage,
+  pagePreviewToken,
   sectionTextHash,
   toAdminPage,
   toSummary,
@@ -66,7 +67,8 @@ function draftErrors(page: StoredPage, sections: PageSection[]): FieldErrors {
 /**
  * Version anglaise du brouillon (`translations.en`, comme `englishDraft` de l'API) : `id` alignés sur les sections
  * françaises de l'envoi (même type, sans doublon, dans l'ordre), textes anglais posés sur la section française puis
- * validés comme elle ; empreinte des textes français gardée si les textes anglais de la section n'ont pas changé.
+ * validés comme elle ; empreinte des textes français gardée si les textes anglais de la section n'ont pas changé,
+ * sauf pour les sections marquées revues (`reviewedSectionIds`, `id` présents dans l'envoi).
  */
 function englishDraft(
   french: PageSection[],
@@ -80,6 +82,7 @@ function englishDraft(
   const seen = new Set<string>();
   const sections: PageSection[] = [];
   const sourceHashes: Record<string, string> = {};
+  const reviewed = Array.isArray(input.reviewedSectionIds) ? input.reviewedSectionIds : [];
   let last = -1;
   (Array.isArray(input.sections) ? input.sections : []).forEach((section, index) => {
     const path = `${basePath}.${index}`;
@@ -126,10 +129,21 @@ function englishDraft(
       previousSection !== undefined &&
       sectionTextHash(applyEnglishTexts(source, previousSection) as PageSection) ===
         sectionTextHash(translated);
-    const hash = unchanged
-      ? (previous?.sourceHashes[section.id] ?? sectionTextHash(source))
-      : sectionTextHash(source);
+    // Section marquée revue : empreinte du français actuel, même si ses textes anglais n'ont pas changé.
+    const hash =
+      unchanged && !reviewed.includes(section.id)
+        ? (previous?.sourceHashes[section.id] ?? sectionTextHash(source))
+        : sectionTextHash(source);
     if (hash !== null) sourceHashes[section.id] = hash;
+  });
+  const sent = new Set((Array.isArray(input.sections) ? input.sections : []).map((section) => section.id));
+  reviewed.forEach((id, index) => {
+    if (!sent.has(id))
+      errors.push({
+        path: `translations.en.reviewedSectionIds.${index}`,
+        code: 'unknown_section',
+        message: 'Cette section ne fait pas partie de la version anglaise envoyée.',
+      });
   });
   if ((input.title?.length ?? 0) > 160)
     errors.push({ path: 'translations.en.title', code: 'too_long', message: '160 caractères au maximum.' });
@@ -235,11 +249,12 @@ export const adminPageHandlers: HttpHandler[] = [
   http.get('*/v1/admin/pages/:key/preview-token', ({ params }) => {
     const page = findAdminPage(String(params.key));
     if (!page) return notFound();
-    const token = mockId('apercu');
+    const expiresAt = Date.now() + PREVIEW_TOKEN_TTL_MS;
+    const token = pagePreviewToken(page.key, expiresAt);
     const body: PreviewToken = {
       token,
       url: previewUrl(page.path, token),
-      expiresAt: new Date(Date.now() + PREVIEW_TOKEN_TTL_MS).toISOString(),
+      expiresAt: new Date(expiresAt).toISOString(),
     };
     return HttpResponse.json(body);
   }),

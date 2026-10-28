@@ -1,11 +1,12 @@
 'use client';
 
-import { ChevronRight, CircleAlert, Languages, Minus } from 'lucide-react';
+import { CheckCheck, ChevronRight, CircleAlert, Languages, Minus } from 'lucide-react';
 import { Fragment, useId, type ReactNode } from 'react';
 import { StatusPill } from '@/components/admin/editor/editor-ui';
 import { RichTextEditor } from '@/components/admin/editor/rich-text-editor';
 import { ReadOnlyFieldset } from '@/components/admin/shell/permissions';
 import { AccentText } from '@/components/ui/accent-text';
+import { Button } from '@/components/ui/button';
 import { Field, Input, Textarea } from '@/components/ui/field';
 import type { PageSection, Seo } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
@@ -259,8 +260,38 @@ const STATE_LABELS: Record<Exclude<SectionTranslationState, null>, string> = {
 };
 
 /**
+ * Bandeau au-dessus des sections anglaises quand plusieurs sont « À revoir » : « Tout marquer comme revu » (les
+ * traductions restent justes malgré les changements du français).
+ */
+export function ReviewAllBar({
+  count,
+  reviewing,
+  disabled,
+  onReviewAll,
+}: {
+  count: number;
+  reviewing: boolean;
+  disabled: boolean;
+  onReviewAll: () => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-md border border-border-default bg-neutral-0 px-4 py-2.5">
+      <p className="min-w-0 flex-1 font-ui text-[12px] leading-4 text-text-main">
+        {count} sections à revoir : si leurs traductions restent justes malgré les changements du texte
+        français, marquez-les comme revues.
+      </p>
+      <Button variant="outline" size="sm" loading={reviewing} disabled={disabled} onClick={onReviewAll}>
+        <CheckCheck aria-hidden />
+        Tout marquer comme revu
+      </Button>
+    </div>
+  );
+}
+
+/**
  * Carte d'une section dans l'onglet anglais : même en-tête que la carte française (nom, description), sans poignée,
- * interrupteur ni suppression ; badge « À traduire » / « À revoir » ; champs texte de la section.
+ * interrupteur ni suppression ; badge « À traduire » / « À revoir » ; champs texte de la section. Une section
+ * « À revoir » propose « Marquer comme revue » (traduction juste malgré le changement du français).
  */
 export function EnglishSectionCard({
   french,
@@ -270,8 +301,11 @@ export function EnglishSectionCard({
   hasErrors,
   state,
   readOnly,
+  reviewing = false,
+  reviewDisabled = false,
   onToggle,
   onEdit,
+  onMarkReviewed,
 }: {
   /** Section française (structure et textes de référence). */
   french: PageSection;
@@ -282,14 +316,21 @@ export function EnglishSectionCard({
   hasErrors: boolean;
   state: SectionTranslationState;
   readOnly: boolean;
+  /** Enregistrement en cours de la section marquée revue. */
+  reviewing?: boolean;
+  /** Marquage impossible pour l'instant (autre marquage en cours, champs français à corriger). */
+  reviewDisabled?: boolean;
   onToggle: () => void;
   onEdit: (path: string, value: string) => void;
+  /** Absent en lecture seule. */
+  onMarkReviewed?: () => void;
 }) {
   const id = useId();
   const label = sectionLabel(french);
   const fields = translatableFields(french);
   const path = `en.sections.${index}`;
   const sectionError = useFieldError(path);
+  const reviewError = useFieldError(`${path}.reviewed`);
   const groups: { name: string | null; fields: TranslatableField[] }[] = [];
   for (const field of fields) {
     const last = groups.at(-1);
@@ -367,6 +408,29 @@ export function EnglishSectionCard({
                 : ''}
             Images, liens, réglages d’affichage et visibilité : repris de la version française.
           </p>
+          {state === 'outdated' && onMarkReviewed && !readOnly && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <Button
+                variant="outline"
+                size="sm"
+                loading={reviewing}
+                disabled={reviewDisabled}
+                onClick={onMarkReviewed}
+              >
+                <CheckCheck aria-hidden />
+                Marquer comme revue
+              </Button>
+              <span className="font-ui text-[12px] leading-4 text-text-muted">
+                La traduction reste juste : la section n’est plus signalée « À revoir ».
+              </span>
+            </div>
+          )}
+          {reviewError && (
+            <p role="alert" className="flex items-start gap-1.5 text-[13px] leading-4 text-feedback-error">
+              <CircleAlert aria-hidden size={16} className="mt-px shrink-0" />
+              {reviewError}
+            </p>
+          )}
           {sectionError && (
             <p role="alert" className="flex items-start gap-1.5 text-[13px] leading-4 text-feedback-error">
               <CircleAlert aria-hidden size={16} className="mt-px shrink-0" />

@@ -335,14 +335,18 @@ export function editEnglish(
  * `translations.en` envoyé avec le brouillon : sections françaises traduites, dans l'ordre du français, recomposées
  * sur la section française actuelle (mêmes `id`, `type` et champs non textuels) ; les sections jamais traduites ne
  * sont pas envoyées (le site affiche le français). Titre et SEO (`title`, `description`) anglais.
+ *
+ * `reviewed` : sections « marquées comme revues » (`reviewedSectionIds`) — l'API leur donne l'empreinte des textes
+ * français actuels sans que leurs textes anglais changent ; elles sont toujours envoyées.
  */
 export function buildEnglishInput(
   french: PageSection[],
   draft: EnglishDraft,
   frenchSeo: PageDraftInput['seo'],
+  reviewed: readonly string[] = [],
 ): PageTranslationInput {
   const blank = (value: string | null) => (value?.trim() ? value : null);
-  return {
+  const input: PageTranslationInput = {
     title: blank(draft.title),
     seo: {
       noindex: frenchSeo?.noindex ?? false,
@@ -350,10 +354,20 @@ export function buildEnglishInput(
       description: blank(draft.seo.description),
     },
     sections: french.flatMap((section) => {
-      const english = englishFor(section, draft);
+      const english = englishFor(section, draft) ?? (reviewed.includes(section.id) ? section : undefined);
       return english ? [alignToFrench(section, english) as PageSection] : [];
     }),
   };
+  return reviewed.length > 0 ? { ...input, reviewedSectionIds: [...reviewed] } : input;
+}
+
+/** Envoi sans les sections marquées revues : ce qui reste du brouillon une fois l'empreinte mise à jour. */
+export function withoutReview(input: PageDraftInput): PageDraftInput {
+  const english = input.translations?.en;
+  if (english?.reviewedSectionIds === undefined) return input;
+  const rest = { ...english };
+  delete rest.reviewedSectionIds;
+  return { ...input, translations: { ...input.translations, en: rest } };
 }
 
 // ───────────────────────────── Erreurs ─────────────────────────────
@@ -363,8 +377,9 @@ export const EN_PREFIX = 'en';
 
 /**
  * Erreurs d'une réponse 422 réparties entre les deux onglets : `translations.en.sections.N.champ` (N = rang dans
- * les sections anglaises envoyées) devient `en.sections.<rang de la section française>.champ` ; `translations.en.title`
- * et `translations.en.seo.*` deviennent `en.title` et `en.seo.*`.
+ * les sections anglaises envoyées) devient `en.sections.<rang de la section française>.champ` ;
+ * `translations.en.reviewedSectionIds.N` devient `en.sections.<rang>.reviewed` (carte de la section marquée revue) ;
+ * `translations.en.title` et `translations.en.seo.*` deviennent `en.title` et `en.seo.*`.
  */
 export function splitDraftErrors(
   errors: FieldErrors,
@@ -373,9 +388,17 @@ export function splitDraftErrors(
   const french: FieldErrors = {};
   const english: FieldErrors = {};
   const sent = input.translations?.en?.sections ?? [];
+  const reviewed = input.translations?.en?.reviewedSectionIds ?? [];
   for (const [path, message] of Object.entries(errors)) {
     if (!path.startsWith('translations.en')) {
       french[path] = message;
+      continue;
+    }
+    const review = /^translations\.en\.reviewedSectionIds\.(\d+)$/.exec(path);
+    if (review) {
+      const id = reviewed[Number(review[1])];
+      const index = input.sections.findIndex((section) => section.id === id);
+      english[index === -1 ? EN_PREFIX : `${EN_PREFIX}.sections.${index}.reviewed`] = message;
       continue;
     }
     const match = /^translations\.en\.sections\.(\d+)(?:\.(.*))?$/.exec(path);

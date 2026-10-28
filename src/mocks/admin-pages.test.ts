@@ -169,6 +169,25 @@ describe('pages & textes simulées', () => {
     expect(refused.body.errors?.map((error) => [error.path, error.code])).toEqual([
       ['translations.en.sections.1.id', 'section_order'],
     ]);
+
+    // Traduction toujours juste : marquée revue sans changer ses textes, elle redevient à jour.
+    const english = outdated.body.translations.en?.sections ?? [];
+    const unknown = await call<Problem>('PUT', '/v1/admin/pages/contact', {
+      sections: french,
+      translations: {
+        en: { title: 'Contact', sections: english.slice(0, 1), reviewedSectionIds: ['rendez-vous'] },
+      },
+    });
+    expect(unknown.body.errors?.map((error) => error.path)).toEqual(['translations.en.reviewedSectionIds.0']);
+    const reviewed = await call<AdminPage>('PUT', '/v1/admin/pages/contact', {
+      sections: french,
+      translations: { en: { title: 'Contact', sections: english, reviewedSectionIds: ['hero'] } },
+    });
+    expect(reviewed.body.translationStatus.en).toEqual({
+      state: 'UP_TO_DATE',
+      missingSectionIds: [],
+      outdatedSectionIds: [],
+    });
   });
 
   it('assainit le HTML des articles comme l’API', async () => {

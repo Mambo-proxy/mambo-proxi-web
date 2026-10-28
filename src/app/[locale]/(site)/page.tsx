@@ -16,6 +16,7 @@ import type { PageSection } from '@/lib/api/schema';
 import { unwrap, unwrapOrNull } from '@/lib/api/result';
 import { api, cached } from '@/lib/api/server';
 import { cacheTags } from '@/lib/api/tags';
+import { getPage } from '@/lib/pages';
 import { getNavigation, getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
 import { seoMetadata } from '@/lib/seo/metadata';
@@ -39,12 +40,7 @@ async function getFinderCategories(): Promise<FinderCategory[]> {
 
 async function getHomeData() {
   const [page, settings, categories, reviews, summary, partners, zones] = await Promise.all([
-    unwrapOrNull(
-      api.GET('/v1/pages/{key}', {
-        params: { path: { key: 'accueil' } },
-        ...cached([cacheTags.page('accueil')]),
-      }),
-    ),
+    getPage('accueil'),
     getSiteSettings(),
     unwrap(api.GET('/v1/categories', cached([cacheTags.categories]))),
     unwrap(

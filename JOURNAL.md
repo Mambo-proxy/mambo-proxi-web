@@ -1247,7 +1247,59 @@ erreurs) ; toutes les routes appelées existent. Corrections :
 
 ### Points ouverts
 
-- Une section « À revoir » dont la traduction reste valable ne peut être marquée revue qu'en modifiant un de ses
-  textes anglais (l'API garde l'empreinte si les textes anglais sont inchangés).
-- Le site ne lit pas encore `?preview=` sur les pages éditoriales (seul le Magazine le fait) : l'aperçu, français
-  comme anglais, montre la version publiée tant que ce n'est pas branché.
+- ~~Une section « À revoir » dont la traduction reste valable ne peut être marquée revue qu'en modifiant un de ses
+  textes anglais~~ : réglé par « Marquer comme revue » (voir ci-dessous).
+- ~~Le site ne lit pas encore `?preview=` sur les pages éditoriales (seul le Magazine le fait)~~ : branché, voir
+  « Aperçu des brouillons des pages éditoriales » ci-dessous.
+
+## Traduction anglaise « marquée comme revue » (28 octobre 2026)
+
+### Fait
+
+- Contrat synchronisé (`pnpm contract:sync`) : `PageTranslationInput.reviewedSectionIds`.
+- Onglet anglais de Pages & textes : bouton « Marquer comme revue » dans chaque section « À revoir », et bandeau
+  « Tout marquer comme revu » au-dessus des sections quand plusieurs sont à revoir. Le clic enregistre aussitôt le
+  brouillon avec `translations.en.reviewedSectionIds` (section toujours incluse dans `translations.en.sections`) ;
+  le badge disparaît avec le `translationStatus` de la réponse. Le brouillon envoyé, sans le marquage, devient la
+  dernière version enregistrée (pas de second envoi automatique).
+- Erreurs 422 `translations.en.reviewedSectionIds.N` rattachées à la carte de la section (`en.sections.<rang>.reviewed`).
+- Mocks : `PUT` accepte `reviewedSectionIds` (contrôle des `id`, empreinte du français actuel) ; tests dans
+  `page-translation.test.ts` et `src/mocks/admin-pages.test.ts`.
+
+## Aperçu des brouillons des pages éditoriales (28 octobre 2026)
+
+### Fait
+
+- `getPage(key, { preview })` (`src/lib/pages.ts`) : sans jeton, version publiée mise en cache avec l'étiquette
+  `page:<clé>` (inchangé) ; avec jeton, `GET /v1/pages/{key}?preview=` sans cache (`no-store`, aucune étiquette),
+  une seule lecture par requête (`cache` de React). Jeton expiré, invalide ou d'une autre page : l'API renvoie la
+  version publiée (`isPreview: false`) ; erreur ou API injoignable : repli sur la version publiée mise en cache. Un
+  aperçu ne provoque jamais d'erreur 500. L'accueil et « Nos services » passent aussi par `getPage`.
+- Pages couvertes : accueil, services, zones d'intervention, qui sommes-nous, mission, partenaires, formation,
+  recrutement, avis clients, suivi Mambo, les quatre pages légales (`PREVIEWABLE_PAGES`, `src/lib/preview-routes.ts`),
+  et le Magazine (jeton de page ou d'édition).
+- Le proxy réécrit `/qui-sommes-nous?preview=…` et `/en/about-us?preview=…` vers la route dynamique
+  `/[locale]/apercu/[key]` (`Cache-Control: private, no-store`, `X-Robots-Tag: noindex, nofollow`), qui enregistre le
+  jeton pour la requête (`setRequestPreview`) puis rend le composant habituel de la page sous `PreviewBanner`
+  (« Aperçu du brouillon — non publié » ou « Lien d’aperçu expiré — version publiée affichée »), métadonnées
+  `noindex`. Sans jeton, cette route renvoie 404.
+- Mocks : jeton de page simulé `apercu_<clé>.<expiration>` (vérifié comme l'API : page et expiration) ;
+  `GET /v1/pages/{key}?preview=` renvoie le brouillon des Pages & textes simulées (anglais recomposé section par
+  section). Tests : `src/lib/pages.test.ts`, `src/lib/preview-routes.test.ts`, `src/proxy.test.ts`.
+
+### Décisions
+
+- Réécriture par le proxy plutôt que lecture de `searchParams` dans chaque page : lire `searchParams` rendrait les
+  pages dynamiques pour tous les visiteurs. Seules les requêtes avec `?preview=` passent par la route d'aperçu ; les
+  pages restent prérendues (ISR) et leurs lectures gardent leurs étiquettes. Le Magazine, déjà dynamique, lit le
+  jeton lui-même.
+
+### Points ouverts
+
+- Avec les mocks, le serveur Next et le back-office (navigateur) ont chacun leur mémoire : l'aperçu montre le
+  brouillon simulé côté serveur (« Mentions légales »), pas les modifications faites dans le navigateur. Sur l'API
+  réelle, le brouillon enregistré est bien celui affiché.
+- La page Contact du site n'est pas construite sur la page `contact` de l'API (contenu en dur) : son aperçu n'a pas
+  d'effet.
+- À vérifier sur Vercel : réécriture du proxy vers `/[locale]/apercu/[key]`, en-têtes `no-store`, jeton expiré
+  (30 min), aperçu anglais `/en/about-us?preview=…`.

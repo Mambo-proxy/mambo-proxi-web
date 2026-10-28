@@ -42,6 +42,7 @@ import {
   sectionTranslationState,
   splitDraftErrors,
   translationBadge,
+  withoutReview,
   type EnglishDraft,
 } from './page-translation';
 import { SectionCard, sectionToggleId, TopBarCard } from './section-card';
@@ -49,6 +50,7 @@ import {
   EnglishPageFields,
   EnglishSectionCard,
   LanguageTabs,
+  ReviewAllBar,
   languagePanelId,
   languageTabId,
   type EditorLanguage,
@@ -119,6 +121,8 @@ export function PageEditor({
   // `translations.en` n'est envoyé qu'après une saisie en anglais : un envoi remplace le brouillon anglais.
   const [englishTouched, setEnglishTouched] = useState(false);
   const [touchedSections, setTouchedSections] = useState<string[]>([]);
+  // Sections « marquées comme revues » dont l'enregistrement est en cours.
+  const [reviewing, setReviewing] = useState<string[]>([]);
   const storePage = useStorePage();
 
   const value: PageDraftInput = englishTouched
@@ -152,8 +156,12 @@ export function PageEditor({
     onError: (error, input) => {
       const fieldErrors = error instanceof ApiError && error.status === 422 ? error.fieldErrors : {};
       const split = splitDraftErrors(fieldErrors, input);
+      // Erreurs rattachées au brouillon tel qu'il reste affiché (sans les sections marquées revues).
       if (Object.keys(fieldErrors).length)
-        setServer({ for: JSON.stringify(input), errors: { ...split.french, ...split.english } });
+        setServer({
+          for: JSON.stringify(withoutReview(input)),
+          errors: { ...split.french, ...split.english },
+        });
       const englishSections = englishSectionsWithErrors(split.english);
       if (Object.keys(split.english).length > 0 && sectionsWithErrors(split.french).length === 0) {
         // Erreurs de la version anglaise seulement : onglet anglais, sections concernées ouvertes.
@@ -221,6 +229,31 @@ export function PageEditor({
     setEnglish((draft) => editEnglish(draft, section, path, text));
     setEnglishTouched(true);
     setTouchedSections((ids) => (ids.includes(section.id) ? ids : [...ids, section.id]));
+  }
+
+  /**
+   * « Marquer comme revue » : enregistre tout de suite le brouillon avec `reviewedSectionIds` (l'API donne à ces
+   * sections l'empreinte des textes français actuels) ; le badge « À revoir » disparaît avec la réponse. Le brouillon
+   * envoyé, sans le marquage, devient la dernière version enregistrée (pas de nouvel envoi automatique).
+   */
+  async function markReviewed(ids: string[]) {
+    if (ids.length === 0 || reviewing.length > 0 || !valid || readOnly) return;
+    const input: PageDraftInput = {
+      sections,
+      seo: page.seo,
+      translations: { en: buildEnglishInput(sections, english, page.seo, ids) },
+    };
+    setReviewing(ids);
+    setEnglishTouched(true);
+    try {
+      await save.mutateAsync(input);
+      autosave.markSaved(withoutReview(input), new Date().toISOString());
+      toast.success(ids.length > 1 ? 'Sections marquées comme revues.' : 'Section marquée comme revue.');
+    } catch {
+      // Erreurs affichées par `onError` (carte de la section, ou message de l'API).
+    } finally {
+      setReviewing([]);
+    }
   }
 
   const toggle = (id: string) =>
@@ -330,6 +363,14 @@ export function PageEditor({
                 setEnglishTouched(true);
               }}
             />
+            {!readOnly && translation.outdatedSectionIds.length > 1 && (
+              <ReviewAllBar
+                count={translation.outdatedSectionIds.length}
+                reviewing={reviewing.length > 1}
+                disabled={reviewing.length > 0 || !valid}
+                onReviewAll={() => void markReviewed(translation.outdatedSectionIds)}
+              />
+            )}
             {count > 0 && (
               <ul className="flex flex-col gap-3.5">
                 {sections.map((section, index) => (
@@ -342,8 +383,11 @@ export function PageEditor({
                     hasErrors={englishErrorSections.has(index)}
                     state={sectionTranslationState(section.id, translation)}
                     readOnly={readOnly}
+                    reviewing={reviewing.includes(section.id)}
+                    reviewDisabled={reviewing.length > 0 || !valid}
                     onToggle={() => toggle(section.id)}
                     onEdit={(path, text) => editEnglishText(section, path, text)}
+                    onMarkReviewed={readOnly ? undefined : () => void markReviewed([section.id])}
                   />
                 ))}
               </ul>

@@ -4871,11 +4871,25 @@ export interface components {
          *     Les limites de longueur des champs s'appliquent aux textes anglais (`422` sur
          *     `translations.en.sections.N.<champ>`), le HTML des articles est assaini. Pour `seo`, seuls `title` et
          *     `description` sont traduits.
+         *
+         *     **Empreinte des sections** (voir `PageTranslationStatus.outdatedSectionIds`) : pour chaque section anglaise
+         *     envoyée, l'empreinte des textes français est recalculée sur les textes français actuels du brouillon si la
+         *     section est nouvelle ou si ses textes anglais ont changé ; sinon l'empreinte mémorisée est gardée (la
+         *     section reste périmée si le français a changé). `reviewedSectionIds` permet de **marquer une traduction
+         *     comme revue** sans modifier ses textes : l'empreinte de ces sections devient celle des textes français
+         *     actuels du brouillon, et la réponse renvoie le statut recalculé.
          */
         PageTranslationInput: {
             title?: string | null;
             sections: components["schemas"]["PageSection"][];
             seo?: components["schemas"]["Seo"];
+            /**
+             * @description Sections dont la traduction a été relue et reste juste malgré un changement des textes français : leur
+             *     empreinte devient celle des textes français actuels du brouillon (elles quittent
+             *     `outdatedSectionIds`). Chaque `id` doit être celui d'une section présente dans `sections` du même envoi,
+             *     sinon `422` sur `translations.en.reviewedSectionIds.N`. Non mémorisé : n'agit que sur cet envoi.
+             */
+            reviewedSectionIds?: string[];
         };
         PageDraftInput: {
             sections: components["schemas"]["PageSection"][];

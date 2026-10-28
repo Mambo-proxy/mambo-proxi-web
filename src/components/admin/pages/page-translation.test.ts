@@ -12,6 +12,7 @@ import {
   splitDraftErrors,
   translatableFields,
   translationBadge,
+  withoutReview,
   type EnglishDraft,
 } from './page-translation';
 
@@ -106,6 +107,20 @@ describe('brouillon anglais envoyé', () => {
     expect(input.sections[1]).toMatchObject({ title: 'Our strengths', columns: 2 });
   });
 
+  it('envoie les sections marquées revues, puis les retire du brouillon enregistré', () => {
+    const draft = emptyDraft({ hero: { ...hero, title: 'Let’s talk' } as PageSection });
+    const input = buildEnglishInput([hero, cards], draft, undefined, ['hero']);
+    expect(input.reviewedSectionIds).toEqual(['hero']);
+    expect(input.sections.map((section) => section.id)).toEqual(['hero']);
+    expect(buildEnglishInput([hero], draft, undefined)).not.toHaveProperty('reviewedSectionIds');
+
+    const draftInput: PageDraftInput = { sections: [hero, cards], translations: { en: input } };
+    expect(withoutReview(draftInput)).toEqual({
+      sections: [hero, cards],
+      translations: { en: buildEnglishInput([hero, cards], draft, undefined) },
+    });
+  });
+
   it('ignore une section anglaise dont le type ne correspond plus', () => {
     const draft = emptyDraft({ hero: { ...cards, id: 'hero' } as PageSection });
     expect(buildEnglishInput([hero], draft, undefined).sections).toEqual([]);
@@ -137,6 +152,18 @@ describe('erreurs 422 de la version anglaise', () => {
       'en.seo.description': 'Trop long.',
     });
     expect(englishSectionsWithErrors(english)).toEqual([0, 2]);
+  });
+
+  it('rattache translations.en.reviewedSectionIds.N à la carte de la section marquée revue', () => {
+    const { english } = splitDraftErrors(
+      {
+        'translations.en.reviewedSectionIds.0': 'Section absente de l’envoi.',
+        'translations.en.reviewedSectionIds.1': 'Inconnue.',
+      },
+      { ...input, translations: { en: { sections: [hero], reviewedSectionIds: ['cartes', 'autre'] } } },
+    );
+    expect(english).toEqual({ 'en.sections.2.reviewed': 'Section absente de l’envoi.', en: 'Inconnue.' });
+    expect(englishSectionsWithErrors(english)).toEqual([2]);
   });
 
   it('garde une erreur sur une section anglaise inconnue au niveau de la page', () => {

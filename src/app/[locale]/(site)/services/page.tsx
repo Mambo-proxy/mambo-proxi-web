@@ -6,9 +6,10 @@ import { CategoryNav } from '@/components/sections/services/category-nav';
 import { CategoryServices } from '@/components/sections/services/category-services';
 import { CtaBand } from '@/components/site/cta-band';
 import type { PageSection } from '@/lib/api/schema';
-import { unwrap, unwrapOrNull } from '@/lib/api/result';
+import { unwrap } from '@/lib/api/result';
 import { api, cached } from '@/lib/api/server';
 import { cacheTags } from '@/lib/api/tags';
+import { getPage } from '@/lib/pages';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
@@ -17,12 +18,7 @@ import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
 async function getServicesData() {
   const [page, settings, categories] = await Promise.all([
-    unwrapOrNull(
-      api.GET('/v1/pages/{key}', {
-        params: { path: { key: 'services' } },
-        ...cached([cacheTags.page('services')]),
-      }),
-    ),
+    getPage('services'),
     getSiteSettings(),
     unwrap(
       api.GET('/v1/categories', {

@@ -4,25 +4,35 @@ import { getTranslations } from 'next-intl/server';
 import { PageSections } from '@/components/sections/content/page-sections';
 import { ArticleAnchor } from '@/components/sections/magazine/article-anchor';
 import { MagazineArticles } from '@/components/sections/magazine/magazine-articles';
+import { PreviewBanner } from '@/components/site/preview-banner';
 import type { MagazineEdition, Page, PageSection } from '@/lib/api/schema';
 import { unwrapOrNull } from '@/lib/api/result';
 import { api, cached, uncached } from '@/lib/api/server';
 import { cacheTags } from '@/lib/api/tags';
-import { getPage, pageMetadata } from '@/lib/pages';
+import { getPage, pageMetadata, previewState } from '@/lib/pages';
 import { routes } from '@/lib/routes';
+import { seoMetadata } from '@/lib/seo/metadata';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
 import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
 type SearchParams = { searchParams: Promise<{ edition?: string | string[]; preview?: string | string[] }> };
 
-export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
-  await withLocale(params);
-  return pageMetadata('magazine', '/magazine');
-}
-
 const single = (value: string | string[] | undefined) =>
   typeof value === 'string' && value ? value : undefined;
+
+/** Aperçu (`?preview=`, page ou édition) : brouillon de la page lu sans cache, jamais indexé. */
+export async function generateMetadata({
+  params,
+  searchParams,
+}: LocaleParams & SearchParams): Promise<Metadata> {
+  await withLocale(params);
+  const preview = single((await searchParams).preview);
+  if (!preview) return pageMetadata('magazine', '/magazine');
+  const page = await getPage('magazine', { preview });
+  if (!page) return {};
+  return seoMetadata({ title: page.title, path: '/magazine', seo: page.seo, noindex: true });
+}
 
 /**
  * `GET /v1/magazine` : édition affichée (la dernière publiée, celle de `?edition=`, ou le brouillon d'un jeton
@@ -127,7 +137,7 @@ export default async function MagazinePage({ params, searchParams }: LocaleParam
   const editionId = single(query.edition);
   const preview = single(query.preview);
   const [page, magazine, settings, t, tm] = await Promise.all([
-    getPage('magazine'),
+    getPage('magazine', { preview }),
     getMagazine(editionId, preview),
     getSiteSettings(),
     getTranslations('rubrique'),
@@ -171,13 +181,11 @@ export default async function MagazinePage({ params, searchParams }: LocaleParam
   return (
     <>
       <ArticleAnchor fallbackId={themesAnchor ?? (edition ? 'articles' : null)} />
-      {magazine?.isPreview && (
-        <p
-          role="status"
-          className="bg-orange-50 px-4 py-2.5 text-center font-ui text-[14px] leading-5 font-medium text-text-brand"
-        >
-          {tm('preview')}
-        </p>
+      {/* Jeton d'une édition (texte du Magazine) ou de la page (Pages & textes) ; refusé par les deux : expiré. */}
+      {magazine?.isPreview ? (
+        <PreviewBanner state="draft">{tm('preview')}</PreviewBanner>
+      ) : (
+        <PreviewBanner state={previewState(preview, page)} />
       )}
       <PageSections page={{ ...shown, sections: shown.sections.slice(0, at) }} {...common} />
       {edition && magazine && (
