@@ -1,11 +1,10 @@
 import Image from 'next/image';
 import { connection } from 'next/server';
 import type { ReactNode } from 'react';
-import { Visual } from '@/components/ui/visual';
 
 /**
- * Écrans d'accès au back-office (Connexion `95:11689`) : panneau sombre 640 à gauche (logo blanc, illustration
- * « equipe », accroche) et formulaire centré dans une colonne de 400 à droite. En dessous de 1024 px, le panneau
+ * Écrans d'accès au back-office (Connexion `95:11689`) : panneau sombre 640 à gauche (logo blanc, photo
+ * `admin-connexion` générée dans Figma, accroche) et formulaire centré dans une colonne de 400 à droite. En dessous de 1024 px, le panneau
  * disparaît et le logo passe au-dessus du formulaire.
  */
 export default async function AdminAuthLayout({ children }: { children: ReactNode }) {
@@ -23,12 +22,17 @@ export default async function AdminAuthLayout({ children }: { children: ReactNod
           priority
           className="h-[43px] w-auto self-start"
         />
-        <Visual
-          visual={{ illustration: 'equipe', image: null }}
-          sizes="528px"
-          priority
-          className="aspect-[528/380] w-full rounded-[24px]"
-        />
+        <div className="relative aspect-[528/380] w-full overflow-hidden rounded-[24px] bg-neutral-800">
+          <Image
+            src="/photos/admin-connexion.png"
+            alt=""
+            fill
+            sizes="528px"
+            preload
+            fetchPriority="high"
+            className="object-cover"
+          />
+        </div>
         <div className="flex flex-col gap-2.5">
           <p className="font-brand text-[30px] leading-[38px] font-semibold tracking-[-0.01em] text-neutral-0">
             Pilotez tout le site depuis un seul endroit.

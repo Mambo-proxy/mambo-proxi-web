@@ -1349,3 +1349,16 @@ erreurs) ; toutes les routes appelées existent. Corrections :
 
 - Textes anglais rangés comme les listes enregistrées (éléments vides retirés) : pas de correspondance à maintenir
   avec les rangs du formulaire.
+
+## Photo de la page de connexion du back-office (28 octobre 2026)
+
+### Fait
+
+- Panneau sombre des écrans d'accès (`src/app/admin/(auth)/layout.tsx`) : photo `admin-connexion` à la place de
+  l'illustration « equipe » (coordinatrice en polo de la marque devant le tableau de bord, bureau à Douala).
+  Générée dans Figma, rangée dans la banque de photos v2 (`photo/admin_connexion`, `412:13079`), 1200 × 896, compressée en PNG à palette (461 Ko).
+
+### Décisions
+
+- La maquette (`95:11689`) montre `agence-equipe`, déjà utilisée sur le site : une photo inédite, propre au pilotage
+  du site, a été générée à la place.
