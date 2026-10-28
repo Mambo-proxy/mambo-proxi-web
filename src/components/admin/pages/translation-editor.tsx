@@ -9,6 +9,7 @@ import { AccentText } from '@/components/ui/accent-text';
 import { Button } from '@/components/ui/button';
 import { Field, Input, Textarea } from '@/components/ui/field';
 import type { PageSection, Seo } from '@/lib/api/schema';
+import { FIELD_STATE_LABELS, type FieldTranslationState } from '@/lib/admin/translation';
 import { cn } from '@/lib/cn';
 import { useFieldError } from './fields';
 import { sectionDescription, sectionLabel } from './page-model';
@@ -29,18 +30,24 @@ import { sectionToggleId } from './section-card';
 
 export type EditorLanguage = 'fr' | 'en';
 
-export const languagePanelId = (lang: EditorLanguage) => `page-editor-${lang}`;
-export const languageTabId = (lang: EditorLanguage) => `page-editor-tab-${lang}`;
+export const languagePanelId = (lang: EditorLanguage, prefix = 'page-editor') => `${prefix}-${lang}`;
+export const languageTabId = (lang: EditorLanguage, prefix = 'page-editor') => `${prefix}-tab-${lang}`;
 
-/** Onglets « Français | English » ; badge « À traduire » / « À revoir » sur l'anglais. */
+/**
+ * Onglets « Français | English » ; badge « À traduire » / « À revoir » sur l'anglais. Réutilisés par les autres
+ * éditeurs bilingues (paramètres, zones…) : `idPrefix` distingue leurs identifiants (`languagePanelId(lang, prefix)`
+ * pour le panneau associé).
+ */
 export function LanguageTabs({
   value,
   onChange,
   badge,
+  idPrefix = 'page-editor',
 }: {
   value: EditorLanguage;
   onChange: (lang: EditorLanguage) => void;
   badge: string | null;
+  idPrefix?: string;
 }) {
   const tabs: { lang: EditorLanguage; label: string }[] = [
     { lang: 'fr', label: 'Français' },
@@ -55,7 +62,7 @@ export function LanguageTabs({
         if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
         const next = value === 'fr' ? 'en' : 'fr';
         onChange(next);
-        document.getElementById(languageTabId(next))?.focus();
+        document.getElementById(languageTabId(next, idPrefix))?.focus();
       }}
     >
       {tabs.map(({ lang, label }) => {
@@ -65,9 +72,9 @@ export function LanguageTabs({
             key={lang}
             type="button"
             role="tab"
-            id={languageTabId(lang)}
+            id={languageTabId(lang, idPrefix)}
             aria-selected={selected}
-            aria-controls={selected ? languagePanelId(lang) : undefined}
+            aria-controls={selected ? languagePanelId(lang, idPrefix) : undefined}
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(lang)}
             className={cn(
@@ -110,22 +117,47 @@ function frenchReference(french: string, value: string, rich = false): ReactNode
   );
 }
 
-/** Champ anglais d'un texte : saisie, texte français en aide, erreur de l'API (`en.sections.3.title`). */
+/** Champ anglais d'un texte des pages : erreur de l'API lue dans le contexte de l'éditeur (`en.sections.3.title`). */
 function TranslationField({
+  errorPath,
+  ...props
+}: Omit<TextTranslationFieldProps, 'error'> & { errorPath: string }) {
+  return <TextTranslationField {...props} error={useFieldError(errorPath)} />;
+}
+
+export type TextTranslationFieldProps = Omit<TranslatableField, 'path' | 'group' | 'rich' | 'accent'> & {
+  value: string;
+  error: string | null;
+  onChange: (value: string) => void;
+  /** Texte mis en forme (éditeur riche). */
+  rich?: boolean;
+  /** Texte mis en avant avec `==…==` (aperçu). */
+  accent?: boolean;
+  /** État du champ : badge « À traduire » / « À revoir ». */
+  state?: FieldTranslationState;
+  /** « Marquer comme revu » (champ « À revoir »), absent en lecture seule. */
+  onMarkReviewed?: () => void;
+  /** Saisie limitée (mêmes limites que le français). */
+  maxLength?: number;
+};
+
+/**
+ * Champ anglais d'un texte, réutilisable par tous les éditeurs bilingues : saisie, texte français de référence en
+ * aide, erreur, badge d'état et « Marquer comme revu » pour un champ dont le français a changé.
+ */
+export function TextTranslationField({
   label,
   value,
   french,
-  errorPath,
+  error,
   multiline,
-  rich,
-  accent,
+  rich = false,
+  accent = false,
+  state = null,
+  onMarkReviewed,
+  maxLength,
   onChange,
-}: Omit<TranslatableField, 'path' | 'group'> & {
-  value: string;
-  errorPath: string;
-  onChange: (value: string) => void;
-}) {
-  const error = useFieldError(errorPath);
+}: TextTranslationFieldProps) {
   if (rich)
     return (
       <div className="flex flex-col gap-1">
@@ -143,9 +175,20 @@ function TranslationField({
         </details>
       </div>
     );
-  return (
+  const field = (
     <Field
-      label={label}
+      label={
+        state ? (
+          <span className="inline-flex flex-wrap items-center gap-2">
+            {label}
+            <StatusPill tone={state === 'missing' ? 'brand' : 'neutral'} className="py-0">
+              {FIELD_STATE_LABELS[state]}
+            </StatusPill>
+          </span>
+        ) : (
+          label
+        )
+      }
       error={error}
       help={
         <>
@@ -165,6 +208,7 @@ function TranslationField({
             lang="en"
             rows={1}
             value={value}
+            maxLength={maxLength}
             placeholder={plain(french, 120)}
             onChange={(event) => onChange(event.target.value)}
             className="field-sizing-content min-h-0 resize-none"
@@ -174,12 +218,28 @@ function TranslationField({
             {...control}
             lang="en"
             value={value}
+            maxLength={maxLength}
             placeholder={plain(french, 120)}
             onChange={(event) => onChange(event.target.value)}
           />
         )
       }
     </Field>
+  );
+  if (state !== 'outdated' || !onMarkReviewed) return field;
+  return (
+    <div className="flex flex-col gap-1.5">
+      {field}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <Button variant="outline" size="sm" onClick={onMarkReviewed}>
+          <CheckCheck aria-hidden />
+          Marquer comme revu
+        </Button>
+        <span className="font-ui text-[12px] leading-4 text-text-muted">
+          La traduction reste juste malgré le changement du français.
+        </span>
+      </div>
+    </div>
   );
 }
 

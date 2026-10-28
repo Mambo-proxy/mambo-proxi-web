@@ -1,7 +1,9 @@
 'use client';
 
 import { CircleCheck, Clock, Lock, Mail, MapPin, Plus, Smartphone } from 'lucide-react';
+import { useState } from 'react';
 import { SideCard } from '@/components/admin/editor/editor-ui';
+import type { EditorLanguage } from '@/components/admin/pages/translation-editor';
 import { useCan } from '@/components/admin/shell/permissions';
 import { ROLE_LABELS } from '@/components/admin/shell/nav';
 import { Avatar } from '@/components/admin/shell/sidebar';
@@ -11,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { formatNumber } from '@/lib/format/number';
 import { EmailFamiliesCard } from './settings-emails';
+import { SettingsLanguageTabs } from './settings-english';
 import { FieldGrid, FormattedInput, SettingsCard } from './settings-fields';
 import { useSettingsGroup } from './settings-form';
 import {
@@ -25,8 +28,24 @@ import { useAdminUsers, useSystemStatus } from './settings-queries';
 
 const cardSkeleton = (height: string) => <Skeleton className={`${height} w-full rounded-md`} />;
 
-/** Onglet « Coordonnées » (`94:11866`) : agence, bouton WhatsApp, réseaux sociaux et e-mails automatiques. */
+/**
+ * Onglet « Coordonnées » (`94:11866`) : agence, bouton WhatsApp, réseaux sociaux et e-mails automatiques. Onglets
+ * « Français | English » : la version anglaise ne reprend que les textes (horaires, adresse, message WhatsApp…).
+ */
 export function CoordinatesTab({ onInvite }: { onInvite: () => void }) {
+  const [lang, setLang] = useState<EditorLanguage>('fr');
+  return (
+    <SettingsLanguageTabs
+      id="settings-coordonnees"
+      groups={['coordonnees', 'whatsapp']}
+      lang={lang}
+      onChange={setLang}
+      french={<FrenchCoordinates onInvite={onInvite} />}
+    />
+  );
+}
+
+function FrenchCoordinates({ onInvite }: { onInvite: () => void }) {
   return (
     <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
       <div className="flex min-w-0 flex-col gap-5">

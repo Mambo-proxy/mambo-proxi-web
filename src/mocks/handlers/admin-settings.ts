@@ -18,6 +18,11 @@ import type {
   SettingsWhatsapp,
   SystemStatus,
 } from '@/lib/api/schema';
+import {
+  isTextGroup,
+  settingsTextRules,
+  type TextGroup,
+} from '@/components/admin/settings/settings-translation';
 import { jsonBody, mockId, normalize } from '../admin-utils';
 import { emailDocument } from '../email-layout';
 import { unknownMediaErrors } from '../media-refs';
@@ -26,6 +31,13 @@ import { adminMedia } from './admin-media';
 import { ROLES, can, forbidden } from '../permissions';
 import { sessionUser } from '../session';
 import { adminUsers, syncSessionRole } from '../team';
+import {
+  mockTextStatus,
+  pickEnglish,
+  saveMockTranslation,
+  unknownReviewedFields,
+  type MockTextTranslation,
+} from '../text-translations';
 
 type Groups = {
   coordonnees: SettingsCoordonnees;
@@ -130,6 +142,47 @@ const settings: Groups = {
   },
   rgpd: { group: 'rgpd', inactiveContactsRetentionMonths: 36, rejectedApplicationsRetentionMonths: 24 },
   securite: { group: 'securite', maintenanceMode: false, trustedDeviceDays: 30 },
+};
+
+/**
+ * Versions anglaises des groupes qui ont des textes (seed de l'API : textes seulement, sans suivi d'empreinte, donc
+ * à jour) ; le groupe `coordonnees` n'a pas d'adresse française dans la maquette, donc pas d'adresse anglaise.
+ */
+const translations: Record<TextGroup, MockTextTranslation> = {
+  coordonnees: {
+    en: {
+      hoursLabel: 'Mon – Sat · 8am – 8pm',
+      agency: {
+        name: 'MAMBO Proxi agency',
+        openingHours: [
+          { label: 'Monday – Friday', hours: '8am – 6pm' },
+          { label: 'Saturday', hours: '9am – 1pm' },
+        ],
+        parcelReceptionNote: 'Parcels and mail are received during opening hours.',
+      },
+    },
+    sources: {},
+  },
+  whatsapp: { en: { message: 'Hello Mambo Proxi, I would like some information about…' }, sources: {} },
+  seo: {
+    en: {
+      defaultTitle: 'MAMBO Proxi — Home services in Douala, Cameroon',
+      defaultDescription:
+        'Home cleaning, laundry, meals, parcels, private chef, massage, photographer: trusted professionals at your home, in Douala and the surrounding area.',
+    },
+    sources: {},
+  },
+  chiffres: {
+    en: {
+      keyFigures: [
+        { suffix: '+', label: 'projects supported' },
+        { suffix: '+', label: 'committed partners' },
+        { label: 'services across 6 areas' },
+        { valueText: 'Douala', label: 'and surroundings, starting from Cité SIC' },
+      ],
+    },
+    sources: {},
+  },
 };
 
 const UPDATED = '2026-10-05T08:00:00.000Z';
@@ -476,6 +529,12 @@ function groupValue(group: SettingsGroup): Groups[SettingsGroup] {
   const stored = settings[group] as Record<string, unknown>;
   const value: Record<string, unknown> = { group };
   for (const field of GROUP_FIELDS[group]) if (field in stored) value[field] = stored[field];
+  // Version anglaise et son statut (groupes qui ont des textes, liste blanche de l'API).
+  if (isTextGroup(group)) {
+    const rules = settingsTextRules(group);
+    value.translations = { en: pickEnglish(value, translations[group].en, rules) };
+    value.translationStatus = { en: mockTextStatus(value, translations[group], rules) };
+  }
   if (group === 'seo') {
     const media = adminMedia.find((item) => item.id === stored.ogImageId);
     value.ogImage = media
@@ -818,7 +877,31 @@ export const adminSettingsHandlers = [
     const fields = Object.fromEntries(
       GROUP_FIELDS[group].filter((field) => field in body).map((field) => [field, body[field]]),
     );
-    (settings as Record<SettingsGroup, unknown>)[group] = { ...settings[group], ...fields };
+    const previous = settings[group];
+    const next = { ...previous, ...fields };
+    // Version anglaise : textes de la liste blanche, référence française mise à jour (`reviewedFields` compris).
+    if (isTextGroup(group)) {
+      const sent = body.translations as { en?: unknown; reviewedFields?: string[] } | undefined;
+      const rules = settingsTextRules(group);
+      const reviewed = sent?.reviewedFields ?? [];
+      const reviewErrors = unknownReviewedFields(
+        next,
+        sent?.en,
+        reviewed,
+        rules,
+        'translations.reviewedFields',
+      );
+      if (reviewErrors.length) return validationProblem(reviewErrors);
+      translations[group] = saveMockTranslation({
+        french: next,
+        previousFrench: previous,
+        before: translations[group],
+        english: sent === undefined ? undefined : (sent.en ?? null),
+        reviewed,
+        rules,
+      });
+    }
+    (settings as Record<SettingsGroup, unknown>)[group] = next;
     return HttpResponse.json(groupValue(group));
   }),
 

@@ -1,4 +1,12 @@
 import { localizeHref, parseSitePath } from '@/i18n/href';
+import {
+  composeTexts,
+  getAt,
+  isObject,
+  setAt,
+  translationBadge,
+  type TextRules,
+} from '@/lib/admin/translation';
 import type {
   AdminPage,
   PageDraftInput,
@@ -36,8 +44,10 @@ export const NON_TEXT_KEYS: ReadonlySet<string> = new Set([
   'adminLabel',
 ]);
 
-const isObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+/** Règles des textes des pages (socle `@/lib/admin/translation`) : toutes les chaînes hors champs techniques. */
+const PAGE_TEXT_RULES: TextRules = { nonTextKeys: NON_TEXT_KEYS };
+
+export { getAt, setAt, translationBadge };
 
 /**
  * Textes anglais posés sur la structure française, comme l'API : une chaîne française non vide est remplacée par la
@@ -45,7 +55,7 @@ const isObject = (value: unknown): value is Record<string, unknown> =>
  * (nombre et ordre du français) ; champs techniques, booléens et nombres du français.
  */
 export function applyEnglishTexts(french: unknown, english: unknown, key?: string): unknown {
-  return compose(french, english, key, false);
+  return composeTexts(french, english, PAGE_TEXT_RULES, { key });
 }
 
 /**
@@ -53,29 +63,7 @@ export function applyEnglishTexts(french: unknown, english: unknown, key?: strin
  * (un champ vidé ne doit pas se remplir de nouveau avec le français pendant la saisie).
  */
 export function alignToFrench(french: unknown, english: unknown, key?: string): unknown {
-  return compose(french, english, key, true);
-}
-
-function compose(french: unknown, english: unknown, key: string | undefined, keepEmpty: boolean): unknown {
-  if (key !== undefined && NON_TEXT_KEYS.has(key)) return french;
-  if (typeof french === 'string') {
-    if (french === '' || typeof english !== 'string') return french;
-    return keepEmpty || english.trim() !== '' ? english : french;
-  }
-  if (Array.isArray(french)) {
-    const list: unknown[] = Array.isArray(english) ? english : [];
-    return french.map((item, index) => compose(item, list[index], undefined, keepEmpty));
-  }
-  if (isObject(french)) {
-    const source = isObject(english) ? english : {};
-    return Object.fromEntries(
-      Object.entries(french).map(([field, value]) => [
-        field,
-        compose(value, source[field], field, keepEmpty),
-      ]),
-    );
-  }
-  return french;
+  return composeTexts(french, english, PAGE_TEXT_RULES, { key, keepEmpty: true });
 }
 
 // ───────────────────────────── Champs à traduire ─────────────────────────────
@@ -270,22 +258,6 @@ export function translatableFields(section: PageSection): TranslatableField[] {
 
 export const hasTexts = (section: PageSection) => translatableFields(section).length > 0;
 
-/** Valeur d'un chemin (`items.2.title`). */
-export function getAt(value: unknown, path: string): unknown {
-  return path.split('.').reduce<unknown>((current, segment) => {
-    if (Array.isArray(current)) return current[Number(segment)];
-    return isObject(current) ? current[segment] : undefined;
-  }, value);
-}
-
-/** Copie avec la valeur remplacée au chemin donné (le chemin doit exister). */
-export function setAt<T>(value: T, path: string, next: unknown): T {
-  const [head = '', ...rest] = path.split('.');
-  const child = rest.length === 0 ? next : setAt(getAt(value, head), rest.join('.'), next);
-  if (Array.isArray(value)) return value.map((item, index) => (index === Number(head) ? child : item)) as T;
-  return { ...(value as object), [head]: child } as T;
-}
-
 // ───────────────────────────── Brouillon anglais ─────────────────────────────
 
 export type EnglishDraft = {
@@ -468,13 +440,6 @@ export function localTranslationStatus(
 export function sectionTranslationState(id: string, status: PageTranslationStatus): SectionTranslationState {
   if (status.missingSectionIds.includes(id)) return 'missing';
   if (status.outdatedSectionIds.includes(id)) return 'outdated';
-  return null;
-}
-
-/** Badge de l'onglet « English » : « À traduire », « À revoir », ou rien si la version anglaise est à jour. */
-export function translationBadge(status: Pick<PageTranslationStatus, 'state'>): string | null {
-  if (status.state === 'MISSING') return 'À traduire';
-  if (status.state === 'OUTDATED') return 'À revoir';
   return null;
 }
 

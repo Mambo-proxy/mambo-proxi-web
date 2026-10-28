@@ -137,6 +137,8 @@ export function useSettingsGroup<G extends EditableGroup>(group: G) {
   const value = (form.drafts[group] as GroupValues[G] | undefined) ?? query.data;
   return {
     value,
+    /** Valeur enregistrée (statut de la traduction anglaise, textes avant modification). */
+    saved: query.data,
     isError: query.isError && !query.data,
     update: (patch: Partial<GroupValues[G]>) => form.update(group, patch),
     error: (path: string) => fieldError(form.errors, `${group}.${path}`),

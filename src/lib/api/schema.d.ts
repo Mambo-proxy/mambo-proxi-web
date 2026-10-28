@@ -5342,6 +5342,13 @@ export interface components {
             quarters?: components["schemas"]["ZoneQuarter"][];
             /** @description Contour dessiné sur la carte ou importé (GeoJSON) ; `null` = supprimer le contour. */
             area?: components["schemas"]["ZoneArea"] | null;
+            /**
+             * @description Traductions anglaises relues, justes malgré un changement du texte français : leur empreinte devient
+             *     celle du texte français enregistré (elles quittent `translationStatus.en.outdatedFields`). Chemins de
+             *     `TextTranslationStatus` (`quarters.N.…` : rang du quartier dans la zone enregistrée). Un chemin sans
+             *     texte anglais → `422` sur `reviewedFields.N`. Non mémorisé : n'agit que sur cet envoi.
+             */
+            reviewedFields?: string[];
         };
         ZoneInput: components["schemas"]["ZoneFields"] & Record<string, never>;
         ZonePatch: components["schemas"]["ZoneFields"] & Record<string, never>;
@@ -5365,6 +5372,16 @@ export interface components {
             requestsCount: number;
             sortOrder: number;
             updatedAt: components["schemas"]["DateTime"];
+            /**
+             * @description État de la version anglaise (`nameEn`, `descriptionEn`, `resultEn` et textes anglais des quartiers), par
+             *     champ : `name`, `description`, `result`, `quarters.N.detail`, `quarters.N.mapLabel` (N = rang du
+             *     quartier). Une traduction est « à revoir » quand son texte français a changé depuis son enregistrement ;
+             *     la traduction anglaise d'un quartier est gardée quand son texte français change (sauf s'il est vidé) et
+             *     signalée à revoir. Les traductions antérieures à ce suivi sont considérées à jour.
+             */
+            translationStatus: {
+                en: components["schemas"]["TextTranslationStatus"];
+            };
         };
         AdminZones: {
             zones: components["schemas"]["AdminZone"][];
@@ -5505,6 +5522,14 @@ export interface components {
             email: components["schemas"]["Email"];
             hoursLabel: string;
             agency: components["schemas"]["SiteSettings"]["agency"];
+            /**
+             * @description Version anglaise saisie à la main (règles : `SettingsTranslations`). Renvoyée par `GET` et `PUT` ;
+             *     facultative à l'enregistrement (absente : version anglaise inchangée).
+             */
+            translations?: components["schemas"]["SettingsTranslations"] & {
+                en?: components["schemas"]["SettingsCoordonneesTexts"] | null;
+            };
+            translationStatus?: components["schemas"]["SettingsTranslationStatus"];
         };
         /** whatsapp */
         SettingsWhatsapp: {
@@ -5513,6 +5538,14 @@ export interface components {
             enabled: boolean;
             number: components["schemas"]["PhoneE164"];
             message: string;
+            /**
+             * @description Version anglaise saisie à la main (règles : `SettingsTranslations`). Renvoyée par `GET` et `PUT` ;
+             *     facultative à l'enregistrement (absente : version anglaise inchangée).
+             */
+            translations?: components["schemas"]["SettingsTranslations"] & {
+                en?: components["schemas"]["SettingsWhatsappTexts"] | null;
+            };
+            translationStatus?: components["schemas"]["SettingsTranslationStatus"];
         };
         /** reseaux */
         SettingsReseaux: {
@@ -5549,6 +5582,14 @@ export interface components {
             /** @description Image de partage correspondant à `ogImageId` (lecture seule, ignorée à l'enregistrement). */
             readonly ogImage?: components["schemas"]["MediaImage"] | null;
             searchConsoleVerification?: string | null;
+            /**
+             * @description Version anglaise saisie à la main (règles : `SettingsTranslations`). Renvoyée par `GET` et `PUT` ;
+             *     facultative à l'enregistrement (absente : version anglaise inchangée).
+             */
+            translations?: components["schemas"]["SettingsTranslations"] & {
+                en?: components["schemas"]["SettingsSeoTexts"] | null;
+            };
+            translationStatus?: components["schemas"]["SettingsTranslationStatus"];
         };
         /** analytics */
         SettingsAnalytics: {
@@ -5565,6 +5606,14 @@ export interface components {
             /** @constant */
             group: "chiffres";
             keyFigures: components["schemas"]["KeyFigure"][];
+            /**
+             * @description Version anglaise saisie à la main (règles : `SettingsTranslations`). Renvoyée par `GET` et `PUT` ;
+             *     facultative à l'enregistrement (absente : version anglaise inchangée).
+             */
+            translations?: components["schemas"]["SettingsTranslations"] & {
+                en?: components["schemas"]["SettingsChiffresTexts"] | null;
+            };
+            translationStatus?: components["schemas"]["SettingsTranslationStatus"];
         };
         /** rgpd */
         SettingsRgpd: {
@@ -5582,6 +5631,92 @@ export interface components {
             maintenanceMode: boolean;
             /** @default 30 */
             trustedDeviceDays: number;
+        };
+        /**
+         * @description État d'une version anglaise suivie champ par champ (paramètres, zones…), calculé à la lecture par rapport
+         *     aux textes français actuels. Seuls les champs dont le texte français est renseigné comptent.
+         *     - `missingFields` : champs sans texte anglais (le site affiche le français).
+         *     - `outdatedFields` : champs dont le texte français a changé depuis l'enregistrement de leur traduction
+         *       (empreinte du texte français mémorisée à chaque enregistrement). Une traduction antérieure à ce suivi
+         *       (sans empreinte) est considérée à jour, puis suivie dès l'enregistrement suivant.
+         *     - `state` : `MISSING` s'il manque au moins un champ, sinon `OUTDATED` si au moins un champ est périmé,
+         *       sinon `UP_TO_DATE`.
+         *
+         *     Chemins pointés (`hoursLabel`, `agency.addressLines.0`, `keyFigures.2.label`, `quarters.3.detail`).
+         */
+        TextTranslationStatus: {
+            /** @enum {string} */
+            state: "MISSING" | "OUTDATED" | "UP_TO_DATE";
+            missingFields: string[];
+            outdatedFields: string[];
+        };
+        /**
+         * @description Version anglaise d'un groupe de paramètres qui a des textes (`coordonnees`, `whatsapp`, `seo`, `chiffres`).
+         *     **Seuls les textes se traduisent**, et seulement ceux de cette liste (toute autre valeur envoyée est
+         *     ignorée) :
+         *     - `coordonnees` : `hoursLabel`, `agency.name`, `agency.addressLines.N`, `agency.openingHours.N.label`,
+         *       `agency.openingHours.N.hours`, `agency.parcelReceptionNote` ;
+         *     - `whatsapp` : `message` ;
+         *     - `seo` : `defaultTitle`, `defaultDescription` ;
+         *     - `chiffres` : `keyFigures.N.label`, `keyFigures.N.labelMobile`, `keyFigures.N.suffix`,
+         *       `keyFigures.N.valueText`.
+         *
+         *     Numéros, adresses e-mail, coordonnées GPS, liens, nombres et réglages sont toujours ceux du français, sur le
+         *     site comme dans les e-mails. Listes alignées par rang : l'élément N anglais traduit l'élément N français
+         *     (éléments en trop ignorés). Un texte anglais absent, `null` ou vide laisse le texte français.
+         *
+         *     À l'enregistrement, `en` remplace la version anglaise (`null` la supprime) ; l'empreinte de chaque texte
+         *     français traduit est recalculée si son texte anglais est nouveau ou modifié, sinon gardée (le champ reste
+         *     « à revoir » si le français a changé). `GET` renvoie `en` réduit aux textes traduits (`null` sans
+         *     traduction).
+         */
+        SettingsTranslations: {
+            /** @description Textes anglais (forme `Settings*Texts` du groupe). */
+            en: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * @description Envoi seulement. Champs dont la traduction a été relue et reste juste malgré un changement du texte
+             *     français : leur empreinte devient celle du texte français enregistré (ils quittent `outdatedFields`).
+             *     Chaque chemin doit désigner un texte traduit, sinon `422` sur `translations.reviewedFields.N`. Non
+             *     mémorisé.
+             */
+            reviewedFields?: string[];
+        };
+        /** @description État de la version anglaise du groupe (lecture seule, ignoré à l'enregistrement). */
+        SettingsTranslationStatus: {
+            en: components["schemas"]["TextTranslationStatus"];
+        };
+        /** @description Textes anglais du groupe `coordonnees`. */
+        SettingsCoordonneesTexts: {
+            hoursLabel?: string | null;
+            agency?: {
+                name?: string | null;
+                addressLines?: (string | null)[];
+                openingHours?: ({
+                    label?: string | null;
+                    hours?: string | null;
+                } | null)[];
+                parcelReceptionNote?: string | null;
+            };
+        };
+        /** @description Textes anglais du groupe `whatsapp`. */
+        SettingsWhatsappTexts: {
+            message?: string | null;
+        };
+        /** @description Textes anglais du groupe `seo`. */
+        SettingsSeoTexts: {
+            defaultTitle?: string | null;
+            defaultDescription?: string | null;
+        };
+        /** @description Textes anglais du groupe `chiffres`. */
+        SettingsChiffresTexts: {
+            keyFigures?: ({
+                label?: string | null;
+                labelMobile?: string | null;
+                suffix?: string | null;
+                valueText?: string | null;
+            } | null)[];
         };
         SystemStatus: {
             https: boolean;
@@ -6424,6 +6559,13 @@ export type SettingsAnalytics = components['schemas']['SettingsAnalytics'];
 export type SettingsChiffres = components['schemas']['SettingsChiffres'];
 export type SettingsRgpd = components['schemas']['SettingsRgpd'];
 export type SettingsSecurite = components['schemas']['SettingsSecurite'];
+export type TextTranslationStatus = components['schemas']['TextTranslationStatus'];
+export type SettingsTranslations = components['schemas']['SettingsTranslations'];
+export type SettingsTranslationStatus = components['schemas']['SettingsTranslationStatus'];
+export type SettingsCoordonneesTexts = components['schemas']['SettingsCoordonneesTexts'];
+export type SettingsWhatsappTexts = components['schemas']['SettingsWhatsappTexts'];
+export type SettingsSeoTexts = components['schemas']['SettingsSeoTexts'];
+export type SettingsChiffresTexts = components['schemas']['SettingsChiffresTexts'];
 export type SystemStatus = components['schemas']['SystemStatus'];
 export type EmailTemplateKey = components['schemas']['EmailTemplateKey'];
 export type EmailTemplateFields = components['schemas']['EmailTemplateFields'];

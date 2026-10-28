@@ -5,6 +5,12 @@ import { serviceAreas as areas, serviceAreasEn as areasEn } from '../data/zones'
 import { jsonBody, mockId, normalize, slugify, uniqueSlug } from '../admin-utils';
 import { nothingSent, reorderInputErrors, tooLong, tooMany } from '../content-rules';
 import { problem, validationProblem, type FieldErrors } from '../problem';
+import {
+  mockTextStatus,
+  saveMockTranslation,
+  unknownReviewedFields,
+  type MockTextTranslation,
+} from '../text-translations';
 
 /**
  * Délais, tarifs indicatifs et demandes de la maquette « BO — Zones d'intervention » (`267:2047`). L'API compte les
@@ -40,8 +46,49 @@ export const adminZones: AdminZone[] = areas.zones.map((zone, index) => {
     area: zone.area ?? null,
     sortOrder: index,
     updatedAt: areas.updatedAt ?? '2026-10-18T08:00:00.000Z',
+    translationStatus: { en: { state: 'UP_TO_DATE', missingFields: [], outdatedFields: [] } },
   };
 });
+
+/**
+ * Suivi de la version anglaise (`translationStatus`, `reviewedFields`) : nom, description et réponse ; texte français
+ * traduit par champ, à la place de l'empreinte de l'API (traductions de départ sans suivi : à jour).
+ */
+const ZONE_TEXT_RULES = { paths: ['name', 'description', 'result'] };
+const zoneSources = new Map<string, Record<string, string>>();
+
+const frenchTexts = (zone: Pick<AdminZone, 'name' | 'description' | 'result'>) => ({
+  name: zone.name,
+  description: zone.description,
+  result: zone.result,
+});
+
+const englishTexts = (zone: Pick<AdminZone, 'nameEn' | 'descriptionEn' | 'resultEn'>) => ({
+  name: zone.nameEn,
+  description: zone.descriptionEn,
+  result: zone.resultEn,
+});
+
+function translationOf(zone: AdminZone): MockTextTranslation {
+  return { en: englishTexts(zone), sources: zoneSources.get(zone.id) ?? {} };
+}
+
+/** Statut recalculé (réponse) ; `previous` : zone avant modification (`null` à la création). */
+function trackTranslation(zone: AdminZone, previous: AdminZone | null, reviewed: readonly string[]) {
+  const saved = saveMockTranslation({
+    french: frenchTexts(zone),
+    previousFrench: previous === null ? {} : frenchTexts(previous),
+    before: previous === null ? { en: null, sources: {} } : translationOf(previous),
+    english: englishTexts(zone),
+    reviewed,
+    rules: ZONE_TEXT_RULES,
+  });
+  zoneSources.set(zone.id, saved.sources);
+  zone.translationStatus = { en: mockTextStatus(frenchTexts(zone), saved, ZONE_TEXT_RULES) };
+}
+
+for (const zone of adminZones)
+  zone.translationStatus = { en: mockTextStatus(frenchTexts(zone), translationOf(zone), ZONE_TEXT_RULES) };
 
 /**
  * Option « Afficher les tarifs » : l'API la lit dans le paramètre `zones` (seed : `false`). Le contrat n'a pas de
@@ -171,7 +218,17 @@ export const adminZoneHandlers = [
       requestsCount: 0,
       sortOrder: Math.max(-1, ...adminZones.map((item) => item.sortOrder)) + 1,
       updatedAt: new Date().toISOString(),
+      translationStatus: { en: { state: 'UP_TO_DATE', missingFields: [], outdatedFields: [] } },
     };
+    const reviewErrors = unknownReviewedFields(
+      frenchTexts(zone),
+      englishTexts(zone),
+      body.reviewedFields ?? [],
+      ZONE_TEXT_RULES,
+      'reviewedFields',
+    );
+    if (reviewErrors.length) return validationProblem(reviewErrors);
+    trackTranslation(zone, null, body.reviewedFields ?? []);
     adminZones.push(zone);
     claimQuarters(zone);
     return HttpResponse.json(zone, { status: 201 });
@@ -199,7 +256,18 @@ export const adminZoneHandlers = [
     if (errors.length) return validationProblem(errors);
     const zone = adminZones.find((item) => item.id === params.id);
     if (!zone) return problem(404, 'Cette zone n’existe plus.');
+    const previous = { ...zone };
+    const next = { ...zone, ...fieldsOf(body) };
+    const reviewErrors = unknownReviewedFields(
+      frenchTexts(next),
+      englishTexts(next),
+      body.reviewedFields ?? [],
+      ZONE_TEXT_RULES,
+      'reviewedFields',
+    );
+    if (reviewErrors.length) return validationProblem(reviewErrors);
     Object.assign(zone, fieldsOf(body), { updatedAt: new Date().toISOString() });
+    trackTranslation(zone, previous, body.reviewedFields ?? []);
     if (body.quarters) claimQuarters(zone);
     return HttpResponse.json(zone);
   }),

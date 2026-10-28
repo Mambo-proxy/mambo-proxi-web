@@ -8321,7 +8321,14 @@
             ],
             "requestsCount": 41,
             "sortOrder": 0,
-            "updatedAt": "2026-10-18T08:00:00.000Z"
+            "updatedAt": "2026-10-18T08:00:00.000Z",
+            "translationStatus": {
+              "en": {
+                "state": "UP_TO_DATE",
+                "missingFields": [],
+                "outdatedFields": []
+              }
+            }
           },
           {
             "id": "zon_speciale",
@@ -8363,7 +8370,14 @@
             ],
             "requestsCount": 3,
             "sortOrder": 3,
-            "updatedAt": "2026-10-18T08:00:00.000Z"
+            "updatedAt": "2026-10-18T08:00:00.000Z",
+            "translationStatus": {
+              "en": {
+                "state": "UP_TO_DATE",
+                "missingFields": [],
+                "outdatedFields": []
+              }
+            }
           }
         ]
       }

@@ -1303,3 +1303,29 @@ erreurs) ; toutes les routes appelées existent. Corrections :
   d'effet.
 - À vérifier sur Vercel : réécriture du proxy vers `/[locale]/apercu/[key]`, en-têtes `no-store`, jeton expiré
   (30 min), aperçu anglais `/en/about-us?preview=…`.
+
+## Paramètres et zones bilingues, socle commun des traductions (28 octobre 2026)
+
+### Fait
+
+- Socle `src/lib/admin/translation.ts` (sans React) : `composeTexts` (textes anglais sur la structure française,
+  `nonTextKeys` et/ou liste blanche de chemins, saisie vide gardée en édition), `textEntries`, `getAt` / `setAt` /
+  `setPath`, `translationBadge`, `fieldTranslationState`, `localTextStatus`. `page-translation.ts` s'appuie dessus
+  (comportement et tests des pages inchangés).
+- `translation-editor.tsx` : `LanguageTabs` réutilisable (`idPrefix`), `TextTranslationField` exporté (référence
+  française, badge du champ, « Marquer comme revu »).
+- Paramètres : `settings-translation.ts` (liste blanche et libellés des textes par groupe, saisie, statut local),
+  `settings-english.tsx` (onglets et cartes anglaises) dans les onglets Coordonnées (`coordonnees`, `whatsapp`) et
+  Référencement (`seo`). Le marquage « revu » s'ajoute au brouillon et part avec « Enregistrer ». Chiffres clés : pas
+  d'écran dans le back-office (l'API les traduit déjà).
+- Zones : `LanguageTabs` à la place de `LanguageSwitch`, badge d'après `localZoneStatus` (nom, description, réponse
+  et textes des quartiers renvoyés par l'API), badge et « Marquer comme revu » par champ, liste des textes de
+  quartiers à revoir.
+- Mocks : `src/mocks/text-translations.ts` (texte français de référence à la place de l'empreinte), paramètres et
+  zones à jour. Contrat synchronisé. Test e2e des paramètres limité à la liste « Rubriques des paramètres » (les
+  onglets de langue sont aussi des `tab`).
+
+### Décisions
+
+- Paramètres : un seul bouton « Enregistrer » pour tout l'écran, donc le marquage « revu » n'est pas envoyé tout de
+  suite (contrairement aux pages).

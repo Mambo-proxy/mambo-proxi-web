@@ -1,16 +1,21 @@
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
-import { MapPin, X } from 'lucide-react';
+import { CheckCheck, MapPin, X } from 'lucide-react';
 import { useCallback, useMemo, useState, type ChangeEvent } from 'react';
+import { StatusPill } from '@/components/admin/editor/editor-ui';
 import {
   CompactField,
   CompactInput,
   compactButtonClass,
   compactInputClass,
-  LanguageSwitch,
-  type EditingLanguage,
 } from '@/components/admin/magazine/magazine-ui';
+import {
+  LanguageTabs,
+  languagePanelId,
+  languageTabId,
+  type EditorLanguage,
+} from '@/components/admin/pages/translation-editor';
 import { TONES } from '@/components/sections/zones/zone-tones';
 import { ReadOnlyFieldset } from '@/components/admin/shell/permissions';
 import { ZonesLeafletMap, type MapZone } from '@/components/sections/zones/zones-leaflet';
@@ -22,9 +27,16 @@ import { data } from '@/lib/admin/query';
 import { browserApi } from '@/lib/api/browser';
 import { ApiError, errorMessage } from '@/lib/api/errors';
 import type { AdminZone, GeoPoint, ZoneArea, ZoneFields, ZoneQuarter, ZoneTone } from '@/lib/api/schema';
+import {
+  FIELD_STATE_LABELS,
+  fieldTranslationState,
+  translationBadge,
+  type FieldTranslationState,
+} from '@/lib/admin/translation';
 import { cn } from '@/lib/cn';
 import { isInCameroon, parseCoordinate, parseZoneArea } from '@/lib/geo/zones';
 import { ADMIN_MAP_LABELS, areaSummary, pointLabel } from './zone-labels';
+import { localZoneStatus, quarterFieldLabel } from './zone-translation';
 
 /** Fichier GeoJSON importé : 2 Mo au plus (5 000 points tiennent largement). */
 const MAX_GEOJSON_BYTES = 2 * 1024 * 1024;
@@ -50,6 +62,8 @@ type Draft = {
   active: boolean;
   quarters: ZoneQuarter[];
   area: ZoneArea | null;
+  /** Traductions marquées revues (`reviewedFields`). */
+  reviewedFields: string[];
 };
 
 function draftOf(zone: AdminZone | null): Draft {
@@ -67,7 +81,31 @@ function draftOf(zone: AdminZone | null): Draft {
     active: zone?.active ?? true,
     quarters: zone?.quarters ?? [],
     area: zone?.area ?? null,
+    reviewedFields: [],
   };
+}
+
+/** Libellé d'un champ anglais avec son état (« À traduire », « À revoir »). */
+function stateLabel(label: string, state: FieldTranslationState) {
+  if (!state) return label;
+  return (
+    <span className="inline-flex flex-wrap items-center gap-2">
+      {label}
+      <StatusPill tone={state === 'missing' ? 'brand' : 'neutral'} className="py-0">
+        {FIELD_STATE_LABELS[state]}
+      </StatusPill>
+    </span>
+  );
+}
+
+/** « Marquer comme revu » sous un champ anglais « À revoir ». */
+function ReviewButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button type="button" className={cn(compactButtonClass, 'w-fit gap-1.5')} onClick={onClick}>
+      <CheckCheck aria-hidden size={14} />
+      Marquer comme revu
+    </button>
+  );
 }
 
 /** Texte des champs latitude / longitude d'un quartier. */
@@ -121,7 +159,7 @@ export function ZoneDialog({
   readOnly?: boolean;
 }) {
   const [draft, setDraft] = useState(() => draftOf(zone));
-  const [language, setLanguage] = useState<EditingLanguage>('fr');
+  const [language, setLanguage] = useState<EditorLanguage>('fr');
   const [quarter, setQuarter] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [wasOpen, setWasOpen] = useState(open);
@@ -294,6 +332,7 @@ export function ZoneDialog({
         active: draft.active,
         quarters: draft.quarters,
         area: draft.area,
+        ...(draft.reviewedFields.length > 0 ? { reviewedFields: draft.reviewedFields } : {}),
       };
       // Schémas `allOf` du contrat générés avec `Record<string, never>` : le corps est typé par `ZoneFields`.
       return zone
@@ -331,6 +370,19 @@ export function ZoneDialog({
   }
 
   const en = language === 'en';
+  const translation = localZoneStatus(draft, zone);
+  const fieldState = (path: string) => (en ? fieldTranslationState(path, translation) : null);
+  const review = (path: string) =>
+    readOnly
+      ? null
+      : fieldState(path) === 'outdated' && (
+          <ReviewButton onClick={() => set('reviewedFields', [...draft.reviewedFields, path])} />
+        );
+  const quarterFields = en
+    ? [...translation.missingFields, ...translation.outdatedFields].filter((path) =>
+        path.startsWith('quarters.'),
+      )
+    : [];
 
   return (
     <Modal
@@ -353,334 +405,376 @@ export function ZoneDialog({
       }
     >
       <div className="flex flex-col gap-4">
-        <LanguageSwitch
+        <LanguageTabs
+          idPrefix="zone-dialog"
           value={language}
           onChange={setLanguage}
-          labels={{ fr: 'Français', en: draft.nameEn.trim() ? 'English · traduit' : 'English · à traduire' }}
+          badge={translationBadge(translation)}
         />
         {/* Lecture seule : langue au choix, champs figés, boutons d'ajout et de retrait masqués. */}
-        <ReadOnlyFieldset readOnly={readOnly}>
-          <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_200px]">
-            <CompactField label={en ? 'Nom (anglais)' : 'Nom'} error={en ? null : errors.name}>
+        <div
+          role="tabpanel"
+          id={languagePanelId(language, 'zone-dialog')}
+          aria-labelledby={languageTabId(language, 'zone-dialog')}
+        >
+          <ReadOnlyFieldset readOnly={readOnly}>
+            <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_200px]">
+              <CompactField
+                label={en ? stateLabel('Nom (anglais)', fieldState('name')) : 'Nom'}
+                error={en ? errors.nameEn : errors.name}
+              >
+                {(control) => (
+                  <CompactInput
+                    {...control}
+                    key={language}
+                    lang={language}
+                    value={en ? draft.nameEn : draft.name}
+                    placeholder={en ? draft.name : 'Zone 4 — Périphérie'}
+                    maxLength={60}
+                    onChange={(event) => set(en ? 'nameEn' : 'name', event.target.value)}
+                  />
+                )}
+              </CompactField>
+              <CompactField label="Couleur sur la carte">
+                {(control) => (
+                  <select
+                    {...control}
+                    value={draft.tone}
+                    onChange={(event) => set('tone', event.target.value as ZoneTone)}
+                    className={compactInputClass}
+                  >
+                    {(Object.keys(TONE_LABELS) as ZoneTone[]).map((tone) => (
+                      <option key={tone} value={tone}>
+                        {TONE_LABELS[tone]}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </CompactField>
+            </div>
+            {en && review('name')}
+            <CompactField
+              label={en ? stateLabel('Description (anglais)', fieldState('description')) : 'Description'}
+              help={en ? `Français : ${draft.description || '—'}` : 'Une phrase, sous le nom de la zone.'}
+              error={en ? errors.descriptionEn : errors.description}
+            >
               {(control) => (
                 <CompactInput
                   {...control}
                   key={language}
                   lang={language}
-                  value={en ? draft.nameEn : draft.name}
-                  placeholder={en ? draft.name : 'Zone 4 — Périphérie'}
-                  maxLength={60}
-                  onChange={(event) => set(en ? 'nameEn' : 'name', event.target.value)}
+                  value={en ? draft.descriptionEn : draft.description}
+                  placeholder={en ? draft.description : 'Autour de la base de Cité SIC.'}
+                  maxLength={160}
+                  onChange={(event) => set(en ? 'descriptionEn' : 'description', event.target.value)}
                 />
               )}
             </CompactField>
-            <CompactField label="Couleur sur la carte">
-              {(control) => (
-                <select
-                  {...control}
-                  value={draft.tone}
-                  onChange={(event) => set('tone', event.target.value as ZoneTone)}
-                  className={compactInputClass}
-                >
-                  {(Object.keys(TONE_LABELS) as ZoneTone[]).map((tone) => (
-                    <option key={tone} value={tone}>
-                      {TONE_LABELS[tone]}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </CompactField>
-          </div>
-          <CompactField
-            label={en ? 'Description (anglais)' : 'Description'}
-            help="Une phrase, sous le nom de la zone."
-          >
-            {(control) => (
-              <CompactInput
-                {...control}
-                key={language}
-                lang={language}
-                value={en ? draft.descriptionEn : draft.description}
-                placeholder={en ? draft.description : 'Autour de la base de Cité SIC.'}
-                maxLength={160}
-                onChange={(event) => set(en ? 'descriptionEn' : 'description', event.target.value)}
-              />
-            )}
-          </CompactField>
-          <CompactField
-            label={en ? 'Réponse à la recherche (anglais)' : 'Réponse à la recherche'}
-            help="Affichée quand un visiteur cherche un quartier de la zone."
-          >
-            {(control) => (
-              <textarea
-                {...control}
-                key={language}
-                lang={language}
-                rows={2}
-                value={en ? draft.resultEn : draft.result}
-                placeholder={en ? draft.result : undefined}
-                maxLength={240}
-                onChange={(event) => set(en ? 'resultEn' : 'result', event.target.value)}
-                className={cn(compactInputClass, 'resize-y')}
-              />
-            )}
-          </CompactField>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <CompactField label="Délai moyen" help="Ex. « 30–45 min » ; vide : « Sur devis ».">
-              {(control) => (
-                <CompactInput
-                  {...control}
-                  value={draft.delay}
-                  maxLength={30}
-                  onChange={(event) => set('delay', event.target.value)}
-                />
-              )}
-            </CompactField>
+            {en && review('description')}
             <CompactField
-              label="Tarif indicatif (FCFA)"
-              help="Masqué sur le site : les prix sont donnés sur devis."
-              error={feeError}
-            >
-              {(control) => (
-                <CompactInput
-                  {...control}
-                  inputMode="numeric"
-                  value={draft.fee}
-                  onChange={(event) => set('fee', event.target.value.replace(/\D/g, ''))}
-                />
-              )}
-            </CompactField>
-          </div>
-          <div className="flex flex-wrap gap-x-8 gap-y-3">
-            <label className="inline-flex cursor-pointer items-center gap-2 font-ui text-[14px] leading-5 text-text-main">
-              <input
-                type="checkbox"
-                checked={draft.feeFrom}
-                onChange={(event) => set('feeFrom', event.target.checked)}
-                className="size-4 accent-brand-primary"
-              />
-              Montant minimal (« Dès … »)
-            </label>
-            <Switch
-              label="Zone active sur le site"
-              checked={draft.active}
-              onChange={(event) => set('active', event.target.checked)}
-            />
-          </div>
-          <fieldset className="flex flex-col gap-2.5">
-            <legend className="mb-1.5 font-ui text-[13px] leading-4 font-medium text-neutral-700">
-              Quartiers ({draft.quarters.length})
-            </legend>
-            {draft.quarters.length > 0 && (
-              <ul className="flex flex-wrap gap-2">
-                {draft.quarters.map((item) => (
-                  <li
-                    key={item.name}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 py-1 pr-1 pl-3 font-ui text-[13px] leading-4 text-text-main"
-                  >
-                    <span aria-hidden className={cn('size-2 rounded-full', TONES[draft.tone].dot)} />
-                    {/* Choisir le quartier à placer sur la carte. */}
-                    <button
-                      type="button"
-                      aria-pressed={placing === item.name}
-                      title="Placer sur la carte"
-                      onClick={() => choosePlacing(item.name)}
-                      className={cn(
-                        'inline-flex items-center gap-1 rounded-full hover:underline',
-                        placing === item.name && 'font-semibold underline',
-                      )}
-                    >
-                      {item.name}
-                      {item.isBase && <span className="font-normal text-text-muted">(base)</span>}
-                      {item.coordinates ? (
-                        <>
-                          <MapPin aria-hidden size={12} className="text-icon-default" />
-                          <span className="sr-only">(placé sur la carte)</span>
-                        </>
-                      ) : (
-                        <span className="sr-only">(non placé)</span>
-                      )}
-                    </button>
-                    {!readOnly && (
-                      <button
-                        type="button"
-                        aria-label={`Retirer ${item.name}`}
-                        onClick={() => {
-                          set(
-                            'quarters',
-                            draft.quarters.filter((other) => other !== item),
-                          );
-                          if (placing === item.name) setPlacing(null);
-                        }}
-                        className="flex size-6 items-center justify-center rounded-full text-icon-default hover:bg-neutral-200 hover:text-text-main"
-                      >
-                        <X aria-hidden size={14} />
-                      </button>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-            {!readOnly && (
-              <div className="flex gap-2.5">
-                <CompactInput
-                  aria-label="Ajouter un quartier"
-                  placeholder="Nom du quartier"
-                  value={quarter}
-                  aria-invalid={quartersError ? true : undefined}
-                  onChange={(event) => setQuarter(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key !== 'Enter') return;
-                    event.preventDefault();
-                    addQuarter();
-                  }}
-                />
-                <button type="button" className={cn(compactButtonClass, 'shrink-0')} onClick={addQuarter}>
-                  Ajouter
-                </button>
-              </div>
-            )}
-            {readOnly ? null : quartersError ? (
-              <p role="alert" className="font-ui text-[13px] leading-4 text-feedback-error">
-                {quartersError}
-              </p>
-            ) : (
-              <p className="font-ui text-[12px] leading-4 text-text-muted">
-                Un quartier ajouté ici est retiré de son ancienne zone. Les nouveaux quartiers apparaissent
-                dans la recherche et les formulaires ; choisissez un quartier pour le placer sur la carte.
-              </p>
-            )}
-          </fieldset>
-          <fieldset className="flex flex-col gap-3">
-            <legend className="mb-1.5 font-ui text-[13px] leading-4 font-medium text-neutral-700">
-              {placingQuarter ? `Position de ${placingQuarter.name}` : 'Position des quartiers'}
-            </legend>
-            {placingQuarter ? (
-              <div className="grid items-start gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
-                <CompactField label="Latitude" help="Degrés décimaux, ex. 4.0565">
-                  {(control) => (
-                    <CompactInput
-                      {...control}
-                      aria-invalid={errors.coordinates ? true : undefined}
-                      inputMode="decimal"
-                      value={coordinates.lat}
-                      onChange={(event) => typeCoordinate('lat', event.target.value)}
-                    />
-                  )}
-                </CompactField>
-                <CompactField label="Longitude" help="Degrés décimaux, ex. 9.732">
-                  {(control) => (
-                    <CompactInput
-                      {...control}
-                      aria-invalid={errors.coordinates ? true : undefined}
-                      inputMode="decimal"
-                      value={coordinates.lng}
-                      onChange={(event) => typeCoordinate('lng', event.target.value)}
-                    />
-                  )}
-                </CompactField>
-                {!readOnly && (
-                  <button
-                    type="button"
-                    disabled={!placingQuarter.coordinates}
-                    className={cn(compactButtonClass, 'sm:mt-[21px]')}
-                    onClick={() => {
-                      setQuarterPoint(placingQuarter.name, null);
-                      setCoordinates({ lat: '', lng: '' });
-                      setErrors((current) => ({ ...current, coordinates: '' }));
-                    }}
-                  >
-                    Retirer de la carte
-                  </button>
-                )}
-              </div>
-            ) : (
-              <p className="font-ui text-[12px] leading-4 text-text-muted">
-                Ajoutez ou choisissez un quartier ci-dessus pour le placer.
-              </p>
-            )}
-            {(errors.coordinates || apiCoordinateError) && (
-              <p role="alert" className="font-ui text-[13px] leading-4 text-feedback-error">
-                {errors.coordinates || apiCoordinateError}
-              </p>
-            )}
-            <p aria-live="polite" className="font-ui text-[12px] leading-4 text-text-muted">
-              {placingQuarter?.coordinates
-                ? `${placingQuarter.name} : ${pointLabel(placingQuarter.coordinates)}.${readOnly ? '' : ' Cliquez ailleurs sur la carte pour le déplacer.'}`
-                : readOnly
-                  ? 'Quartier non placé sur la carte.'
-                  : 'Cliquez sur la carte pour placer le quartier choisi.'}
-            </p>
-            {/* Montée à l'ouverture seulement (le dialogue reste dans la page fermé) : cadrage sur la zone ouverte. */}
-            {open && (
-              <ZonesLeafletMap
-                key={zone?.id ?? 'nouvelle-zone'}
-                zones={previewZones}
-                labels={ADMIN_MAP_LABELS}
-                selected={placing}
-                onPick={readOnly ? undefined : pick}
-                onMarkerClick={choosePlacing}
-                className="xl:w-full"
-              />
-            )}
-          </fieldset>
-          <fieldset className="flex flex-col gap-2.5">
-            <legend className="mb-1.5 font-ui text-[13px] leading-4 font-medium text-neutral-700">
-              Contour de la zone
-            </legend>
-            <p className="font-ui text-[13px] leading-4 text-text-main">
-              {draft.area
-                ? `Contour enregistré : ${areaSummary(draft.area)}.`
-                : 'Aucun contour : seuls les quartiers placés apparaissent sur la carte.'}
-            </p>
-            <CompactField
-              label="GeoJSON du contour"
-              help="Polygon, MultiPolygon, Feature ou FeatureCollection (geojson.io, uMap, QGIS), en [longitude, latitude]."
-              error={areaError}
+              label={
+                en
+                  ? stateLabel('Réponse à la recherche (anglais)', fieldState('result'))
+                  : 'Réponse à la recherche'
+              }
+              help={
+                en
+                  ? `Français : ${draft.result || '—'}`
+                  : 'Affichée quand un visiteur cherche un quartier de la zone.'
+              }
+              error={en ? errors.resultEn : errors.result}
             >
               {(control) => (
                 <textarea
                   {...control}
-                  rows={3}
-                  spellCheck={false}
-                  value={areaText}
-                  placeholder='{"type": "Polygon", "coordinates": [[[9.715, 4.07], …]]}'
-                  onChange={(event) => setAreaText(event.target.value)}
-                  className={cn(compactInputClass, 'resize-y font-mono text-[12px] leading-4')}
+                  key={language}
+                  lang={language}
+                  rows={2}
+                  value={en ? draft.resultEn : draft.result}
+                  placeholder={en ? draft.result : undefined}
+                  maxLength={240}
+                  onChange={(event) => set(en ? 'resultEn' : 'result', event.target.value)}
+                  className={cn(compactInputClass, 'resize-y')}
                 />
               )}
             </CompactField>
-            {!readOnly && (
-              <div className="flex flex-wrap gap-2.5">
-                <button type="button" className={compactButtonClass} onClick={() => applyArea()}>
-                  Appliquer le contour
-                </button>
-                <label className={cn(compactButtonClass, 'cursor-pointer focus-within:focus-ring')}>
-                  Importer un fichier
-                  <input
-                    type="file"
-                    accept=".geojson,.json,application/geo+json,application/json"
-                    onChange={importFile}
-                    className="sr-only"
-                  />
-                </label>
-                {draft.area && (
-                  <button
-                    type="button"
-                    className={compactButtonClass}
-                    onClick={() => {
-                      set('area', null);
-                      setAreaText('');
-                      setErrors((current) => ({ ...current, area: '' }));
-                    }}
-                  >
-                    Supprimer le contour
-                  </button>
-                )}
+            {en && review('result')}
+            {quarterFields.length > 0 && (
+              <div className="flex flex-col gap-2 rounded-md border border-border-default p-3">
+                <p className="font-ui text-[13px] leading-4 text-text-main">
+                  Textes anglais des quartiers à revoir ou à traduire (repris du français sur le site en
+                  attendant) :
+                </p>
+                <ul className="flex flex-col gap-1.5">
+                  {quarterFields.map((path) => (
+                    <li
+                      key={path}
+                      className="flex flex-wrap items-center gap-2 font-ui text-[13px] leading-4"
+                    >
+                      {stateLabel(quarterFieldLabel(path, zone?.quarters ?? []), fieldState(path))}
+                      {review(path)}
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
-          </fieldset>
-        </ReadOnlyFieldset>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <CompactField label="Délai moyen" help="Ex. « 30–45 min » ; vide : « Sur devis ».">
+                {(control) => (
+                  <CompactInput
+                    {...control}
+                    value={draft.delay}
+                    maxLength={30}
+                    onChange={(event) => set('delay', event.target.value)}
+                  />
+                )}
+              </CompactField>
+              <CompactField
+                label="Tarif indicatif (FCFA)"
+                help="Masqué sur le site : les prix sont donnés sur devis."
+                error={feeError}
+              >
+                {(control) => (
+                  <CompactInput
+                    {...control}
+                    inputMode="numeric"
+                    value={draft.fee}
+                    onChange={(event) => set('fee', event.target.value.replace(/\D/g, ''))}
+                  />
+                )}
+              </CompactField>
+            </div>
+            <div className="flex flex-wrap gap-x-8 gap-y-3">
+              <label className="inline-flex cursor-pointer items-center gap-2 font-ui text-[14px] leading-5 text-text-main">
+                <input
+                  type="checkbox"
+                  checked={draft.feeFrom}
+                  onChange={(event) => set('feeFrom', event.target.checked)}
+                  className="size-4 accent-brand-primary"
+                />
+                Montant minimal (« Dès … »)
+              </label>
+              <Switch
+                label="Zone active sur le site"
+                checked={draft.active}
+                onChange={(event) => set('active', event.target.checked)}
+              />
+            </div>
+            <fieldset className="flex flex-col gap-2.5">
+              <legend className="mb-1.5 font-ui text-[13px] leading-4 font-medium text-neutral-700">
+                Quartiers ({draft.quarters.length})
+              </legend>
+              {draft.quarters.length > 0 && (
+                <ul className="flex flex-wrap gap-2">
+                  {draft.quarters.map((item) => (
+                    <li
+                      key={item.name}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-neutral-100 py-1 pr-1 pl-3 font-ui text-[13px] leading-4 text-text-main"
+                    >
+                      <span aria-hidden className={cn('size-2 rounded-full', TONES[draft.tone].dot)} />
+                      {/* Choisir le quartier à placer sur la carte. */}
+                      <button
+                        type="button"
+                        aria-pressed={placing === item.name}
+                        title="Placer sur la carte"
+                        onClick={() => choosePlacing(item.name)}
+                        className={cn(
+                          'inline-flex items-center gap-1 rounded-full hover:underline',
+                          placing === item.name && 'font-semibold underline',
+                        )}
+                      >
+                        {item.name}
+                        {item.isBase && <span className="font-normal text-text-muted">(base)</span>}
+                        {item.coordinates ? (
+                          <>
+                            <MapPin aria-hidden size={12} className="text-icon-default" />
+                            <span className="sr-only">(placé sur la carte)</span>
+                          </>
+                        ) : (
+                          <span className="sr-only">(non placé)</span>
+                        )}
+                      </button>
+                      {!readOnly && (
+                        <button
+                          type="button"
+                          aria-label={`Retirer ${item.name}`}
+                          onClick={() => {
+                            set(
+                              'quarters',
+                              draft.quarters.filter((other) => other !== item),
+                            );
+                            if (placing === item.name) setPlacing(null);
+                          }}
+                          className="flex size-6 items-center justify-center rounded-full text-icon-default hover:bg-neutral-200 hover:text-text-main"
+                        >
+                          <X aria-hidden size={14} />
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {!readOnly && (
+                <div className="flex gap-2.5">
+                  <CompactInput
+                    aria-label="Ajouter un quartier"
+                    placeholder="Nom du quartier"
+                    value={quarter}
+                    aria-invalid={quartersError ? true : undefined}
+                    onChange={(event) => setQuarter(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key !== 'Enter') return;
+                      event.preventDefault();
+                      addQuarter();
+                    }}
+                  />
+                  <button type="button" className={cn(compactButtonClass, 'shrink-0')} onClick={addQuarter}>
+                    Ajouter
+                  </button>
+                </div>
+              )}
+              {readOnly ? null : quartersError ? (
+                <p role="alert" className="font-ui text-[13px] leading-4 text-feedback-error">
+                  {quartersError}
+                </p>
+              ) : (
+                <p className="font-ui text-[12px] leading-4 text-text-muted">
+                  Un quartier ajouté ici est retiré de son ancienne zone. Les nouveaux quartiers apparaissent
+                  dans la recherche et les formulaires ; choisissez un quartier pour le placer sur la carte.
+                </p>
+              )}
+            </fieldset>
+            <fieldset className="flex flex-col gap-3">
+              <legend className="mb-1.5 font-ui text-[13px] leading-4 font-medium text-neutral-700">
+                {placingQuarter ? `Position de ${placingQuarter.name}` : 'Position des quartiers'}
+              </legend>
+              {placingQuarter ? (
+                <div className="grid items-start gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+                  <CompactField label="Latitude" help="Degrés décimaux, ex. 4.0565">
+                    {(control) => (
+                      <CompactInput
+                        {...control}
+                        aria-invalid={errors.coordinates ? true : undefined}
+                        inputMode="decimal"
+                        value={coordinates.lat}
+                        onChange={(event) => typeCoordinate('lat', event.target.value)}
+                      />
+                    )}
+                  </CompactField>
+                  <CompactField label="Longitude" help="Degrés décimaux, ex. 9.732">
+                    {(control) => (
+                      <CompactInput
+                        {...control}
+                        aria-invalid={errors.coordinates ? true : undefined}
+                        inputMode="decimal"
+                        value={coordinates.lng}
+                        onChange={(event) => typeCoordinate('lng', event.target.value)}
+                      />
+                    )}
+                  </CompactField>
+                  {!readOnly && (
+                    <button
+                      type="button"
+                      disabled={!placingQuarter.coordinates}
+                      className={cn(compactButtonClass, 'sm:mt-[21px]')}
+                      onClick={() => {
+                        setQuarterPoint(placingQuarter.name, null);
+                        setCoordinates({ lat: '', lng: '' });
+                        setErrors((current) => ({ ...current, coordinates: '' }));
+                      }}
+                    >
+                      Retirer de la carte
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <p className="font-ui text-[12px] leading-4 text-text-muted">
+                  Ajoutez ou choisissez un quartier ci-dessus pour le placer.
+                </p>
+              )}
+              {(errors.coordinates || apiCoordinateError) && (
+                <p role="alert" className="font-ui text-[13px] leading-4 text-feedback-error">
+                  {errors.coordinates || apiCoordinateError}
+                </p>
+              )}
+              <p aria-live="polite" className="font-ui text-[12px] leading-4 text-text-muted">
+                {placingQuarter?.coordinates
+                  ? `${placingQuarter.name} : ${pointLabel(placingQuarter.coordinates)}.${readOnly ? '' : ' Cliquez ailleurs sur la carte pour le déplacer.'}`
+                  : readOnly
+                    ? 'Quartier non placé sur la carte.'
+                    : 'Cliquez sur la carte pour placer le quartier choisi.'}
+              </p>
+              {/* Montée à l'ouverture seulement (le dialogue reste dans la page fermé) : cadrage sur la zone ouverte. */}
+              {open && (
+                <ZonesLeafletMap
+                  key={zone?.id ?? 'nouvelle-zone'}
+                  zones={previewZones}
+                  labels={ADMIN_MAP_LABELS}
+                  selected={placing}
+                  onPick={readOnly ? undefined : pick}
+                  onMarkerClick={choosePlacing}
+                  className="xl:w-full"
+                />
+              )}
+            </fieldset>
+            <fieldset className="flex flex-col gap-2.5">
+              <legend className="mb-1.5 font-ui text-[13px] leading-4 font-medium text-neutral-700">
+                Contour de la zone
+              </legend>
+              <p className="font-ui text-[13px] leading-4 text-text-main">
+                {draft.area
+                  ? `Contour enregistré : ${areaSummary(draft.area)}.`
+                  : 'Aucun contour : seuls les quartiers placés apparaissent sur la carte.'}
+              </p>
+              <CompactField
+                label="GeoJSON du contour"
+                help="Polygon, MultiPolygon, Feature ou FeatureCollection (geojson.io, uMap, QGIS), en [longitude, latitude]."
+                error={areaError}
+              >
+                {(control) => (
+                  <textarea
+                    {...control}
+                    rows={3}
+                    spellCheck={false}
+                    value={areaText}
+                    placeholder='{"type": "Polygon", "coordinates": [[[9.715, 4.07], …]]}'
+                    onChange={(event) => setAreaText(event.target.value)}
+                    className={cn(compactInputClass, 'resize-y font-mono text-[12px] leading-4')}
+                  />
+                )}
+              </CompactField>
+              {!readOnly && (
+                <div className="flex flex-wrap gap-2.5">
+                  <button type="button" className={compactButtonClass} onClick={() => applyArea()}>
+                    Appliquer le contour
+                  </button>
+                  <label className={cn(compactButtonClass, 'cursor-pointer focus-within:focus-ring')}>
+                    Importer un fichier
+                    <input
+                      type="file"
+                      accept=".geojson,.json,application/geo+json,application/json"
+                      onChange={importFile}
+                      className="sr-only"
+                    />
+                  </label>
+                  {draft.area && (
+                    <button
+                      type="button"
+                      className={compactButtonClass}
+                      onClick={() => {
+                        set('area', null);
+                        setAreaText('');
+                        setErrors((current) => ({ ...current, area: '' }));
+                      }}
+                    >
+                      Supprimer le contour
+                    </button>
+                  )}
+                </div>
+              )}
+            </fieldset>
+          </ReadOnlyFieldset>
+        </div>
       </div>
     </Modal>
   );

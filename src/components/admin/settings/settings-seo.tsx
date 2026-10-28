@@ -1,25 +1,40 @@
 'use client';
 
 import { BarChart3, Search } from 'lucide-react';
+import { useState } from 'react';
 import { charCountHelp } from '@/components/admin/editor/editor-ui';
 import { ImageField } from '@/components/admin/editor/media-picker';
+import type { EditorLanguage } from '@/components/admin/pages/translation-editor';
 import { useCan } from '@/components/admin/shell/permissions';
 import { EmptyState } from '@/components/admin/ui/filters';
 import { Field, Input, Textarea } from '@/components/ui/field';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
+import { SettingsLanguageTabs } from './settings-english';
 import { FieldGrid, SettingsCard } from './settings-fields';
 import { useSettingsGroup } from './settings-form';
 
-/** Onglet « Référencement » : titre, description et image de partage par défaut, mesure d'audience (administrateurs). */
+/**
+ * Onglet « Référencement » : titre, description et image de partage par défaut, mesure d'audience (administrateurs).
+ * Onglets « Français | English » : titre et description par défaut en anglais.
+ */
 export function SeoTab() {
   // Mesure d'audience : paramètres sensibles (`settings:admin`).
   const canAdmin = useCan()('settings:admin');
+  const [lang, setLang] = useState<EditorLanguage>('fr');
   return (
-    <div className="flex max-w-[752px] flex-col gap-5">
-      <SeoCard />
-      {canAdmin && <AnalyticsCard />}
-    </div>
+    <SettingsLanguageTabs
+      id="settings-seo"
+      groups={['seo']}
+      lang={lang}
+      onChange={setLang}
+      french={
+        <div className="flex max-w-[752px] flex-col gap-5">
+          <SeoCard />
+          {canAdmin && <AnalyticsCard />}
+        </div>
+      }
+    />
   );
 }
 

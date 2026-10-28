@@ -22,13 +22,9 @@ test.describe('back-office : paramètres', () => {
         timeout: 15_000,
       },
     );
-    await expect(page.getByRole('tab')).toHaveText([
-      'Coordonnées',
-      'E-mails automatiques',
-      'Référencement',
-      'Utilisateurs',
-      'Sécurité & sauvegardes',
-    ]);
+    await expect(page.getByRole('tablist', { name: 'Rubriques des paramètres' }).getByRole('tab')).toHaveText(
+      ['Coordonnées', 'E-mails automatiques', 'Référencement', 'Utilisateurs', 'Sécurité & sauvegardes'],
+    );
     await expect(page.getByRole('textbox', { name: 'Horaires' })).toHaveValue('Lun – Sam · 8h – 20h');
     await expect(page.getByRole('textbox', { name: 'Instagram' })).toHaveValue('instagram.com/mamboproxi');
     await expect(page.getByRole('switch', { name: 'Afficher le bouton WhatsApp' })).toBeChecked();
