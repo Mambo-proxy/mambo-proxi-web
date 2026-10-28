@@ -1289,7 +1289,9 @@ export interface paths {
          *     (`galleryImageIds`, `relatedServiceIds`, `featuredReviewIds`, `offers`) remplacent les listes enregistrées ;
          *     une offre renvoyée avec son `id` le garde. Changement de rubrique : le service passe à la fin de la nouvelle
          *     rubrique. Slug déjà utilisé → `409`. Service publié dont l'adresse change (slug ou rubrique) : redirection
-         *     301 de l'ancienne adresse (`GET /v1/site/redirects`).
+         *     301 de l'ancienne adresse (`GET /v1/site/redirects`). `translations` (facultatif) enregistre la version
+         *     anglaise avec le reste (règles : `CatalogTranslations`) ; elle change la `version` comme un champ français et,
+         *     pour un service publié, est en ligne aussitôt.
          */
         patch: operations["adminUpdateService"];
         trace?: never;
@@ -1346,7 +1348,8 @@ export interface paths {
         /**
          * Dupliquer (copie en brouillon)
          * @description Copie en brouillon : « (copie) » ajouté au nom, slug `<slug>-copie` (`-2`… si besoin), hors menu et hors
-         *     accueil, à la fin de la rubrique ; galerie, services liés, avis mis en avant et offres recopiés.
+         *     accueil, à la fin de la rubrique ; galerie, services liés, avis mis en avant, offres et version anglaise
+         *     (textes et suivi, offres comprises) recopiés. Le nom ayant changé, sa traduction est signalée « à revoir ».
          */
         post: operations["adminDuplicateService"];
         delete?: never;
@@ -1457,8 +1460,10 @@ export interface paths {
         /**
          * Modifier une rubrique
          * @description Mise à jour partielle (statut compris : publier, dépublier, archiver). `offerSections` remplace les carrousels
-         *     d'offres. Slug déjà utilisé → `409`. Rubrique publiée dont le slug change : redirections 301 de la page
-         *     rubrique et de ses fiches publiées.
+         *     d'offres : un carrousel renvoyé avec son `id` le garde, ainsi que la traduction anglaise de ses textes (sans
+         *     `id`, celle du carrousel de même rang) ; une carte renvoyée avec son `id` garde la sienne. `translations`
+         *     (facultatif) enregistre la version anglaise (règles : `CatalogTranslations`). Slug déjà utilisé → `409`.
+         *     Rubrique publiée dont le slug change : redirections 301 de la page rubrique et de ses fiches publiées.
          */
         patch: operations["adminUpdateCategory"];
         trace?: never;
@@ -4684,6 +4689,13 @@ export interface components {
             seoTitle?: string | null;
             seoDescription?: string | null;
             toComplete?: boolean;
+            /**
+             * @description Version anglaise saisie à la main (règles : `CatalogTranslations`). Renvoyée par les lectures ; facultative
+             *     à l'enregistrement (absente : version anglaise inchangée).
+             */
+            translations?: components["schemas"]["CatalogTranslations"] & {
+                en?: components["schemas"]["ServiceTexts"] | null;
+            };
         };
         ServiceInput: components["schemas"]["ServiceFields"] & Record<string, never>;
         ServicePatch: components["schemas"]["ServiceFields"] & Record<string, never>;
@@ -4726,6 +4738,11 @@ export interface components {
             relatedTitle?: string | null;
             ctaTitle?: string | null;
             ctaText?: string | null;
+            /** @description Version anglaise (règles : `CatalogTranslations`), réduite aux textes traduits. */
+            translations: {
+                en: components["schemas"]["ServiceTexts"] | null;
+            };
+            translationStatus: components["schemas"]["CatalogTranslationStatus"];
         };
         Completeness: {
             percent: number;
@@ -4736,6 +4753,85 @@ export interface components {
                 label: string;
                 done: boolean;
             }[];
+        };
+        /**
+         * @description Version anglaise d'un service ou d'une rubrique, saisie à la main dans le back-office. **Seuls les textes
+         *     modifiables dans le back-office se traduisent ici** (`ServiceTexts`, `CategoryTexts`) ; toute autre valeur
+         *     envoyée est ignorée. Icônes, images, liens, nombres, réglages et structure (nombre et ordre des éléments de
+         *     listes) sont toujours ceux du français, sur le site comme dans les e-mails. Listes alignées par rang :
+         *     l'élément N anglais traduit l'élément N français (éléments en trop ignorés, élément `null` = non traduit).
+         *     Un texte anglais absent, `null` ou vide laisse le texte français.
+         *
+         *     À l'enregistrement, `en` remplace la version anglaise de ces textes (`null` la supprime) ; les textes anglais
+         *     des autres champs (repris à l'import, non modifiables dans le back-office) sont conservés. Le suivi se fait
+         *     par champ de premier niveau (`name`, `steps`, `homeCard`…) : l'empreinte des textes français d'un champ est
+         *     recalculée si sa traduction est nouvelle ou modifiée, sinon gardée (le champ reste « à revoir » si le
+         *     français a changé). Les lectures renvoient `en` réduit aux textes traduits (`null` sans traduction).
+         */
+        CatalogTranslations: {
+            /** @description Textes anglais (forme `ServiceTexts` ou `CategoryTexts`). */
+            en: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * @description Envoi seulement. Champs de premier niveau (`steps`, `seoTitle`…) dont la traduction a été relue et reste
+             *     juste malgré un changement du français : leur empreinte devient celle des textes français enregistrés
+             *     (ils quittent `outdatedFields`). Chaque champ doit être traduit, sinon `422` sur
+             *     `translations.reviewedFields.N`. Non mémorisé.
+             */
+            reviewedFields?: string[];
+        };
+        /**
+         * @description État de la version anglaise (lecture seule, ignoré à l'enregistrement), par champ de premier niveau des textes
+         *     modifiables (`TextTranslationStatus` : `steps` est « à traduire » si l'un de ses textes n'a pas de traduction).
+         */
+        CatalogTranslationStatus: {
+            en: components["schemas"]["TextTranslationStatus"];
+        };
+        /** @description Textes anglais d'un service (champs modifiables dans le back-office), de la forme du français. */
+        ServiceTexts: {
+            name?: string | null;
+            tagline?: string | null;
+            summary?: string | null;
+            audiences?: (string | null)[];
+            steps?: ({
+                title?: string | null;
+                text?: string | null;
+            } | null)[];
+            advantages?: ({
+                title?: string | null;
+                text?: string | null;
+            } | null)[];
+            faq?: ({
+                question?: string | null;
+                answer?: string | null;
+            } | null)[];
+            seoTitle?: string | null;
+            seoDescription?: string | null;
+        };
+        /** @description Textes anglais d'une rubrique (champs modifiables dans le back-office), de la forme du français. */
+        CategoryTexts: {
+            name?: string | null;
+            tagline?: string | null;
+            description?: string | null;
+            eyebrow?: string | null;
+            /** @description Texte à accent `==…==`. */
+            heroTitle?: string | null;
+            heroLead?: string | null;
+            audiencesTitle?: string | null;
+            servicesTitle?: string | null;
+            servicesLead?: string | null;
+            processTitle?: string | null;
+            ctaTitle?: string | null;
+            ctaText?: string | null;
+            homeCard?: {
+                title?: string | null;
+                text?: string | null;
+                textMobile?: string | null;
+                chips?: (string | null)[];
+            };
+            seoTitle?: string | null;
+            seoDescription?: string | null;
         };
         CategoryFields: {
             name?: string;
@@ -4769,6 +4865,12 @@ export interface components {
             }[];
             highlight?: components["schemas"]["CategoryHighlight"] | null;
             offerSections?: {
+                /**
+                 * @description Identifiant d'un carrousel enregistré (renvoyé par les lectures) : renvoyé tel quel, le carrousel le
+                 *     garde avec la traduction anglaise de ses textes ; absent, il reprend celle du carrousel de même rang ;
+                 *     `null`, c'est un nouveau carrousel.
+                 */
+                id?: components["schemas"]["Id"] | null;
                 eyebrow: string;
                 title: string;
                 titleMobile?: string | null;
@@ -4781,6 +4883,13 @@ export interface components {
             ctaText?: string | null;
             seoTitle?: string | null;
             seoDescription?: string | null;
+            /**
+             * @description Version anglaise saisie à la main (règles : `CatalogTranslations`). Renvoyée par les lectures (réduite aux
+             *     textes traduits) ; facultative à l'enregistrement (absente : version anglaise inchangée).
+             */
+            translations?: components["schemas"]["CatalogTranslations"] & {
+                en?: components["schemas"]["CategoryTexts"] | null;
+            };
         };
         CategoryInput: components["schemas"]["CategoryFields"] & Record<string, never>;
         CategoryPatch: components["schemas"]["CategoryFields"] & Record<string, never>;
@@ -4789,6 +4898,7 @@ export interface components {
             sortOrder: number;
             serviceCount: number;
             updatedAt: components["schemas"]["DateTime"];
+            translationStatus: components["schemas"]["CatalogTranslationStatus"];
         };
         AdminPageSummary: {
             key: components["schemas"]["PageKey"];
@@ -6476,6 +6586,10 @@ export type ServiceInput = components['schemas']['ServiceInput'];
 export type ServicePatch = components['schemas']['ServicePatch'];
 export type AdminService = components['schemas']['AdminService'];
 export type Completeness = components['schemas']['Completeness'];
+export type CatalogTranslations = components['schemas']['CatalogTranslations'];
+export type CatalogTranslationStatus = components['schemas']['CatalogTranslationStatus'];
+export type ServiceTexts = components['schemas']['ServiceTexts'];
+export type CategoryTexts = components['schemas']['CategoryTexts'];
 export type CategoryFields = components['schemas']['CategoryFields'];
 export type CategoryInput = components['schemas']['CategoryInput'];
 export type CategoryPatch = components['schemas']['CategoryPatch'];

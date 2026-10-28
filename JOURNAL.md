@@ -1329,3 +1329,23 @@ erreurs) ; toutes les routes appelées existent. Corrections :
 
 - Paramètres : un seul bouton « Enregistrer » pour tout l'écran, donc le marquage « revu » n'est pas envoyé tout de
   suite (contrairement aux pages).
+
+## Services et rubriques bilingues (28 octobre 2026)
+
+### Fait
+
+- `src/components/admin/services/catalog-translation.ts` (sans React) : textes modifiables, libellés et limites,
+  envoi (`englishPayload`), statut pendant l'édition par champ de premier niveau ; `catalog-english.tsx` : champs
+  anglais (`TextTranslationField`, français en référence), encadré avec badge et « Marquer comme revu » pour les
+  listes.
+- Éditeur de service : `LanguageTabs`, l'anglais et les champs revus font partie de la valeur enregistrée
+  automatiquement (un seul `PATCH` avec `If-Match`) ; un champ revu n'est envoyé qu'une fois ; erreurs
+  `translations.…` → onglet « English ».
+- Dialogue de rubrique : mêmes onglets, anglais envoyé avec « Enregistrer la rubrique ».
+- Mocks : traductions simulées par service et rubrique (tirées du catalogue anglais simulé, accroche
+  d'« Entretien du logement » à revoir), statut par champ, revu, limites, duplication. Contrat synchronisé.
+
+### Décisions
+
+- Textes anglais rangés comme les listes enregistrées (éléments vides retirés) : pas de correspondance à maintenir
+  avec les rangs du formulaire.

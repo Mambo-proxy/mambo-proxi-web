@@ -1,13 +1,26 @@
 import type { AdminService, ServiceDetail } from '@/lib/api/schema';
 import type { Category } from '@/components/admin/services/service-utils';
+import {
+  CATALOG_TEXT_RULES,
+  CATEGORY_TEXT_UNITS,
+  frenchTexts,
+  SERVICE_TEXT_UNITS,
+} from '@/components/admin/services/catalog-translation';
 import { serviceCompleteness } from '@/components/admin/services/completeness';
+import { getAt, textEntries } from '@/lib/admin/translation';
 import { adminMedia } from '../handlers/admin-media';
 import { daysAgo } from '../admin-utils';
 import { rememberSeedImages } from '../media-refs';
+import { pickEnglish, type MockTextTranslation } from '../text-translations';
 import { adminReviews } from './admin-reviews';
-import { categorySummaries, services as catalogueServices } from './catalogue';
+import {
+  categorySummaries,
+  getCategorySummaries,
+  getServices,
+  services as catalogueServices,
+} from './catalogue';
 import { catalogueSeed } from './catalogue-services';
-import { categoryDetails } from './category-details';
+import { categoryDetails, categoryDetailsEn } from './category-details';
 import { serviceDetails } from './service-details';
 
 /**
@@ -34,6 +47,15 @@ if (!adminMedia.some((media) => media.id === 'med_culture'))
     usages: [{ kind: 'service', label: 'Service « Visites guidées de Douala »', href: null }],
     createdAt: daysAgo(12),
   });
+
+/**
+ * Version anglaise d'une réponse (`translations`, `translationStatus`) : recalculée à chaque réponse par les
+ * gestionnaires simulés depuis `serviceTranslations` / `categoryTranslations` ; valeur d'attente dans les données.
+ */
+export const untranslated = () => ({
+  translations: { en: null },
+  translationStatus: { en: { state: 'MISSING' as const, missingFields: [], outdatedFields: [] } },
+});
 
 /** Ordre de la maquette dans « Expérience » ; ordre du catalogue ailleurs. */
 const EXPERIENCE_ORDER = [
@@ -158,6 +180,7 @@ function fromCatalogue(slug: string, sortOrder: number): AdminService {
     publishedAt: daysAgo(60),
     completenessDetail: { percent: 0, criteria: [] },
     version: 'v1',
+    ...untranslated(),
   });
 }
 
@@ -229,6 +252,7 @@ function visitesDouala(sortOrder: number): AdminService {
     publishedAt: null,
     completenessDetail: { percent: 0, criteria: [] },
     version: 'v1',
+    ...untranslated(),
   });
 }
 
@@ -280,6 +304,7 @@ function seedCategories(): Category[] {
       sortOrder: summary.sortOrder,
       serviceCount: 0,
       updatedAt: daysAgo(20),
+      ...untranslated(),
     };
   });
 }
@@ -287,6 +312,70 @@ function seedCategories(): Category[] {
 /** Données en mémoire (modifiées par les gestionnaires simulés). */
 export const adminServices: AdminService[] = seedServices();
 export const adminCategories: Category[] = seedCategories();
+
+/** Traduction simulée : textes anglais retenus, texte français traduit par chemin (à jour au départ). */
+function seedTranslation(units: readonly string[], value: object, english: Record<string, unknown>) {
+  const french = frenchTexts(units, value);
+  const en = pickEnglish(french, english, CATALOG_TEXT_RULES);
+  const sources = Object.fromEntries(
+    textEntries(french, CATALOG_TEXT_RULES).filter(([path]) => typeof getAt(en, path) === 'string'),
+  );
+  return { en, sources } satisfies MockTextTranslation;
+}
+
+/**
+ * Versions anglaises simulées des services (par identifiant), tirées du catalogue anglais simulé. Le brouillon
+ * « Visites guidées de Douala » n'est pas traduit ; l'accroche d'« Entretien du logement » est « à revoir ».
+ */
+export const serviceTranslations = new Map<string, MockTextTranslation>(
+  adminServices.flatMap((service) => {
+    const summary = getServices('en').find((item) => item.slug === service.slug);
+    if (!summary) return [];
+    const detail = serviceDetails.en[service.slug];
+    const translation = seedTranslation(SERVICE_TEXT_UNITS, service, {
+      name: summary.name,
+      summary: summary.summary,
+      tagline: detail?.tagline,
+      audiences: detail?.audiences,
+      steps: detail?.steps,
+      advantages: detail?.advantages,
+      faq: detail?.faq,
+      seoTitle: detail?.seo.title?.slice(0, 60),
+      seoDescription: detail?.seo.description?.slice(0, 160),
+    });
+    if (service.slug === 'entretien-du-logement' && translation.sources.tagline)
+      translation.sources.tagline = 'Un logement entretenu, sans y passer vos soirées.';
+    return [[service.id, translation] as const];
+  }),
+);
+
+/** Versions anglaises simulées des rubriques (par identifiant). */
+export const categoryTranslations = new Map<string, MockTextTranslation>(
+  adminCategories.map((category) => {
+    const summary = getCategorySummaries('en').find((item) => item.slug === category.slug);
+    const detail = categoryDetailsEn[category.slug];
+    return [
+      category.id,
+      seedTranslation(CATEGORY_TEXT_UNITS, category, {
+        name: summary?.name,
+        tagline: summary?.tagline,
+        description: summary?.description,
+        homeCard: summary?.homeCard,
+        eyebrow: detail?.eyebrow,
+        heroTitle: detail?.heroTitle,
+        heroLead: detail?.heroLead,
+        audiencesTitle: detail?.audiencesTitle,
+        servicesTitle: detail?.servicesTitle,
+        servicesLead: detail?.servicesLead,
+        processTitle: detail?.processTitle,
+        ctaTitle: detail?.cta?.title,
+        ctaText: detail?.cta?.text,
+        seoTitle: detail?.seo?.title?.slice(0, 60),
+        seoDescription: detail?.seo?.description?.slice(0, 160),
+      }),
+    ] as const;
+  }),
+);
 
 // Photos des fiches : présentes dans la médiathèque de l'API (seed), donc acceptées comme références.
 rememberSeedImages(adminServices);

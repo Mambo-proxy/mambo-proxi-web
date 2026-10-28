@@ -2,7 +2,7 @@ import { getAt, localTextStatus, setPath, textEntries, type TextRules } from '@/
 import type { TextTranslationStatus } from '@/lib/api/schema';
 
 /**
- * Suivi simulé des versions anglaises champ par champ (paramètres, zones), mêmes règles que l'API
+ * Suivi simulé des versions anglaises champ par champ (paramètres, zones, services, rubriques), mêmes règles que l'API
  * (`src/common/i18n/text-translation.ts`) : à la place d'une empreinte, chaque champ traduit garde le texte
  * français qu'il traduit (`sources`) ; un texte français différent le signale « à revoir ».
  */
@@ -87,6 +87,69 @@ export function unknownReviewedFields(
   );
   return reviewed.flatMap((path, index) =>
     translated.has(path)
+      ? []
+      : [
+          {
+            path: `${basePath}.${index}`,
+            code: 'unknown_field',
+            message: 'Ce champ n’a pas de traduction anglaise à marquer comme revue.',
+          },
+        ],
+  );
+}
+
+// ─────────────── Suivi par champ de premier niveau (services, rubriques) ───────────────
+
+const unitOf = (path: string) => path.split('.')[0]!;
+
+/**
+ * Statut par champ de premier niveau (`CatalogTranslationStatus`) : « à traduire » s'il manque un de ses textes,
+ * sinon « à revoir » si l'un de ses textes français a changé depuis sa traduction.
+ */
+export function mockUnitStatus(
+  french: unknown,
+  translation: MockTextTranslation,
+  rules: TextRules,
+): TextTranslationStatus {
+  const entries = textEntries(french, rules);
+  const units = [...new Set(entries.map(([path]) => unitOf(path)))];
+  const own = (unit: string) => entries.filter(([path]) => unitOf(path) === unit);
+  const missingFields = units.filter((unit) =>
+    own(unit).some(([path]) => text(getAt(translation.en, path)) === null),
+  );
+  const outdatedFields = units.filter(
+    (unit) =>
+      !missingFields.includes(unit) &&
+      own(unit).some(
+        ([path, value]) => translation.sources[path] !== undefined && translation.sources[path] !== value,
+      ),
+  );
+  const state = missingFields.length > 0 ? 'MISSING' : outdatedFields.length > 0 ? 'OUTDATED' : 'UP_TO_DATE';
+  return { state, missingFields, outdatedFields };
+}
+
+/** Chemins des textes des champs de premier niveau donnés (`reviewedFields` → chemins revus). */
+export function unitPaths(french: unknown, rules: TextRules, units: readonly string[]): string[] {
+  return textEntries(french, rules)
+    .map(([path]) => path)
+    .filter((path) => units.includes(unitOf(path)));
+}
+
+/** `reviewedFields` d'un service ou d'une rubrique : champs sans aucun texte anglais (`422`, `<base>.N`). */
+export function unknownReviewedUnits(
+  french: unknown,
+  english: unknown,
+  reviewed: readonly string[],
+  rules: TextRules,
+  basePath: string,
+) {
+  const translated = new Set(
+    textEntries(french, rules)
+      .filter(([path]) => text(getAt(english, path)) !== null)
+      .map(([path]) => unitOf(path)),
+  );
+  return reviewed.flatMap((unit, index) =>
+    translated.has(unit)
       ? []
       : [
           {

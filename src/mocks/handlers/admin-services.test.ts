@@ -239,4 +239,47 @@ describe('services du back-office simulés', () => {
     ]);
     expect((await call('DELETE', `/v1/admin/categories/${created.body.id}`)).status).toBe(204);
   });
+
+  it('version anglaise : statut par champ, revue, limites, duplication et rubriques', async () => {
+    const list = await call<List>('GET', '/v1/admin/services');
+    const id = list.body.data.find((service) => service.slug === 'entretien-du-logement')!.id;
+    const detail = await call<AdminService>('GET', `/v1/admin/services/${id}`);
+    expect(detail.body.translations.en).toMatchObject({ name: expect.any(String) });
+    expect(detail.body.translationStatus.en.outdatedFields).toContain('tagline');
+
+    const reviewed = await call<AdminService>(
+      'PATCH',
+      `/v1/admin/services/${id}`,
+      { translations: { en: detail.body.translations.en, reviewedFields: ['tagline'] } },
+      { 'If-Match': detail.body.version },
+    );
+    expect(reviewed.status).toBe(200);
+    expect(reviewed.body.translationStatus.en.outdatedFields).toEqual([]);
+
+    const draft = await call<AdminService>('GET', '/v1/admin/services/svc_visites_douala');
+    expect(draft.body.translations.en).toBeNull();
+    expect(draft.body.translationStatus.en.state).toBe('MISSING');
+    const invalid = await call<Problem>('PATCH', '/v1/admin/services/svc_visites_douala', {
+      translations: { en: { name: 'Guided tours', seoTitle: 'x'.repeat(61) }, reviewedFields: ['tagline'] },
+    });
+    expect(invalid.status).toBe(422);
+    expect(invalid.body.errors?.map((error) => error.path)).toEqual([
+      'translations.en.seoTitle',
+      'translations.reviewedFields.0',
+    ]);
+
+    const copy = await call<AdminService>('POST', `/v1/admin/services/${id}/duplicate`);
+    expect(copy.body.translations.en?.name).toBe(reviewed.body.translations.en?.name);
+    expect(copy.body.translationStatus.en.outdatedFields).toContain('name');
+
+    const category = (await call<AdminCategory[]>('GET', '/v1/admin/categories')).body.find(
+      (item) => (item.homeCard?.chips ?? []).length > 0,
+    )!;
+    expect(category.translations?.en).toMatchObject({ name: expect.any(String) });
+    const saved = await call<AdminCategory>('PATCH', `/v1/admin/categories/${category.id}`, {
+      translations: { en: { ...category.translations?.en, homeCard: { chips: ['Only chip'] } } },
+    });
+    expect(saved.status).toBe(200);
+    expect(saved.body.translations?.en?.homeCard?.chips?.[0]).toBe('Only chip');
+  });
 });

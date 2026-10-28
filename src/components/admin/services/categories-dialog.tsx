@@ -10,12 +10,19 @@ import {
   PublishStatusBadge,
 } from '@/components/admin/editor/editor-ui';
 import { DragHandle, SortableItem, SortableList } from '@/components/admin/editor/sortable';
+import {
+  LanguageTabs,
+  languagePanelId,
+  languageTabId,
+  type EditorLanguage,
+} from '@/components/admin/pages/translation-editor';
 import { Button } from '@/components/ui/button';
 import { Field, Input, Select, Textarea } from '@/components/ui/field';
 import { Modal } from '@/components/ui/modal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/toaster';
 import { data } from '@/lib/admin/query';
+import { translationBadge } from '@/lib/admin/translation';
 import { browserApi } from '@/lib/api/browser';
 import { ApiError, errorMessage } from '@/lib/api/errors';
 import type {
@@ -25,6 +32,15 @@ import type {
   CategoryTint,
   PublishStatus,
 } from '@/lib/api/schema';
+import { CatalogEnglishFields } from './catalog-english';
+import {
+  catalogTextFields,
+  CATEGORY_TEXT_UNITS,
+  editEnglish,
+  englishPayload,
+  localCatalogStatus,
+  type EnglishTexts,
+} from './catalog-translation';
 import { categoriesKey, fetchCategories, servicesKey, slugify, type Category } from './service-utils';
 
 const TINTS: { value: CategoryTint; label: string }[] = [
@@ -154,10 +170,38 @@ function CategoryEditor({
   const client = useQueryClient();
   const [form, setForm] = useState(() => toForm(category));
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [language, setLanguage] = useState<EditorLanguage>('fr');
+  /** Textes anglais (forme `CategoryTexts`), envoyés avec « Enregistrer la rubrique ». */
+  const [english, setEnglish] = useState<EnglishTexts>(
+    () => (category?.translations?.en as EnglishTexts | null | undefined) ?? {},
+  );
+  /** Champs anglais marqués revus (`reviewedFields`). */
+  const [reviewed, setReviewed] = useState<string[]>([]);
   const set = <K extends keyof CategoryForm>(key: K, value: CategoryForm[K]) => {
     setForm((previous) => ({ ...previous, [key]: value }));
     setErrors((previous) => ({ ...previous, [key]: '' }));
   };
+
+  // Version anglaise : textes français tels qu'ils seront enregistrés, statut pendant l'édition.
+  const french = toBody(form);
+  const englishFields = catalogTextFields(CATEGORY_TEXT_UNITS, french);
+  const englishStatus = localCatalogStatus({
+    units: CATEGORY_TEXT_UNITS,
+    french,
+    english,
+    saved: category?.translations?.en as EnglishTexts | null | undefined,
+    server: category?.translationStatus.en,
+    reviewed,
+  });
+
+  /** Corps envoyé : champs français et version anglaise (`translations`, règles `CatalogTranslations`). */
+  function body(): CategoryFields {
+    const fields = toBody(form);
+    const en = englishPayload(CATEGORY_TEXT_UNITS, fields, english);
+    if (!category && !en) return fields;
+    const reviewedFields = reviewed.filter((unit) => en?.[unit] !== undefined);
+    return { ...fields, translations: { en, ...(reviewedFields.length > 0 ? { reviewedFields } : {}) } };
+  }
 
   const save = useMutation({
     mutationFn: (body: CategoryFields) =>
@@ -181,7 +225,12 @@ function CategoryEditor({
       onSaved();
     },
     onError: (error) => {
-      if (error instanceof ApiError && Object.keys(error.fieldErrors).length) setErrors(error.fieldErrors);
+      if (error instanceof ApiError && Object.keys(error.fieldErrors).length) {
+        setErrors(error.fieldErrors);
+        // Onglet de la langue des champs à corriger (`translations.en.…` : onglet « English »).
+        const paths = Object.keys(error.fieldErrors);
+        setLanguage(paths.every((path) => path.startsWith('translations.')) ? 'en' : 'fr');
+      }
       toast.error(errorMessage(error));
     },
   });
@@ -195,9 +244,10 @@ function CategoryEditor({
     if (!form.icon.trim()) missing.icon = 'Indiquez une icône.';
     if (Object.keys(missing).length) {
       setErrors(missing);
+      setLanguage('fr');
       return;
     }
-    save.mutate(toBody(form));
+    save.mutate(body());
   }
 
   const text = (
@@ -233,96 +283,150 @@ function CategoryEditor({
     </Field>
   );
 
+  const reviewError = Object.entries(errors).find(
+    ([path, message]) => message && path.startsWith('translations.reviewedFields'),
+  )?.[1];
+
   return (
     <form id={formId} noValidate onSubmit={submit} className="flex flex-col gap-4">
-      <div className="grid gap-4 md:grid-cols-2">
-        <Field label="Nom" required error={errors.name || null}>
-          {(control) => (
-            <Input
-              {...control}
-              value={form.name}
-              maxLength={80}
-              onChange={(event) => {
-                const name = event.target.value;
-                setForm((previous) => ({
-                  ...previous,
-                  name,
-                  // L'adresse suit le nom d'une nouvelle rubrique tant qu'elle n'a pas été modifiée.
-                  slug: !category && previous.slug === slugify(previous.name) ? slugify(name) : previous.slug,
-                }));
-                setErrors((previous) => ({ ...previous, name: '' }));
-              }}
-            />
+      <LanguageTabs
+        idPrefix="category-dialog"
+        value={language}
+        onChange={setLanguage}
+        badge={translationBadge(englishStatus)}
+      />
+      {language === 'en' ? (
+        <div
+          role="tabpanel"
+          id={languagePanelId('en', 'category-dialog')}
+          aria-labelledby={languageTabId('en', 'category-dialog')}
+          className="flex flex-col gap-4"
+        >
+          <p className="font-ui text-[12px] leading-4 text-text-muted">
+            Vide : le texte français est repris. Icône, teinte, images et liens : ceux du français.
+          </p>
+          {reviewError && (
+            <p role="alert" className="font-ui text-[13px] leading-4 text-feedback-error">
+              {reviewError}
+            </p>
           )}
-        </Field>
-        <Field label="Adresse" error={errors.slug || null} help={`/services/${slugify(form.slug) || '…'}`}>
-          {(control) => (
-            <Input
-              {...control}
-              value={form.slug}
-              maxLength={80}
-              onChange={(event) => set('slug', event.target.value)}
-            />
-          )}
-        </Field>
-      </div>
-      {text('tagline', 'Accroche', { max: 120, required: true })}
-      {text('description', 'Description', { max: 600, required: true, multiline: true })}
-      <div className="grid gap-4 md:grid-cols-3">
-        {text('icon', 'Icône', { required: true, help: 'Nom Lucide, ex. Sparkles.' })}
-        <Field label="Teinte de la carte" required>
-          {(control) => (
-            <Select
-              {...control}
-              value={form.tint}
-              onChange={(event) => set('tint', event.target.value as CategoryTint)}
+          <CatalogEnglishFields
+            fields={englishFields}
+            english={english}
+            status={englishStatus}
+            readOnly={false}
+            errorFor={(path) => errors[`translations.en.${path}`] || null}
+            onChange={(path, value) => {
+              setEnglish((current) => editEnglish(current, path, value));
+              setErrors((previous) => ({ ...previous, [`translations.en.${path}`]: '' }));
+            }}
+            onMarkReviewed={(unit) =>
+              setReviewed((current) => (current.includes(unit) ? current : [...current, unit]))
+            }
+          />
+        </div>
+      ) : (
+        <div
+          role="tabpanel"
+          id={languagePanelId('fr', 'category-dialog')}
+          aria-labelledby={languageTabId('fr', 'category-dialog')}
+          className="flex flex-col gap-4"
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            <Field label="Nom" required error={errors.name || null}>
+              {(control) => (
+                <Input
+                  {...control}
+                  value={form.name}
+                  maxLength={80}
+                  onChange={(event) => {
+                    const name = event.target.value;
+                    setForm((previous) => ({
+                      ...previous,
+                      name,
+                      // L'adresse suit le nom d'une nouvelle rubrique tant qu'elle n'a pas été modifiée.
+                      slug:
+                        !category && previous.slug === slugify(previous.name) ? slugify(name) : previous.slug,
+                    }));
+                    setErrors((previous) => ({ ...previous, name: '' }));
+                  }}
+                />
+              )}
+            </Field>
+            <Field
+              label="Adresse"
+              error={errors.slug || null}
+              help={`/services/${slugify(form.slug) || '…'}`}
             >
-              {TINTS.map((tint) => (
-                <option key={tint.value} value={tint.value}>
-                  {tint.label}
-                </option>
-              ))}
-            </Select>
-          )}
-        </Field>
-        <Field label="Statut">
-          {(control) => (
-            <Select
-              {...control}
-              value={form.status}
-              onChange={(event) => set('status', event.target.value as PublishStatus)}
-            >
-              <option value="PUBLISHED">Publiée</option>
-              <option value="DRAFT">Brouillon</option>
-              <option value="ARCHIVED">Archivée</option>
-            </Select>
-          )}
-        </Field>
-      </div>
-      <Fold title="Textes de la page de rubrique">
-        {text('eyebrow', 'Surtitre', { max: 60 })}
-        {text('heroTitle', 'Titre principal', {
-          max: 400,
-          help: 'Entourez de == la partie à mettre en avant.',
-        })}
-        {text('heroLead', 'Texte d’introduction', { max: 400, multiline: true })}
-        {text('audiencesTitle', 'Titre de la partie « Pour qui ? »', { max: 160 })}
-        {text('servicesTitle', 'Titre de la liste des services', { max: 160 })}
-        {text('servicesLead', 'Texte sous la liste des services', { max: 300 })}
-        {text('processTitle', 'Titre de la partie « Comment ça marche ? »', { max: 160 })}
-        {text('ctaTitle', 'Titre de l’appel à l’action')}
-        {text('ctaText', 'Texte de l’appel à l’action', { multiline: true })}
-      </Fold>
-      <Fold title="Carte de la page d’accueil">
-        {text('homeTitle', 'Titre de la carte', { max: 80 })}
-        {text('homeText', 'Texte de la carte', { max: 200, multiline: true })}
-        {text('homeTextMobile', 'Texte court (mobile)', { max: 120 })}
-        {text('homeChips', 'Puces', { help: 'Séparées par des virgules, 6 au plus.' })}
-      </Fold>
-      <Fold title="Référencement (SEO)">
-        {text('seoTitle', 'Titre pour Google', { max: 60 })}
-        {text('seoDescription', 'Description pour Google', { max: 160, multiline: true })}
-      </Fold>
+              {(control) => (
+                <Input
+                  {...control}
+                  value={form.slug}
+                  maxLength={80}
+                  onChange={(event) => set('slug', event.target.value)}
+                />
+              )}
+            </Field>
+          </div>
+          {text('tagline', 'Accroche', { max: 120, required: true })}
+          {text('description', 'Description', { max: 600, required: true, multiline: true })}
+          <div className="grid gap-4 md:grid-cols-3">
+            {text('icon', 'Icône', { required: true, help: 'Nom Lucide, ex. Sparkles.' })}
+            <Field label="Teinte de la carte" required>
+              {(control) => (
+                <Select
+                  {...control}
+                  value={form.tint}
+                  onChange={(event) => set('tint', event.target.value as CategoryTint)}
+                >
+                  {TINTS.map((tint) => (
+                    <option key={tint.value} value={tint.value}>
+                      {tint.label}
+                    </option>
+                  ))}
+                </Select>
+              )}
+            </Field>
+            <Field label="Statut">
+              {(control) => (
+                <Select
+                  {...control}
+                  value={form.status}
+                  onChange={(event) => set('status', event.target.value as PublishStatus)}
+                >
+                  <option value="PUBLISHED">Publiée</option>
+                  <option value="DRAFT">Brouillon</option>
+                  <option value="ARCHIVED">Archivée</option>
+                </Select>
+              )}
+            </Field>
+          </div>
+          <Fold title="Textes de la page de rubrique">
+            {text('eyebrow', 'Surtitre', { max: 60 })}
+            {text('heroTitle', 'Titre principal', {
+              max: 400,
+              help: 'Entourez de == la partie à mettre en avant.',
+            })}
+            {text('heroLead', 'Texte d’introduction', { max: 400, multiline: true })}
+            {text('audiencesTitle', 'Titre de la partie « Pour qui ? »', { max: 160 })}
+            {text('servicesTitle', 'Titre de la liste des services', { max: 160 })}
+            {text('servicesLead', 'Texte sous la liste des services', { max: 300 })}
+            {text('processTitle', 'Titre de la partie « Comment ça marche ? »', { max: 160 })}
+            {text('ctaTitle', 'Titre de l’appel à l’action')}
+            {text('ctaText', 'Texte de l’appel à l’action', { multiline: true })}
+          </Fold>
+          <Fold title="Carte de la page d’accueil">
+            {text('homeTitle', 'Titre de la carte', { max: 80 })}
+            {text('homeText', 'Texte de la carte', { max: 200, multiline: true })}
+            {text('homeTextMobile', 'Texte court (mobile)', { max: 120 })}
+            {text('homeChips', 'Puces', { help: 'Séparées par des virgules, 6 au plus.' })}
+          </Fold>
+          <Fold title="Référencement (SEO)">
+            {text('seoTitle', 'Titre pour Google', { max: 60 })}
+            {text('seoDescription', 'Description pour Google', { max: 160, multiline: true })}
+          </Fold>
+        </div>
+      )}
     </form>
   );
 }

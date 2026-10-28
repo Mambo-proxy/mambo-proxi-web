@@ -9,6 +9,14 @@ import type {
   ServiceFields,
 } from '@/lib/api/schema';
 import type { Category } from '@/components/admin/services/service-utils';
+import {
+  CATALOG_TEXT_RULES,
+  catalogMaxLength,
+  CATEGORY_TEXT_UNITS,
+  frenchTexts,
+  SERVICE_TEXT_UNITS,
+} from '@/components/admin/services/catalog-translation';
+import { textEntries } from '@/lib/admin/translation';
 import { adminMedia } from './admin-media';
 import { jsonBody, matches, mockId, slugify, uniqueSlug } from '../admin-utils';
 import {
@@ -23,10 +31,25 @@ import {
   tooMany,
   uniqueIds,
 } from '../content-rules';
-import { adminCategories, adminServices, withCompleteness } from '../data/admin-services';
+import {
+  adminCategories,
+  adminServices,
+  categoryTranslations,
+  serviceTranslations,
+  untranslated,
+  withCompleteness,
+} from '../data/admin-services';
 import { adminReviews } from '../data/admin-reviews';
 import { unknownMediaErrors, type MediaReference } from '../media-refs';
 import { invalidQuery, problem, validationProblem, type FieldErrors } from '../problem';
+import {
+  mockUnitStatus,
+  pickEnglish,
+  saveMockTranslation,
+  unitPaths,
+  unknownReviewedUnits,
+  type MockTextTranslation,
+} from '../text-translations';
 
 /**
  * Back-office — Services et rubriques (`/v1/admin/services*`, `/v1/admin/categories*`), mêmes règles que l'API
@@ -125,11 +148,73 @@ const categoryIdOf = (service: AdminService) =>
   adminCategories.find((category) => category.slug === service.category.slug)?.id;
 const nextVersion = (version: string) => `v${(Number(version.replace(/\D/g, '')) || 0) + 1}`;
 
-/** Réponse `AdminService` : identifiants de la rubrique et de la photo (contrat). */
+const EMPTY_TRANSLATION: MockTextTranslation = { en: null, sources: {} };
+
+/** `translations` / `translationStatus` d'une réponse (`CatalogTranslations`), depuis la traduction simulée. */
+function translationView(
+  units: readonly string[],
+  value: object,
+  translation: MockTextTranslation | undefined,
+) {
+  const french = frenchTexts(units, value);
+  const current = translation ?? EMPTY_TRANSLATION;
+  return {
+    translations: { en: pickEnglish(french, current.en, CATALOG_TEXT_RULES) },
+    translationStatus: { en: mockUnitStatus(french, current, CATALOG_TEXT_RULES) },
+  };
+}
+
+type TranslationsInput = { en?: Record<string, unknown> | null; reviewedFields?: string[] } | undefined;
+
+/** Version anglaise envoyée : limites du français (`translations.en.…`), champs revus traduits (`422`). */
+function translationErrors(units: readonly string[], value: object, input: TranslationsInput): FieldErrors {
+  if (!input) return [];
+  const errors: FieldErrors = [];
+  for (const [path, text] of textEntries(input.en ?? null, CATALOG_TEXT_RULES)) {
+    const max = catalogMaxLength(path);
+    if (max !== undefined) tooLong(errors, `translations.en.${path}`, text, max);
+  }
+  errors.push(
+    ...unknownReviewedUnits(
+      frenchTexts(units, value),
+      input.en ?? null,
+      input.reviewedFields ?? [],
+      CATALOG_TEXT_RULES,
+      'translations.reviewedFields',
+    ),
+  );
+  return errors;
+}
+
+/** Enregistre la version anglaise (envoyée, sinon gardée) avec les nouveaux textes français. */
+function saveTranslation(
+  store: Map<string, MockTextTranslation>,
+  id: string,
+  units: readonly string[],
+  before: object | null,
+  after: object,
+  input: TranslationsInput,
+) {
+  const french = frenchTexts(units, after);
+  store.set(
+    id,
+    saveMockTranslation({
+      french,
+      previousFrench: before ? frenchTexts(units, before) : null,
+      before: store.get(id) ?? EMPTY_TRANSLATION,
+      english: input === undefined ? undefined : (input.en ?? null),
+      reviewed: unitPaths(french, CATALOG_TEXT_RULES, input?.reviewedFields ?? []),
+      rules: CATALOG_TEXT_RULES,
+    }),
+  );
+}
+
+/** Réponse `AdminService` : identifiants de la rubrique et de la photo, version anglaise (contrat). */
 const respond = (service: AdminService): AdminService => ({
   ...service,
   categoryId: categoryIdOf(service),
   coverImageId: service.coverImage?.id ?? null,
+  ...translationView(SERVICE_TEXT_UNITS, service, serviceTranslations.get(service.id)),
 });
 
 const isText = (value: unknown): value is string => typeof value === 'string';
@@ -309,8 +394,9 @@ const mediaImage = (id: string | null | undefined) => {
 function apply(service: AdminService, body: ServiceFields): AdminService {
   const { categoryId, coverImageId, ...fields } = body;
   const next: AdminService = { ...service };
+  // La version anglaise (`translations`) est enregistrée à part (`saveTranslation`).
   for (const [key, value] of Object.entries(fields))
-    if (value !== undefined) (next as Record<string, unknown>)[key] = value;
+    if (value !== undefined && key !== 'translations') (next as Record<string, unknown>)[key] = value;
   if (categoryId !== undefined) {
     const category = findCategory(categoryId);
     if (category && category.slug !== service.category.slug) {
@@ -338,6 +424,7 @@ function withCounts(category: Category): Category {
   return {
     ...category,
     serviceCount: adminServices.filter((service) => service.category.slug === category.slug).length,
+    ...translationView(CATEGORY_TEXT_UNITS, category, categoryTranslations.get(category.id)),
   };
 }
 
@@ -511,8 +598,13 @@ export const adminServiceHandlers: HttpHandler[] = [
       publishedAt: null,
       completenessDetail: { percent: 0, criteria: [] },
       version: 'v1',
+      ...untranslated(),
     };
     const created = apply(draft, { ...body, slug, categoryId: undefined });
+    const translationProblems = translationErrors(SERVICE_TEXT_UNITS, created, body.translations);
+    if (translationProblems.length) return validationProblem(translationProblems);
+    if (body.translations)
+      saveTranslation(serviceTranslations, created.id, SERVICE_TEXT_UNITS, null, created, body.translations);
     adminServices.push(created);
     return HttpResponse.json(respond(created), { status: 201 });
   }),
@@ -563,6 +655,9 @@ export const adminServiceHandlers: HttpHandler[] = [
     if (body.slug !== undefined && body.slug !== service.slug && serviceSlugTaken(body.slug, service.id))
       return serviceSlugConflict();
     const next = apply(service, body);
+    const translationProblems = translationErrors(SERVICE_TEXT_UNITS, next, body.translations);
+    if (translationProblems.length) return validationProblem(translationProblems);
+    saveTranslation(serviceTranslations, service.id, SERVICE_TEXT_UNITS, service, next, body.translations);
     next.version = nextVersion(service.version);
     return HttpResponse.json(respond(replace(next)));
   }),
@@ -645,6 +740,9 @@ export const adminServiceHandlers: HttpHandler[] = [
       version: 'v1',
     });
     adminServices.push(copy);
+    // Version anglaise recopiée avec son suivi : le nom (« (copie) ») devient « à revoir ».
+    const translation = serviceTranslations.get(service.id);
+    if (translation) serviceTranslations.set(copy.id, structuredClone(translation));
     return HttpResponse.json(respond(copy), { status: 201 });
   }),
 
@@ -693,7 +791,9 @@ export const adminServiceHandlers: HttpHandler[] = [
         (candidate) => categorySlugTaken(candidate),
         'rubrique',
       );
+    const { translations: categoryInput, ...fields } = body;
     const category: Category = {
+      ...untranslated(),
       audiences: [],
       processSteps: [],
       groups: [],
@@ -702,7 +802,7 @@ export const adminServiceHandlers: HttpHandler[] = [
       imageId: null,
       testimonialId: null,
       highlight: null,
-      ...body,
+      ...fields,
       heroTitle: body.heroTitle ?? body.name!,
       heroLead: body.heroLead ?? body.description!,
       status: body.status ?? 'DRAFT',
@@ -713,6 +813,10 @@ export const adminServiceHandlers: HttpHandler[] = [
       serviceCount: 0,
       updatedAt: new Date().toISOString(),
     } as Category;
+    const translationProblems = translationErrors(CATEGORY_TEXT_UNITS, category, categoryInput);
+    if (translationProblems.length) return validationProblem(translationProblems);
+    if (categoryInput)
+      saveTranslation(categoryTranslations, category.id, CATEGORY_TEXT_UNITS, null, category, categoryInput);
     adminCategories.push(category);
     return HttpResponse.json(withCounts(category), { status: 201 });
   }),
@@ -749,7 +853,13 @@ export const adminServiceHandlers: HttpHandler[] = [
     if (body.slug !== undefined && body.slug !== category.slug && categorySlugTaken(body.slug, category.id))
       return categorySlugConflict();
     const previousSlug = category.slug;
-    const defined = Object.fromEntries(Object.entries(body).filter(([, value]) => value !== undefined));
+    const { translations: input, ...fields } = body;
+    const defined = Object.fromEntries(Object.entries(fields).filter(([, value]) => value !== undefined));
+    const before = { ...category };
+    const after = { ...category, ...defined };
+    const translationProblems = translationErrors(CATEGORY_TEXT_UNITS, after, input);
+    if (translationProblems.length) return validationProblem(translationProblems);
+    saveTranslation(categoryTranslations, category.id, CATEGORY_TEXT_UNITS, before, after, input);
     Object.assign(category, defined, { updatedAt: new Date().toISOString() });
     if (body.name !== undefined || body.slug !== undefined) {
       // Les services suivent le nouveau nom et la nouvelle adresse de leur rubrique.
