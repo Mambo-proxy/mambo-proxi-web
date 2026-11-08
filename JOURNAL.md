@@ -1377,3 +1377,14 @@ erreurs) ; toutes les routes appelées existent. Corrections :
 
 - Site sur `https://mamboproxi.com`, API sur `https://api.mamboproxi.com` : appels directs, relais désactivé
   (`API_RELAY_TARGET` vide), appels serveur par le réseau interne (`API_INTERNAL_URL=http://api:4000`).
+
+### Difficultés
+
+- `robots.txt` et le `noindex` des pages pré-générées dépendent de `SITE_ENV` au build : passé en argument de l'image
+  (variable de dépôt `SITE_ENV=production`), sinon le site restait fermé aux moteurs malgré `.env` du serveur.
+- Le build pré-génère des pages depuis l'API en ligne : un build lancé pendant un arrêt de l'API échoue.
+
+### Mise en production
+
+- Clé publique Turnstile du domaine (`NEXT_PUBLIC_TURNSTILE_SITE_KEY`), `SITE_ENV=production` : indexation ouverte,
+  sitemap publié.
