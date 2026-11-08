@@ -54,7 +54,8 @@ du serveur : `docs/DEPLOIEMENT.md` de `mambo-proxi-api`.
   `/opt/mambo/deploy-web.sh <sha>`. Retour arrière : même script avec un ancien SHA.
 - Variables du dépôt GitHub (lues au build) : `NEXT_PUBLIC_API_URL=https://api.mamboproxi.com`,
   `NEXT_PUBLIC_SITE_URL=https://mamboproxi.com`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, facultatives
-  `NEXT_PUBLIC_MEDIA_URL`, `NEXT_PUBLIC_MAP_TILES_URL`, `NEXT_PUBLIC_MAP_TILES_CREDIT`. Relais désactivé
+  `NEXT_PUBLIC_MEDIA_URL`, `NEXT_PUBLIC_MAP_TILES_URL`, `NEXT_PUBLIC_MAP_TILES_CREDIT`, et `SITE_ENV`
+  (`production` : robots.txt et noindex sont figés au build). Relais désactivé
   (`API_RELAY_TARGET` vide), mocks désactivés.
 - Secrets du dépôt : `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_KNOWN_HOSTS`.
 - Variables d'exécution (fichier `/opt/mambo/.env` du serveur) : `REVALIDATE_SECRET`, `SITE_ENV`, `MAINTENANCE_MODE` ;

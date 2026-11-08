@@ -5,7 +5,7 @@ name: Déploiement
 # place par mambo-proxi-api : docs/DEPLOIEMENT.md de ce dépôt-là).
 #
 # Variables de dépôt (lues au build) : NEXT_PUBLIC_API_URL, NEXT_PUBLIC_SITE_URL, NEXT_PUBLIC_TURNSTILE_SITE_KEY,
-# NEXT_PUBLIC_MEDIA_URL, NEXT_PUBLIC_MAP_TILES_URL, NEXT_PUBLIC_MAP_TILES_CREDIT.
+# NEXT_PUBLIC_MEDIA_URL, NEXT_PUBLIC_MAP_TILES_URL, NEXT_PUBLIC_MAP_TILES_CREDIT, SITE_ENV (production : indexation).
 # Secrets de dépôt : VPS_HOST, VPS_USER, VPS_SSH_KEY (clé privée de l'utilisateur deploy), VPS_KNOWN_HOSTS.
 on:
   workflow_dispatch:
@@ -50,6 +50,7 @@ jobs:
             NEXT_PUBLIC_MEDIA_URL=${{ vars.NEXT_PUBLIC_MEDIA_URL }}
             NEXT_PUBLIC_MAP_TILES_URL=${{ vars.NEXT_PUBLIC_MAP_TILES_URL }}
             NEXT_PUBLIC_MAP_TILES_CREDIT=${{ vars.NEXT_PUBLIC_MAP_TILES_CREDIT }}
+            SITE_ENV=${{ vars.SITE_ENV || 'preproduction' }}
           tags: |
             ${{ env.IMAGE }}:${{ github.sha }}
             ${{ env.IMAGE }}:latest
