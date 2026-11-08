@@ -56,6 +56,8 @@ const apiRelayTarget = relayTarget();
 const nextConfig: NextConfig = {
   // Relais activé : indiqué au code du navigateur (`isApiRelay`, `src/lib/api/config.ts`).
   env: { NEXT_PUBLIC_API_RELAY: apiRelayTarget ? 'enabled' : '' },
+  // Serveur autonome (`.next/standalone/server.js`) pour l'image Docker de production (Dockerfile, VPS).
+  output: 'standalone',
   reactCompiler: true,
   poweredByHeader: false,
   typedRoutes: true,

@@ -1362,3 +1362,18 @@ erreurs) ; toutes les routes appelées existent. Corrections :
 
 - La maquette (`95:11689`) montre `agence-equipe`, déjà utilisée sur le site : une photo inédite, propre au pilotage
   du site, a été générée à la place.
+
+## Hébergement sur VPS (8 novembre 2026)
+
+### Fait
+
+- Départ de Vercel : `output: 'standalone'`, `Dockerfile` (serveur Next.js autonome, variables `NEXT_PUBLIC_*` en
+  arguments de build, cache ISR dans un volume), `.dockerignore`.
+- Workflow « Déploiement » : image poussée dans `ghcr.io/mambo-proxy/mambo-proxi-web`, puis
+  `/opt/mambo/deploy-web.sh <sha>` sur le VPS par SSH (pile Docker Compose de mambo-proxi-api).
+- README : section « Déploiement (VPS) ».
+
+### Décisions
+
+- Site sur `https://mamboproxi.com`, API sur `https://api.mamboproxi.com` : appels directs, relais désactivé
+  (`API_RELAY_TARGET` vide), appels serveur par le réseau interne (`API_INTERNAL_URL=http://api:4000`).

@@ -42,7 +42,25 @@ REVALIDATE_SECRET`, `{ "tags": [...] }`, 100 étiquettes au plus) ; étiquettes 
 - Images de la médiathèque : variantes AVIF / WebP (480, 960, 1600) servies telles quelles par `<Visual>` ;
   `{NEXT_PUBLIC_API_URL}/v1/media/**` et `NEXT_PUBLIC_MEDIA_URL` sont dans `images.remotePatterns` et la CSP.
 
-## Back-office sur un autre domaine que l'API (relais)
+## Déploiement (VPS)
+
+Le site tourne sur le VPS de production, dans la pile Docker Compose de `mambo-proxi-api` (service `web`, derrière
+Caddy) : `https://mamboproxi.com`, API sur `https://api.mamboproxi.com`, cookies sur `.mamboproxi.com`. Mise en place
+du serveur : `docs/DEPLOIEMENT.md` de `mambo-proxi-api`.
+
+- Image : `Dockerfile` (serveur Next.js autonome, `output: 'standalone'`), poussée dans
+  `ghcr.io/mambo-proxy/mambo-proxi-web`.
+- Déploiement : GitHub → Actions → « Déploiement » (`gh workflow run deploy.yml`) ; le serveur lance
+  `/opt/mambo/deploy-web.sh <sha>`. Retour arrière : même script avec un ancien SHA.
+- Variables du dépôt GitHub (lues au build) : `NEXT_PUBLIC_API_URL=https://api.mamboproxi.com`,
+  `NEXT_PUBLIC_SITE_URL=https://mamboproxi.com`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, facultatives
+  `NEXT_PUBLIC_MEDIA_URL`, `NEXT_PUBLIC_MAP_TILES_URL`, `NEXT_PUBLIC_MAP_TILES_CREDIT`. Relais désactivé
+  (`API_RELAY_TARGET` vide), mocks désactivés.
+- Secrets du dépôt : `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_KNOWN_HOSTS`.
+- Variables d'exécution (fichier `/opt/mambo/.env` du serveur) : `REVALIDATE_SECRET`, `SITE_ENV`, `MAINTENANCE_MODE` ;
+  `API_INTERNAL_URL=http://api:4000` est posé par la pile.
+
+## Back-office sur un autre domaine que l'API (relais, ancien hébergement Vercel)
 
 Tant que le site (`https://mambo-proxi-web.vercel.app`) et l'API (`https://13-38-208-248.sslip.io`) n'ont pas de
 domaine commun, les cookies de session et `mp_csrf` ne peuvent pas être partagés. `API_RELAY_TARGET` active un relais

@@ -1,0 +1,16 @@
+.git
+.github
+.claude
+.next
+node_modules
+coverage
+test-results
+playwright-report
+e2e
+qa
+worktrees
+.env
+.env.*
+!.env.example
+tsconfig.tsbuildinfo
+*.md
