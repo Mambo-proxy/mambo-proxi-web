@@ -46,7 +46,9 @@
       "alreadySubscribed": "Vous êtes déjà inscrit(e) à la lettre Mambo : merci de votre fidélité !",
       "invalidEmail": "Merci d’indiquer une adresse e-mail valide.",
       "invalidPhone": "Merci d’indiquer un numéro avec l’indicatif du pays (ex. +237…).",
-      "sendFailed": "L’inscription n’a pas pu être envoyée. Vérifiez votre connexion puis réessayez."
+      "sendFailed": "L’inscription n’a pas pu être envoyée. Vérifiez votre connexion puis réessayez.",
+      "consent": "J’accepte de recevoir la lettre Mambo par e-mail. Je peux me désinscrire à tout moment depuis chaque lettre.",
+      "consentRequired": "Merci de cocher la case pour accepter de recevoir la lettre Mambo."
     },
     "whatsappFloat": {
       "label": "Écrire sur WhatsApp"

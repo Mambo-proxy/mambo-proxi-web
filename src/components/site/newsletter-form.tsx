@@ -4,6 +4,7 @@ import { CircleCheck, Mail, Smartphone, User } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRef, useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/cn';
 import { useTurnstile } from '@/lib/forms/use-turnstile';
 import { toE164 } from '@/lib/phone';
@@ -12,14 +13,14 @@ type Status =
   | { kind: 'idle' }
   | { kind: 'sending' }
   | { kind: 'success'; message: string }
-  | { kind: 'error'; message: string; field?: 'email' | 'phone' };
+  | { kind: 'error'; message: string; field?: 'email' | 'phone' | 'consent' };
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
  * Inscription à la lettre Mambo (pied de page, Figma `46:90`) : nom, e-mail, téléphone (WhatsApp) en pilules
- * sombres, bouton « S'abonner ». Double opt-in : l'envoi déclenche l'e-mail de confirmation (le clic vaut
- * consentement, confirmé par l'e-mail). États : envoi, succès, déjà inscrit, erreur (annoncés aux lecteurs d'écran).
+ * sombres, bouton « S'abonner », case de consentement explicite (non cochée par défaut, obligatoire). Double opt-in :
+ * l'envoi déclenche l'e-mail de confirmation. États : envoi, succès, déjà inscrit, erreur (annoncés aux lecteurs d'écran).
  * Le jeton Turnstile est obtenu pendant le chargement du module d'envoi (client de l'API hors du JavaScript initial).
  */
 export function NewsletterForm() {
@@ -36,6 +37,10 @@ export function NewsletterForm() {
     const phone = rawPhone ? toE164(rawPhone) : null;
     if (!EMAIL.test(email)) {
       setStatus({ kind: 'error', field: 'email', message: t('invalidEmail') });
+      return;
+    }
+    if (data.get('consent') !== 'on') {
+      setStatus({ kind: 'error', field: 'consent', message: t('consentRequired') });
       return;
     }
     if (rawPhone && !phone) {
@@ -83,7 +88,7 @@ export function NewsletterForm() {
     );
   }
 
-  const field = (name: 'email' | 'phone') =>
+  const field = (name: 'email' | 'phone' | 'consent') =>
     status.kind === 'error' && status.field === name
       ? { 'aria-invalid': true as const, 'aria-describedby': 'newsletter-error' }
       : {};
@@ -127,6 +132,15 @@ export function NewsletterForm() {
           {t('submit')}
         </Button>
       </div>
+      <Checkbox
+        id="newsletter-consent"
+        name="consent"
+        required
+        label={t('consent')}
+        labelClassName="text-[13px] leading-[18px] text-neutral-300"
+        className="xl:max-w-[720px]"
+        {...field('consent')}
+      />
       <p
         id="newsletter-error"
         aria-live="polite"
