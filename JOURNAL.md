@@ -1400,3 +1400,19 @@ erreurs) ; toutes les routes appelées existent. Corrections :
 
 - React propage `close` et `cancel` d'un `<dialog>` le long de l'arbre des composants, alors que ces événements ne
   remontent pas dans le DOM : la fermeture d'une modale imbriquée déclenchait l'`onClose` de la modale parente.
+
+## Correctifs de l'audit, priorité élevée (15 novembre 2026)
+
+### Fait
+
+- **Sauvegarde automatique** (`use-autosave.ts`) : une saisie faite pendant un enregistrement n'était jamais enregistrée
+  (minuteur non relancé), et « Publier », « Enregistrer » ou « Aperçu » échouaient sans raison pendant un
+  enregistrement en cours (`flush()` renvoyait `false`). `flush()` attend désormais l'enregistrement en cours puis
+  enregistre la valeur la plus récente ; le minuteur repart à la fin d'un enregistrement.
+- **Pages & textes** : changer de page avec un brouillon invalide ou dont l'enregistrement échoue est refusé (message),
+  au lieu de perdre les modifications.
+- **Modales** : une sélection de texte commencée dans la modale et relâchée sur le voile ne la ferme plus (seul un clic
+  commencé et terminé sur le voile la ferme).
+- **Appels serveur vers l'API** : en-tête `x-internal-token` (HMAC de `REVALIDATE_SECRET`, `src/lib/api/internal-token.ts`)
+  pour sortir les rendus et le renouvellement de session de la limitation de débit de l'API, qui les comptait comme un
+  seul visiteur.

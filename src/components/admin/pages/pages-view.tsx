@@ -133,8 +133,18 @@ export function PagesView() {
 
   async function selectPage(key: string) {
     if (key === selection.page) return;
-    // Modifications en attente enregistrées avant de changer de page.
-    await editor.current?.flush();
+    // Modifications en attente enregistrées avant de changer de page : sinon elles seraient perdues.
+    const handle = editor.current;
+    if (handle) {
+      if (!handle.validate()) {
+        toast.error('Corrigez les champs signalés avant de changer de page.');
+        return;
+      }
+      if (!(await handle.flush())) {
+        toast.error('Le brouillon n’a pas pu être enregistré : réessayez avant de changer de page.');
+        return;
+      }
+    }
     selection.update({ page: key });
   }
 
