@@ -1388,3 +1388,15 @@ erreurs) ; toutes les routes appelées existent. Corrections :
 
 - Clé publique Turnstile du domaine (`NEXT_PUBLIC_TURNSTILE_SITE_KEY`), `SITE_ENV=production` : indexation ouverte,
   sitemap publié.
+
+## Correctif : image d'un article du magazine (15 novembre 2026)
+
+### Fait
+
+- Choisir une image dans la médiathèque depuis la modale d'un article fermait aussi la modale de l'article (image et
+  brouillon perdus). `Modal` ne réagit plus qu'à ses propres événements `close` et `cancel`.
+
+### Difficultés
+
+- React propage `close` et `cancel` d'un `<dialog>` le long de l'arbre des composants, alors que ces événements ne
+  remontent pas dans le DOM : la fermeture d'une modale imbriquée déclenchait l'`onClose` de la modale parente.
