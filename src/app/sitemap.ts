@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { unstable_rethrow } from 'next/navigation';
 import { unwrapOrNull } from '@/lib/api/result';
 import { api, cached } from '@/lib/api/server';
 import { cacheTags } from '@/lib/api/tags';
@@ -49,7 +50,13 @@ function bilingual(entries: Entry[]): MetadataRoute.Sitemap {
  * publication depuis le back-office (étiquette `sitemap`), en français et en anglais.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const entries = await unwrapOrNull(api.GET('/v1/sitemap', cached([cacheTags.sitemap])));
+  // API absente, en erreur ou injoignable : pages fixes seulement, plutôt qu'un plan du site en erreur 500.
+  const entries = await unwrapOrNull(api.GET('/v1/sitemap', cached([cacheTags.sitemap]))).catch(
+    (error: unknown) => {
+      unstable_rethrow(error);
+      return null;
+    },
+  );
   if (!entries) return bilingual(STATIC_PATHS.map((path) => ({ path })));
   return bilingual(
     entries.map((entry) => ({

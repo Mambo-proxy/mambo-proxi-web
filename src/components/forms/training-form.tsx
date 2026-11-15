@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Field, Input, PhoneInput, Select, Textarea } from '@/components/ui/field';
 import { toast } from '@/components/ui/toaster';
 import { browserApi } from '@/lib/api/browser';
-import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
+import { ApiError, formErrorMessage, toApiError } from '@/lib/api/errors';
 import type { Training } from '@/lib/api/schema';
 import { CONSENT_TEXT, fieldRules, trimmed } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
@@ -112,7 +112,13 @@ export function TrainingForm({ trainings }: { trainings: Training[] }) {
           if (name in form.getValues()) form.setError(name, { message });
         }
       }
-      toast.error(errorMessage(caught));
+      // Erreur sur un champ absent du formulaire : son message plutôt que « Vérifiez les champs signalés ».
+      toast.error(
+        formErrorMessage(caught, (path) => {
+          const name = path.replace(/^contact\./, '') as keyof FormInput;
+          return name in form.getValues();
+        }),
+      );
     }
   }
 

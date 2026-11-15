@@ -103,7 +103,14 @@ export function MediaLibrary() {
   });
   const items = list.data?.data;
   const meta = list.data?.meta;
-  const opened = items?.find((item) => item.id === id) ?? null;
+  const listed = items?.find((item) => item.id === id) ?? null;
+  // Lien `?id=` vers une image absente de la page affichée (autre page, recherche qui l'exclut) : chargée seule.
+  const single = useQuery({
+    queryKey: [...mediaListKey, 'detail', id],
+    queryFn: () => data(browserApi.GET('/v1/admin/media/{id}', { params: { path: { id: id! } } })),
+    enabled: Boolean(id) && list.isSuccess && listed === null,
+  });
+  const opened = listed ?? (single.data?.id === id ? single.data : null);
 
   return (
     <AdminPage

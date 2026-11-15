@@ -1,5 +1,5 @@
 import { Check } from 'lucide-react';
-import type { Metadata } from 'next';
+import type { Metadata, Route } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { redirect } from 'next/navigation';
@@ -9,6 +9,7 @@ import { frenchTypography } from '@/lib/format/typography';
 import { routes } from '@/lib/routes';
 import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
+import { localizeHref } from '@/i18n/href';
 import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
 export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
@@ -28,9 +29,10 @@ type SearchParams = { searchParams: Promise<{ ref?: string }> };
  * Sans référence valide, retour au formulaire.
  */
 export default async function QuoteConfirmationPage({ params, searchParams }: LocaleParams & SearchParams) {
-  await withLocale(params);
+  const locale = await withLocale(params);
   const { ref } = await searchParams;
-  if (!ref || !REFERENCE.test(ref)) redirect(routes.devis);
+  // Retour au formulaire dans la langue de la page (`/en/free-quote` depuis le site anglais).
+  if (!ref || !REFERENCE.test(ref)) redirect(localizeHref(routes.devis, locale) as Route);
   const [settings, t] = await Promise.all([getSiteSettings(), getTranslations('quoteConfirmation')]);
   const whatsappHref = settings.whatsapp.enabled
     ? whatsappUrl(settings.whatsapp.number, settings.whatsapp.message, t('whatsappMessage', { ref }))

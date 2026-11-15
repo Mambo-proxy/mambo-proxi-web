@@ -47,10 +47,15 @@ export function NewsletterForm() {
       return;
     }
     setStatus({ kind: 'sending' });
-    const [{ subscribeToNewsletter }, turnstileToken] = await Promise.all([
-      import('./newsletter-submit'),
-      turnstile.token(),
-    ]);
+    let loaded: [typeof import('./newsletter-submit'), Awaited<ReturnType<typeof turnstile.token>>];
+    try {
+      loaded = await Promise.all([import('./newsletter-submit'), turnstile.token()]);
+    } catch {
+      // Module non chargé (site redéployé entre-temps, réseau coupé) : le formulaire ne reste pas bloqué en envoi.
+      setStatus({ kind: 'error', message: t('sendFailed') });
+      return;
+    }
+    const [{ subscribeToNewsletter }, turnstileToken] = loaded;
     const result = await subscribeToNewsletter({
       name: String(data.get('name') ?? '').trim() || null,
       email,

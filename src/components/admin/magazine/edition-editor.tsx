@@ -608,8 +608,10 @@ function EditionForm({ edition }: { edition: AdminMagazineEdition }) {
               </div>
               {!published && canWrite && (
                 <p className="font-ui text-[12px] leading-4 text-text-muted">
-                  {draft.publishDate && draft.publishDate > toLocal(new Date().toISOString(), 'yyyy-MM-dd')
-                    ? 'La publication sera programmée à la date choisie.'
+                  {/* Publication à 9 h, heure de Douala, le jour choisi : aujourd'hui avant 9 h, elle est programmée. */}
+                  {draft.publishDate &&
+                  new Date(fromLocal(`${draft.publishDate}T09:00:00`)).getTime() > new Date().getTime()
+                    ? 'La publication sera programmée à la date choisie (9 h, heure de Douala).'
                     : 'L’édition sera publiée tout de suite sur le site.'}
                 </p>
               )}
