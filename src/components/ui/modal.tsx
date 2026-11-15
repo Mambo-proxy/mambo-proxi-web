@@ -36,6 +36,7 @@ export function Modal({
   className,
 }: ModalProps) {
   const ref = useRef<HTMLDialogElement>(null);
+  const pressedOnBackdrop = useRef(false);
   const titleId = useId();
   const descriptionId = useId();
 
@@ -61,9 +62,15 @@ export function Modal({
         event.preventDefault();
         onClose();
       }}
+      onPointerDown={(event) => {
+        pressedOnBackdrop.current = event.target === event.currentTarget;
+      }}
       onClick={(event) => {
-        // Clic sur le voile (en dehors du contenu) : fermeture.
-        if (event.target === event.currentTarget) onClose();
+        // Clic sur le voile (en dehors du contenu) : fermeture. Une sélection de texte commencée dans la modale et
+        // relâchée sur le voile produit aussi un `click` sur le `<dialog>` : elle ne ferme pas la modale.
+        const onBackdrop = pressedOnBackdrop.current && event.target === event.currentTarget;
+        pressedOnBackdrop.current = false;
+        if (onBackdrop) onClose();
       }}
       style={{ ['--modal-max' as string]: `${maxWidth}px` }}
       className={cn(
