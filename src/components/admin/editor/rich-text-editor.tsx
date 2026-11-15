@@ -1,6 +1,7 @@
 'use client';
 
 import { EditorContent, useEditor, useEditorState, type Editor } from '@tiptap/react';
+import { EditorState } from '@tiptap/pm/state';
 import StarterKit from '@tiptap/starter-kit';
 import {
   Bold,
@@ -118,11 +119,15 @@ export function RichTextEditor({
     if (editor && !editor.isDestroyed && editor.isEditable === readOnly) editor.setEditable(!readOnly);
   }, [editor, readOnly]);
 
-  // Contenu remplacé de l'extérieur (rechargement, annulation des modifications) : synchronisation.
+  // Contenu remplacé de l'extérieur (rechargement, annulation des modifications, autre article ouvert dans la même
+  // modale) : synchronisation, historique d'annulation vidé. Sinon « Annuler » ramènerait le contenu précédent.
   useEffect(() => {
     if (!editor || editor.isDestroyed) return;
     const current = editor.isEmpty ? '' : editor.getHTML();
-    if (value !== current) editor.commands.setContent(value, { emitUpdate: false });
+    if (value === current) return;
+    editor.commands.setContent(value, { emitUpdate: false });
+    const { doc, plugins, selection } = editor.state;
+    editor.view.updateState(EditorState.create({ doc, plugins, selection }));
   }, [editor, value]);
 
   if (labelled)

@@ -23,7 +23,7 @@ import { toast } from '@/components/ui/toaster';
 import { data } from '@/lib/admin/query';
 import { adminRoutes } from '@/lib/admin/routes';
 import { browserApi } from '@/lib/api/browser';
-import { ApiError, errorMessage } from '@/lib/api/errors';
+import { ApiError, errorMessage, formErrorMessage } from '@/lib/api/errors';
 import type {
   AdminMagazineArticle,
   AdminMagazineEdition,
@@ -84,6 +84,19 @@ function draftOf(edition: AdminMagazineEdition): Draft {
     signature: edition.signature ?? '',
     signatureEn: edition.signatureEn ?? '',
   };
+}
+
+/** Champs de l'édition qui affichent leur erreur de validation (les autres : message en toast). */
+const EDITION_SHOWN_ERRORS = new Set(['number', 'title', 'titleEn', 'publishAt']);
+
+/** Brouillon reporté sur une nouvelle version : champs modifiés gardés, les autres pris dans `next`. */
+function rebase(draft: Draft, previous: Draft, next: Draft): Draft {
+  const merged = { ...next };
+  for (const key of Object.keys(draft) as (keyof Draft)[]) {
+    const touched = key === 'cover' ? draft.cover?.id !== previous.cover?.id : draft[key] !== previous[key];
+    if (touched) Object.assign(merged, { [key]: draft[key] });
+  }
+  return merged;
 }
 
 /** Corps de l'enregistrement : champs modifiés seulement. */
@@ -170,11 +183,12 @@ function EditionForm({ edition }: { edition: AdminMagazineEdition }) {
   const articlesRef = useRef<HTMLDivElement>(null);
   const [synced, setSynced] = useState(edition);
 
-  // Édition rechargée (enregistrement, articles) : le brouillon suit les valeurs enregistrées.
+  // Édition rechargée (enregistrement, articles, modification faite ailleurs) : les champs que l'utilisateur n'a pas
+  // touchés suivent les valeurs enregistrées ; ses modifications sont gardées. Sinon l'enregistrement renverrait les
+  // anciennes valeurs des champs non touchés et effacerait les modifications faites ailleurs.
   if (synced !== edition) {
-    const before = changes(draft, synced);
     setSynced(edition);
-    if (Object.keys(before).length === 0) setDraft(draftOf(edition));
+    setDraft(rebase(draft, draftOf(synced), draftOf(edition)));
   }
 
   const body = changes(draft, edition);
@@ -196,8 +210,14 @@ function EditionForm({ edition }: { edition: AdminMagazineEdition }) {
   };
 
   const onError = (error: unknown) => {
-    if (error instanceof ApiError) setErrors(error.fieldErrors);
-    toast.error(errorMessage(error));
+    if (error instanceof ApiError) {
+      const fields = error.fieldErrors;
+      setErrors(fields);
+      // Seule erreur affichée sous un champ anglais : onglet anglais ouvert pour la montrer.
+      if (fields.titleEn && !fields.title && !fields.number && !fields.publishAt) setLanguage('en');
+    }
+    // Erreur sur un champ sans message sous le champ (signature, sous-titre, édito…) : son message en toast.
+    toast.error(formErrorMessage(error, (path) => EDITION_SHOWN_ERRORS.has(path)));
   };
 
   function validate(): boolean {
@@ -267,6 +287,8 @@ function EditionForm({ edition }: { edition: AdminMagazineEdition }) {
       data(browserApi.DELETE('/v1/admin/magazine/editions/{id}', { params: { path: { id: edition.id } } })),
     onSuccess: () => {
       toast.success('Édition supprimée ; ses articles restent disponibles.');
+      // Retirée du cache avant la navigation : relue, elle afficherait « Édition introuvable » un instant.
+      client.removeQueries({ queryKey: magazineEditionKey(edition.id) });
       refresh();
       router.push(adminRoutes.magazine);
     },
@@ -281,17 +303,22 @@ function EditionForm({ edition }: { edition: AdminMagazineEdition }) {
           body: { ids },
         }),
       ),
-    onMutate: (ids) => {
-      const byId = new Map(edition.articles.map((article) => [article.id, article]));
-      client.setQueryData(magazineEditionKey(edition.id), {
-        ...edition,
+    onMutate: async (ids) => {
+      const key = magazineEditionKey(edition.id);
+      // Rechargement en cours annulé : sa réponse remettrait l'ancien ordre par-dessus l'ordre affiché.
+      await client.cancelQueries({ queryKey: key });
+      const previous = client.getQueryData<AdminMagazineEdition>(key) ?? edition;
+      const byId = new Map(previous.articles.map((article) => [article.id, article]));
+      client.setQueryData(key, {
+        ...previous,
         articles: ids.map((articleId) => byId.get(articleId)).filter(Boolean),
       });
+      return { previous };
     },
     onSuccess: store,
-    onError: (error) => {
+    onError: (error, _ids, context) => {
       onError(error);
-      client.setQueryData(magazineEditionKey(edition.id), edition);
+      if (context) client.setQueryData(magazineEditionKey(edition.id), context.previous);
     },
   });
 
@@ -703,9 +730,14 @@ function NewsletterCard({
   const client = useQueryClient();
   const canSend = useCan()('newsletter:write');
   const { newsletter } = edition;
-  const [sendAt, setSendAt] = useState(
-    newsletter.scheduledAt ? toLocal(newsletter.scheduledAt, "yyyy-MM-dd'T'HH:mm") : '',
-  );
+  const scheduledLocal = newsletter.scheduledAt ? toLocal(newsletter.scheduledAt, "yyyy-MM-dd'T'HH:mm") : '';
+  const [sendAt, setSendAt] = useState(scheduledLocal);
+  // Programmation changée par l'API (retour en brouillon : envoi annulé ; autre poste) : le champ la suit.
+  const [syncedSchedule, setSyncedSchedule] = useState(newsletter.scheduledAt);
+  if (syncedSchedule !== newsletter.scheduledAt) {
+    setSyncedSchedule(newsletter.scheduledAt);
+    setSendAt(scheduledLocal);
+  }
   const [error, setError] = useState<string | null>(null);
   const [testOpen, setTestOpen] = useState(false);
 
@@ -761,6 +793,11 @@ function NewsletterCard({
         </p>
       ) : (
         <>
+          <p className="font-ui text-[13px] leading-4 text-text-muted">
+            {newsletter.scheduledAt
+              ? `Envoi programmé le ${formatStamp(newsletter.scheduledAt)} (heure de Douala).`
+              : 'Envoi pas encore programmé.'}
+          </p>
           <CompactField label="Programmer l’envoi" help="Heure de Douala." error={error}>
             {(control) => (
               <CompactInput
@@ -819,6 +856,14 @@ function TestDialog({
 }) {
   const [email, setEmail] = useState(defaultEmail);
   const [error, setError] = useState<string | null>(null);
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setEmail(defaultEmail);
+      setError(null);
+    }
+  }
   const send = useMutation({
     mutationFn: () =>
       data(
@@ -839,6 +884,11 @@ function TestDialog({
       );
     },
   });
+  // Entrée répétée dans le champ : un seul envoi.
+  const submit = () => {
+    if (!send.isPending) send.mutate();
+  };
+
   return (
     <Modal
       open={open}
@@ -851,7 +901,7 @@ function TestDialog({
           <Button variant="outline" size="sm" onClick={onClose}>
             Annuler
           </Button>
-          <Button size="sm" loading={send.isPending} onClick={() => send.mutate()}>
+          <Button size="sm" loading={send.isPending} onClick={submit}>
             Envoyer
           </Button>
         </div>
@@ -861,7 +911,7 @@ function TestDialog({
         noValidate
         onSubmit={(event) => {
           event.preventDefault();
-          send.mutate();
+          submit();
         }}
       >
         <CompactField label="Adresse e-mail" error={error}>
@@ -895,6 +945,12 @@ function AddArticlesDialog({
   onAdded: (edition: AdminMagazineEdition) => void;
 }) {
   const [selected, setSelected] = useState<string[]>([]);
+  // Sélection vidée à chaque ouverture : un article coché puis abandonné ne doit pas partir avec l'ajout suivant.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) setSelected([]);
+  }
   const available = useQuery({
     queryKey: ['magazine', 'articles', 'none'],
     queryFn: () =>
