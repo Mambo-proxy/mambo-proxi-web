@@ -51,8 +51,13 @@ export function Modal({
       ref={ref}
       aria-labelledby={titleId}
       aria-describedby={description ? descriptionId : undefined}
-      onClose={onClose}
+      // React propage `close` et `cancel` le long de l'arbre des composants : la fermeture d'une modale imbriquée
+      // (médiathèque ouverte depuis la modale d'un article) fermerait aussi la modale parente.
+      onClose={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
       onCancel={(event) => {
+        if (event.target !== event.currentTarget) return;
         event.preventDefault();
         onClose();
       }}
