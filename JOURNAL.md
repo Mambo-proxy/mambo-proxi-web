@@ -1489,3 +1489,7 @@ erreurs) ; toutes les routes appelées existent. Corrections :
   back-office ; seuls les libellés sont traduits.
 - `Modal` et `Calendar` restent utilisables hors du site bilingue (back-office, `/dev/ui`) : libellés en propriétés,
   français par défaut.
+- Budget de JavaScript de Lighthouse relevé à 340 000 octets : les formulaires traduits (devis, inscription), préchargés
+  en basse priorité depuis les liens de l'accueil, pèsent environ 1 Ko de plus (331 Ko mesurés) ; sans effet sur le score.
+- Second bouton du bandeau CTA rendu au lien brut : « Read in French » vise une adresse française depuis le site anglais,
+  impossible à distinguer d'un lien interne à convertir.
