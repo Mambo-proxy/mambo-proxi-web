@@ -67,6 +67,8 @@ export function useUploadMedia() {
         }),
       ),
     onSuccess: () => void client.invalidateQueries({ queryKey: mediaListKey }),
+    // Erreurs affichées sous les champs par les formulaires d'envoi (`uploadFieldErrors`) : pas de toast en plus.
+    onError: () => {},
   });
 }
 
@@ -235,9 +237,11 @@ export function MediaPickerDialog({ open, onClose, onSelect, initialFile }: Medi
     if (open) {
       setSelected(null);
       setAlt('');
-      setFileError(null);
       setAltError(null);
-      setFile(initialFile ?? null);
+      // Fichier déposé sur la zone d'ajout : contrôlé comme un fichier choisi (format, taille) avant tout envoi.
+      const droppedError = initialFile ? imageFileError(initialFile) : null;
+      setFileError(droppedError);
+      setFile(droppedError ? null : (initialFile ?? null));
       setTab(initialFile ? 'upload' : 'library');
     }
   }
