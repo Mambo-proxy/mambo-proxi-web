@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import type { AdminEvent, Event, RequestListItem } from '@/lib/api/schema';
 import { resolveMockRequest } from './resolve';
 import { MOCK_COOKIE_HEADER } from './session';
@@ -15,6 +15,13 @@ async function call<T>(method: string, path: string, body?: unknown) {
 }
 
 describe('agenda du back-office simulé', () => {
+  // Événements des exemples du contrat datés (le premier le 14 novembre 2026) : date du jour figée avant eux.
+  beforeAll(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-11-01T08:00:00.000Z'));
+  });
+  afterAll(() => vi.useRealTimers());
+
   it('à venir, passés, inscriptions et places', async () => {
     const upcoming = await call<AdminEvent[]>('GET', '/v1/admin/events');
     expect(upcoming.body.map((event) => event.slug)).toEqual([

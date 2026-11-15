@@ -45,7 +45,8 @@
       "submit": "Subscribe",
       "alreadySubscribed": "You are already subscribed to the Mambo letter: thank you for your loyalty!",
       "invalidEmail": "Please enter a valid email address.",
-      "invalidPhone": "Please enter a number with the country code (e.g. +237…)."
+      "invalidPhone": "Please enter a number with the country code (e.g. +237…).",
+      "sendFailed": "Your subscription could not be sent. Please check your connection and try again."
     },
     "whatsappFloat": {
       "label": "Message us on WhatsApp"

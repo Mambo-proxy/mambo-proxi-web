@@ -48,8 +48,15 @@ export function CookieBanner({ ga4MeasurementId }: { ga4MeasurementId: string | 
   }, [showBanner]);
 
   function decide(value: boolean) {
+    const withdrawn = Boolean(consent?.analytics) && !value;
     saveConsent(value);
     setPreferencesOpen(false);
+    // Retrait du consentement : gtag déjà chargé ne se décharge pas (démonter `<Script>` ne l'arrête pas) ; ses
+    // cookies sont effacés et la page rechargée, sans Google Analytics.
+    if (withdrawn) {
+      clearAnalyticsCookies();
+      window.location.reload();
+    }
   }
 
   return (
@@ -106,6 +113,22 @@ export function CookieBanner({ ga4MeasurementId }: { ga4MeasurementId: string | 
       {consent?.analytics && ga4MeasurementId && <GoogleAnalytics measurementId={ga4MeasurementId} />}
     </>
   );
+}
+
+/** Cookies de Google Analytics (`_ga`, `_ga_<id>`) effacés pour l'hôte et ses domaines parents. */
+function clearAnalyticsCookies() {
+  const names = document.cookie
+    .split(';')
+    .map((entry) => entry.split('=')[0]?.trim() ?? '')
+    .filter((name) => name === '_ga' || name.startsWith('_ga_'));
+  const parts = window.location.hostname.split('.');
+  const domains = parts
+    .map((_, index) => parts.slice(index).join('.'))
+    .filter((domain) => domain.includes('.'));
+  for (const name of names) {
+    document.cookie = `${name}=; Max-Age=0; path=/`;
+    for (const domain of domains) document.cookie = `${name}=; Max-Age=0; path=/; domain=.${domain}`;
+  }
 }
 
 function GoogleAnalytics({ measurementId }: { measurementId: string }) {

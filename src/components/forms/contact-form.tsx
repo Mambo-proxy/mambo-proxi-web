@@ -13,7 +13,7 @@ import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { toast } from '@/components/ui/toaster';
 import { useStaggerIn } from '@/components/ui/use-stagger-in';
 import { browserApi } from '@/lib/api/browser';
-import { ApiError, errorMessage, toApiError } from '@/lib/api/errors';
+import { ApiError, formErrorMessage, toApiError } from '@/lib/api/errors';
 import { CONSENT_TEXT, fieldRules, trimmed } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
 
@@ -129,13 +129,14 @@ export function ContactForm({ initialTab, serviceGroups }: ContactFormProps) {
       setSent(data);
       form.reset(EMPTY);
     } catch (caught) {
+      const fieldOf = (path: string) => path.replace(/^contact\./, '') as keyof FormInput;
       if (caught instanceof ApiError) {
         for (const [path, message] of Object.entries(caught.fieldErrors)) {
-          const name = path.replace(/^contact\./, '') as keyof FormInput;
-          if (name in schema.shape) form.setError(name, { message });
+          if (fieldOf(path) in schema.shape) form.setError(fieldOf(path), { message });
         }
       }
-      toast.error(errorMessage(caught));
+      // Erreur sur un champ sans message à l'écran : son message plutôt que « Vérifiez les champs signalés ».
+      toast.error(formErrorMessage(caught, (path) => fieldOf(path) in schema.shape));
     }
   }
 
@@ -219,7 +220,7 @@ export function ContactForm({ initialTab, serviceGroups }: ContactFormProps) {
               )}
             </Field>
             {tab === 'INFORMATION' && (
-              <Field label="Service concerné" className="md:col-span-2">
+              <Field label="Service concerné" className="md:col-span-2" error={errors.serviceSlug?.message}>
                 {(control) => (
                   <Select {...control} {...form.register('serviceSlug')}>
                     <option value="">Choisir un service</option>
@@ -236,7 +237,7 @@ export function ContactForm({ initialTab, serviceGroups }: ContactFormProps) {
                 )}
               </Field>
             )}
-            <Field label="Sujet" className="md:col-span-2">
+            <Field label="Sujet" className="md:col-span-2" error={errors.subject?.message}>
               {(control) => (
                 <Select {...control} {...form.register('subject')}>
                   <option value="">Choisir un sujet</option>

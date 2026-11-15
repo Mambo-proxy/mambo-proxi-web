@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Fragment } from 'react';
+import { Fragment, type MouseEvent } from 'react';
 import { localizeHref, parseSitePath } from '@/i18n/href';
 import { locales } from '@/i18n/routing';
 import { cn } from '@/lib/cn';
@@ -13,6 +13,15 @@ import { cn } from '@/lib/cn';
  * - `pill` (menu mobile `290:32174`) : pilule blanche bordée, langue active sur fond `neutral/900`.
  * Liens complets (rechargement) : le document change de langue (`<html lang>`, messages, contenus de l'API).
  */
+/**
+ * Paramètres de l'adresse gardés au changement de langue (jeton de désinscription, page et tri des avis…). Ajoutés au
+ * clic plutôt qu'au rendu : lire `useSearchParams` ferait perdre le rendu statique des pages.
+ */
+function keepQuery(event: MouseEvent<HTMLAnchorElement>) {
+  const { search } = window.location;
+  if (search) event.currentTarget.href = `${event.currentTarget.pathname}${search}`;
+}
+
 export function LanguageSwitch({ variant }: { variant: 'bar' | 'pill' }) {
   const t = useTranslations('site.language');
   const { locale: current, internal } = parseSitePath(usePathname());
@@ -31,6 +40,7 @@ export function LanguageSwitch({ variant }: { variant: 'bar' | 'pill' }) {
               <li>
                 <a
                   href={localizeHref(internal, locale)}
+                  onClick={keepQuery}
                   hrefLang={locale}
                   lang={locale}
                   aria-label={t(locale)}
@@ -65,6 +75,7 @@ export function LanguageSwitch({ variant }: { variant: 'bar' | 'pill' }) {
           <li key={locale}>
             <a
               href={localizeHref(internal, locale)}
+              onClick={keepQuery}
               hrefLang={locale}
               lang={locale}
               aria-current={locale === current ? 'true' : undefined}

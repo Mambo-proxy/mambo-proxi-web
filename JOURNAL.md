@@ -1445,3 +1445,24 @@ erreurs) ; toutes les routes appelées existent. Corrections :
 - Avertissement avant une navigation interne avec des modifications non enregistrées (édition du magazine, éditeurs) :
   seule la fermeture de l'onglet est couverte (`beforeunload`).
 - Formulaires et messages de validation du site anglais encore en français.
+
+## Correctifs de l'audit, priorité faible (15 novembre 2026)
+
+### Fait
+
+- **Formulaires** : contact (« Service concerné », « Sujet »), partenariat et formation : une erreur 422 sur un champ
+  sans message à l'écran affiche son message (`formErrorMessage`) ; newsletter : erreur 422 sur le téléphone sous le
+  champ, et plus de blocage en « envoi » si le module ne se charge pas (`sendFailed`).
+- **Langues** : `/en/free-quote/confirmation` sans référence renvoie vers le formulaire anglais ; le sélecteur de langue
+  garde les paramètres de l'adresse (jeton, page, tri) ; le second bouton du bandeau CTA convertit une adresse interne
+  française dans la langue de la page (adresses `/en/…` et externes inchangées).
+- **Cookies** : le retrait du consentement efface les cookies `_ga*` et recharge la page (gtag ne se décharge pas).
+- **Plan du site** : pages fixes si l'API est en erreur ou injoignable (plus de 500).
+- **Back-office** : lien `?id=` de la médiathèque vers une image absente de la page affichée (chargée seule) ; aide de
+  la date de publication d'une édition juste avant 9 h, heure de Douala.
+- Test des événements simulés : date du jour figée (le premier exemple du contrat, le 14 novembre 2026, était passé).
+
+### Non traité (décision à prendre)
+
+- Case de consentement explicite pour l'inscription à la newsletter ; page de maintenance contournable par un simple
+  cookie de session ; `'unsafe-inline'` dans la CSP des scripts.
