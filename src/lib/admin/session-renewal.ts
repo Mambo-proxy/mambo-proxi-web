@@ -1,5 +1,5 @@
 import { getApiBaseUrl, isApiMocking, isApiRelay } from '@/lib/api/config';
-import { transport } from '@/lib/api/transport';
+import { serverTransport as transport } from '@/lib/api/internal-token';
 
 /**
  * Renouvellement de la session au chargement d'un écran du back-office (proxy). Le cookie `mp_at` expire avec le

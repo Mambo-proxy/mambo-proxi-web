@@ -6,7 +6,7 @@ import { getLocale } from 'next-intl/server';
 import { defaultLocale } from '@/i18n/routing';
 import { getApiBaseUrl } from './config';
 import type { paths } from './schema';
-import { transport } from './transport';
+import { serverTransport as transport } from './internal-token';
 
 /** Filet de sécurité si une revalidation à la demande n'arrive pas : une heure. */
 const FALLBACK_REVALIDATE_SECONDS = 3600;
