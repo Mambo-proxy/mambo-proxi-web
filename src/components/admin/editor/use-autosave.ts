@@ -29,8 +29,11 @@ export function useAutosave<T>({
 }: AutosaveOptions<T>) {
   const serialized = JSON.stringify(value);
   const [saved, setSaved] = useState(serialized);
-  const saving = useRef(false);
-  const latest = useRef({ value, serialized, save, saved: serialized });
+  // Dernière valeur enregistrée, lue sans attendre le rendu suivant (enchaînement de deux enregistrements).
+  const savedRef = useRef(serialized);
+  // Enregistrement en cours : un appel concurrent l'attend puis enregistre la valeur la plus récente.
+  const inflight = useRef<Promise<boolean> | null>(null);
+  const latest = useRef({ value, serialized, save });
   const [state, setState] = useState<{ savedAt: string | null; pending: boolean; error: boolean }>({
     savedAt: initialSavedAt,
     pending: false,
@@ -38,35 +41,53 @@ export function useAutosave<T>({
   });
 
   useEffect(() => {
-    latest.current = { value, serialized, save, saved };
+    latest.current = { value, serialized, save };
   });
 
   const dirty = serialized !== saved;
 
-  async function flush(): Promise<boolean> {
-    const { value: current, serialized: snapshot, save: run, saved: lastSaved } = latest.current;
-    if (saving.current || snapshot === lastSaved) return snapshot === lastSaved;
-    saving.current = true;
+  function markAsSaved(snapshot: string) {
+    savedRef.current = snapshot;
+    setSaved(snapshot);
+  }
+
+  async function run(): Promise<boolean> {
+    const { value: current, serialized: snapshot, save: persist } = latest.current;
+    if (snapshot === savedRef.current) return true;
     setState((previous) => ({ ...previous, pending: true }));
     try {
-      await run(current);
-      setSaved(snapshot);
+      await persist(current);
+      markAsSaved(snapshot);
       setState({ savedAt: new Date().toISOString(), pending: false, error: false });
       return true;
     } catch {
       setState((previous) => ({ ...previous, pending: false, error: true }));
       return false;
-    } finally {
-      saving.current = false;
     }
   }
 
+  /**
+   * Enregistre la valeur courante. Si un enregistrement est en cours, l'attend puis enregistre ce qui a été saisi
+   * entre-temps : `true` seulement quand la valeur courante est enregistrée.
+   */
+  async function flush(): Promise<boolean> {
+    while (inflight.current) await inflight.current;
+    const promise = run();
+    inflight.current = promise;
+    try {
+      return await promise;
+    } finally {
+      inflight.current = null;
+    }
+  }
+
+  // `saved` dans les dépendances : une saisie faite pendant un enregistrement relance le minuteur à sa fin.
   useEffect(() => {
     if (!enabled || !dirty) return;
     const timer = window.setTimeout(() => void flush(), delay);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serialized, enabled, delay]);
+  }, [serialized, saved, enabled, delay]);
 
   useEffect(() => {
     if (!dirty) return;
@@ -82,7 +103,7 @@ export function useAutosave<T>({
     flush,
     /** Valeur enregistrée côté API à l'initialisation ou après un rechargement. */
     markSaved: (next: T, savedAt?: string) => {
-      setSaved(JSON.stringify(next));
+      markAsSaved(JSON.stringify(next));
       if (savedAt) setState({ savedAt, pending: false, error: false });
     },
   };
