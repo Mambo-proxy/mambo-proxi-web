@@ -120,6 +120,9 @@ export function QuoteForm({
     },
   });
   const { errors, isSubmitting } = form.formState;
+  // Demande acceptée : le bouton reste désactivé pendant le chargement de la confirmation (sinon un second clic, sur
+  // un réseau lent, créerait une seconde demande).
+  const [sent, setSent] = useState(false);
   const values = useWatch({ control: form.control });
 
   const categorySlug = values.categorySlug ?? '';
@@ -225,6 +228,7 @@ export function QuoteForm({
       } catch {
         // Rien à nettoyer.
       }
+      setSent(true);
       router.push(`/devis/confirmation?ref=${encodeURIComponent(accepted.reference)}`);
     } catch (caught) {
       const shown = (path: string) =>
@@ -514,7 +518,7 @@ export function QuoteForm({
               <Lock aria-hidden size={16} />
               Formulaire protégé contre les envois automatiques
             </p>
-            <Button type="submit" loading={isSubmitting} className="max-md:w-full md:self-start">
+            <Button type="submit" loading={isSubmitting || sent} className="max-md:w-full md:self-start">
               Envoyer ma demande de devis
             </Button>
           </StepCard>

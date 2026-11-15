@@ -16,6 +16,8 @@ import { getSiteSettings } from '@/lib/site-data';
 import { whatsappUrl } from '@/lib/whatsapp';
 import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
+const MAX_ID_LENGTH = 64;
+
 type SearchParams = { searchParams: Promise<{ edition?: string | string[]; preview?: string | string[] }> };
 
 const single = (value: string | string[] | undefined) =>
@@ -136,6 +138,8 @@ export default async function MagazinePage({ params, searchParams }: LocaleParam
   const query = await searchParams;
   const editionId = single(query.edition);
   const preview = single(query.preview);
+  // Identifiant hors format (`Id` : 64 caractères au plus) : refusé par l'API en 422, page introuvable ici.
+  if (editionId && editionId.length > MAX_ID_LENGTH) notFound();
   const [page, magazine, settings, t, tm] = await Promise.all([
     getPage('magazine', { preview }),
     getMagazine(editionId, preview),

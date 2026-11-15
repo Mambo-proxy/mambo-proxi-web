@@ -2072,7 +2072,7 @@ export interface paths {
         head?: never;
         /**
          * Enregistrer une édition
-         * @description Une édition publiée est mise à jour en ligne immédiatement (tag de revalidation `page:magazine`). Un numéro déjà pris renvoie 409.
+         * @description Une édition publiée est mise à jour en ligne immédiatement (tag de revalidation `page:magazine`). Un numéro déjà pris renvoie 409, de même qu'une édition programmée reportée après la date d'envoi programmée de sa newsletter.
          */
         patch: operations["adminUpdateMagazineEdition"];
         trace?: never;
@@ -2088,7 +2088,7 @@ export interface paths {
         put?: never;
         /**
          * Publier ou programmer la publication
-         * @description Sans date (ou avec une date passée), l'édition est publiée tout de suite ; avec une date future, elle est programmée (`SCHEDULED`).
+         * @description Sans date (ou avec une date passée), l'édition est publiée tout de suite ; avec une date future, elle est programmée (`SCHEDULED`). Une date postérieure à l'envoi programmé de sa newsletter renvoie 409.
          */
         post: operations["adminPublishMagazineEdition"];
         delete?: never;
@@ -10758,6 +10758,7 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
             422: components["responses"]["ValidationError"];
         };
     };

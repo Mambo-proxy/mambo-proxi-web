@@ -10,7 +10,8 @@ import { Modal } from '@/components/ui/modal';
 import { toast } from '@/components/ui/toaster';
 import { data } from '@/lib/admin/query';
 import { browserApi } from '@/lib/api/browser';
-import { ApiError, errorMessage } from '@/lib/api/errors';
+import { ApiError, formErrorMessage } from '@/lib/api/errors';
+import { cn } from '@/lib/cn';
 import type { AdminMagazineArticle, MagazineArticleFields, MediaImage } from '@/lib/api/schema';
 import {
   CompactField,
@@ -26,6 +27,8 @@ type Draft = {
   titleEn: string;
   theme: string;
   themeEn: string;
+  excerpt: string;
+  excerptEn: string;
   body: string;
   bodyEn: string;
   image: MediaImage | null;
@@ -38,11 +41,48 @@ function draftOf(article: AdminMagazineArticle | null, editionId: string | null)
     titleEn: article?.titleEn ?? '',
     theme: article?.theme ?? '',
     themeEn: article?.themeEn ?? '',
+    excerpt: article?.excerpt ?? '',
+    excerptEn: article?.excerptEn ?? '',
     body: article?.body ?? '',
     bodyEn: article?.bodyEn ?? '',
     image: article?.image ?? null,
     editionId: article?.edition?.id ?? editionId ?? '',
   };
+}
+
+/** Champs de l'article qui affichent leur erreur de validation (les autres : message en toast). */
+const ARTICLE_SHOWN_ERRORS = new Set(['title', 'titleEn', 'theme', 'themeEn', 'excerpt', 'excerptEn']);
+
+/** Corps de l'enregistrement : tous les champs à la création, les seuls champs modifiés ensuite. */
+function articleBody(
+  draft: Draft,
+  initial: Draft,
+  creating: boolean,
+  withEdition: boolean,
+): MagazineArticleFields {
+  const text = (value: string) => value.trim() || null;
+  const all: MagazineArticleFields = {
+    title: draft.title.trim(),
+    titleEn: text(draft.titleEn),
+    theme: draft.theme.trim(),
+    themeEn: text(draft.themeEn),
+    excerpt: text(draft.excerpt),
+    excerptEn: text(draft.excerptEn),
+    body: draft.body || null,
+    bodyEn: draft.bodyEn || null,
+    imageId: draft.image?.id ?? null,
+    ...(withEdition ? { editionId: draft.editionId || null } : {}),
+  };
+  if (creating) return all;
+  // Modification : un champ non touché n'est pas renvoyé (il effacerait une modification faite ailleurs entre-temps).
+  const changed = (key: keyof Draft) =>
+    key === 'image' ? draft.image?.id !== initial.image?.id : draft[key] !== initial[key];
+  const body: MagazineArticleFields = {};
+  const keys = ['title', 'titleEn', 'theme', 'themeEn', 'excerpt', 'excerptEn', 'body', 'bodyEn'] as const;
+  for (const key of keys) if (changed(key)) Object.assign(body, { [key]: all[key] });
+  if (changed('image')) body.imageId = all.imageId;
+  if (withEdition && changed('editionId')) body.editionId = all.editionId;
+  return body;
 }
 
 type ArticleDialogProps = {
@@ -95,16 +135,7 @@ export function ArticleDialog({
 
   const save = useMutation({
     mutationFn: () => {
-      const body: MagazineArticleFields = {
-        title: draft.title.trim(),
-        titleEn: draft.titleEn.trim() || null,
-        theme: draft.theme.trim(),
-        themeEn: draft.themeEn.trim() || null,
-        body: draft.body || null,
-        bodyEn: draft.bodyEn || null,
-        imageId: draft.image?.id ?? null,
-        ...(editions || !article ? { editionId: draft.editionId || null } : {}),
-      };
+      const body = articleBody(draft, draftOf(article, editionId), !article, Boolean(editions || !article));
       // Schémas `allOf` du contrat générés avec `Record<string, never>` : le corps est typé par `MagazineArticleFields`.
       return article
         ? data(
@@ -122,8 +153,14 @@ export function ArticleDialog({
       onClose();
     },
     onError: (error) => {
-      if (error instanceof ApiError && error.fieldErrors) setErrors(error.fieldErrors);
-      toast.error(errorMessage(error));
+      if (error instanceof ApiError) {
+        const fields = error.fieldErrors;
+        setErrors(fields);
+        // Erreurs sur les seuls champs anglais : onglet anglais ouvert pour les montrer.
+        if ((fields.titleEn || fields.themeEn) && !fields.title && !fields.theme) setLanguage('en');
+      }
+      // Erreur sur un champ sans message sous le champ (texte, photo, édition…) : son message en toast.
+      toast.error(formErrorMessage(error, (path) => ARTICLE_SHOWN_ERRORS.has(path)));
     },
   });
 
@@ -171,7 +208,7 @@ export function ArticleDialog({
         {/* Le choix de la langue reste possible en lecture seule : seuls les champs sont figés. */}
         <ReadOnlyFieldset readOnly={readOnly}>
           <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_200px]">
-            <CompactField label={en ? 'Titre (anglais)' : 'Titre'} error={en ? null : errors.title}>
+            <CompactField label={en ? 'Titre (anglais)' : 'Titre'} error={en ? errors.titleEn : errors.title}>
               {(control) => (
                 <CompactInput
                   {...control}
@@ -183,7 +220,7 @@ export function ArticleDialog({
                 />
               )}
             </CompactField>
-            <CompactField label={en ? 'Thème (anglais)' : 'Thème'} error={en ? null : errors.theme}>
+            <CompactField label={en ? 'Thème (anglais)' : 'Thème'} error={en ? errors.themeEn : errors.theme}>
               {(control) => (
                 <CompactInput
                   {...control}
@@ -216,6 +253,24 @@ export function ArticleDialog({
               )}
             </CompactField>
           )}
+          <CompactField
+            label={en ? 'Extrait (anglais)' : 'Extrait'}
+            help="Texte court affiché avant la lecture de l’article · 400 caractères au plus."
+            error={en ? errors.excerptEn : errors.excerpt}
+          >
+            {(control) => (
+              <textarea
+                {...control}
+                key={language}
+                lang={language}
+                rows={3}
+                value={en ? draft.excerptEn : draft.excerpt}
+                onChange={(event) => set(en ? 'excerptEn' : 'excerpt', event.target.value)}
+                maxLength={400}
+                className={cn(compactInputClass, 'resize-y')}
+              />
+            )}
+          </CompactField>
           <ImageField
             label="Photo"
             value={draft.image}

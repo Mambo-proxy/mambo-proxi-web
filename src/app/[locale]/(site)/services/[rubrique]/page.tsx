@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, unstable_rethrow } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { FormulaCards } from '@/components/sections/home/formula-cards';
 import { PageHero } from '@/components/sections/page-hero';
@@ -63,6 +63,24 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 }
 
 /**
+ * Agenda d'une rubrique (`highlight.kind === 'AGENDA'`) : donnée secondaire, masquée si l'API ne répond pas plutôt que
+ * de faire échouer toute la page.
+ */
+async function getAgenda() {
+  try {
+    return await unwrap(
+      api.GET('/v1/events', {
+        params: { query: { upcoming: true, limit: AGENDA_LIMIT } },
+        ...cached([cacheTags.events]),
+      }),
+    );
+  } catch (error) {
+    unstable_rethrow(error);
+    return null;
+  }
+}
+
+/**
  * Page rubrique (Services à domicile `249:24507`, Expérience `60:1491`, Immobilier `61:2156`, Proximité `61:3356`,
  * Culture `61:5620`). Une rubrique de formules (Services à domicile) présente ses formules en cartes photo et
  * « Nos formules » dans le fil d'Ariane.
@@ -81,15 +99,7 @@ export default async function RubriquePage({ params }: Params) {
   const formulas = services.filter((service) => service.kind === 'formula');
   const isFormulaCategory = formulas.length > 0;
   const bySlug = new Map(services.map((service) => [service.slug, service]));
-  const agenda =
-    category.highlight?.kind === 'AGENDA'
-      ? await unwrap(
-          api.GET('/v1/events', {
-            params: { query: { upcoming: true, limit: AGENDA_LIMIT } },
-            ...cached([cacheTags.events]),
-          }),
-        )
-      : null;
+  const agenda = category.highlight?.kind === 'AGENDA' ? await getAgenda() : null;
   const whatsappHref = settings.whatsapp.enabled
     ? whatsappUrl(
         settings.whatsapp.number,
