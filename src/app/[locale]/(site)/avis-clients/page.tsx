@@ -23,6 +23,9 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 /** Avis par page : 6, comme la maquette (« 1 2 3 … 12 »). */
 const PAGE_SIZE = 6;
 
+/** Dernière page acceptée dans l'adresse (`?page=`). */
+const MAX_PAGE = 500;
+
 type SearchParams = { searchParams: Promise<{ page?: string; categorie?: string; tri?: string }> };
 
 /** Avis clients (desktop `68:7186`, mobile `68:7686`) : note globale, avis filtrables et paginés, collecte, CTA. */
@@ -40,6 +43,8 @@ export default async function ReviewsPage({ params, searchParams }: LocaleParams
   const category = categories.find((item) => item.slug === query.categorie)?.slug ?? null;
   const sort = query.tri === 'notes' ? 'rating' : 'recent';
   const pageNumber = Math.max(1, Number.parseInt(query.page ?? '1', 10) || 1);
+  // Numéro de page borné : au-delà, l'API répond 422 et chaque page vide serait mise en cache.
+  if (pageNumber > MAX_PAGE) notFound();
   const reviews = await unwrap(
     api.GET('/v1/reviews', {
       params: {
@@ -48,6 +53,7 @@ export default async function ReviewsPage({ params, searchParams }: LocaleParams
       ...cached([cacheTags.reviews]),
     }),
   );
+  if (pageNumber > 1 && pageNumber > reviews.meta.totalPages) notFound();
   const breadcrumb = [{ label: t('home'), href: routes.home }, { label: page.title }];
 
   return (

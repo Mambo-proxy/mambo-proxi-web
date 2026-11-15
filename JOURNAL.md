@@ -1416,3 +1416,32 @@ erreurs) ; toutes les routes appelées existent. Corrections :
 - **Appels serveur vers l'API** : en-tête `x-internal-token` (HMAC de `REVALIDATE_SECRET`, `src/lib/api/internal-token.ts`)
   pour sortir les rendus et le renouvellement de session de la limitation de débit de l'API, qui les comptait comme un
   seul visiteur.
+
+## Correctifs de l'audit, priorité moyenne (15 novembre 2026)
+
+### Fait
+
+- **Magazine** :
+  - éditeur de texte : un contenu remplacé de l'extérieur (autre article ouvert dans la même modale, rechargement) vide
+    l'historique d'annulation ; « Annuler » ne ramène plus le texte de l'article précédent ;
+  - édition : au rechargement, les champs non touchés suivent les valeurs enregistrées (l'enregistrement n'écrase plus
+    une modification faite ailleurs) ;
+  - article : extrait FR/EN modifiable (contrat : 400 caractères) ; une modification n'envoie que les champs changés ;
+  - erreurs de validation : affichées sous les champs anglais (onglet anglais ouvert si besoin), sinon message du champ
+    en toast (`formErrorMessage`) ;
+  - envoi par la newsletter : le champ de programmation suit `scheduledAt` (retour en brouillon : envoi annulé) et l'état
+    « Envoi programmé le… » est affiché aussi aux personnes qui peuvent programmer ;
+  - « Ajouter un article » : sélection vidée à chaque ouverture ; « Envoyer un test » : un seul envoi par Entrée répétée,
+    champ réinitialisé ; suppression d'une édition sans « Édition introuvable » ; réordonnancement sans retour
+    momentané à l'ancien ordre.
+- **Médiathèque** : image déposée sur la zone d'ajout contrôlée (format, taille) avant l'envoi ; plus de double message
+  d'erreur à l'envoi.
+- **Site public** : `/avis-clients?page=` borné (500) et page introuvable au-delà de la dernière page ;
+  `/magazine?edition=` hors format : page introuvable (au lieu d'une erreur) ; agenda de la rubrique masqué si l'API
+  des événements ne répond pas ; formulaire de devis désactivé après acceptation (pas de seconde demande).
+
+### Reste
+
+- Avertissement avant une navigation interne avec des modifications non enregistrées (édition du magazine, éditeurs) :
+  seule la fermeture de l'onglet est couverte (`beforeunload`).
+- Formulaires et messages de validation du site anglais encore en français.
