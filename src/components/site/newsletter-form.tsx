@@ -4,7 +4,6 @@ import { CircleCheck, Mail, Smartphone, User } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRef, useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/cn';
 import { useTurnstile } from '@/lib/forms/use-turnstile';
 import { toE164 } from '@/lib/phone';
@@ -134,15 +133,17 @@ export function NewsletterForm() {
           {t('submit')}
         </Button>
       </div>
-      <Checkbox
-        id="newsletter-consent"
-        name="consent"
-        required
-        label={t('consent')}
-        labelClassName="text-[13px] leading-[18px] text-neutral-300"
-        className="xl:max-w-[720px]"
-        {...field('consent')}
-      />
+      {/* Case native (couleur de marque) : le pied de page est présent sur toutes les pages, son JavaScript reste minimal. */}
+      <label className="flex cursor-pointer items-start gap-3 xl:max-w-[720px]">
+        <input
+          type="checkbox"
+          name="consent"
+          required
+          className="mt-px size-[18px] shrink-0 cursor-pointer accent-brand-primary"
+          {...field('consent')}
+        />
+        <span className="font-ui text-[13px] leading-[18px] text-neutral-300">{t('consent')}</span>
+      </label>
       <p
         id="newsletter-error"
         aria-live="polite"
