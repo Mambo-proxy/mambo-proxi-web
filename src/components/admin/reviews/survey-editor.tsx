@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, Trash2 } from 'lucide-react';
-import { useEffect, useId, useState, type ComponentProps } from 'react';
+import { useId, useState, type ComponentProps } from 'react';
 import {
   AddItemButton,
   ConfirmDialog,
@@ -25,6 +25,7 @@ import { ApiError, errorMessage } from '@/lib/api/errors';
 import type { AdminSurveyQuestion, SurveyQuestionInput, SurveyQuestionKind } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { SURVEY_KIND_LABELS, surveyQuestionsKey } from './review-ui';
+import { useUnsavedChangesGuard } from '@/components/admin/editor/use-unsaved-guard';
 
 /** Contrat : 10 questions au plus, dont 5 actives. */
 export const MAX_QUESTIONS = 10;
@@ -349,12 +350,8 @@ function SurveyForm({ initial }: { initial: AdminSurveyQuestion[] }) {
   const dirty = JSON.stringify(questions.map(toInput)) !== saved;
   const activeCount = questions.filter((question) => question.active).length;
 
-  useEffect(() => {
-    if (!dirty) return;
-    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
-    window.addEventListener('beforeunload', warn);
-    return () => window.removeEventListener('beforeunload', warn);
-  }, [dirty]);
+  // Modifications non enregistrées : confirmation avant de fermer l'onglet ou de suivre un lien interne.
+  useUnsavedChangesGuard(dirty);
 
   const save = useMutation({
     mutationFn: (body: SurveyQuestionInput[]) => data(browserApi.PUT('/v1/admin/survey-questions', { body })),

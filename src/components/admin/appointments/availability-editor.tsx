@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowUpRight, Trash2, X } from 'lucide-react';
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { ChipToggle } from '@/components/admin/editor/chip-select';
 import { AddItemButton, EditorLayout, EditorSection, SideCard } from '@/components/admin/editor/editor-ui';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,7 @@ import {
 } from './availability-model';
 import { addDays, todayKey } from './calendar-utils';
 import { FORMAT_LABELS } from './labels';
+import { useUnsavedChangesGuard } from '@/components/admin/editor/use-unsaved-guard';
 
 const FORMATS = Object.entries(FORMAT_LABELS) as [AppointmentFormat, string][];
 const DURATIONS = [15, 30, 45, 60, 90, 120, 180];
@@ -70,13 +71,8 @@ function AvailabilityFormView({ initial }: { initial: AvailabilityConfig }) {
   const { config, origins } = toConfig(form);
   const dirty = JSON.stringify(config) !== JSON.stringify(toConfig(fromConfig(saved)).config);
 
-  // Avertissement avant de quitter la page avec des modifications non enregistrées.
-  useEffect(() => {
-    if (!dirty) return;
-    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
-    window.addEventListener('beforeunload', warn);
-    return () => window.removeEventListener('beforeunload', warn);
-  }, [dirty]);
+  // Modifications non enregistrées : confirmation avant de fermer l'onglet ou de suivre un lien interne.
+  useUnsavedChangesGuard(dirty);
 
   const save = useMutation({
     mutationFn: (body: AvailabilityConfig) => data(browserApi.PUT('/v1/admin/availability', { body })),
