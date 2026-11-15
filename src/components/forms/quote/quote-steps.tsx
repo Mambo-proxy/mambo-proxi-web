@@ -1,26 +1,28 @@
 import { Check } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { ReactNode, Ref } from 'react';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
 
 export type StepState = 'done' | 'active' | 'upcoming';
 
-const STEP_LABELS = ['Service', 'Votre besoin', 'Coordonnées'] as const;
+const STEP_KEYS = ['service', 'need', 'contact'] as const;
 
 /**
  * Indicateur de progression (`70:8191`) : pastilles 28 (faite = vert + coche, active = orange, à venir = gris),
  * libellés Inter SemiBold 14/20, traits de 2 px (vert après une étape faite). En mobile, seul le libellé actif reste.
  */
 export function QuoteProgress({ states }: { states: [StepState, StepState, StepState] }) {
+  const t = useTranslations('forms.quote');
   return (
-    <ol aria-label="Progression de la demande" className="flex items-center gap-1.5 md:gap-3">
-      {STEP_LABELS.map((label, index) => {
+    <ol aria-label={t('progressLabel')} className="flex items-center gap-1.5 md:gap-3">
+      {STEP_KEYS.map((key, index) => {
         const state = states[index]!;
         return (
           <li
-            key={label}
+            key={key}
             aria-current={state === 'active' ? 'step' : undefined}
-            className={cn('flex items-center gap-1.5 md:gap-3', index < STEP_LABELS.length - 1 && 'flex-1')}
+            className={cn('flex items-center gap-1.5 md:gap-3', index < STEP_KEYS.length - 1 && 'flex-1')}
           >
             <span className="flex items-center gap-2.5">
               <span
@@ -41,13 +43,11 @@ export function QuoteProgress({ states }: { states: [StepState, StepState, StepS
                   state !== 'active' && 'max-md:sr-only',
                 )}
               >
-                {label}
-                <span className="sr-only">
-                  {state === 'done' ? ' (terminée)' : state === 'active' ? ' (en cours)' : ' (à venir)'}
-                </span>
+                {t(`steps.${key}`)}
+                <span className="sr-only"> {t(`stepStates.${state}`)}</span>
               </span>
             </span>
-            {index < STEP_LABELS.length - 1 && (
+            {index < STEP_KEYS.length - 1 && (
               <span
                 aria-hidden
                 className={cn(
@@ -77,6 +77,7 @@ type StepCardProps = {
  * En-tête : pastille 36 (faite = vert + coche, sinon numéro blanc sur sombre), titre Poppins 21/28 (18/28), sous-titre.
  */
 export function StepCard({ number, state, title, subtitle, headingRef, children }: StepCardProps) {
+  const t = useTranslations('forms.quote');
   return (
     <section
       aria-labelledby={`etape-${number}`}
@@ -102,7 +103,7 @@ export function StepCard({ number, state, title, subtitle, headingRef, children 
             tabIndex={-1}
             className="font-brand text-[18px] leading-7 font-semibold text-text-main outline-none md:text-[21px]"
           >
-            <span className="sr-only">{`Étape ${number} sur 3 : `}</span>
+            <span className="sr-only">{t('stepOf', { number })}</span>
             {frenchTypography(title)}
           </h2>
           {subtitle && (

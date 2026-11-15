@@ -31,10 +31,6 @@ type CtaBandProps = {
   className?: string;
 };
 
-/** Adresse interne française du site (`/contact`), hors `//hôte` et hors adresses anglaises (`/en`, `/en/…`). */
-const isInternalFrenchPath = (href: string) =>
-  href.startsWith('/') && !href.startsWith('//') && !/^\/en(?:[/?#]|$)/.test(href);
-
 /**
  * Bandeau d'appel à l'action (Figma desktop `56:2092`, mobile `56:2132`) : carte `gradient/energie`
  * rayon 40 (28 en mobile), p 72 (28), titre 52/58 (30/36), texte 19/30 (16/24), bouton Dark + WhatsApp,
@@ -105,24 +101,15 @@ export function CtaBand({
                 {primaryContent}
               </Link>
             )}
-            {secondary &&
-              // Adresse interne du site (`/contact`) : convertie dans la langue de la page. Adresse externe ou qui vise
-              // explicitement l'autre langue (« Lire en anglais » → `/en/…`) : lien tel quel.
-              (isInternalFrenchPath(secondary.href) ? (
-                <Link
-                  href={secondary.href}
-                  className={cn(buttonVariants({ variant: 'whatsapp' }), 'max-md:w-full')}
-                >
-                  {frenchTypography(secondary.label)}
-                </Link>
-              ) : (
-                <a
-                  href={secondary.href}
-                  className={cn(buttonVariants({ variant: 'whatsapp' }), 'max-md:w-full')}
-                >
-                  {frenchTypography(secondary.label)}
-                </a>
-              ))}
+            {secondary && (
+              // Lien tel quel : les liens « Lire en anglais » / « Read in French » visent l'autre langue (JOURNAL).
+              <a
+                href={secondary.href}
+                className={cn(buttonVariants({ variant: 'whatsapp' }), 'max-md:w-full')}
+              >
+                {frenchTypography(secondary.label)}
+              </a>
+            )}
             {whatsappHref && !secondary && (
               <a
                 href={whatsappHref}

@@ -39,7 +39,10 @@ export async function generateMetadata({ params }: LocaleParams): Promise<Metada
 /** « Nos services » (Figma `58:828`, mobile `58:1543`) : héros, rubriques avec leurs services, bandeau CTA. */
 export default async function ServicesPage({ params }: LocaleParams) {
   await withLocale(params);
-  const { page, settings, categories } = await getServicesData();
+  const [{ page, settings, categories }, a11y] = await Promise.all([
+    getServicesData(),
+    getTranslations('site.a11y'),
+  ]);
   if (!page) notFound();
   const whatsappHref = settings.whatsapp.enabled
     ? whatsappUrl(settings.whatsapp.number, settings.whatsapp.message)
@@ -54,7 +57,10 @@ export default async function ServicesPage({ params }: LocaleParams) {
             key={section.id}
             section={section}
             whatsappHref={whatsappHref}
-            breadcrumb={[{ label: 'Accueil', href: routes.home }, { label: page?.title ?? 'Nos services' }]}
+            breadcrumb={[
+              { label: a11y('home'), href: routes.home },
+              { label: page?.title ?? a11y('services') },
+            ]}
           />
         );
       case 'dynamic':

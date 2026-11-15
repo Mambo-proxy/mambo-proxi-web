@@ -1,5 +1,6 @@
 import { CircleAlert } from 'lucide-react';
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { SurveyForm } from '@/components/forms/survey-form';
 import { buttonVariants } from '@/components/ui/button';
@@ -11,7 +12,11 @@ import { frenchTypography } from '@/lib/format/typography';
 import { routes } from '@/lib/routes';
 import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-export const metadata: Metadata = { title: 'Questionnaire de satisfaction' };
+export async function generateMetadata({ params }: Params): Promise<Metadata> {
+  await withLocale(params);
+  const t = await getTranslations('forms.survey');
+  return { title: t('title') };
+}
 
 type Params = LocaleParams<{ token: string }>;
 
@@ -20,7 +25,8 @@ const CARD =
   'flex w-full max-w-[720px] flex-col gap-6 self-start rounded-[28px] border border-border-default bg-neutral-0 p-[22px] md:gap-7 md:p-12';
 
 /** État d'un lien inutilisable (invalide, expiré ou déjà utilisé) : message de l'API et retour au site. */
-function Unavailable({ title, message }: { title: string; message: string }) {
+async function Unavailable({ title, message }: { title: string; message: string }) {
+  const t = await getTranslations('forms.survey.page');
   return (
     <div className={`${CARD} items-center text-center`}>
       <span aria-hidden className="flex size-14 items-center justify-center rounded-full bg-orange-50">
@@ -32,10 +38,10 @@ function Unavailable({ title, message }: { title: string; message: string }) {
       <p className="font-ui text-[16px] leading-6 text-text-muted">{frenchTypography(message)}</p>
       <div className="flex w-full flex-col gap-2.5 md:w-auto md:flex-row">
         <Link href={routes.contact} className={buttonVariants({ variant: 'outline' })}>
-          Nous contacter
+          {t('contactUs')}
         </Link>
         <Link href={routes.home} className={buttonVariants()}>
-          Retour à l’accueil
+          {t('home')}
         </Link>
       </div>
     </div>
@@ -47,8 +53,9 @@ function Unavailable({ title, message }: { title: string; message: string }) {
  * après la prestation. Jeton inconnu → « lien non valide » ; expiré ou déjà utilisé (410) → message de l'API.
  */
 export default async function SurveyPage({ params }: Params) {
-  await withLocale(params);
+  const locale = await withLocale(params);
   const { token } = await params;
+  const t = await getTranslations('forms.survey');
   const {
     data: survey,
     error,
@@ -61,34 +68,22 @@ export default async function SurveyPage({ params }: Params) {
   if (!survey) {
     const detail = isProblem(error) ? error.detail : null;
     if (response.status === 410)
-      return (
-        <Unavailable title="Ce questionnaire n’est plus disponible" message={detail ?? 'Ce lien a expiré.'} />
-      );
+      return <Unavailable title={t('page.expiredTitle')} message={detail ?? t('page.expiredMessage')} />;
     // Lien inconnu : 404 (ou 400/422 pour un jeton mal formé). Trop de requêtes (429) ou API indisponible : à réessayer.
     if (response.status === 429 || response.status >= 500)
-      return (
-        <Unavailable
-          title="Le questionnaire n’a pas pu être chargé"
-          message="Merci de réessayer dans quelques instants."
-        />
-      );
-    return (
-      <Unavailable
-        title="Ce lien n’est pas valide"
-        message={detail ?? 'Vérifiez le lien reçu par e-mail, ou contactez-nous.'}
-      />
-    );
+      return <Unavailable title={t('page.loadErrorTitle')} message={t('page.loadErrorMessage')} />;
+    return <Unavailable title={t('page.invalidTitle')} message={detail ?? t('page.invalidMessage')} />;
   }
 
-  const date = survey.serviceDate ? formatLongDate(survey.serviceDate) : null;
+  const date = survey.serviceDate ? formatLongDate(survey.serviceDate, undefined, locale) : null;
   return (
     <div className={CARD}>
       <div className="flex flex-col gap-2.5">
         <p className="font-ui text-[12px] leading-4 font-semibold tracking-[0.08em] text-text-brand uppercase">
-          Questionnaire de satisfaction
+          {t('title')}
         </p>
         <h1 className="font-brand text-[24px] leading-[30px] font-semibold tracking-[-0.01em] text-text-main md:text-[32px] md:leading-10">
-          {frenchTypography('Comment s’est passée votre prestation ?')}
+          {frenchTypography(t('page.heading'))}
         </h1>
         {/* Résumé de la prestation à 10 sous le titre, comme la maquette (`82:9580`). */}
         <div className="flex items-center gap-3 rounded-2xl bg-neutral-50 p-3.5">
@@ -97,7 +92,9 @@ export default async function SurveyPage({ params }: Params) {
             <p className="font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main">
               {[survey.service.name, date].filter(Boolean).join(' · ')}
             </p>
-            <p className="text-caption text-text-muted">{`Demande ${survey.reference}`}</p>
+            <p className="text-caption text-text-muted">
+              {t('page.request', { reference: survey.reference })}
+            </p>
           </div>
         </div>
       </div>

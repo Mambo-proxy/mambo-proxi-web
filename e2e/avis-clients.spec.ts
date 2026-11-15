@@ -43,7 +43,7 @@ test.describe('avis clients', () => {
   test('version anglaise : note, filtres, tri et badges traduits', async ({ page }) => {
     await page.goto('/en/reviews', { waitUntil: 'domcontentloaded' });
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('What our clients say about us.');
-    await expect(page.getByRole('navigation', { name: "Fil d'Ariane" })).toContainText('Home');
+    await expect(page.getByRole('navigation', { name: 'Breadcrumb' })).toContainText('Home');
     await expect(page.getByText('120 verified reviews')).toBeVisible();
     await expect(page.locator('main section').first()).toContainText('4.9 out of 5');
     const filters = page.getByRole('navigation', { name: 'Filter by category' });

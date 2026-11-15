@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { ChevronRight } from 'lucide-react';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { Fragment } from 'react';
@@ -14,8 +15,9 @@ export type BreadcrumbItem = { label: string; href?: string };
  * Accompagné des données structurées `BreadcrumbList`.
  */
 export function Breadcrumb({ items, className }: { items: BreadcrumbItem[]; className?: string }) {
+  const t = useTranslations('site.a11y');
   return (
-    <nav aria-label="Fil d'Ariane" className={className}>
+    <nav aria-label={t('breadcrumb')} className={className}>
       <ol className="flex flex-wrap items-center gap-1.5 font-ui text-[13px] leading-4 tracking-[0.01em]">
         {items.map((item, index) => {
           const current = index === items.length - 1;

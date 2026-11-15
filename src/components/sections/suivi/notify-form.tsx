@@ -1,11 +1,12 @@
 'use client';
 
 import { CircleCheck, Mail } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { browserApi } from '@/lib/api/browser';
 import { errorMessage, toApiError } from '@/lib/api/errors';
-import { fieldRules } from '@/lib/forms/schemas';
+import { useFormCommon } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
 
 type State =
@@ -19,15 +20,17 @@ type State =
  * source `suivi-mambo` et double opt-in (e-mail de confirmation), comme le formulaire du pied de page.
  */
 export function NotifyForm() {
+  const t = useTranslations('forms.notify');
+  const common = useFormCommon();
   const antiSpam = useAntiSpam();
   const [email, setEmail] = useState('');
   const [state, setState] = useState<State>({ kind: 'idle' });
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const parsed = fieldRules.email.safeParse(email);
+    const parsed = common.rules.email.safeParse(email);
     if (!parsed.success) {
-      setState({ kind: 'error', message: parsed.error.issues[0]?.message ?? 'Adresse e-mail invalide.' });
+      setState({ kind: 'error', message: parsed.error.issues[0]?.message ?? t('invalidEmail') });
       return;
     }
     setState({ kind: 'sending' });
@@ -44,12 +47,10 @@ export function NotifyForm() {
       if (!response.ok || !data) throw toApiError(error, response);
       setState({
         kind: 'done',
-        message: data.alreadySubscribed
-          ? 'Vous êtes déjà inscrit : nous vous préviendrons dès l’ouverture de Suivi Mambo.'
-          : 'Merci ! Confirmez votre adresse dans l’e-mail que nous venons de vous envoyer : nous vous préviendrons dès l’ouverture.',
+        message: data.alreadySubscribed ? t('alreadySubscribed') : t('subscribed'),
       });
     } catch (caught) {
-      setState({ kind: 'error', message: errorMessage(caught) });
+      setState({ kind: 'error', message: errorMessage(caught, common.t('unexpectedError')) });
     }
   }
 
@@ -63,17 +64,12 @@ export function NotifyForm() {
   }
 
   return (
-    <form
-      noValidate
-      onSubmit={submit}
-      aria-label="Être prévenu de l’ouverture"
-      className="flex flex-col gap-2"
-    >
+    <form noValidate onSubmit={submit} aria-label={t('formLabel')} className="flex flex-col gap-2">
       <input {...antiSpam.honeypotProps} />
       <div {...antiSpam.widgetProps} />
       <div className="flex flex-col gap-2.5 md:flex-row">
         <label className="relative flex-1">
-          <span className="sr-only">Votre adresse e-mail</span>
+          <span className="sr-only">{t('emailLabel')}</span>
           <Mail
             aria-hidden
             size={18}
@@ -85,14 +81,14 @@ export function NotifyForm() {
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="Votre adresse e-mail"
+            placeholder={t('emailLabel')}
             aria-invalid={state.kind === 'error' ? true : undefined}
             aria-describedby="suivi-message"
             className="w-full rounded-md border border-border-strong bg-neutral-0 py-3.5 pr-[18px] pl-12 font-ui text-[16px] leading-6 text-text-main placeholder:text-text-subtle focus:border-brand-primary focus:ring-1 focus:ring-brand-primary focus:outline-none aria-invalid:border-feedback-error"
           />
         </label>
         <Button type="submit" loading={state.kind === 'sending'} className="max-md:w-full md:self-center">
-          Me prévenir
+          {t('submit')}
         </Button>
       </div>
       <p

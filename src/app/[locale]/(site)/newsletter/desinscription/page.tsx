@@ -1,8 +1,13 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { TokenAction } from '@/components/sections/system/token-action';
 import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-export const metadata: Metadata = { title: 'Désinscription de la newsletter', robots: { index: false } };
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await withLocale(params);
+  const t = await getTranslations('system.meta');
+  return { title: t('newsletterUnsubscribe'), robots: { index: false } };
+}
 
 type SearchParams = { searchParams: Promise<{ token?: string }> };
 

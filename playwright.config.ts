@@ -39,6 +39,8 @@ export default defineConfig({
     timeout: 300_000,
     env: {
       NEXT_PUBLIC_API_MOCKING: 'enabled',
+      // Données simulées datées (agenda, magazine) : date figée, indépendante du jour du test (`src/mocks/clock.ts`).
+      NEXT_PUBLIC_MOCK_NOW: '2026-11-01T08:00:00.000Z',
       NEXT_PUBLIC_SITE_URL: `http://localhost:${PORT}`,
       NEXT_TELEMETRY_DISABLED: '1',
     },

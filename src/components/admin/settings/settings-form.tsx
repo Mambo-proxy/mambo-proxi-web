@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import { toast } from '@/components/ui/toaster';
 import { data } from '@/lib/admin/query';
 import { browserApi } from '@/lib/api/browser';
@@ -16,6 +16,7 @@ import type {
   SettingsSeo,
   SettingsWhatsapp,
 } from '@/lib/api/schema';
+import { useUnsavedChangesGuard } from '@/components/admin/editor/use-unsaved-guard';
 
 /** Groupes de paramètres modifiés par l'écran (enregistrés ensemble par « Enregistrer »). */
 export type GroupValues = {
@@ -69,13 +70,8 @@ export function useSettingsDrafts() {
     [client],
   );
 
-  // Modifications non enregistrées : le navigateur demande confirmation avant de quitter la page.
-  useEffect(() => {
-    if (!dirty) return;
-    const onBeforeUnload = (event: BeforeUnloadEvent) => event.preventDefault();
-    window.addEventListener('beforeunload', onBeforeUnload);
-    return () => window.removeEventListener('beforeunload', onBeforeUnload);
-  }, [dirty]);
+  // Modifications non enregistrées : confirmation avant de fermer l'onglet ou de suivre un lien interne.
+  useUnsavedChangesGuard(dirty);
 
   async function save() {
     const entries = Object.entries(drafts) as [EditableGroup, GroupValues[EditableGroup]][];

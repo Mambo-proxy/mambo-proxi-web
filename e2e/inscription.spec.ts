@@ -5,7 +5,8 @@ test.describe('inscription', () => {
     test(`${path} : accessible, sans débordement`, async ({ page, pageErrors }) => {
       await page.goto(path, { waitUntil: 'domcontentloaded' });
       await expect(page.getByRole('heading', { level: 1 })).toHaveText('Valider mon inscription');
-      await expect(page.getByRole('checkbox', { name: /lettre Mambo/ })).not.toBeChecked();
+      // Case du formulaire (le pied de page a sa propre case de consentement à la lettre Mambo).
+      await expect(page.getByRole('main').getByRole('checkbox', { name: /lettre Mambo/ })).not.toBeChecked();
       await expectNoHorizontalScroll(page);
       await expectAccessible(page);
       expect(pageErrors).toEqual([]);
@@ -55,8 +56,8 @@ test.describe('inscription', () => {
   for (const path of ['/inscription?profil=professionnel', '/en/sign-up?profil=professionnel']) {
     test(`arrivée sur ${path} : profil professionnel sélectionné`, async ({ page, pageErrors }) => {
       await page.goto(path, { waitUntil: 'domcontentloaded' });
-      await expect(page.getByRole('radio', { name: /professionnel/i })).toBeChecked();
-      await expect(page.getByLabel(/Nom de la structure/)).toBeVisible();
+      await expect(page.getByRole('radio', { name: /professionnel|professional/i })).toBeChecked();
+      await expect(page.getByLabel(/Nom de la structure|Business name/)).toBeVisible();
       expect(pageErrors).toEqual([]);
     });
   }

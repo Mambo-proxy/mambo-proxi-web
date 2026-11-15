@@ -1,11 +1,16 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { TokenAction } from '@/components/sections/system/token-action';
 import { buttonVariants } from '@/components/ui/button';
 import { routes } from '@/lib/routes';
 import { withLocale, type LocaleParams } from '@/i18n/request-locale';
 
-export const metadata: Metadata = { title: 'Confirmer votre rendez-vous', robots: { index: false } };
+export async function generateMetadata({ params }: LocaleParams): Promise<Metadata> {
+  await withLocale(params);
+  const t = await getTranslations('system.meta');
+  return { title: t('appointmentAccept'), robots: { index: false } };
+}
 
 type SearchParams = { searchParams: Promise<{ ref?: string; token?: string }> };
 
@@ -15,7 +20,7 @@ type SearchParams = { searchParams: Promise<{ ref?: string; token?: string }> };
  */
 export default async function AcceptAppointmentPage({ params, searchParams }: LocaleParams & SearchParams) {
   await withLocale(params);
-  const { ref, token } = await searchParams;
+  const [{ ref, token }, t] = await Promise.all([searchParams, getTranslations('system')]);
   return (
     <TokenAction
       kind="appointment-accept"
@@ -23,7 +28,7 @@ export default async function AcceptAppointmentPage({ params, searchParams }: Lo
       reference={ref ?? null}
       extra={
         <Link href={routes.rendezVous} className={buttonVariants()}>
-          Choisir un autre créneau
+          {t('otherSlot')}
         </Link>
       }
     />

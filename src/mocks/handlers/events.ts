@@ -1,4 +1,5 @@
 import { http, HttpResponse } from 'msw';
+import { mockNow } from '../clock';
 import type { Event, PublishStatus } from '@/lib/api/schema';
 import operations from '../data/contract-examples.json';
 
@@ -116,7 +117,7 @@ export const agendaEvents: StoredEvent[] = [
 ];
 
 /** Événements publiés à venir, du plus proche au plus lointain (agenda du site). */
-export function publishedEvents(now = Date.now()): Event[] {
+export function publishedEvents(now = mockNow()): Event[] {
   return agendaEvents
     .filter((event) => event.status === 'PUBLISHED' && Date.parse(event.startsAt) >= now)
     .sort((a, b) => a.startsAt.localeCompare(b.startsAt))

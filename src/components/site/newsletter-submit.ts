@@ -9,6 +9,8 @@ export type NewsletterRequest = {
   startedAt: string;
   /** Jeton Turnstile obtenu par le formulaire (vide sans clé publique). */
   turnstileToken: string;
+  /** Message d'une erreur réseau dans la langue de la page (`forms.common.unexpectedError`). */
+  unexpectedError: string;
 };
 
 export type NewsletterResult =
@@ -42,6 +44,6 @@ export async function subscribeToNewsletter(request: NewsletterRequest): Promise
     const fields = caught instanceof ApiError ? caught.fieldErrors : {};
     if (fields.email) return { ok: false, field: 'email', message: fields.email };
     if (fields.phone) return { ok: false, field: 'phone', message: fields.phone };
-    return { ok: false, message: errorMessage(caught) };
+    return { ok: false, message: errorMessage(caught, request.unexpectedError) };
   }
 }

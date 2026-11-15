@@ -1,6 +1,7 @@
 'use client';
 
 import type { Route } from 'next';
+import { useTranslations } from 'next-intl';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -11,40 +12,17 @@ import { StatusCard } from './status-card';
 
 type Kind = 'newsletter-confirm' | 'newsletter-unsubscribe' | 'appointment-accept';
 
-type Copy = {
-  /** Écran avant l'action (actions sur clic uniquement). */
-  ask?: { title: string; text: string; button: string };
-  pending: string;
-  success: string;
-  failure: string;
-};
+/** Textes de chaque action : `system.tokenAction.<clé>`. */
+const COPY_KEY = {
+  'newsletter-confirm': 'newsletterConfirm',
+  'newsletter-unsubscribe': 'newsletterUnsubscribe',
+  'appointment-accept': 'appointmentAccept',
+} as const;
 
-const COPY: Record<Kind, Copy> = {
-  'newsletter-confirm': {
-    pending: 'Confirmation de votre inscription…',
-    success: 'Inscription confirmée',
-    failure: 'Confirmation impossible',
-  },
-  'newsletter-unsubscribe': {
-    ask: {
-      title: 'Se désinscrire de la lettre Mambo',
-      text: 'Vous ne recevrez plus nos nouveautés, sorties culturelles et conseils. Vous pourrez vous réinscrire à tout moment.',
-      button: 'Confirmer ma désinscription',
-    },
-    pending: 'Désinscription en cours…',
-    success: 'Désinscription effectuée',
-    failure: 'Désinscription impossible',
-  },
-  'appointment-accept': {
-    ask: {
-      title: 'Confirmer le créneau proposé',
-      text: 'L’agence vous a proposé un nouveau créneau pour votre rendez-vous. Confirmez-le pour recevoir l’invitation.',
-      button: 'Confirmer ce rendez-vous',
-    },
-    pending: 'Confirmation du rendez-vous…',
-    success: 'Rendez-vous confirmé',
-    failure: 'Confirmation impossible',
-  },
+/** Actions sur clic uniquement : écran de demande avant l'action. */
+const ASK_KEY: Partial<Record<Kind, 'newsletterUnsubscribe' | 'appointmentAccept'>> = {
+  'newsletter-unsubscribe': 'newsletterUnsubscribe',
+  'appointment-accept': 'appointmentAccept',
 };
 
 type State = { step: 'ask' | 'pending' } | { step: 'done' | 'failed'; message: string };
@@ -75,13 +53,16 @@ export function TokenAction({
   /** Action complémentaire après un échec (ex. « Prendre un autre rendez-vous »). */
   extra?: ReactNode;
 }) {
-  const copy = COPY[kind];
-  const [state, setState] = useState<State>({ step: copy.ask ? 'ask' : 'pending' });
+  const t = useTranslations('system.tokenAction');
+  const common = useTranslations('forms.common');
+  const key = COPY_KEY[kind];
+  const askKey = ASK_KEY[kind];
+  const [state, setState] = useState<State>({ step: askKey ? 'ask' : 'pending' });
   const started = useRef(false);
 
   async function run() {
     if (!token) {
-      setState({ step: 'failed', message: 'Ce lien est incomplet. Vérifiez le lien reçu par e-mail.' });
+      setState({ step: 'failed', message: t('incompleteLink') });
       return;
     }
     setState({ step: 'pending' });
@@ -90,12 +71,12 @@ export function TokenAction({
       if (!response.ok || !data) throw toApiError(error, response);
       setState({ step: 'done', message: data.message });
     } catch (caught) {
-      setState({ step: 'failed', message: errorMessage(caught) });
+      setState({ step: 'failed', message: errorMessage(caught, common('unexpectedError')) });
     }
   }
 
   useEffect(() => {
-    if (copy.ask || started.current) return;
+    if (askKey || started.current) return;
     started.current = true;
     void run();
     // Une seule fois, à l'ouverture du lien.
@@ -104,29 +85,29 @@ export function TokenAction({
 
   const home = (
     <Link href={routes.home} className={buttonVariants({ variant: 'outline' })}>
-      Retour à l’accueil
+      {t('home')}
     </Link>
   );
 
-  if (state.step === 'ask' && copy.ask)
+  if (state.step === 'ask' && askKey)
     return (
-      <StatusCard tone="info" title={copy.ask.title} text={copy.ask.text}>
-        <Button onClick={() => void run()}>{copy.ask.button}</Button>
+      <StatusCard tone="info" title={t(`${askKey}.askTitle`)} text={t(`${askKey}.askText`)}>
+        <Button onClick={() => void run()}>{t(`${askKey}.askButton`)}</Button>
         {home}
       </StatusCard>
     );
-  if (state.step === 'pending') return <StatusCard tone="pending" title={copy.pending} />;
+  if (state.step === 'pending') return <StatusCard tone="pending" title={t(`${key}.pending`)} />;
   if (state.step === 'done')
     return (
-      <StatusCard tone="success" title={copy.success} text={state.message}>
+      <StatusCard tone="success" title={t(`${key}.success`)} text={state.message}>
         <Link href={'/services' as Route} className={buttonVariants()}>
-          Découvrir nos services
+          {t('discoverServices')}
         </Link>
         {home}
       </StatusCard>
     );
   return (
-    <StatusCard tone="error" title={copy.failure} text={'message' in state ? state.message : null}>
+    <StatusCard tone="error" title={t(`${key}.failure`)} text={'message' in state ? state.message : null}>
       {extra}
       {home}
     </StatusCard>

@@ -12,7 +12,7 @@ import {
   startOfMonth,
   startOfWeek,
 } from 'date-fns';
-import { fr } from 'date-fns/locale';
+import { enGB, fr } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRef, useState, type KeyboardEvent } from 'react';
 import { cn } from '@/lib/cn';
@@ -35,7 +35,13 @@ type CalendarProps = {
   minMonth?: Date;
   maxMonth?: Date;
   className?: string;
+  /** Langue des mois et des jours (site anglais : `en`). */
+  locale?: 'fr' | 'en';
+  /** Libellés des boutons de navigation (français par défaut). */
+  labels?: { previousMonth: string; nextMonth: string };
 };
+
+const FRENCH_LABELS = { previousMonth: 'Mois précédent', nextMonth: 'Mois suivant' };
 
 /**
  * Calendrier de prise de rendez-vous (Contact `69:7903`) : carte blanche rayon 20, p 20, gap 12 ;
@@ -51,7 +57,10 @@ export function Calendar({
   minMonth,
   maxMonth,
   className,
+  locale: language = 'fr',
+  labels = FRENCH_LABELS,
 }: CalendarProps) {
+  const dateLocale = language === 'en' ? enGB : fr;
   const gridRef = useRef<HTMLTableElement>(null);
   const firstAvailable = eachDayOfInterval({ start: startOfMonth(month), end: endOfMonth(month) })
     .map(toKey)
@@ -102,7 +111,7 @@ export function Calendar({
     moveFocus(toKey(step()));
   }
 
-  const monthLabel = format(month, 'MMMM yyyy', { locale: fr });
+  const monthLabel = format(month, 'MMMM yyyy', { locale: dateLocale });
 
   return (
     <div
@@ -116,7 +125,7 @@ export function Calendar({
           type="button"
           onClick={() => onMonthChange(addMonths(month, -1))}
           disabled={!canGoBack}
-          aria-label="Mois précédent"
+          aria-label={labels.previousMonth}
           className="flex size-9 cursor-pointer items-center justify-center rounded-full text-icon-default hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ChevronLeft aria-hidden size={18} />
@@ -131,7 +140,7 @@ export function Calendar({
           type="button"
           onClick={() => onMonthChange(addMonths(month, 1))}
           disabled={!canGoForward}
-          aria-label="Mois suivant"
+          aria-label={labels.nextMonth}
           className="flex size-9 cursor-pointer items-center justify-center rounded-full text-icon-default hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ChevronRight aria-hidden size={18} />
@@ -149,10 +158,10 @@ export function Calendar({
               <th
                 key={toKey(day)}
                 scope="col"
-                abbr={format(day, 'EEEE', { locale: fr })}
+                abbr={format(day, 'EEEE', { locale: dateLocale })}
                 className="h-6 p-0 font-ui text-[12px] leading-4 font-medium text-text-muted"
               >
-                {format(day, 'EEEEE', { locale: fr }).toUpperCase()}
+                {format(day, 'EEEEE', { locale: dateLocale }).toUpperCase()}
               </th>
             ))}
           </tr>
@@ -173,7 +182,7 @@ export function Calendar({
                       tabIndex={key === focusKey ? 0 : -1}
                       aria-disabled={!available || undefined}
                       aria-pressed={isSelected}
-                      aria-label={format(day, 'EEEE d MMMM yyyy', { locale: fr })}
+                      aria-label={format(day, 'EEEE d MMMM yyyy', { locale: dateLocale })}
                       onClick={() => available && onSelect(key)}
                       onKeyDown={(event) => onKeyDown(event, day)}
                       onFocus={() => setFocused(key)}

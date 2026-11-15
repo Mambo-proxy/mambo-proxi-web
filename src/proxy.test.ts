@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { server } from '@/mocks/node';
 import { resetSessionRenewals } from '@/lib/admin/session-renewal';
-import { proxy, resetMaintenanceCache } from './proxy';
+import { proxy, resetMaintenanceCache, resetSessionChecks } from './proxy';
 
 function request(path: string, cookies: Record<string, string> = {}) {
   const headers = new Headers();
@@ -25,6 +25,7 @@ function maintenance(enabled: boolean) {
 beforeEach(() => {
   resetMaintenanceCache();
   resetSessionRenewals();
+  resetSessionChecks();
 });
 afterEach(() => vi.unstubAllEnvs());
 
@@ -171,8 +172,22 @@ describe('proxy — maintenance', () => {
 
   it('les membres de l’équipe connectés voient toujours le site', async () => {
     maintenance(true);
-    const response = await proxy(request('/services', { mp_at: 'jeton' }));
+    server.use(
+      http.get('*/v1/auth/me', ({ request: incoming }) =>
+        incoming.headers.get('cookie') === 'mp_at=jeton-valide'
+          ? HttpResponse.json({ id: 'usr_1' })
+          : new HttpResponse(null, { status: 401 }),
+      ),
+    );
+    const response = await proxy(request('/services', { mp_at: 'jeton-valide' }));
     expect(response.status).toBe(200);
+  });
+
+  it('un cookie de session factice ne contourne pas la maintenance', async () => {
+    maintenance(true);
+    server.use(http.get('*/v1/auth/me', () => new HttpResponse(null, { status: 401 })));
+    const response = await proxy(request('/services', { mp_at: 'faux', mp_rt: 'faux' }));
+    expect(response.status).toBe(503);
   });
 
   it('MAINTENANCE_MODE=on force la maintenance même si l’API ne répond pas', async () => {

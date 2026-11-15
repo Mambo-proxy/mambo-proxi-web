@@ -1,11 +1,14 @@
 import { Calendar, MapPin, Users } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { UseFormRegisterReturn } from 'react-hook-form';
 import { Field, Input, Select, Textarea } from '@/components/ui/field';
 import type { QuoteField } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
 
+/** Villes proposées par défaut : valeurs en français (lues par l'équipe), « Autre » traduit à l'affichage. */
 const DEFAULT_CITIES = ['Douala', 'Yaoundé', 'Kribi', 'Autre'];
+const OTHER_CITY = 'Autre';
 
 /** Date du jour au format `AAAA-MM-JJ` (borne basse des champs date). */
 function today(): string {
@@ -25,6 +28,7 @@ type NeedFieldProps = {
  * date (icône calendrier), ville (liste + repère), nombre (icône personnes), liste, texte, zone de texte ou puces.
  */
 export function NeedField({ field, registration, error, value }: NeedFieldProps) {
+  const t = useTranslations('forms.quote');
   const label = frenchTypography(field.label);
   const help = field.helpText ? frenchTypography(field.helpText) : undefined;
   const placeholder = field.placeholder ?? undefined;
@@ -82,10 +86,10 @@ export function NeedField({ field, registration, error, value }: NeedFieldProps)
             const options = field.options?.length ? field.options : DEFAULT_CITIES;
             return (
               <Select icon={field.type === 'city' ? MapPin : undefined} {...control} {...registration}>
-                <option value="">Choisir</option>
+                <option value="">{t('choose')}</option>
                 {options.map((option) => (
                   <option key={option} value={option}>
-                    {option}
+                    {options === DEFAULT_CITIES && option === OTHER_CITY ? t('otherCity') : option}
                   </option>
                 ))}
               </Select>

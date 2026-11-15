@@ -65,7 +65,9 @@ test.describe('gabarit des pages publiques', () => {
     expect(gtag).toEqual([]);
   });
 
-  test('newsletter : adresse invalide puis adresse déjà inscrite', async ({ page }) => {
+  test('newsletter : adresse invalide, consentement manquant puis adresse déjà inscrite', async ({
+    page,
+  }) => {
     const form = page.getByRole('form', { name: 'Inscription à la lettre Mambo' });
     const email = form.getByRole('textbox', { name: 'Votre adresse e-mail' });
     await expect(async () => {
@@ -77,6 +79,14 @@ test.describe('gabarit des pages publiques', () => {
     }).toPass();
     await expect(email).toHaveAttribute('aria-invalid', 'true');
     await email.fill('deja@exemple.fr');
+    await form.getByRole('button', { name: "S'abonner" }).click();
+    // Case de consentement obligatoire, jamais cochée par défaut.
+    const consent = form.getByRole('checkbox', { name: /J’accepte de recevoir la lettre Mambo/ });
+    await expect(consent).not.toBeChecked();
+    await expect(
+      form.getByText('Merci de cocher la case pour accepter de recevoir la lettre Mambo.'),
+    ).toBeVisible();
+    await consent.check();
     await form.getByRole('button', { name: "S'abonner" }).click();
     // Premier envoi : le module des mocks est chargé à la demande dans le navigateur.
     await expect(page.getByRole('status').filter({ hasText: 'déjà inscrit' })).toBeVisible({

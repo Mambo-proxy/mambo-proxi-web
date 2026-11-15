@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { Sparkles } from 'lucide-react';
 import { Fragment } from 'react';
 import type { MarqueeSection } from '@/lib/api/schema';
@@ -33,10 +34,11 @@ function Track({ items, className }: { items: string[]; className?: string }) {
  * bords estompés. Liste réduite en mobile (`itemsMobile`).
  */
 export function MarqueeBand({ section }: { section: MarqueeSection }) {
+  const t = useTranslations('site.a11y');
   const mobileItems = section.itemsMobile?.length ? section.itemsMobile : null;
   return (
     <section
-      aria-label="Nos services en bref"
+      aria-label={t('servicesMarquee')}
       className="group/marquee overflow-hidden border-y border-border-default bg-neutral-0 [mask-image:linear-gradient(90deg,transparent,black_6%,black_94%,transparent)] py-[17px] md:py-[22px]"
     >
       <Track items={section.items} className={mobileItems ? 'max-md:hidden' : undefined} />

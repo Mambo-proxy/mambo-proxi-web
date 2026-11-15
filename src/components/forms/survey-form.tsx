@@ -1,6 +1,7 @@
 'use client';
 
 import { Check, Star } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -14,9 +15,6 @@ import { frenchTypography } from '@/lib/format/typography';
 import { useSiteRouter } from '@/i18n/site-link';
 
 type Value = number | string | null;
-
-const PUBLISH_TEXT =
-  'J’accepte que mon avis (prénom, ville, note et commentaire) soit publié sur le site après validation par l’agence.';
 
 /** Valeur renseignée (le texte libre compte dès qu'il n'est pas vide). */
 const answered = (value: Value | undefined) =>
@@ -32,6 +30,7 @@ function StarsQuestion({
   value: number | null;
   onChange: (value: number) => void;
 }) {
+  const t = useTranslations('forms.survey');
   const [hover, setHover] = useState<number | null>(null);
   const shown = hover ?? value ?? 0;
   const label = shown ? question.options[shown - 1] : null;
@@ -52,7 +51,11 @@ function StarsQuestion({
               onChange={() => onChange(rating)}
               className="sr-only"
             />
-            <span className="sr-only">{`${rating} sur 5${question.options[rating - 1] ? ` : ${question.options[rating - 1]}` : ''}`}</span>
+            <span className="sr-only">
+              {question.options[rating - 1]
+                ? t('starLabelWithText', { rating, label: question.options[rating - 1]! })
+                : t('starLabel', { rating })}
+            </span>
             <Star
               aria-hidden
               strokeWidth={1.5}
@@ -169,6 +172,8 @@ function NpsQuestion({
  * `POST /v1/surveys/{token}/responses` puis page de remerciement.
  */
 export function SurveyForm({ token, questions }: { token: string; questions: SurveyQuestion[] }) {
+  const t = useTranslations('forms.survey');
+  const common = useTranslations('forms.common');
   const router = useSiteRouter();
   const sorted = [...questions].sort((a, b) => a.order - b.order);
   const [values, setValues] = useState<Record<string, Value>>({});
@@ -206,24 +211,19 @@ export function SurveyForm({ token, questions }: { token: string; questions: Sur
       router.push('/questionnaire/merci');
     } catch (caught) {
       setSending(false);
-      toast.error(formErrorMessage(caught, () => false));
+      toast.error(formErrorMessage(caught, () => false, common('unexpectedError')));
     }
   }
 
   return (
-    <form
-      noValidate
-      onSubmit={submit}
-      aria-label="Questionnaire de satisfaction"
-      className="flex flex-col gap-6 md:gap-7"
-    >
+    <form noValidate onSubmit={submit} aria-label={t('title')} className="flex flex-col gap-6 md:gap-7">
       <div
         role="progressbar"
-        aria-label="Progression du questionnaire"
+        aria-label={t('progressLabel')}
         aria-valuemin={0}
         aria-valuemax={sorted.length}
         aria-valuenow={done}
-        aria-valuetext={`${done} question${done > 1 ? 's' : ''} sur ${sorted.length}`}
+        aria-valuetext={t('progressValue', { done, total: sorted.length })}
         className="flex gap-1.5"
       >
         {sorted.map((question, index) => (
@@ -239,7 +239,7 @@ export function SurveyForm({ token, questions }: { token: string; questions: Sur
 
       {sorted.map((question, index) => {
         const title = `${index + 1}. ${question.label}`;
-        const error = missing.includes(question.id) ? 'Merci de répondre à cette question.' : null;
+        const error = missing.includes(question.id) ? t('required') : null;
         if (question.kind === 'TEXT') {
           return (
             <fieldset key={question.id} className="flex flex-col gap-3">
@@ -250,12 +250,12 @@ export function SurveyForm({ token, questions }: { token: string; questions: Sur
               >
                 {frenchTypography(title)}
               </legend>
-              <Field label={question.helpText ?? 'Votre réponse'} error={error}>
+              <Field label={question.helpText ?? t('answerLabel')} error={error}>
                 {(control) => (
                   <Textarea
                     rows={3}
                     maxLength={2000}
-                    placeholder="Ce qui vous a plu, ce que nous pouvons améliorer…"
+                    placeholder={t('answerPlaceholder')}
                     value={(values[question.id] as string | undefined) ?? ''}
                     onChange={(event) => set(question.id, event.target.value)}
                     {...control}
@@ -315,15 +315,15 @@ export function SurveyForm({ token, questions }: { token: string; questions: Sur
 
       <Checkbox
         id="questionnaire-publication"
-        label={PUBLISH_TEXT}
+        label={t('publishConsent')}
         checked={publish}
         onChange={(event) => setPublish(event.target.checked)}
       />
       <Button type="submit" fullWidth loading={sending}>
-        Envoyer mes réponses
+        {t('submit')}
       </Button>
       <p className="text-center font-ui text-[12px] leading-4 text-text-muted">
-        {`2 minutes · ${sorted.length} questions · réponses confidentielles`}
+        {t('footer', { count: sorted.length })}
       </p>
     </form>
   );

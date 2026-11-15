@@ -116,7 +116,7 @@ test.describe('devis gratuit', () => {
     await page.goto('/en/free-quote?service=chef-prive', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('input[name="serviceSlug"][value="chef-prive"]')).toBeChecked();
     await expect(page.locator('input[name="categorySlug"][value="experience"]')).toBeChecked();
-    await expect(page.getByRole('listitem').filter({ hasText: 'Votre besoin (en cours)' })).toHaveAttribute(
+    await expect(page.getByRole('listitem').filter({ hasText: 'Your needs (current)' })).toHaveAttribute(
       'aria-current',
       'step',
     );

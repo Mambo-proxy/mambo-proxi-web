@@ -25,14 +25,22 @@ export function formatShortDate(date: DateInput, timeZone = DEFAULT_TIME_ZONE): 
   return format(inZone(date, timeZone), 'dd/MM/yyyy', { locale: fr });
 }
 
-/** « mardi 6 octobre ». */
-export function formatWeekdayDate(date: DateInput, timeZone = DEFAULT_TIME_ZONE): string {
-  return format(inZone(date, timeZone), 'EEEE d MMMM', { locale: fr });
+/** « mardi 6 octobre » (anglais : « Tuesday 6 October »). */
+export function formatWeekdayDate(
+  date: DateInput,
+  timeZone = DEFAULT_TIME_ZONE,
+  locale: 'fr' | 'en' = 'fr',
+): string {
+  return format(inZone(date, timeZone), 'EEEE d MMMM', { locale: locale === 'en' ? enGB : fr });
 }
 
-/** « samedi 14 novembre 2026 ». */
-export function formatLongDate(date: DateInput, timeZone = DEFAULT_TIME_ZONE): string {
-  return format(inZone(date, timeZone), 'EEEE d MMMM yyyy', { locale: fr });
+/** « samedi 14 novembre 2026 » (anglais : « Saturday 14 November 2026 »). */
+export function formatLongDate(
+  date: DateInput,
+  timeZone = DEFAULT_TIME_ZONE,
+  locale: 'fr' | 'en' = 'fr',
+): string {
+  return format(inZone(date, timeZone), 'EEEE d MMMM yyyy', { locale: locale === 'en' ? enGB : fr });
 }
 
 /** « 14 h 30 ». */

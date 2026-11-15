@@ -15,6 +15,7 @@ const EventRegistrationModal = dynamic(
 /** « Je participe » (Agenda) : ouvre la modale d'inscription à l'événement. */
 export function EventRegistrationDialog({ event }: { event: Event }) {
   const t = useTranslations('rubrique');
+  const form = useTranslations('forms.eventRegistration');
   const [open, setOpen] = useState(false);
   // Gardée montée après la première ouverture : la confirmation reste affichée si la modale est rouverte.
   const [loaded, setLoaded] = useState(false);
@@ -33,7 +34,7 @@ export function EventRegistrationDialog({ event }: { event: Event }) {
         className="group/cta inline-flex cursor-pointer items-center gap-1.5 rounded-xs font-ui text-[14px] leading-5 font-semibold text-text-brand"
       >
         {t('join')}
-        <span className="sr-only"> : {event.title}</span>
+        <span className="sr-only">{form('joinTarget', { title: event.title })}</span>
         <ArrowRight
           aria-hidden
           size={16}

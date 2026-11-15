@@ -3,7 +3,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CircleCheck, Mail, Smartphone, User } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod/mini';
 import { Button } from '@/components/ui/button';
@@ -14,42 +15,53 @@ import { toast } from '@/components/ui/toaster';
 import { useStaggerIn } from '@/components/ui/use-stagger-in';
 import { browserApi } from '@/lib/api/browser';
 import { ApiError, formErrorMessage, toApiError } from '@/lib/api/errors';
-import { CONSENT_TEXT, fieldRules, trimmed } from '@/lib/forms/schemas';
+import { trimmed, useFormCommon, type FieldRules } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
 
 export type ContactTab = 'CONTACT' | 'INFORMATION';
 
-/** Sujets proposés (liste du formulaire, à rendre administrable si besoin). */
+/**
+ * Sujets proposés : valeur enregistrée en français (lue par l'équipe dans le back-office), libellé dans la langue de
+ * la page (`forms.contact.subjects`).
+ */
 const SUBJECTS = [
-  'Une demande de devis',
-  'Une question sur un service',
-  'Immobilier',
-  'Partenariat',
-  'Recrutement',
-  'Presse et médias',
-  'Autre',
-];
+  ['quote', 'Une demande de devis'],
+  ['service', 'Une question sur un service'],
+  ['realEstate', 'Immobilier'],
+  ['partnership', 'Partenariat'],
+  ['careers', 'Recrutement'],
+  ['press', 'Presse et médias'],
+  ['other', 'Autre'],
+] as const;
 
-/** Villes proposées (champ « Ville » de la maquette), Douala par défaut ; « Hors du Cameroun » n'envoie ni ville ni pays. */
-const CITIES = ['Douala', 'Yaoundé', 'Autre ville du Cameroun'];
+/**
+ * Villes proposées (champ « Ville » de la maquette), Douala par défaut ; « Hors du Cameroun » n'envoie ni ville ni
+ * pays. Valeurs en français (fiche contact), libellés traduits (`forms.contact.cities`).
+ */
+const CITIES = [
+  ['douala', 'Douala'],
+  ['yaounde', 'Yaoundé'],
+  ['other', 'Autre ville du Cameroun'],
+] as const;
 const ABROAD = 'Hors du Cameroun';
 
-const schema = z.object({
-  fullName: fieldRules.fullName,
-  email: fieldRules.email,
-  phone: fieldRules.optionalPhone,
-  city: z.string(),
-  subject: z.string(),
-  serviceSlug: z.string(),
-  message: trimmed(
-    z.minLength(10, 'Merci d’écrire votre message (10 caractères au moins).'),
-    z.maxLength(3000, 'Ce message est trop long (3 000 caractères au plus).'),
-  ),
-  consent: fieldRules.consent,
-});
+type ContactMessages = ReturnType<typeof useTranslations<'forms.contact'>>;
 
-type FormInput = z.input<typeof schema>;
-type FormOutput = z.output<typeof schema>;
+function makeSchema(rules: FieldRules, t: ContactMessages) {
+  return z.object({
+    fullName: rules.fullName,
+    email: rules.email,
+    phone: rules.optionalPhone,
+    city: z.string(),
+    subject: z.string(),
+    serviceSlug: z.string(),
+    message: trimmed(z.minLength(10, t('messageTooShort')), z.maxLength(3000, t('messageTooLong'))),
+    consent: rules.consent,
+  });
+}
+
+type FormInput = z.input<ReturnType<typeof makeSchema>>;
+type FormOutput = z.output<ReturnType<typeof makeSchema>>;
 
 type ServiceGroup = { name: string; services: { slug: string; name: string }[] };
 
@@ -85,6 +97,9 @@ export function ContactFormFromUrl(props: Omit<ContactFormProps, 'initialTab'>) 
  * (le second ajoute le service concerné), envoi `POST /v1/contact-messages` et confirmation en place.
  */
 export function ContactForm({ initialTab, serviceGroups }: ContactFormProps) {
+  const t = useTranslations('forms.contact');
+  const common = useFormCommon();
+  const schema = useMemo(() => makeSchema(common.rules, t), [common.rules, t]);
   const [tab, setTab] = useState<ContactTab>(initialTab);
   // Changement d'onglet : les champs du formulaire réapparaissent en cascade.
   const formRef = useStaggerIn<HTMLFormElement>(tab);
@@ -136,21 +151,23 @@ export function ContactForm({ initialTab, serviceGroups }: ContactFormProps) {
         }
       }
       // Erreur sur un champ sans message à l'écran : son message plutôt que « Vérifiez les champs signalés ».
-      toast.error(formErrorMessage(caught, (path) => fieldOf(path) in schema.shape));
+      toast.error(
+        formErrorMessage(caught, (path) => fieldOf(path) in schema.shape, common.t('unexpectedError')),
+      );
     }
   }
 
-  const title = tab === 'CONTACT' ? 'Écrivez-nous' : 'Demande d’information';
+  const title = tab === 'CONTACT' ? t('titleContact') : t('titleInformation');
 
   return (
     <div className="flex flex-col gap-5 rounded-[28px] border border-border-default bg-neutral-0 p-5 md:p-10">
       <SegmentedTabs
-        label="Type de message"
+        label={t('tabsLabel')}
         value={tab}
         onChange={changeTab}
         options={[
-          { value: 'CONTACT', label: 'Nous contacter' },
-          { value: 'INFORMATION', label: 'Demande d’information', shortLabel: 'Information' },
+          { value: 'CONTACT', label: t('tabContact') },
+          { value: 'INFORMATION', label: t('tabInformation'), shortLabel: t('tabInformationShort') },
         ]}
         className="md:w-auto md:self-start"
         fullWidth
@@ -165,10 +182,10 @@ export function ContactForm({ initialTab, serviceGroups }: ContactFormProps) {
             {sent.message}
           </p>
           <p className="font-ui text-[14px] leading-5 text-text-muted">
-            Référence : <span className="font-semibold text-text-main">{sent.reference}</span>
+            {common.t('reference')} <span className="font-semibold text-text-main">{sent.reference}</span>
           </p>
           <Button variant="outline" onClick={() => setSent(null)}>
-            Écrire un autre message
+            {t('writeAnother')}
           </Button>
         </div>
       ) : (
@@ -182,48 +199,49 @@ export function ContactForm({ initialTab, serviceGroups }: ContactFormProps) {
           <input {...antiSpam.honeypotProps} />
           <div {...antiSpam.widgetProps} />
           <div className="grid gap-4 md:grid-cols-2 md:gap-y-5 max-md:[&>*:nth-child(3)]:mt-1 max-md:[&>*:nth-child(n+5)]:mt-1">
-            <Field label="Nom et prénom" required error={errors.fullName?.message}>
+            <Field label={t('fullName')} required error={errors.fullName?.message}>
               {(control) => (
                 <Input
                   icon={User}
                   autoComplete="name"
-                  placeholder="Votre nom complet"
+                  placeholder={t('fullNamePlaceholder')}
                   {...control}
                   {...form.register('fullName')}
                 />
               )}
             </Field>
-            <Field label="E-mail" required error={errors.email?.message}>
+            <Field label={t('email')} required error={errors.email?.message}>
               {(control) => (
                 <Input
                   icon={Mail}
                   type="email"
                   autoComplete="email"
-                  placeholder="vous@exemple.com"
+                  placeholder={t('emailPlaceholder')}
                   {...control}
                   {...form.register('email')}
                 />
               )}
             </Field>
-            <Field label="Téléphone / WhatsApp" error={errors.phone?.message}>
+            <Field label={t('phone')} error={errors.phone?.message}>
               {(control) => <PhoneInput icon={Smartphone} {...control} {...form.register('phone')} />}
             </Field>
-            <Field label="Ville" error={errors.city?.message}>
+            <Field label={t('city')} error={errors.city?.message}>
               {(control) => (
                 <Select {...control} {...form.register('city')}>
-                  {[...CITIES, ABROAD].map((city) => (
-                    <option key={city} value={city}>
-                      {city}
+                  {CITIES.map(([key, value]) => (
+                    <option key={key} value={value}>
+                      {t(`cities.${key}`)}
                     </option>
                   ))}
+                  <option value={ABROAD}>{t('cities.abroad')}</option>
                 </Select>
               )}
             </Field>
             {tab === 'INFORMATION' && (
-              <Field label="Service concerné" className="md:col-span-2" error={errors.serviceSlug?.message}>
+              <Field label={t('service')} className="md:col-span-2" error={errors.serviceSlug?.message}>
                 {(control) => (
                   <Select {...control} {...form.register('serviceSlug')}>
-                    <option value="">Choisir un service</option>
+                    <option value="">{t('servicePlaceholder')}</option>
                     {serviceGroups.map((group) => (
                       <optgroup key={group.name} label={group.name}>
                         {group.services.map((service) => (
@@ -237,22 +255,22 @@ export function ContactForm({ initialTab, serviceGroups }: ContactFormProps) {
                 )}
               </Field>
             )}
-            <Field label="Sujet" className="md:col-span-2" error={errors.subject?.message}>
+            <Field label={t('subject')} className="md:col-span-2" error={errors.subject?.message}>
               {(control) => (
                 <Select {...control} {...form.register('subject')}>
-                  <option value="">Choisir un sujet</option>
-                  {SUBJECTS.map((subject) => (
-                    <option key={subject} value={subject}>
-                      {subject}
+                  <option value="">{t('subjectPlaceholder')}</option>
+                  {SUBJECTS.map(([key, value]) => (
+                    <option key={key} value={value}>
+                      {t(`subjects.${key}`)}
                     </option>
                   ))}
                 </Select>
               )}
             </Field>
-            <Field label="Message" required error={errors.message?.message} className="md:col-span-2">
+            <Field label={t('message')} required error={errors.message?.message} className="md:col-span-2">
               {(control) => (
                 <Textarea
-                  placeholder="Votre message…"
+                  placeholder={t('messagePlaceholder')}
                   className="min-h-[130px]"
                   {...control}
                   {...form.register('message')}
@@ -263,7 +281,7 @@ export function ContactForm({ initialTab, serviceGroups }: ContactFormProps) {
           <div className="flex flex-col gap-1.5">
             <Checkbox
               id="contact-consent"
-              label={CONSENT_TEXT}
+              label={common.t('consentText')}
               aria-invalid={errors.consent ? true : undefined}
               aria-describedby={errors.consent ? 'contact-consent-error' : undefined}
               {...form.register('consent')}
@@ -275,7 +293,7 @@ export function ContactForm({ initialTab, serviceGroups }: ContactFormProps) {
             )}
           </div>
           <Button type="submit" loading={isSubmitting} className="max-md:w-full md:self-start">
-            Envoyer le message
+            {t('submit')}
           </Button>
         </form>
       )}

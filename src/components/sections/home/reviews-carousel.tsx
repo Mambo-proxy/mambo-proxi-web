@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Children, useEffect, useRef, useState, type ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
@@ -9,6 +10,7 @@ import { cn } from '@/lib/cn';
  * barre 20 × 6 `neutral/900`) indiquent la position ; trop petits pour servir de cibles tactiles, ils sont décoratifs.
  */
 export function ReviewsCarousel({ children, className }: { children: ReactNode; className?: string }) {
+  const t = useTranslations('site.a11y');
   const ref = useRef<HTMLUListElement>(null);
   const [active, setActive] = useState(0);
   const items = Children.toArray(children);
@@ -35,7 +37,7 @@ export function ReviewsCarousel({ children, className }: { children: ReactNode; 
       <ul
         ref={ref}
         tabIndex={0}
-        aria-label="Avis clients (faire défiler horizontalement)"
+        aria-label={t('reviewsCarousel')}
         className="-mr-5 flex snap-x snap-mandatory [scrollbar-width:none] gap-3 overflow-x-auto rounded-xl pr-5 md:-mr-[clamp(20px,4.5vw,64px)] [&::-webkit-scrollbar]:hidden"
       >
         {items.map((item, index) => (

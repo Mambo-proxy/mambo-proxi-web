@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useUnsavedChangesGuard } from './use-unsaved-guard';
 
 type AutosaveOptions<T> = {
   /** Valeur courante du formulaire (comparée par sérialisation JSON). */
@@ -89,12 +90,8 @@ export function useAutosave<T>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serialized, saved, enabled, delay]);
 
-  useEffect(() => {
-    if (!dirty) return;
-    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
-    window.addEventListener('beforeunload', warn);
-    return () => window.removeEventListener('beforeunload', warn);
-  }, [dirty]);
+  // Lien interne suivi avec des modifications en attente : enregistrées d'abord (contenu valide), sinon confirmation.
+  useUnsavedChangesGuard(dirty, { save: enabled ? flush : undefined });
 
   return {
     ...state,

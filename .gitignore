@@ -41,3 +41,4 @@ next-env.d.ts
 /lighthouse-report/
 /.lighthouseci/
 /blob-report/
+.i18n-lock

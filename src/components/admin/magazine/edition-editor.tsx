@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { BookOpen, ChevronRight, Save, Trash2, Undo2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { ConfirmDialog } from '@/components/admin/editor/editor-ui';
 import { MediaPickerDialog, MediaThumb } from '@/components/admin/editor/media-picker';
 import { RichTextEditor } from '@/components/admin/editor/rich-text-editor';
@@ -50,6 +50,7 @@ import {
   type EditingLanguage,
 } from './magazine-ui';
 import { usePreviewEdition } from './magazine-view';
+import { useUnsavedChangesGuard } from '@/components/admin/editor/use-unsaved-guard';
 
 type Draft = {
   number: string;
@@ -194,12 +195,8 @@ function EditionForm({ edition }: { edition: AdminMagazineEdition }) {
   const body = changes(draft, edition);
   const dirty = Object.keys(body).length > 0;
 
-  useEffect(() => {
-    if (!dirty) return;
-    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
-    window.addEventListener('beforeunload', warn);
-    return () => window.removeEventListener('beforeunload', warn);
-  }, [dirty]);
+  // Modifications non enregistrées : confirmation avant de fermer l'onglet ou de suivre un lien interne.
+  useUnsavedChangesGuard(dirty);
 
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) =>
     setDraft((current) => ({ ...current, [key]: value }));

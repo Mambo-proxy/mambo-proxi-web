@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { cn } from '@/lib/cn';
 
@@ -34,9 +35,10 @@ const cell =
 
 /** Pagination (Avis clients `68:7508`) : cases 40 × 40 rayon 12, page active fond `neutral/900`. */
 export function Pagination({ page, totalPages, hrefFor, className }: PaginationProps) {
+  const t = useTranslations('site.a11y');
   if (totalPages <= 1) return null;
   return (
-    <nav aria-label="Pagination" className={className}>
+    <nav aria-label={t('pagination')} className={className}>
       <ul className="flex flex-wrap items-center justify-center gap-2">
         {paginationRange(page, totalPages).map((item, index) => (
           <li key={item === 'ellipsis' ? `ellipsis-${index}` : item}>
@@ -49,13 +51,16 @@ export function Pagination({ page, totalPages, hrefFor, className }: PaginationP
                 aria-current="page"
                 className={cn(cell, 'border-neutral-900 bg-neutral-900 text-neutral-0')}
               >
-                <span className="sr-only">Page{'\u00A0'}</span>
+                <span className="sr-only">
+                  {t('pagePrefix')}
+                  {'\u00A0'}
+                </span>
                 {item}
               </span>
             ) : (
               <Link
                 href={hrefFor(item)}
-                aria-label={`Page ${item}`}
+                aria-label={t('page', { number: item })}
                 className={cn(cell, 'border-border-default bg-neutral-0 text-text-main hover:bg-neutral-100')}
               >
                 {item}

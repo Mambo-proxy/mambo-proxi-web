@@ -2,8 +2,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CircleCheck, Mail, User } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod/mini';
 import { Button } from '@/components/ui/button';
@@ -14,19 +14,21 @@ import { browserApi } from '@/lib/api/browser';
 import { ApiError, formErrorMessage, toApiError } from '@/lib/api/errors';
 import type { Event } from '@/lib/api/schema';
 import { formatWeekdayDate } from '@/lib/format/date';
-import { CONSENT_TEXT, fieldRules } from '@/lib/forms/schemas';
+import { useFormCommon, type FieldRules } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
 
-const schema = z.object({
-  fullName: fieldRules.fullName,
-  email: fieldRules.email,
-  phone: fieldRules.phone,
-  seats: z.coerce.number().check(z.int(), z.minimum(1), z.maximum(10)),
-  consent: fieldRules.consent,
-});
+function makeSchema(rules: FieldRules) {
+  return z.object({
+    fullName: rules.fullName,
+    email: rules.email,
+    phone: rules.phone,
+    seats: z.coerce.number().check(z.int(), z.minimum(1), z.maximum(10)),
+    consent: rules.consent,
+  });
+}
 
-type FormInput = z.input<typeof schema>;
-type FormOutput = z.output<typeof schema>;
+type FormInput = z.input<ReturnType<typeof makeSchema>>;
+type FormOutput = z.output<ReturnType<typeof makeSchema>>;
 
 /**
  * Modale d'inscription à un événement (Agenda, non maquetté : style des formulaires du site) — nom, e-mail,
@@ -42,7 +44,12 @@ export function EventRegistrationModal({
   open: boolean;
   onClose: () => void;
 }) {
-  const t = useTranslations('rubrique');
+  const t = useTranslations('forms.eventRegistration');
+  const locale = useLocale() === 'en' ? 'en' : 'fr';
+  const rubrique = useTranslations('rubrique');
+  const a11y = useTranslations('site.a11y');
+  const common = useFormCommon();
+  const schema = useMemo(() => makeSchema(common.rules), [common.rules]);
   const [done, setDone] = useState<string | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
   const antiSpam = useAntiSpam();
@@ -73,7 +80,13 @@ export function EventRegistrationModal({
           if (field in schema.shape) form.setError(field, { message });
         }
       }
-      setFailure(formErrorMessage(caught, (path) => path.replace(/^contact\./, '') in schema.shape));
+      setFailure(
+        formErrorMessage(
+          caught,
+          (path) => path.replace(/^contact\./, '') in schema.shape,
+          common.t('unexpectedError'),
+        ),
+      );
     }
   }
 
@@ -89,8 +102,9 @@ export function EventRegistrationModal({
     <Modal
       open={open}
       onClose={close}
-      title={done ? 'Inscription envoyée' : t('join')}
-      description={`${event.title} · ${formatWeekdayDate(event.startsAt)} · ${event.city}`}
+      title={done ? t('doneTitle') : rubrique('join')}
+      closeLabel={a11y('close')}
+      description={`${event.title} · ${formatWeekdayDate(event.startsAt, undefined, locale)} · ${event.city}`}
     >
       {done ? (
         <div role="status" className="flex flex-col items-start gap-4 pb-2">
@@ -99,32 +113,27 @@ export function EventRegistrationModal({
             {done}
           </p>
           <Button variant="outline" onClick={close}>
-            Fermer
+            {t('close')}
           </Button>
         </div>
       ) : (
         <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4 pb-2">
           <input {...antiSpam.honeypotProps} />
           <div {...antiSpam.widgetProps} />
-          <Field label="Nom et prénom" required error={errors.fullName?.message}>
+          <Field label={t('fullName')} required error={errors.fullName?.message}>
             {(control) => (
               <Input icon={User} autoComplete="name" {...control} {...form.register('fullName')} />
             )}
           </Field>
-          <Field label="E-mail" required error={errors.email?.message}>
+          <Field label={t('email')} required error={errors.email?.message}>
             {(control) => (
               <Input icon={Mail} type="email" autoComplete="email" {...control} {...form.register('email')} />
             )}
           </Field>
-          <Field
-            label="Téléphone / WhatsApp"
-            required
-            help="Avec l'indicatif du pays."
-            error={errors.phone?.message}
-          >
+          <Field label={t('phone')} required help={t('phoneHelp')} error={errors.phone?.message}>
             {(control) => <PhoneInput {...control} {...form.register('phone')} />}
           </Field>
-          <Field label="Nombre de places" required error={errors.seats?.message}>
+          <Field label={t('seats')} required error={errors.seats?.message}>
             {(control) => (
               <Select {...control} {...form.register('seats')}>
                 {Array.from({ length: 10 }, (_, index) => (
@@ -138,7 +147,7 @@ export function EventRegistrationModal({
           <div className="flex flex-col gap-1.5">
             <Checkbox
               id={`consent-${event.slug}`}
-              label={CONSENT_TEXT}
+              label={common.t('consentText')}
               aria-invalid={errors.consent ? true : undefined}
               {...form.register('consent')}
             />
@@ -155,7 +164,7 @@ export function EventRegistrationModal({
             </p>
           )}
           <Button type="submit" loading={isSubmitting} fullWidth>
-            Confirmer ma participation
+            {t('submit')}
           </Button>
         </form>
       )}

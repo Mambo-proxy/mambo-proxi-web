@@ -12,6 +12,8 @@ type ModalProps = {
   children: ReactNode;
   /** Pied de la modale (boutons d'action). */
   footer?: ReactNode;
+  /** Libellé du bouton de fermeture (site anglais : `site.a11y.close`) ; « Fermer » par défaut (back-office). */
+  closeLabel?: string;
   /** Largeur maximale en desktop (px). En mobile, la modale s'affiche en panneau bas plein écran en largeur. */
   maxWidth?: number;
   className?: string;
@@ -34,6 +36,7 @@ export function Modal({
   footer,
   maxWidth = 560,
   className,
+  closeLabel = 'Fermer',
 }: ModalProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const pressedOnBackdrop = useRef(false);
@@ -101,7 +104,7 @@ export function Modal({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Fermer"
+            aria-label={closeLabel}
             className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-border-default text-icon-default hover:bg-neutral-100"
           >
             <X aria-hidden size={20} />

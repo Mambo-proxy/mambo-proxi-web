@@ -3,6 +3,7 @@ import createIntlMiddleware from 'next-intl/middleware';
 import { routing } from '@/i18n/routing';
 import { mergeCookieHeader, renewSession } from '@/lib/admin/session-renewal';
 import { getApiBaseUrl } from '@/lib/api/config';
+import { serverTransport } from '@/lib/api/internal-token';
 import { transport } from '@/lib/api/transport';
 import { adminCsp } from '@/lib/security/headers';
 import { JS_CLASS_SCRIPT, cspHash } from '@/lib/security/inline-scripts';
@@ -58,6 +59,53 @@ async function isMaintenance(): Promise<boolean> {
 
 function hasSession(request: NextRequest): boolean {
   return SESSION_COOKIES.some((name) => Boolean(request.cookies.get(name)?.value));
+}
+
+/** Durée de mémorisation d'une session vérifiée pendant la maintenance (une vérification par minute et par jeton). */
+const SESSION_CHECK_TTL_MS = 60_000;
+const SESSION_CHECK_MAX = 500;
+const sessionChecks = new Map<string, { valid: boolean; expiresAt: number }>();
+
+/** Oublie les sessions vérifiées (tests). */
+export function resetSessionChecks() {
+  sessionChecks.clear();
+}
+
+async function checkAccessToken(accessToken: string): Promise<boolean> {
+  const now = Date.now();
+  const known = sessionChecks.get(accessToken);
+  if (known && known.expiresAt > now) return known.valid;
+  let valid = false;
+  try {
+    const response = await serverTransport(
+      new Request(`${getApiBaseUrl()}/v1/auth/me`, {
+        headers: { cookie: `mp_at=${encodeURIComponent(accessToken)}` },
+      }),
+      { cache: 'no-store', signal: AbortSignal.timeout(2000) },
+    );
+    valid = response.ok;
+  } catch {
+    valid = false;
+  }
+  if (sessionChecks.size >= SESSION_CHECK_MAX) {
+    for (const [token, entry] of sessionChecks) if (entry.expiresAt <= now) sessionChecks.delete(token);
+    if (sessionChecks.size >= SESSION_CHECK_MAX) sessionChecks.clear();
+  }
+  sessionChecks.set(accessToken, { valid, expiresAt: now + SESSION_CHECK_TTL_MS });
+  return valid;
+}
+
+/**
+ * Session réelle d'un membre de l'équipe (maintenance) : jeton d'accès accepté par l'API (`GET /v1/auth/me`), ou
+ * jeton de rafraîchissement renouvelable. La seule présence d'un cookie ne suffit pas : n'importe qui peut en poser un.
+ */
+async function hasValidSession(request: NextRequest): Promise<boolean> {
+  const accessToken = request.cookies.get('mp_at')?.value;
+  if (accessToken && (await checkAccessToken(accessToken))) return true;
+  const refreshToken = request.cookies.get('mp_rt')?.value;
+  if (!refreshToken) return false;
+  const renewal = await renewSession(refreshToken, request.headers.get('user-agent'));
+  return renewal.kind === 'renewed';
 }
 
 function isAdminPublic(pathname: string): boolean {
@@ -131,7 +179,7 @@ export async function proxy(request: NextRequest) {
   const locale = localeOf(pathname);
   const maintenancePath = `/${locale}/maintenance`;
   const isMaintenancePage = pathname === '/maintenance' || pathname === `/${locale}/maintenance`;
-  if (!isMaintenancePage && !hasSession(request) && (await isMaintenance())) {
+  if (!isMaintenancePage && (await isMaintenance()) && !(await hasValidSession(request))) {
     const response = NextResponse.rewrite(new URL(maintenancePath, request.url), { status: 503 });
     response.headers.set('Retry-After', '3600');
     response.headers.set('Cache-Control', 'no-store');

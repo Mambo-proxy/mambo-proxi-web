@@ -98,7 +98,7 @@ test.describe('pages éditoriales', () => {
 
     await page.goto('/en/about-us', { waitUntil: 'domcontentloaded' });
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('A local services agency in Cameroon.');
-    await expect(page.getByRole('navigation', { name: "Fil d'Ariane" })).toContainText('Home');
+    await expect(page.getByRole('navigation', { name: 'Breadcrumb' })).toContainText('Home');
     await expect(
       page.getByRole('heading', { level: 2, name: 'The faces behind every service' }),
     ).toBeVisible();
@@ -113,7 +113,7 @@ test.describe('pages éditoriales', () => {
 
     await page.goto('/en/mission', { waitUntil: 'domcontentloaded' });
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Making life simpler, close to you.');
-    await expect(page.getByRole('navigation', { name: "Fil d'Ariane" })).toContainText('Home');
+    await expect(page.getByRole('navigation', { name: 'Breadcrumb' })).toContainText('Home');
     await expect(page.locator('#mission')).toContainText('Our mission');
     await expect(page.locator('#vision')).toContainText('Our vision');
     await expect(page.getByRole('heading', { level: 2, name: 'Something we can help with?' })).toBeVisible();

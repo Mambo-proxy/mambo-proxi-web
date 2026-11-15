@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowRight, Check, CircleCheck, Mail, Smartphone } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { SiteLink as Link } from '@/i18n/site-link';
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
@@ -16,78 +17,69 @@ import { browserApi } from '@/lib/api/browser';
 import { ApiError, formErrorMessage, toApiError } from '@/lib/api/errors';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
-import { CONSENT_TEXT, fieldRules, trimmed } from '@/lib/forms/schemas';
+import { trimmed, useFormCommon, type FieldRules } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
 import { routes } from '@/lib/routes';
 
 export type Profile = 'PARTICULIER' | 'PROFESSIONNEL';
 
-/** Activités principales proposées aux professionnels et partenaires. */
+/**
+ * Activités principales proposées aux professionnels et partenaires : valeur enregistrée en français (lue par
+ * l'équipe dans le back-office), libellé dans la langue de la page (`forms.registration.activities`).
+ */
 const ACTIVITIES = [
-  'Chef, traiteur ou restauration',
-  'Chauffeur ou location de véhicules',
-  'Photographie ou vidéo',
-  'Bien-être et massage',
-  'Décoration et événementiel',
-  'Agence immobilière',
-  'Propriétaire ou bailleur',
-  'Entretien et ménage',
-  'Livraison et courses',
-  'Tourisme, guide ou culture',
-  'Autre',
-];
+  ['chef', 'Chef, traiteur ou restauration'],
+  ['driver', 'Chauffeur ou location de véhicules'],
+  ['photo', 'Photographie ou vidéo'],
+  ['wellness', 'Bien-être et massage'],
+  ['events', 'Décoration et événementiel'],
+  ['realEstateAgency', 'Agence immobilière'],
+  ['landlord', 'Propriétaire ou bailleur'],
+  ['cleaning', 'Entretien et ménage'],
+  ['delivery', 'Livraison et courses'],
+  ['tourism', 'Tourisme, guide ou culture'],
+  ['other', 'Autre'],
+] as const;
 
-/** Villes proposées dans « Ville ou quartier » (Douala par défaut) ; « Hors du Cameroun » n'envoie pas de pays. */
-const CITIES = ['Douala', 'Yaoundé', 'Autre ville du Cameroun'];
+/**
+ * Villes proposées dans « Ville ou quartier » (Douala par défaut) ; « Hors du Cameroun » n'envoie pas de pays.
+ * Valeurs en français (fiche contact), libellés traduits (`forms.registration.cities`).
+ */
+const CITIES = [
+  ['douala', 'Douala'],
+  ['yaounde', 'Yaoundé'],
+  ['other', 'Autre ville du Cameroun'],
+  ['abroad', 'Hors du Cameroun'],
+] as const;
 const ABROAD = 'Hors du Cameroun';
 
-const NEWSLETTER_TEXT = 'Je souhaite recevoir la lettre Mambo (une fois par mois).';
-
-const required = (message: string) =>
-  trimmed(z.minLength(1, message), z.maxLength(60, 'Ce champ est trop long.'));
+type RegistrationMessages = ReturnType<typeof useTranslations<'forms.registration'>>;
 
 /** Schéma selon le profil : la structure et l'activité sont obligatoires pour un professionnel. */
-function schemaFor(profile: Profile) {
+function makeSchema(profile: Profile, rules: FieldRules, t: RegistrationMessages) {
   const professional = profile === 'PROFESSIONNEL';
+  const required = (message: string) => trimmed(z.minLength(1, message), z.maxLength(60, t('fieldTooLong')));
   return z.object({
     profile: z.enum(['PARTICULIER', 'PROFESSIONNEL']),
     organization: professional
-      ? trimmed(
-          z.minLength(1, 'Merci d’indiquer le nom de votre structure.'),
-          z.maxLength(120, 'Ce nom est trop long (120 caractères au plus).'),
-        )
+      ? trimmed(z.minLength(1, t('organizationRequired')), z.maxLength(120, t('organizationTooLong')))
       : z.string(),
-    activity: professional
-      ? z.string().check(z.minLength(1, 'Merci de choisir votre activité principale.'))
-      : z.string(),
-    firstName: required('Merci d’indiquer votre prénom.'),
-    lastName: required('Merci d’indiquer votre nom.'),
-    email: fieldRules.email,
-    phone: fieldRules.phone,
-    city: z.string().check(z.minLength(1, 'Merci de choisir votre ville.')),
+    activity: professional ? z.string().check(z.minLength(1, t('activityRequired'))) : z.string(),
+    firstName: required(t('firstNameRequired')),
+    lastName: required(t('lastNameRequired')),
+    email: rules.email,
+    phone: rules.phone,
+    city: z.string().check(z.minLength(1, t('cityRequired'))),
     // L'API limite `city` (« quartier, ville ») à 80 caractères : 55 pour le quartier laisse la place à la ville.
-    quarter: trimmed(z.maxLength(55, 'Ce nom de quartier est trop long.')),
+    quarter: trimmed(z.maxLength(55, t('quarterTooLong'))),
     interests: z.array(z.string()),
     newsletter: z.boolean(),
-    consent: fieldRules.consent,
+    consent: rules.consent,
   });
 }
 
-type FormInput = z.input<ReturnType<typeof schemaFor>>;
-type FormOutput = z.output<ReturnType<typeof schemaFor>>;
-
-const COPY: Record<Profile, { lead: string; interests: string; submit: string }> = {
-  PARTICULIER: {
-    lead: 'Enregistrez vos informations une fois : vos prochaines demandes seront plus rapides et mieux suivies.',
-    interests: 'Les services qui vous intéressent',
-    submit: 'Valider mon inscription',
-  },
-  PROFESSIONNEL: {
-    lead: 'Proposez vos services, recevez des demandes et rejoignez notre réseau de partenaires.',
-    interests: 'Rubriques dans lesquelles vous intervenez',
-    submit: 'Envoyer ma demande d’inscription',
-  },
-};
+type FormInput = z.input<ReturnType<typeof makeSchema>>;
+type FormOutput = z.output<ReturnType<typeof makeSchema>>;
 
 type RegistrationFormProps = {
   initialProfile: Profile;
@@ -102,10 +94,13 @@ type RegistrationFormProps = {
  * (`POST /v1/registrations`). Newsletter décochée par défaut (consentement explicite).
  */
 export function RegistrationForm({ initialProfile, categories, onProfileChange }: RegistrationFormProps) {
+  const t = useTranslations('forms.registration');
+  const common = useFormCommon();
   const antiSpam = useAntiSpam();
   const [done, setDone] = useState<string | null>(null);
   const form = useForm<FormInput, unknown, FormOutput>({
-    resolver: (data, context, options) => zodResolver(schemaFor(data.profile))(data, context, options),
+    resolver: (data, context, options) =>
+      zodResolver(makeSchema(data.profile, common.rules, t))(data, context, options),
     mode: 'onTouched',
     defaultValues: {
       profile: initialProfile,
@@ -127,7 +122,6 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
   // Changement d'onglet : les champs du profil choisi apparaissent en cascade.
   const fieldsRef = useStaggerIn<HTMLDivElement>(profile);
   const interests = useWatch({ control: form.control, name: 'interests' }) ?? [];
-  const copy = COPY[profile];
 
   function changeProfile(next: Profile) {
     form.setValue('profile', next);
@@ -178,27 +172,31 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
           if (path in form.getValues()) form.setError(path as keyof FormInput, { message });
         }
       }
-      toast.error(formErrorMessage(caught, (path) => path in form.getValues()));
+      toast.error(formErrorMessage(caught, (path) => path in form.getValues(), common.t('unexpectedError')));
     }
   }
 
   return (
     <>
       <p className="font-ui text-[15px] leading-[26px] text-text-muted md:text-[17px]">
-        {frenchTypography(copy.lead)}
+        {frenchTypography(t(`copy.${profile}.lead`))}
       </p>
       <SegmentedTabs
-        label="Profil"
+        label={t('profileLabel')}
         value={profile}
         onChange={changeProfile}
         fullWidth
         size="lg"
         options={[
-          { value: 'PARTICULIER', label: 'Je suis un particulier', shortLabel: 'Particulier' },
+          {
+            value: 'PARTICULIER',
+            label: t('profileIndividual'),
+            shortLabel: t('profileIndividualShort'),
+          },
           {
             value: 'PROFESSIONNEL',
-            label: 'Je suis un professionnel / partenaire',
-            shortLabel: 'Professionnel',
+            label: t('profileProfessional'),
+            shortLabel: t('profileProfessionalShort'),
           },
         ]}
       />
@@ -210,14 +208,14 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
               {done}
             </p>
             <Link href={routes.devis} className="font-ui text-[14px] leading-5 font-semibold text-text-brand">
-              Faire une demande de devis
+              {t('quoteLink')}
             </Link>
           </div>
         ) : (
           <form
             noValidate
             onSubmit={form.handleSubmit(onSubmit)}
-            aria-label="Inscription"
+            aria-label={t('formLabel')}
             className="flex flex-col gap-[18px]"
           >
             <input {...antiSpam.honeypotProps} />
@@ -228,23 +226,23 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
             >
               {profile === 'PROFESSIONNEL' && (
                 <>
-                  <Field label="Nom de la structure" required error={errors.organization?.message}>
+                  <Field label={t('organization')} required error={errors.organization?.message}>
                     {(control) => (
                       <Input
                         autoComplete="organization"
-                        placeholder="Ex. : Saveurs de Douala"
+                        placeholder={t('organizationPlaceholder')}
                         {...control}
                         {...form.register('organization')}
                       />
                     )}
                   </Field>
-                  <Field label="Activité principale" required error={errors.activity?.message}>
+                  <Field label={t('activity')} required error={errors.activity?.message}>
                     {(control) => (
                       <Select {...control} {...form.register('activity')}>
-                        <option value="">Choisir</option>
-                        {ACTIVITIES.map((activity) => (
-                          <option key={activity} value={activity}>
-                            {activity}
+                        <option value="">{t('activityPlaceholder')}</option>
+                        {ACTIVITIES.map(([key, value]) => (
+                          <option key={key} value={value}>
+                            {t(`activities.${key}`)}
                           </option>
                         ))}
                       </Select>
@@ -252,39 +250,39 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
                   </Field>
                 </>
               )}
-              <Field label="Prénom" required error={errors.firstName?.message}>
+              <Field label={t('firstName')} required error={errors.firstName?.message}>
                 {(control) => (
                   <Input
                     autoComplete="given-name"
-                    placeholder="Votre prénom"
+                    placeholder={t('firstNamePlaceholder')}
                     {...control}
                     {...form.register('firstName')}
                   />
                 )}
               </Field>
-              <Field label="Nom" required error={errors.lastName?.message}>
+              <Field label={t('lastName')} required error={errors.lastName?.message}>
                 {(control) => (
                   <Input
                     autoComplete="family-name"
-                    placeholder="Votre nom"
+                    placeholder={t('lastNamePlaceholder')}
                     {...control}
                     {...form.register('lastName')}
                   />
                 )}
               </Field>
-              <Field label="E-mail" required error={errors.email?.message}>
+              <Field label={t('email')} required error={errors.email?.message}>
                 {(control) => (
                   <Input
                     icon={Mail}
                     type="email"
                     autoComplete="email"
-                    placeholder="vous@exemple.com"
+                    placeholder={t('emailPlaceholder')}
                     {...control}
                     {...form.register('email')}
                   />
                 )}
               </Field>
-              <Field label="Téléphone / WhatsApp" required error={errors.phone?.message}>
+              <Field label={t('phone')} required error={errors.phone?.message}>
                 {(control) => (
                   <PhoneInput
                     icon={Smartphone}
@@ -294,22 +292,22 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
                   />
                 )}
               </Field>
-              <Field label="Ville ou quartier" required error={errors.city?.message}>
+              <Field label={t('city')} required error={errors.city?.message}>
                 {(control) => (
                   <Select autoComplete="address-level2" {...control} {...form.register('city')}>
-                    {[...CITIES, ABROAD].map((city) => (
-                      <option key={city} value={city}>
-                        {city}
+                    {CITIES.map(([key, value]) => (
+                      <option key={key} value={value}>
+                        {t(`cities.${key}`)}
                       </option>
                     ))}
                   </Select>
                 )}
               </Field>
-              <Field label="Quartier" error={errors.quarter?.message}>
+              <Field label={t('quarter')} error={errors.quarter?.message}>
                 {(control) => (
                   <Input
                     autoComplete="address-level3"
-                    placeholder="Votre quartier"
+                    placeholder={t('quarterPlaceholder')}
                     {...control}
                     {...form.register('quarter')}
                   />
@@ -318,7 +316,7 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
             </div>
             <fieldset>
               <legend className="mb-2.5 font-ui text-[14px] leading-5 font-semibold text-text-main">
-                {copy.interests}
+                {t(`copy.${profile}.interests`)}
               </legend>
               <div className="flex flex-wrap gap-2">
                 {categories.map((category) => {
@@ -349,7 +347,7 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
             <div className="flex flex-col gap-1.5">
               <Checkbox
                 id="inscription-consent"
-                label={CONSENT_TEXT}
+                label={common.t('consentText')}
                 aria-invalid={errors.consent ? true : undefined}
                 aria-describedby={errors.consent ? 'inscription-consent-error' : undefined}
                 {...form.register('consent')}
@@ -360,20 +358,20 @@ export function RegistrationForm({ initialProfile, categories, onProfileChange }
                 </p>
               )}
             </div>
-            <Checkbox id="inscription-newsletter" label={NEWSLETTER_TEXT} {...form.register('newsletter')} />
+            <Checkbox id="inscription-newsletter" label={t('newsletter')} {...form.register('newsletter')} />
             <Button type="submit" fullWidth loading={isSubmitting}>
-              {copy.submit}
+              {t(`copy.${profile}.submit`)}
             </Button>
           </form>
         )}
       </div>
       <p className="flex flex-wrap items-center justify-center gap-1.5 font-ui text-[14px] leading-5 text-text-muted">
-        {frenchTypography('Une question ?')}
+        {frenchTypography(t('question'))}
         <Link
           href={routes.contact}
           className="group/help inline-flex items-center gap-1.5 rounded-xs font-semibold tracking-[0.005em] text-text-brand"
         >
-          Contactez-nous
+          {t('contactLink')}
           <ArrowRight
             aria-hidden
             size={16}

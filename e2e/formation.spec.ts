@@ -57,7 +57,7 @@ test.describe('formation', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
       'Passing on the skills that make quality.',
     );
-    await expect(page.getByRole('navigation', { name: "Fil d'Ariane" })).toContainText('Home');
+    await expect(page.getByRole('navigation', { name: 'Breadcrumb' })).toContainText('Home');
     const filters = page.getByRole('group', { name: 'Filter training courses' });
     await expect(filters.getByRole('button', { name: 'All' })).toBeVisible();
     await expect(
