@@ -72,7 +72,11 @@ const articlesOf = (editionId: string) =>
 
 /** Une édition planifiée dont la date est passée est publiée. */
 function refreshStatus(edition: MagazineEditionRecord) {
-  if (edition.status === 'SCHEDULED' && edition.publishAt && edition.publishAt <= new Date(mockNow()).toISOString())
+  if (
+    edition.status === 'SCHEDULED' &&
+    edition.publishAt &&
+    edition.publishAt <= new Date(mockNow()).toISOString()
+  )
     edition.status = 'PUBLISHED';
 }
 
