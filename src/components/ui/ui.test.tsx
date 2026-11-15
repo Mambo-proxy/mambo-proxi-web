@@ -3,7 +3,10 @@ import userEvent from '@testing-library/user-event';
 import { Mail } from 'lucide-react';
 import type { Route } from 'next';
 import { useState } from 'react';
+import { NextIntlClientProvider } from 'next-intl';
+import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
+import messages from '../../../messages/fr.json';
 import { AccentText } from './accent-text';
 import { Badge } from './badge';
 import { Breadcrumb } from './breadcrumb';
@@ -117,6 +120,13 @@ describe('SegmentedTabs', () => {
   });
 });
 
+/** Composants du site traduits (`site.a11y`) : rendus avec les textes français. */
+const withIntl = (ui: ReactElement) => (
+  <NextIntlClientProvider locale="fr" messages={messages}>
+    {ui}
+  </NextIntlClientProvider>
+);
+
 describe('Pagination', () => {
   it('calcule les pages affichées', () => {
     expect(paginationRange(1, 12)).toEqual([1, 2, 3, 'ellipsis', 12]);
@@ -127,7 +137,11 @@ describe('Pagination', () => {
   });
 
   it('marque la page courante', () => {
-    render(<Pagination page={2} totalPages={12} hrefFor={(page) => `/avis-clients?page=${page}` as never} />);
+    render(
+      withIntl(
+        <Pagination page={2} totalPages={12} hrefFor={(page) => `/avis-clients?page=${page}` as never} />,
+      ),
+    );
     expect(document.querySelector('[aria-current="page"]')).toHaveTextContent(/^Page\s2$/);
     expect(screen.getByRole('link', { name: 'Page 3' })).toHaveAttribute('href', '/avis-clients?page=3');
   });
@@ -136,14 +150,16 @@ describe('Pagination', () => {
 describe('affichage', () => {
   it('Stars, Badge, Breadcrumb et AccentText', () => {
     render(
-      <>
-        <Stars rating={4.8} />
-        <Badge tone="green">Publié</Badge>
-        <Breadcrumb items={[{ label: 'Accueil', href: '/' }, { label: 'Devis gratuit' }]} />
-        <h1>
-          <AccentText text="19 services, ==un seul interlocuteur.==" />
-        </h1>
-      </>,
+      withIntl(
+        <>
+          <Stars rating={4.8} />
+          <Badge tone="green">Publié</Badge>
+          <Breadcrumb items={[{ label: 'Accueil', href: '/' }, { label: 'Devis gratuit' }]} />
+          <h1>
+            <AccentText text="19 services, ==un seul interlocuteur.==" />
+          </h1>
+        </>,
+      ),
     );
     expect(screen.getByRole('img', { name: 'Note : 4,8 sur 5' })).toBeInTheDocument();
     expect(screen.getByText('Publié')).toBeInTheDocument();

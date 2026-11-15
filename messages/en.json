@@ -70,6 +70,20 @@
     },
     "cta": {
       "quote": "Request a free quote"
+    },
+    "a11y": {
+      "breadcrumb": "Breadcrumb",
+      "onThisPage": "On this page",
+      "pagination": "Pagination",
+      "page": "Page {number}",
+      "servicesMarquee": "Our services at a glance",
+      "reviewsCarousel": "Customer reviews (scroll horizontally)",
+      "close": "Close",
+      "home": "Home",
+      "services": "Our services",
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month",
+      "pagePrefix": "Page"
     }
   },
   "home": {
@@ -403,5 +417,428 @@
     "pageTitle": "Search the site",
     "pageTitleQuery": "Results for “{query}”",
     "submit": "Search"
+  },
+  "forms": {
+    "common": {
+      "fullNameRequired": "Please enter your first and last name.",
+      "fullNameTooLong": "This name is too long (120 characters maximum).",
+      "emailInvalid": "Please enter a valid email address.",
+      "phoneRequired": "Please enter a phone number.",
+      "phoneFormat": "Please enter a number with the country code (e.g. +237…).",
+      "consentRequired": "Please agree to the processing of your data to send your request.",
+      "consentText": "I agree that Mambo Proxi may process my data to respond to my request, in accordance with the privacy policy.",
+      "unexpectedError": "Something went wrong. Please try again in a few moments.",
+      "reference": "Reference:"
+    },
+    "contact": {
+      "subjects": {
+        "quote": "A quote request",
+        "service": "A question about a service",
+        "realEstate": "Real estate",
+        "partnership": "Partnership",
+        "careers": "Careers",
+        "press": "Press and media",
+        "other": "Other"
+      },
+      "cities": {
+        "douala": "Douala",
+        "yaounde": "Yaoundé",
+        "other": "Another city in Cameroon",
+        "abroad": "Outside Cameroon"
+      },
+      "messageTooShort": "Please write your message (at least 10 characters).",
+      "messageTooLong": "This message is too long (3,000 characters maximum).",
+      "titleContact": "Write to us",
+      "titleInformation": "Information request",
+      "tabsLabel": "Message type",
+      "tabContact": "Contact us",
+      "tabInformation": "Information request",
+      "tabInformationShort": "Information",
+      "writeAnother": "Write another message",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Your full name",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "phone": "Phone / WhatsApp",
+      "city": "City",
+      "service": "Service concerned",
+      "servicePlaceholder": "Choose a service",
+      "subject": "Subject",
+      "subjectPlaceholder": "Choose a subject",
+      "message": "Message",
+      "messagePlaceholder": "Your message…",
+      "submit": "Send message"
+    },
+    "quote": {
+      "formLabel": "Free quote request",
+      "summaryLabel": "Summary",
+      "progressLabel": "Request progress",
+      "steps": {
+        "service": "Service",
+        "need": "Your needs",
+        "contact": "Contact details"
+      },
+      "stepStates": {
+        "done": "(completed)",
+        "active": "(current)",
+        "upcoming": "(upcoming)"
+      },
+      "stepOf": "Step {number} of 3: ",
+      "step1Title": "Which service are you interested in?",
+      "step1Subtitle": "Choose a category, then a service.",
+      "categoryLegend": "Category",
+      "serviceLegend": "Service",
+      "formulaCount": "{count, plural, one {# package} other {# packages}}",
+      "serviceCount": "{count, plural, one {# service} other {# services}}",
+      "step2Title": "Tell us about your needs",
+      "description": "Describe your needs",
+      "descriptionHelp": "The more precise your description, the more accurate the quote.",
+      "back": "Back",
+      "continue": "Continue",
+      "step3Title": "Your contact details",
+      "step3Subtitle": "Name, email, phone and city.",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Your full name",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "phone": "Phone / WhatsApp",
+      "city": "City or neighbourhood",
+      "choose": "Select",
+      "otherPlaceGroup": "Other location",
+      "otherPlaces": {
+        "douala": "Other neighbourhood in Douala",
+        "cameroon": "Other city in Cameroon"
+      },
+      "otherCity": "Other",
+      "contactPreference": "How would you prefer to be contacted?",
+      "contactPreferences": {
+        "WHATSAPP": "WhatsApp",
+        "TELEPHONE": "Phone",
+        "EMAIL": "Email"
+      },
+      "antiSpamNotice": "Form protected against automated submissions",
+      "submit": "Send my quote request",
+      "whatsappService": "Service: {name}",
+      "summary": {
+        "title": "Your request",
+        "changeService": "Change service ({name})",
+        "noService": "No service selected yet.",
+        "guarantees": {
+          "free": "Free, no-obligation quote",
+          "response": "Reply within 24 hours",
+          "pricing": "Pricing provided on quote"
+        },
+        "questionTitle": "A question before you start?",
+        "questionText": "Chat directly with an advisor.",
+        "whatsapp": "Message us on WhatsApp"
+      },
+      "validation": {
+        "categoryRequired": "Please choose a category.",
+        "serviceRequired": "Please choose a service.",
+        "descriptionTooShort": "Please describe your needs in a few sentences (at least 20 characters).",
+        "descriptionTooLong": "This description is too long (3,000 characters maximum).",
+        "cityRequired": "Please choose your city or neighbourhood.",
+        "needRequired": "Please fill in “{label}”.",
+        "needNumber": "Please enter a number between {min} and {max}."
+      }
+    },
+    "appointment": {
+      "title": "Book an appointment",
+      "subtitle": "At the agency, by phone or by video call",
+      "reasonLegend": "Reason for the appointment",
+      "reasons": {
+        "DEVIS": "Quote",
+        "IMMOBILIER": "Real estate",
+        "PARTENARIAT": "Partnership",
+        "RECRUTEMENT": "Careers",
+        "AUTRE": "Other"
+      },
+      "formatLegend": "Format",
+      "formats": {
+        "AGENCE": "At the agency",
+        "TELEPHONE": "Phone",
+        "VISIO": "Video call"
+      },
+      "daySlots": "{day} · available slots",
+      "chooseDay": "Choose a day to see the available slots.",
+      "defaultTimezone": "Douala time (UTC+1)",
+      "missing": {
+        "reason": "the reason",
+        "format": "the format",
+        "slot": "a day and a time slot"
+      },
+      "missingChoice": "Please choose {items}.",
+      "request": "Request this appointment",
+      "confirmationNote": "The agency confirms your appointment by email or WhatsApp.",
+      "slotAt": "{date} at {time}",
+      "edit": "Change",
+      "detailsTitle": "Your contact details",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Your full name",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "phone": "Phone / WhatsApp",
+      "message": "Message",
+      "messageHelp": "Optional: tell us more about your needs.",
+      "messagePlaceholder": "Your message…",
+      "messageTooLong": "This message is too long (1,000 characters maximum).",
+      "submit": "Send my appointment request",
+      "sent": "Your appointment request for {dateTime} has been sent. The agency will confirm it by email or WhatsApp.",
+      "another": "Book another appointment",
+      "availabilityError": "Availability could not be loaded. Please try again."
+    },
+    "partner": {
+      "formLabel": "Become a partner",
+      "partnershipType": "Partnership type",
+      "types": {
+        "PRESTATAIRE_EXPERIENCE": "Experience provider",
+        "IMMOBILIER": "Real estate",
+        "ENTREPRISE_PRESTATAIRE": "Company & service provider",
+        "AUTRE": "Other"
+      },
+      "partnershipTypeRequired": "Please choose a partnership type.",
+      "organization": "Business name",
+      "organizationPlaceholder": "e.g. Saveurs de Douala",
+      "organizationRequired": "Please enter the name of your business.",
+      "organizationTooLong": "This name is too long (120 characters maximum).",
+      "activity": "Activity",
+      "activityPlaceholder": "e.g. private chef, caterer",
+      "activityRequired": "Please enter your activity.",
+      "activityTooLong": "This text is too long (120 characters maximum).",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Your full name",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "phone": "Phone / WhatsApp",
+      "location": "City and area",
+      "locationPlaceholder": "Choose",
+      "locationRequired": "Please choose your city.",
+      "countries": {
+        "CM": "Cameroon",
+        "FR": "France"
+      },
+      "otherCity": "Other city",
+      "presentation": "Tell us about your activity",
+      "presentationPlaceholder": "Experience, areas covered, availability…",
+      "presentationTooLong": "This text is too long (3,000 characters maximum).",
+      "antiSpam": "Form protected against automated submissions",
+      "submit": "Send request",
+      "sendAnother": "Send another request"
+    },
+    "training": {
+      "formLabel": "Training request",
+      "training": "Training requested",
+      "trainingPlaceholder": "Choose a training course",
+      "trainingRequired": "Please choose a training course.",
+      "otherOption": "Other training",
+      "otherTraining": "Training you are looking for",
+      "otherTrainingPlaceholder": "Topic, goals…",
+      "otherTrainingRequired": "Please specify the training you would like.",
+      "otherTrainingTooLong": "This text is too long (200 characters maximum).",
+      "organization": "Organisation",
+      "organizationPlaceholder": "Company, association, individual…",
+      "organizationRequired": "Please enter your organisation.",
+      "organizationTooLong": "This name is too long (120 characters maximum).",
+      "participants": "Number of participants",
+      "participantsPlaceholder": "e.g. 8",
+      "participantsRequired": "Please enter the number of participants.",
+      "participantsRange": "Please enter a number between 1 and 500.",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Your full name",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "phone": "Phone / WhatsApp",
+      "period": "Preferred period",
+      "periodPlaceholder": "e.g. January 2027",
+      "periodTooLong": "This text is too long.",
+      "message": "Details",
+      "messagePlaceholder": "Goals, participants’ level, location…",
+      "messageTooLong": "This text is too long (3,000 characters maximum).",
+      "submit": "Send request",
+      "sendAnother": "Make another request"
+    },
+    "application": {
+      "formLabel": "Application",
+      "job": "Position",
+      "jobRequired": "Please choose the position you are applying for.",
+      "spontaneous": "Spontaneous application",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Your full name",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "phone": "Phone / WhatsApp",
+      "city": "City",
+      "cityPlaceholder": "Douala",
+      "cityRequired": "Please enter your city.",
+      "cityTooLong": "This city name is too long.",
+      "cv": "CV",
+      "cvRequired": "Please attach your CV.",
+      "cvDrop": "Drag your CV here or browse your files",
+      "cvHelp": "PDF or Word · 5 MB maximum",
+      "message": "Message",
+      "messagePlaceholder": "Introduce yourself in a few lines…",
+      "messageTooLong": "This message is too long (3,000 characters maximum).",
+      "submit": "Send application",
+      "sendAnother": "Send another application"
+    },
+    "registration": {
+      "formLabel": "Sign-up",
+      "profileLabel": "Profile",
+      "profileIndividual": "I am an individual",
+      "profileIndividualShort": "Individual",
+      "profileProfessional": "I am a professional / partner",
+      "profileProfessionalShort": "Professional",
+      "copy": {
+        "PARTICULIER": {
+          "lead": "Save your details once: your next requests will be faster and better followed up.",
+          "interests": "Services you are interested in",
+          "submit": "Complete my sign-up"
+        },
+        "PROFESSIONNEL": {
+          "lead": "Offer your services, receive requests and join our partner network.",
+          "interests": "Categories you work in",
+          "submit": "Send my sign-up request"
+        }
+      },
+      "panels": {
+        "PARTICULIER": {
+          "quote": "“We felt expected from the moment we arrived. Everything was ready.”",
+          "author": "Aurélie K. · Bonapriso"
+        },
+        "PROFESSIONNEL": {
+          "quote": "“Since becoming a partner, I get clear requests and clients who come back.”",
+          "author": "Partner chef · Douala"
+        }
+      },
+      "fieldTooLong": "This field is too long.",
+      "organization": "Business name",
+      "organizationPlaceholder": "e.g. Saveurs de Douala",
+      "organizationRequired": "Please enter the name of your business.",
+      "organizationTooLong": "This name is too long (120 characters maximum).",
+      "activity": "Main activity",
+      "activityPlaceholder": "Choose",
+      "activityRequired": "Please choose your main activity.",
+      "activities": {
+        "chef": "Chef, caterer or restaurant",
+        "driver": "Driver or vehicle rental",
+        "photo": "Photography or video",
+        "wellness": "Wellness and massage",
+        "events": "Decoration and events",
+        "realEstateAgency": "Real estate agency",
+        "landlord": "Owner or landlord",
+        "cleaning": "Cleaning and housekeeping",
+        "delivery": "Delivery and errands",
+        "tourism": "Tourism, guiding or culture",
+        "other": "Other"
+      },
+      "firstName": "First name",
+      "firstNamePlaceholder": "Your first name",
+      "firstNameRequired": "Please enter your first name.",
+      "lastName": "Last name",
+      "lastNamePlaceholder": "Your last name",
+      "lastNameRequired": "Please enter your last name.",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "phone": "Phone / WhatsApp",
+      "city": "City or area",
+      "cityRequired": "Please choose your city.",
+      "cities": {
+        "douala": "Douala",
+        "yaounde": "Yaoundé",
+        "other": "Another city in Cameroon",
+        "abroad": "Outside Cameroon"
+      },
+      "quarter": "Neighbourhood",
+      "quarterPlaceholder": "Your neighbourhood",
+      "quarterTooLong": "This neighbourhood name is too long.",
+      "newsletter": "I would like to receive the Mambo newsletter (once a month).",
+      "quoteLink": "Request a quote",
+      "question": "Any questions?",
+      "contactLink": "Contact us"
+    },
+    "survey": {
+      "title": "Satisfaction survey",
+      "progressLabel": "Survey progress",
+      "progressValue": "{done, plural, one {# question} other {# questions}} of {total}",
+      "starLabel": "{rating} out of 5",
+      "starLabelWithText": "{rating} out of 5: {label}",
+      "required": "Please answer this question.",
+      "answerLabel": "Your answer",
+      "answerPlaceholder": "What you liked, what we could improve…",
+      "publishConsent": "I agree that my review (first name, city, rating and comment) may be published on the website once approved by the agency.",
+      "submit": "Send my answers",
+      "footer": "2 minutes · {count} questions · confidential answers",
+      "page": {
+        "heading": "How did your service go?",
+        "request": "Request {reference}",
+        "contactUs": "Contact us",
+        "home": "Back to home",
+        "expiredTitle": "This survey is no longer available",
+        "expiredMessage": "This link has expired.",
+        "loadErrorTitle": "The survey could not be loaded",
+        "loadErrorMessage": "Please try again in a few moments.",
+        "invalidTitle": "This link is not valid",
+        "invalidMessage": "Check the link you received by email, or contact us."
+      },
+      "thanks": {
+        "metaTitle": "Thank you for your feedback",
+        "title": "Thank you for your feedback!",
+        "text": "Your answers help us improve every service. If you agreed, your review may be published on the site once approved.",
+        "services": "Discover our services"
+      }
+    },
+    "eventRegistration": {
+      "joinTarget": ": {title}",
+      "doneTitle": "Registration sent",
+      "close": "Close",
+      "fullName": "Full name",
+      "email": "Email",
+      "phone": "Phone / WhatsApp",
+      "phoneHelp": "Including the country code.",
+      "seats": "Number of places",
+      "submit": "Confirm my attendance"
+    },
+    "notify": {
+      "invalidEmail": "Invalid email address.",
+      "alreadySubscribed": "You are already subscribed: we will let you know as soon as Suivi Mambo opens.",
+      "subscribed": "Thank you! Please confirm your address in the email we have just sent you: we will let you know as soon as it opens.",
+      "formLabel": "Get notified when it opens",
+      "emailLabel": "Your email address",
+      "submit": "Notify me"
+    }
+  },
+  "system": {
+    "meta": {
+      "newsletterConfirm": "Subscription confirmation",
+      "newsletterUnsubscribe": "Unsubscribe from the newsletter",
+      "appointmentAccept": "Confirm your appointment"
+    },
+    "otherSlot": "Choose another time slot",
+    "tokenAction": {
+      "newsletterConfirm": {
+        "pending": "Confirming your subscription…",
+        "success": "Subscription confirmed",
+        "failure": "Confirmation failed"
+      },
+      "newsletterUnsubscribe": {
+        "askTitle": "Unsubscribe from the Mambo newsletter",
+        "askText": "You will no longer receive our news, cultural outings and tips. You can subscribe again at any time.",
+        "askButton": "Confirm unsubscribe",
+        "pending": "Unsubscribing…",
+        "success": "Unsubscribed",
+        "failure": "Unsubscribe failed"
+      },
+      "appointmentAccept": {
+        "askTitle": "Confirm the proposed time slot",
+        "askText": "The agency has proposed a new time slot for your appointment. Confirm it to receive the invitation.",
+        "askButton": "Confirm this appointment",
+        "pending": "Confirming your appointment…",
+        "success": "Appointment confirmed",
+        "failure": "Confirmation failed"
+      },
+      "incompleteLink": "This link is incomplete. Check the link you received by email.",
+      "home": "Back to home",
+      "discoverServices": "Discover our services"
+    }
   }
 }

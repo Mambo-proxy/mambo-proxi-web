@@ -25,6 +25,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  */
 export function NewsletterForm() {
   const t = useTranslations('site.newsletter');
+  const common = useTranslations('forms.common');
   const [status, setStatus] = useState<Status>({ kind: 'idle' });
   const startedAt = useRef(new Date().toISOString());
   const turnstile = useTurnstile({ theme: 'dark' });
@@ -68,6 +69,7 @@ export function NewsletterForm() {
       honeypot: String(data.get('website') ?? ''),
       startedAt: startedAt.current,
       turnstileToken,
+      unexpectedError: common('unexpectedError'),
     });
     setStatus(
       result.ok

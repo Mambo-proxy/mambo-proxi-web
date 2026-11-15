@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { chipVariants } from '@/components/ui/chip';
@@ -15,6 +16,7 @@ const READING_LINE = 0.45;
  * fluide vers la section.
  */
 export function AnchorChips({ links }: { links: Link[] }) {
+  const t = useTranslations('site.a11y');
   const ids = links.map((link) => link.href.replace(/^#/, ''));
   const [active, setActive] = useState(ids[0] ?? '');
   const key = ids.join(',');
@@ -49,7 +51,7 @@ export function AnchorChips({ links }: { links: Link[] }) {
   }, [key]);
 
   return (
-    <nav aria-label="Sur cette page">
+    <nav aria-label={t('onThisPage')}>
       <ul className="flex flex-wrap gap-2">
         {links.map((link, index) => {
           const id = ids[index]!;

@@ -20,12 +20,14 @@ export function CookiePreferences({
   onDecide: (analytics: boolean) => void;
 }) {
   const t = useTranslations('site.cookies');
+  const a11y = useTranslations('site.a11y');
 
   return (
     <Modal
       open={open}
       onClose={onClose}
       title={t('modalTitle')}
+      closeLabel={a11y('close')}
       description={t('modalText')}
       footer={
         <>

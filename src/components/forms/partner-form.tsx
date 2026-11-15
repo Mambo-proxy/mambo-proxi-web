@@ -3,7 +3,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Check, CircleCheck, Lock, Mail, Smartphone, User } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import * as z from 'zod/mini';
 import { Button } from '@/components/ui/button';
@@ -14,52 +15,56 @@ import { browserApi } from '@/lib/api/browser';
 import { ApiError, formErrorMessage, toApiError } from '@/lib/api/errors';
 import type { PartnerRequestInput, PartnershipType } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
-import { CONSENT_TEXT, fieldRules, trimmed } from '@/lib/forms/schemas';
+import { trimmed, useFormCommon, type FieldRules } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
 
-export const PARTNERSHIP_TYPES: ReadonlyArray<{ value: PartnershipType; label: string }> = [
-  { value: 'PRESTATAIRE_EXPERIENCE', label: 'Prestataire Expérience' },
-  { value: 'IMMOBILIER', label: 'Immobilier' },
-  { value: 'ENTREPRISE_PRESTATAIRE', label: 'Entreprise & prestataire' },
-  { value: 'AUTRE', label: 'Autre' },
+/** Types de partenariat du contrat, libellés dans la langue de la page (`forms.partner.types`). */
+export const PARTNERSHIP_TYPES: ReadonlyArray<PartnershipType> = [
+  'PRESTATAIRE_EXPERIENCE',
+  'IMMOBILIER',
+  'ENTREPRISE_PRESTATAIRE',
+  'AUTRE',
 ];
 
-/** Lieux proposés au format « Pays · Ville » de la maquette (code pays ISO + ville). */
-const LOCATIONS: ReadonlyArray<{ country: string; countryName: string; cities: string[] }> = [
-  {
-    country: 'CM',
-    countryName: 'Cameroun',
-    cities: ['Douala', 'Yaoundé', 'Kribi', 'Bafoussam', 'Garoua', 'Autre ville'],
-  },
-  { country: 'FR', countryName: 'France', cities: ['Paris', 'Lyon', 'Marseille', 'Lille', 'Autre ville'] },
+/** Ville hors liste : valeur envoyée en français (lue par l'équipe), libellé traduit (`forms.partner.otherCity`). */
+const OTHER_CITY = 'Autre ville';
+
+/**
+ * Lieux proposés au format « Pays · Ville » de la maquette (code pays ISO + ville). Noms de pays traduits
+ * (`forms.partner.countries`).
+ */
+const LOCATIONS: ReadonlyArray<{ country: 'CM' | 'FR'; cities: string[] }> = [
+  { country: 'CM', cities: ['Douala', 'Yaoundé', 'Kribi', 'Bafoussam', 'Garoua', OTHER_CITY] },
+  { country: 'FR', cities: ['Paris', 'Lyon', 'Marseille', 'Lille', OTHER_CITY] },
 ];
 
-const schema = z.object({
-  partnershipType: z.enum(['PRESTATAIRE_EXPERIENCE', 'IMMOBILIER', 'ENTREPRISE_PRESTATAIRE', 'AUTRE'], {
-    error: 'Merci de choisir un type de partenariat.',
-  }),
-  organization: trimmed(
-    z.minLength(1, 'Merci d’indiquer le nom de votre structure.'),
-    z.maxLength(120, 'Ce nom est trop long (120 caractères au plus).'),
-  ),
-  activity: trimmed(
-    z.minLength(1, 'Merci d’indiquer votre activité.'),
-    z.maxLength(120, 'Ce texte est trop long (120 caractères au plus).'),
-  ),
-  fullName: fieldRules.fullName,
-  email: fieldRules.email,
-  phone: fieldRules.phone,
-  location: z.string().check(z.minLength(1, 'Merci de choisir votre ville.')),
-  presentation: trimmed(z.maxLength(3000, 'Ce texte est trop long (3 000 caractères au plus).')),
-  consent: fieldRules.consent,
-});
+type PartnerMessages = ReturnType<typeof useTranslations<'forms.partner'>>;
 
-type FormInput = z.input<typeof schema>;
-type FormOutput = z.output<typeof schema>;
+function makeSchema(rules: FieldRules, t: PartnerMessages) {
+  return z.object({
+    partnershipType: z.enum(['PRESTATAIRE_EXPERIENCE', 'IMMOBILIER', 'ENTREPRISE_PRESTATAIRE', 'AUTRE'], {
+      error: t('partnershipTypeRequired'),
+    }),
+    organization: trimmed(
+      z.minLength(1, t('organizationRequired')),
+      z.maxLength(120, t('organizationTooLong')),
+    ),
+    activity: trimmed(z.minLength(1, t('activityRequired')), z.maxLength(120, t('activityTooLong'))),
+    fullName: rules.fullName,
+    email: rules.email,
+    phone: rules.phone,
+    location: z.string().check(z.minLength(1, t('locationRequired'))),
+    presentation: trimmed(z.maxLength(3000, t('presentationTooLong'))),
+    consent: rules.consent,
+  });
+}
+
+type FormInput = z.input<ReturnType<typeof makeSchema>>;
+type FormOutput = z.output<ReturnType<typeof makeSchema>>;
 
 /** Valeur initiale du type depuis `?type=` (lien « Je candidate » sans JavaScript). */
 function isPartnershipType(value: string | null | undefined): value is PartnershipType {
-  return PARTNERSHIP_TYPES.some((type) => type.value === value);
+  return PARTNERSHIP_TYPES.some((type) => type === value);
 }
 
 /**
@@ -77,6 +82,9 @@ export function PartnerFormFromUrl() {
  * Les liens « Je candidate » des cartes présélectionnent le type et font défiler jusqu'ici.
  */
 export function PartnerForm({ initialType }: { initialType: string | null }) {
+  const t = useTranslations('forms.partner');
+  const common = useFormCommon();
+  const schema = useMemo(() => makeSchema(common.rules, t), [common.rules, t]);
   const antiSpam = useAntiSpam();
   const [done, setDone] = useState<{ message: string; reference: string } | null>(null);
   const form = useForm<FormInput, unknown, FormOutput>({
@@ -148,10 +156,14 @@ export function PartnerForm({ initialType }: { initialType: string | null }) {
       }
       // Erreur sur un champ absent du formulaire : son message plutôt que « Vérifiez les champs signalés ».
       toast.error(
-        formErrorMessage(caught, (path) => {
-          const name = path.replace(/^contact\./, '') as keyof FormInput;
-          return name in schema.shape;
-        }),
+        formErrorMessage(
+          caught,
+          (path) => {
+            const name = path.replace(/^contact\./, '') as keyof FormInput;
+            return name in schema.shape;
+          },
+          common.t('unexpectedError'),
+        ),
       );
     }
   }
@@ -165,31 +177,32 @@ export function PartnerForm({ initialType }: { initialType: string | null }) {
             {done.message}
           </p>
           <p className="font-ui text-[14px] leading-5 text-text-muted">
-            Référence : <span className="font-semibold text-text-main">{done.reference}</span>
+            {common.t('reference')} <span className="font-semibold text-text-main">{done.reference}</span>
           </p>
           <Button variant="outline" onClick={() => setDone(null)}>
-            Envoyer une autre demande
+            {t('sendAnother')}
           </Button>
         </div>
       ) : (
         <form
           noValidate
           onSubmit={form.handleSubmit(onSubmit)}
-          aria-label="Devenir partenaire"
+          aria-label={t('formLabel')}
           className="flex flex-col gap-5"
         >
           <input {...antiSpam.honeypotProps} />
           <div {...antiSpam.widgetProps} />
           <fieldset>
             <legend className="mb-2.5 font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main">
-              Type de partenariat<span className="text-text-brand"> *</span>
+              {t('partnershipType')}
+              <span className="text-text-brand"> *</span>
             </legend>
             <div className="flex flex-wrap gap-2">
               {PARTNERSHIP_TYPES.map((type) => {
-                const selected = partnershipType === type.value;
+                const selected = partnershipType === type;
                 return (
                   <label
-                    key={type.value}
+                    key={type}
                     className={cn(
                       'inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-[9px] font-ui text-[14px] leading-5 font-medium tracking-[0.005em] transition-colors duration-150 has-[:focus-visible]:focus-ring',
                       selected
@@ -199,12 +212,12 @@ export function PartnerForm({ initialType }: { initialType: string | null }) {
                   >
                     <input
                       type="radio"
-                      value={type.value}
+                      value={type}
                       className="sr-only"
                       {...form.register('partnershipType')}
                     />
                     {selected && <Check aria-hidden size={14} strokeWidth={2.5} />}
-                    {type.label}
+                    {t(`types.${type}`)}
                   </label>
                 );
               })}
@@ -217,73 +230,72 @@ export function PartnerForm({ initialType }: { initialType: string | null }) {
           </fieldset>
           {/* En mobile, champs groupés par deux comme les rangées du desktop : 16 dans une paire, 20 entre deux (`65:6419`). */}
           <div className="grid gap-4 md:grid-cols-2 md:gap-y-5 max-md:[&>*:nth-child(2n+3)]:mt-1">
-            <Field label="Nom de la structure" required error={errors.organization?.message}>
+            <Field label={t('organization')} required error={errors.organization?.message}>
               {(control) => (
                 <Input
                   autoComplete="organization"
-                  placeholder="Ex. : Saveurs de Douala"
+                  placeholder={t('organizationPlaceholder')}
                   {...control}
                   {...form.register('organization')}
                 />
               )}
             </Field>
-            <Field label="Activité" required error={errors.activity?.message}>
+            <Field label={t('activity')} required error={errors.activity?.message}>
               {(control) => (
-                <Input placeholder="Ex. : chef privé, traiteur" {...control} {...form.register('activity')} />
+                <Input placeholder={t('activityPlaceholder')} {...control} {...form.register('activity')} />
               )}
             </Field>
-            <Field label="Nom et prénom" required error={errors.fullName?.message}>
+            <Field label={t('fullName')} required error={errors.fullName?.message}>
               {(control) => (
                 <Input
                   icon={User}
                   autoComplete="name"
-                  placeholder="Votre nom complet"
+                  placeholder={t('fullNamePlaceholder')}
                   {...control}
                   {...form.register('fullName')}
                 />
               )}
             </Field>
-            <Field label="E-mail" required error={errors.email?.message}>
+            <Field label={t('email')} required error={errors.email?.message}>
               {(control) => (
                 <Input
                   icon={Mail}
                   type="email"
                   autoComplete="email"
-                  placeholder="vous@exemple.com"
+                  placeholder={t('emailPlaceholder')}
                   {...control}
                   {...form.register('email')}
                 />
               )}
             </Field>
-            <Field label="Téléphone / WhatsApp" required error={errors.phone?.message}>
+            <Field label={t('phone')} required error={errors.phone?.message}>
               {(control) => <PhoneInput icon={Smartphone} {...control} {...form.register('phone')} />}
             </Field>
-            <Field label="Ville et quartier" required error={errors.location?.message}>
+            <Field label={t('location')} required error={errors.location?.message}>
               {(control) => (
                 <Select {...control} {...form.register('location')}>
-                  <option value="">Choisir</option>
-                  {LOCATIONS.map((location) => (
-                    <optgroup key={location.country} label={location.countryName}>
-                      {location.cities.map((city) => (
-                        <option key={city} value={`${location.country}|${city}`}>
-                          {`${location.countryName} · ${city}`}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
+                  <option value="">{t('locationPlaceholder')}</option>
+                  {LOCATIONS.map((location) => {
+                    const countryName = t(`countries.${location.country}`);
+                    return (
+                      <optgroup key={location.country} label={countryName}>
+                        {location.cities.map((city) => (
+                          <option key={city} value={`${location.country}|${city}`}>
+                            {`${countryName} · ${city === OTHER_CITY ? t('otherCity') : city}`}
+                          </option>
+                        ))}
+                      </optgroup>
+                    );
+                  })}
                 </Select>
               )}
             </Field>
-            <Field
-              label="Présentez votre activité"
-              error={errors.presentation?.message}
-              className="md:col-span-2"
-            >
+            <Field label={t('presentation')} error={errors.presentation?.message} className="md:col-span-2">
               {(control) => (
                 <Textarea
                   rows={3}
                   className="min-h-[120px]"
-                  placeholder="Expérience, zones d’intervention, disponibilités…"
+                  placeholder={t('presentationPlaceholder')}
                   {...control}
                   {...form.register('presentation')}
                 />
@@ -293,7 +305,7 @@ export function PartnerForm({ initialType }: { initialType: string | null }) {
           <div className="flex flex-col gap-1.5">
             <Checkbox
               id="partenaire-consent"
-              label={CONSENT_TEXT}
+              label={common.t('consentText')}
               aria-invalid={errors.consent ? true : undefined}
               aria-describedby={errors.consent ? 'partenaire-consent-error' : undefined}
               {...form.register('consent')}
@@ -307,10 +319,10 @@ export function PartnerForm({ initialType }: { initialType: string | null }) {
           {/* Une seule ligne : en mobile, la mention empiète sur la marge intérieure, comme sur la maquette (`65:6477`). */}
           <p className="flex items-center gap-2 text-caption text-text-muted max-md:-mr-3 max-md:whitespace-nowrap">
             <Lock aria-hidden size={16} />
-            Formulaire protégé contre les envois automatiques
+            {t('antiSpam')}
           </p>
           <Button type="submit" loading={isSubmitting} className="max-md:w-full md:self-start">
-            Envoyer ma demande
+            {t('submit')}
           </Button>
         </form>
       )}

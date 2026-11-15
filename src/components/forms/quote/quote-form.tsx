@@ -3,6 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Check, Lock, Mail, Smartphone, User } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
@@ -15,17 +16,18 @@ import { ApiError, formErrorMessage, toApiError } from '@/lib/api/errors';
 import type { CategorySummary, QuoteField, QuoteRequestInput, ServiceSummary } from '@/lib/api/schema';
 import { cn } from '@/lib/cn';
 import { frenchTypography } from '@/lib/format/typography';
-import { CONSENT_TEXT } from '@/lib/forms/schemas';
+import { useFormCommon } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
 import { whatsappUrl } from '@/lib/whatsapp';
 import { NeedField } from './need-field';
 import {
   CONTACT_PREFERENCES,
-  quoteSchema,
+  makeQuoteSchema,
   STEP_FIELDS,
   toNeeds,
   type QuoteFormInput,
   type QuoteFormOutput,
+  type QuoteMessages,
 } from './quote-schema';
 import { QuoteProgress, StepCard, type StepState } from './quote-steps';
 import { QuoteSummary } from './quote-summary';
@@ -36,8 +38,14 @@ export type QuoteCategory = CategorySummary & { services: ServiceSummary[] };
 /** Quartiers desservis, par zone (`/v1/zones`), proposés dans « Ville ou quartier ». */
 export type QuoteArea = { name: string; quarters: string[] };
 
-/** Choix hors des quartiers listés ; un quartier est envoyé sous la forme « Akwa, Douala ». */
-const OTHER_PLACES = ['Autre quartier de Douala', 'Autre ville du Cameroun'];
+/**
+ * Choix hors des quartiers listés ; un quartier est envoyé sous la forme « Akwa, Douala ». Valeurs en français (lues
+ * par l'équipe), libellés dans la langue de la page (`forms.quote.otherPlaces`).
+ */
+const OTHER_PLACES = [
+  ['douala', 'Autre quartier de Douala'],
+  ['cameroon', 'Autre ville du Cameroun'],
+] as const;
 
 type QuoteFormProps = {
   categories: QuoteCategory[];
@@ -59,9 +67,11 @@ type Step = 1 | 2 | 3;
 const FIELD_NAMES = new Set<string>(Object.values(STEP_FIELDS).flat());
 
 /** Compteur d'une carte de rubrique : formules pour une rubrique de formules (« 4 formules »), sinon services. */
-function countLabel(category: QuoteCategory) {
+function countLabel(category: QuoteCategory, t: QuoteMessages) {
   const formulas = category.services.filter((service) => service.kind === 'formula').length;
-  return formulas > 0 ? `${formulas} formules` : `${category.serviceCount} services`;
+  return formulas > 0
+    ? t('formulaCount', { count: formulas })
+    : t('serviceCount', { count: category.serviceCount });
 }
 
 /**
@@ -94,6 +104,8 @@ export function QuoteForm({
   areas,
   whatsapp,
 }: QuoteFormProps) {
+  const t = useTranslations('forms.quote');
+  const common = useFormCommon();
   const router = useSiteRouter();
   const antiSpam = useAntiSpam();
   const [step, setStep] = useState<Step>(initialService ? 2 : 1);
@@ -104,7 +116,11 @@ export function QuoteForm({
   const form = useForm<QuoteFormInput, unknown, QuoteFormOutput>({
     // Le schéma dépend des champs propres à la rubrique choisie.
     resolver: (data, context, options) =>
-      zodResolver(quoteSchema(fieldsByCategory[data.categorySlug] ?? []))(data, context, options),
+      zodResolver(makeQuoteSchema(fieldsByCategory[data.categorySlug] ?? [], common.rules, t))(
+        data,
+        context,
+        options,
+      ),
     mode: 'onTouched',
     defaultValues: {
       categorySlug: initialCategory ?? '',
@@ -245,7 +261,7 @@ export function QuoteForm({
           if (FIELD_NAMES.has(name)) form.setError(name, { message });
         }
       }
-      toast.error(formErrorMessage(caught, shown));
+      toast.error(formErrorMessage(caught, shown, common.t('unexpectedError')));
     }
   }
 
@@ -260,7 +276,11 @@ export function QuoteForm({
     step === 3 ? 'active' : 'upcoming',
   ];
   const whatsappHref = whatsapp
-    ? whatsappUrl(whatsapp.number, whatsapp.message, service ? `Service : ${service.name}` : undefined)
+    ? whatsappUrl(
+        whatsapp.number,
+        whatsapp.message,
+        service ? t('whatsappService', { name: service.name }) : undefined,
+      )
     : null;
   const needsErrors = (errors.needs ?? {}) as Record<string, { message?: string } | undefined>;
 
@@ -274,7 +294,7 @@ export function QuoteForm({
           noValidate
           onSubmit={form.handleSubmit(onSubmit, onInvalid)}
           className="flex min-w-0 flex-col gap-4"
-          aria-label="Demande de devis gratuit"
+          aria-label={t('formLabel')}
         >
           <input {...antiSpam.honeypotProps} />
           <div {...antiSpam.widgetProps} />
@@ -282,12 +302,12 @@ export function QuoteForm({
           <StepCard
             number={1}
             state={states[0]}
-            title="Quel service vous intéresse ?"
-            subtitle="Choisissez une rubrique puis un service."
+            title={t('step1Title')}
+            subtitle={t('step1Subtitle')}
             headingRef={heading1}
           >
             <fieldset>
-              <legend className="sr-only">Rubrique</legend>
+              <legend className="sr-only">{t('categoryLegend')}</legend>
               <div className="grid grid-cols-2 gap-2.5 md:flex md:flex-wrap">
                 {categories.map((item) => {
                   const selected = item.slug === categorySlug;
@@ -322,7 +342,7 @@ export function QuoteForm({
                         <span className="font-ui text-[14px] leading-5 font-semibold text-text-main">
                           {item.name}
                         </span>
-                        <span className="text-caption text-text-muted">{countLabel(item)}</span>
+                        <span className="text-caption text-text-muted">{countLabel(item, t)}</span>
                       </span>
                     </label>
                   );
@@ -337,7 +357,7 @@ export function QuoteForm({
             {category && (
               <fieldset className="flex flex-col gap-3">
                 <legend className="mb-5 font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main">
-                  Service
+                  {t('serviceLegend')}
                 </legend>
                 <div className="flex flex-wrap gap-2">
                   {category.services.map((item) => {
@@ -373,7 +393,7 @@ export function QuoteForm({
             )}
           </StepCard>
 
-          <StepCard number={2} state={states[1]} title="Parlez-nous de votre besoin" headingRef={heading2}>
+          <StepCard number={2} state={states[1]} title={t('step2Title')} headingRef={heading2}>
             <div className="grid gap-4 md:grid-cols-2 md:gap-x-4 md:gap-y-5 max-md:[&>*:last-child]:mt-1 max-md:[&>*:nth-child(2n+3)]:mt-1">
               {fields.map((field) => (
                 <NeedField
@@ -385,9 +405,9 @@ export function QuoteForm({
                 />
               ))}
               <Field
-                label="Décrivez votre besoin"
+                label={t('description')}
                 required
-                help="Plus votre description est précise, plus le devis sera juste."
+                help={t('descriptionHelp')}
                 error={errors.description?.message}
                 className="md:col-span-2"
               >
@@ -402,11 +422,11 @@ export function QuoteForm({
                 onClick={() => goTo(1)}
                 className="inline-flex cursor-pointer items-center gap-1.5 rounded-xs font-ui text-[14px] leading-5 font-semibold text-text-muted hover:text-text-main"
               >
-                Retour
+                {t('back')}
                 <ArrowLeft aria-hidden size={16} />
               </button>
               <Button type="button" onClick={continueToContact}>
-                Continuer
+                {t('continue')}
               </Button>
             </div>
           </StepCard>
@@ -414,41 +434,41 @@ export function QuoteForm({
           <StepCard
             number={3}
             state={states[2]}
-            title="Vos coordonnées"
-            subtitle="Nom, e-mail, téléphone et ville."
+            title={t('step3Title')}
+            subtitle={t('step3Subtitle')}
             headingRef={heading3}
           >
             <div className="grid gap-4 md:grid-cols-2 md:gap-x-4 md:gap-y-5 max-md:[&>*:nth-child(3)]:mt-1">
-              <Field label="Nom et prénom" required error={errors.fullName?.message}>
+              <Field label={t('fullName')} required error={errors.fullName?.message}>
                 {(control) => (
                   <Input
                     icon={User}
                     autoComplete="name"
-                    placeholder="Votre nom complet"
+                    placeholder={t('fullNamePlaceholder')}
                     {...control}
                     {...form.register('fullName')}
                   />
                 )}
               </Field>
-              <Field label="E-mail" required error={errors.email?.message}>
+              <Field label={t('email')} required error={errors.email?.message}>
                 {(control) => (
                   <Input
                     icon={Mail}
                     type="email"
                     autoComplete="email"
-                    placeholder="vous@exemple.com"
+                    placeholder={t('emailPlaceholder')}
                     {...control}
                     {...form.register('email')}
                   />
                 )}
               </Field>
-              <Field label="Téléphone / WhatsApp" required error={errors.phone?.message}>
+              <Field label={t('phone')} required error={errors.phone?.message}>
                 {(control) => <PhoneInput icon={Smartphone} {...control} {...form.register('phone')} />}
               </Field>
-              <Field label="Ville ou quartier" required error={errors.city?.message}>
+              <Field label={t('city')} required error={errors.city?.message}>
                 {(control) => (
                   <Select {...control} {...form.register('city')}>
-                    <option value="">Choisir</option>
+                    <option value="">{t('choose')}</option>
                     {areas.map((area) => (
                       <optgroup key={area.name} label={area.name}>
                         {area.quarters.map((quarter) => (
@@ -458,10 +478,10 @@ export function QuoteForm({
                         ))}
                       </optgroup>
                     ))}
-                    <optgroup label="Autre lieu">
-                      {OTHER_PLACES.map((place) => (
-                        <option key={place} value={place}>
-                          {place}
+                    <optgroup label={t('otherPlaceGroup')}>
+                      {OTHER_PLACES.map(([key, place]) => (
+                        <option key={key} value={place}>
+                          {t(`otherPlaces.${key}`)}
                         </option>
                       ))}
                     </optgroup>
@@ -471,14 +491,14 @@ export function QuoteForm({
             </div>
             <fieldset className="flex flex-col">
               <legend className="mb-2.5 font-ui text-[14px] leading-5 font-semibold tracking-[0.005em] text-text-main">
-                {frenchTypography('Comment préférez-vous être recontacté ?')}
+                {frenchTypography(t('contactPreference'))}
               </legend>
               <div className="flex flex-wrap gap-2">
                 {CONTACT_PREFERENCES.map((preference) => {
-                  const selected = values.contactPreference === preference.value;
+                  const selected = values.contactPreference === preference;
                   return (
                     <label
-                      key={preference.value}
+                      key={preference}
                       className={cn(
                         'inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-3.5 py-[9px] font-ui text-[14px] leading-5 font-medium tracking-[0.005em] transition-colors duration-150 has-[:focus-visible]:focus-ring',
                         selected
@@ -488,12 +508,12 @@ export function QuoteForm({
                     >
                       <input
                         type="radio"
-                        value={preference.value}
+                        value={preference}
                         className="sr-only"
                         {...form.register('contactPreference')}
                       />
                       {selected && <Check aria-hidden size={14} strokeWidth={2.5} />}
-                      {preference.label}
+                      {t(`contactPreferences.${preference}`)}
                     </label>
                   );
                 })}
@@ -502,7 +522,7 @@ export function QuoteForm({
             <div className="flex flex-col gap-1.5">
               <Checkbox
                 id="devis-consent"
-                label={CONSENT_TEXT}
+                label={common.t('consentText')}
                 aria-invalid={errors.consent ? true : undefined}
                 aria-describedby={errors.consent ? 'devis-consent-error' : undefined}
                 {...form.register('consent')}
@@ -516,16 +536,16 @@ export function QuoteForm({
             {/* Une ligne en mobile, comme la maquette : la mention empiète sur la marge intérieure. */}
             <p className="flex items-center gap-2 text-caption text-text-muted max-md:-mr-4">
               <Lock aria-hidden size={16} />
-              Formulaire protégé contre les envois automatiques
+              {t('antiSpamNotice')}
             </p>
             <Button type="submit" loading={isSubmitting || sent} className="max-md:w-full md:self-start">
-              Envoyer ma demande de devis
+              {t('submit')}
             </Button>
           </StepCard>
         </form>
 
         <aside
-          aria-label="Récapitulatif"
+          aria-label={t('summaryLabel')}
           className="flex flex-col gap-4 xl:sticky xl:top-[calc(var(--site-header-h,85px)+24px)]"
         >
           <QuoteSummary service={service} onClear={clearService} whatsappHref={whatsappHref} />

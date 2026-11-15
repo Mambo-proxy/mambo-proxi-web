@@ -1466,3 +1466,26 @@ erreurs) ; toutes les routes appelées existent. Corrections :
 
 - Case de consentement explicite pour l'inscription à la newsletter ; page de maintenance contournable par un simple
   cookie de session ; `'unsafe-inline'` dans la CSP des scripts.
+
+## Consentement newsletter, maintenance, navigation et formulaires en anglais (15 novembre 2026)
+
+### Fait
+
+- **Newsletter** : case de consentement explicite, non cochée par défaut et obligatoire (décision du 15/11/2026).
+- **Maintenance** : seule une session vérifiée par l'API (`GET /v1/auth/me`, mémorisée une minute, ou jeton de
+  rafraîchissement renouvelable) contourne la page de maintenance ; un cookie factice ne suffit plus.
+- **Back-office** : `useUnsavedChangesGuard` confirme avant de suivre un lien interne avec des modifications non
+  enregistrées (éditeurs à sauvegarde automatique : enregistrement d'abord) ; remplace les `beforeunload` épars.
+- **Formulaires du site anglais** : contact, devis, rendez-vous, inscription, partenariat, formation, candidature,
+  questionnaire, inscription aux événements, « Me prévenir », pages à jeton (newsletter, rendez-vous) et leurs titres :
+  textes sous `forms.*` et `system.*` de `messages/<langue>.json`. Règles de validation communes traduites
+  (`useFormCommon`, `createFieldRules`) ; libellés d'accessibilité du site sous `site.a11y` ; dates et calendrier en
+  anglais sur `/en`.
+- `scripts/i18n-add.mjs` : ajout de textes dans les deux fichiers de messages sous un espace de noms (verrou, Prettier).
+
+### Décisions
+
+- Valeurs de texte libre envoyées à l'API (sujets, villes, activités) gardées en français : l'équipe les lit dans le
+  back-office ; seuls les libellés sont traduits.
+- `Modal` et `Calendar` restent utilisables hors du site bilingue (back-office, `/dev/ui`) : libellés en propriétés,
+  français par défaut.

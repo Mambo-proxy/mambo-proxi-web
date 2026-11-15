@@ -3,28 +3,17 @@
 import { Quote } from 'lucide-react';
 import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
 import { frenchTypography } from '@/lib/format/typography';
 import { routes } from '@/lib/routes';
 import { RegistrationForm, type Profile } from './registration-form';
 
-/** Citation propre à chaque profil sur la même photo (maquettes `70:10665` et `70:11241`). */
-const PANELS = {
-  PARTICULIER: {
-    quote: 'On s’est sentis attendus dès notre arrivée. Tout était prêt.',
-    author: 'Aurélie K. · Bonapriso',
-  },
-  PROFESSIONNEL: {
-    quote: 'Depuis que je suis partenaire, je reçois des demandes claires et des clients qui reviennent.',
-    author: 'Chef partenaire · Douala',
-  },
-} as const;
-
 type RegistrationLayoutProps = {
   initialProfile: Profile;
   categories: { slug: string; name: string }[];
-  /** Textes de la page dans sa langue (le formulaire reste en français). */
+  /** Textes de la page dans sa langue (le formulaire et le panneau lisent `forms.registration`). */
   labels: { home: string; breadcrumb: string; title: string };
 };
 
@@ -48,8 +37,8 @@ export function RegistrationLayoutFromUrl(props: Omit<RegistrationLayoutProps, '
  * vers le bas, logo blanc, citation), absent en mobile ; contenu à droite (pt 64, px 88, colonne de 664).
  */
 export function RegistrationLayout({ initialProfile, categories, labels }: RegistrationLayoutProps) {
+  const t = useTranslations('forms.registration');
   const [profile, setProfile] = useState<Profile>(initialProfile);
-  const panel = PANELS[profile];
   return (
     <div className="bg-neutral-50 xl:grid xl:grid-cols-[600px_minmax(0,1fr)]">
       <div className="relative hidden h-[980px] self-start overflow-hidden xl:sticky xl:top-[var(--site-header-h,121px)] xl:block">
@@ -78,10 +67,12 @@ export function RegistrationLayout({ initialProfile, categories, labels }: Regis
         <figure className="absolute bottom-14 left-14 flex w-[488px] flex-col gap-4 text-neutral-0">
           <Quote aria-hidden size={36} className="text-orange-300" />
           <blockquote className="font-brand text-[28px] leading-[38px] font-medium">
-            {frenchTypography(`« ${panel.quote} »`)}
+            {/* Citation propre à chaque profil sur la même photo (maquettes `70:10665` et `70:11241`), guillemets
+                compris dans le texte (« » en français, “ ” en anglais). */}
+            {frenchTypography(t(`panels.${profile}.quote`))}
           </blockquote>
           <figcaption className="font-ui text-[14px] leading-5 font-medium tracking-[0.005em]">
-            {panel.author}
+            {t(`panels.${profile}.author`)}
           </figcaption>
         </figure>
       </div>

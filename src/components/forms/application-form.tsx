@@ -3,7 +3,8 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CircleCheck, Mail, MapPin, Smartphone, User } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import * as z from 'zod/mini';
 import { Button } from '@/components/ui/button';
@@ -14,7 +15,7 @@ import { toast } from '@/components/ui/toaster';
 import { browserApi } from '@/lib/api/browser';
 import { ApiError, formErrorMessage, toApiError } from '@/lib/api/errors';
 import type { JobApplicationInput } from '@/lib/api/schema';
-import { CONSENT_TEXT, fieldRules, trimmed } from '@/lib/forms/schemas';
+import { trimmed, useFormCommon, type FieldRules } from '@/lib/forms/schemas';
 import { useAntiSpam } from '@/lib/forms/use-anti-spam';
 
 /** CV : PDF ou Word, 5 Mo au plus (contrat `JobApplicationInput.cv`). */
@@ -24,22 +25,23 @@ const CV_MAX_SIZE = 5 * 1024 * 1024;
 /** Valeur de la liste « Poste visé » pour une candidature spontanée (contrat : `jobSlug` vide). */
 const SPONTANEOUS = 'spontanee';
 
-const schema = z.object({
-  jobSlug: z.string().check(z.minLength(1, 'Merci de choisir le poste visé.')),
-  fullName: fieldRules.fullName,
-  email: fieldRules.email,
-  phone: fieldRules.phone,
-  city: trimmed(
-    z.minLength(1, 'Merci d’indiquer votre ville.'),
-    z.maxLength(80, 'Ce nom de ville est trop long.'),
-  ),
-  cv: z.custom<File>((value) => value instanceof File, { message: 'Merci de joindre votre CV.' }),
-  message: trimmed(z.maxLength(3000, 'Ce message est trop long (3 000 caractères au plus).')),
-  consent: fieldRules.consent,
-});
+type ApplicationMessages = ReturnType<typeof useTranslations<'forms.application'>>;
 
-type FormInput = z.input<typeof schema>;
-type FormOutput = z.output<typeof schema>;
+function makeSchema(rules: FieldRules, t: ApplicationMessages) {
+  return z.object({
+    jobSlug: z.string().check(z.minLength(1, t('jobRequired'))),
+    fullName: rules.fullName,
+    email: rules.email,
+    phone: rules.phone,
+    city: trimmed(z.minLength(1, t('cityRequired')), z.maxLength(80, t('cityTooLong'))),
+    cv: z.custom<File>((value) => value instanceof File, { message: t('cvRequired') }),
+    message: trimmed(z.maxLength(3000, t('messageTooLong'))),
+    consent: rules.consent,
+  });
+}
+
+type FormInput = z.input<ReturnType<typeof makeSchema>>;
+type FormOutput = z.output<ReturnType<typeof makeSchema>>;
 
 type ApplicationFormProps = {
   jobs: { slug: string; title: string }[];
@@ -61,6 +63,9 @@ export function ApplicationFormFromUrl(props: Omit<ApplicationFormProps, 'initia
  * ville, CV par glisser-déposer, message, consentement → `POST /v1/job-applications` en `multipart/form-data`.
  */
 export function ApplicationForm({ jobs, initialJob }: ApplicationFormProps) {
+  const t = useTranslations('forms.application');
+  const common = useFormCommon();
+  const schema = useMemo(() => makeSchema(common.rules, t), [common.rules, t]);
   const antiSpam = useAntiSpam();
   const [done, setDone] = useState<{ message: string; reference: string } | null>(null);
   const initial = jobs.some((job) => job.slug === initialJob) ? initialJob! : SPONTANEOUS;
@@ -114,7 +119,7 @@ export function ApplicationForm({ jobs, initialJob }: ApplicationFormProps) {
         if (caught.status === 413 || caught.status === 415)
           form.setError('cv', { message: caught.problem.detail ?? caught.problem.title });
       }
-      toast.error(formErrorMessage(caught, (path) => path in form.getValues()));
+      toast.error(formErrorMessage(caught, (path) => path in form.getValues(), common.t('unexpectedError')));
     }
   }
 
@@ -127,27 +132,27 @@ export function ApplicationForm({ jobs, initialJob }: ApplicationFormProps) {
             {done.message}
           </p>
           <p className="font-ui text-[14px] leading-5 text-text-muted">
-            Référence : <span className="font-semibold text-text-main">{done.reference}</span>
+            {common.t('reference')} <span className="font-semibold text-text-main">{done.reference}</span>
           </p>
           <Button variant="outline" onClick={() => setDone(null)}>
-            Envoyer une autre candidature
+            {t('sendAnother')}
           </Button>
         </div>
       ) : (
         <form
           noValidate
           onSubmit={form.handleSubmit(onSubmit)}
-          aria-label="Candidature"
+          aria-label={t('formLabel')}
           className="flex flex-col gap-5"
         >
           <input {...antiSpam.honeypotProps} />
           <div {...antiSpam.widgetProps} />
           {/* En mobile, champs groupés comme les rangées du desktop : 16 dans une paire, 20 ailleurs (`67:7394`). */}
           <div className="grid gap-4 md:grid-cols-2 md:gap-y-5 max-md:[&>*:last-child]:mt-1 max-md:[&>*:nth-child(2n)]:mt-1">
-            <Field label="Poste visé" required error={errors.jobSlug?.message} className="md:col-span-2">
+            <Field label={t('job')} required error={errors.jobSlug?.message} className="md:col-span-2">
               {(control) => (
                 <Select {...control} {...form.register('jobSlug')}>
-                  <option value={SPONTANEOUS}>Candidature spontanée</option>
+                  <option value={SPONTANEOUS}>{t('spontaneous')}</option>
                   {jobs.map((job) => (
                     <option key={job.slug} value={job.slug}>
                       {job.title}
@@ -156,38 +161,38 @@ export function ApplicationForm({ jobs, initialJob }: ApplicationFormProps) {
                 </Select>
               )}
             </Field>
-            <Field label="Nom et prénom" required error={errors.fullName?.message}>
+            <Field label={t('fullName')} required error={errors.fullName?.message}>
               {(control) => (
                 <Input
                   icon={User}
                   autoComplete="name"
-                  placeholder="Votre nom complet"
+                  placeholder={t('fullNamePlaceholder')}
                   {...control}
                   {...form.register('fullName')}
                 />
               )}
             </Field>
-            <Field label="E-mail" required error={errors.email?.message}>
+            <Field label={t('email')} required error={errors.email?.message}>
               {(control) => (
                 <Input
                   icon={Mail}
                   type="email"
                   autoComplete="email"
-                  placeholder="vous@exemple.com"
+                  placeholder={t('emailPlaceholder')}
                   {...control}
                   {...form.register('email')}
                 />
               )}
             </Field>
-            <Field label="Téléphone / WhatsApp" required error={errors.phone?.message}>
+            <Field label={t('phone')} required error={errors.phone?.message}>
               {(control) => <PhoneInput icon={Smartphone} {...control} {...form.register('phone')} />}
             </Field>
-            <Field label="Ville" required error={errors.city?.message}>
+            <Field label={t('city')} required error={errors.city?.message}>
               {(control) => (
                 <Input
                   icon={MapPin}
                   autoComplete="address-level2"
-                  placeholder="Douala"
+                  placeholder={t('cityPlaceholder')}
                   {...control}
                   {...form.register('city')}
                 />
@@ -195,7 +200,7 @@ export function ApplicationForm({ jobs, initialJob }: ApplicationFormProps) {
             </Field>
             <div className="flex flex-col gap-2 md:col-span-2">
               <p id="cv-label" className="font-ui text-[14px] leading-5 font-semibold text-text-main">
-                CV
+                {t('cv')}
                 <span aria-hidden className="text-text-brand">
                   {' '}
                   *
@@ -213,19 +218,19 @@ export function ApplicationForm({ jobs, initialJob }: ApplicationFormProps) {
                       field.onChange(file ?? undefined);
                       field.onBlur();
                     }}
-                    label="Glissez votre CV ici ou parcourez vos fichiers"
-                    help="PDF ou Word · 5 Mo maximum"
+                    label={t('cvDrop')}
+                    help={t('cvHelp')}
                     error={fieldState.error?.message}
                     aria-describedby="cv-label"
                   />
                 )}
               />
             </div>
-            <Field label="Message" error={errors.message?.message} className="md:col-span-2">
+            <Field label={t('message')} error={errors.message?.message} className="md:col-span-2">
               {(control) => (
                 <Textarea
                   rows={3}
-                  placeholder="Présentez-vous en quelques lignes…"
+                  placeholder={t('messagePlaceholder')}
                   {...control}
                   {...form.register('message')}
                 />
@@ -235,7 +240,7 @@ export function ApplicationForm({ jobs, initialJob }: ApplicationFormProps) {
           <div className="flex flex-col gap-1.5">
             <Checkbox
               id="candidature-consent"
-              label={CONSENT_TEXT}
+              label={common.t('consentText')}
               aria-invalid={errors.consent ? true : undefined}
               aria-describedby={errors.consent ? 'candidature-consent-error' : undefined}
               {...form.register('consent')}
@@ -247,7 +252,7 @@ export function ApplicationForm({ jobs, initialJob }: ApplicationFormProps) {
             )}
           </div>
           <Button type="submit" loading={isSubmitting} className="max-md:w-full md:self-start">
-            Envoyer ma candidature
+            {t('submit')}
           </Button>
         </form>
       )}

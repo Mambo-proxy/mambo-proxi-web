@@ -40,10 +40,14 @@ export function toApiError(error: unknown, response: Response): ApiError {
   });
 }
 
-/** Message à afficher pour n'importe quelle erreur (réseau compris). */
-export function errorMessage(error: unknown): string {
+/**
+ * Message à afficher pour n'importe quelle erreur (réseau compris). Les messages de l'API suivent la langue de la page
+ * (`Accept-Language`) ; `fallback` remplace le message français des erreurs réseau (site anglais :
+ * `forms.common.unexpectedError`).
+ */
+export function errorMessage(error: unknown, fallback: string = FALLBACK_MESSAGE): string {
   if (error instanceof ApiError) return error.problem.detail ?? error.problem.title;
-  return FALLBACK_MESSAGE;
+  return fallback;
 }
 
 /**
@@ -51,10 +55,14 @@ export function errorMessage(error: unknown): string {
  * (`startsAt`, `eventSlug`, `needs.<champ>`, `antiSpam.startedAt`…), son message, sinon le `detail` de la réponse
  * (« Vérifiez les champs signalés… » n'aurait aucun champ signalé à l'écran).
  */
-export function formErrorMessage(error: unknown, isShown: (path: string) => boolean): string {
+export function formErrorMessage(
+  error: unknown,
+  isShown: (path: string) => boolean,
+  fallback: string = FALLBACK_MESSAGE,
+): string {
   if (error instanceof ApiError) {
     const hidden = (error.problem.errors ?? []).find((item) => !isShown(item.path));
     if (hidden) return hidden.message;
   }
-  return errorMessage(error);
+  return errorMessage(error, fallback);
 }
