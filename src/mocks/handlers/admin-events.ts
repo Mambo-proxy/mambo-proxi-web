@@ -1,4 +1,5 @@
 import { http, HttpResponse } from 'msw';
+import { mockNow } from '../clock';
 import type { AdminEvent, EventFields, IllustrationScene, RequestListItem } from '@/lib/api/schema';
 import { jsonBody, mockId, slugify } from '../admin-utils';
 import { adminRequests } from '../data/admin-requests';
@@ -27,7 +28,7 @@ function toAdmin(event: StoredEvent): AdminEvent {
   };
 }
 
-const isPast = (event: StoredEvent, now = Date.now()) => Date.parse(event.endsAt ?? event.startsAt) < now;
+const isPast = (event: StoredEvent, now = mockNow()) => Date.parse(event.endsAt ?? event.startsAt) < now;
 
 function validate(body: EventFields, current: StoredEvent | null) {
   const errors: { path: string; message: string }[] = [];

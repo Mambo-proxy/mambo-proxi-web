@@ -54,7 +54,7 @@ test.describe('partenaires', () => {
   test('version anglaise : textes, filtres et badges traduits', async ({ page }) => {
     await page.goto('/en/partners', { waitUntil: 'domcontentloaded' });
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Let’s build services you can trust.');
-    await expect(page.getByRole('navigation', { name: "Fil d'Ariane" })).toContainText('Home');
+    await expect(page.getByRole('navigation', { name: 'Breadcrumb' })).toContainText('Home');
     const filters = page.getByRole('group', { name: 'Filter partners' });
     await expect(filters.getByRole('button', { name: 'All' })).toBeVisible();
     await expect(filters.getByRole('button', { name: 'Real estate' })).toBeVisible();

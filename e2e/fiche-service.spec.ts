@@ -90,7 +90,7 @@ test.describe('fiches service', () => {
     await expect(page.getByRole('heading', { name: 'Who is this service for?' })).toBeVisible();
     await expect(page.getByText('Price given in a quote')).toBeVisible();
     await expect(
-      page.getByRole('navigation', { name: "Fil d'Ariane" }).getByRole('link', { name: 'Home services' }),
+      page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', { name: 'Home services' }),
     ).toHaveAttribute('href', '/en/services/services-a-domicile');
   });
 

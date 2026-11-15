@@ -1,4 +1,5 @@
 import { http, HttpResponse } from 'msw';
+import { mockNow } from '../clock';
 import type { Magazine, MagazineEdition, MagazineEditionSummary } from '@/lib/api/schema';
 import { langOf, type Lang } from '../data/catalogue';
 import { magazineArticles, magazineEditions, type MagazineEditionRecord } from '../data/admin-magazine';
@@ -69,7 +70,7 @@ export const magazineHandlers = [
   http.get('*/v1/magazine', ({ request }) => {
     const url = new URL(request.url);
     const lang = langOf(request);
-    const now = Date.now();
+    const now = mockNow();
     const visible = magazineEditions
       .filter((edition) => isVisible(edition, now))
       .sort((a, b) => Date.parse(b.publishAt ?? '') - Date.parse(a.publishAt ?? ''));

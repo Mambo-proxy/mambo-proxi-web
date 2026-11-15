@@ -44,7 +44,7 @@ test.describe('recrutement', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
       'Join a team that takes care of others.',
     );
-    await expect(page.getByRole('navigation', { name: "Fil d'Ariane" })).toContainText('Home');
+    await expect(page.getByRole('navigation', { name: 'Breadcrumb' })).toContainText('Home');
     await expect(page.getByRole('heading', { name: '5 open positions' })).toBeVisible();
     await expect(page.locator('#offres li').first()).toContainText('Posted 3 days ago');
     const offers = page.locator('#offres li');
@@ -116,7 +116,7 @@ test.describe('recrutement', () => {
     await page.goto('/en/careers?poste=coordinateur-rice-de-services#candidature', {
       waitUntil: 'domcontentloaded',
     });
-    await expect(page.getByLabel(/Poste visé/)).toHaveValue('coordinateur-rice-de-services');
+    await expect(page.getByLabel(/^Position/)).toHaveValue('coordinateur-rice-de-services');
     expect(pageErrors).toEqual([]);
   });
 });
