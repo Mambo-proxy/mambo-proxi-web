@@ -83,7 +83,8 @@
   --color-service-photo: var(--mp-color-service-photo);
   --color-service-chef: var(--mp-color-service-chef);
   --color-service-bien-etre: var(--mp-color-service-bien-etre);
-  --spacing-none: var(--mp-spacing-none);
+  /* Pas de `--spacing-none` : Tailwind l'appliquerait aussi à `max-w-none` (`max-width: 0` au lieu de `none`), ce qui
+     écrasait la palette de recherche du back-office. Espacement nul : classes `*-0`. */
   --spacing-3xs: var(--mp-spacing-3xs);
   --spacing-2xs: var(--mp-spacing-2xs);
   --spacing-xs: var(--mp-spacing-xs);

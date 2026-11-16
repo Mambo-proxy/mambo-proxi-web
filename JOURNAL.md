@@ -1493,3 +1493,12 @@ erreurs) ; toutes les routes appelées existent. Corrections :
   en basse priorité depuis les liens de l'accueil, pèsent environ 1 Ko de plus (331 Ko mesurés) ; sans effet sur le score.
 - Second bouton du bandeau CTA rendu au lien brut : « Read in French » vise une adresse française depuis le site anglais,
   impossible à distinguer d'un lien interne à convertir.
+
+## Correctif : palette de recherche du back-office (16 novembre 2026)
+
+### Fait
+
+- La palette de recherche (⌘K, « Rechercher… ») s'ouvrait avec une largeur nulle : écran grisé, fin trait blanc, saisie
+  impossible. `--spacing-none` (thème Tailwind) faisait générer `max-w-none` en `max-width: var(--mp-spacing-none)`
+  (0) au lieu de `none`. L'espacement `none` (inutilisé) est retiré du thème ; `--mp-spacing-none` reste dans les
+  jetons.
